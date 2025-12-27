@@ -2,7 +2,10 @@
 
 [ext_resource type="Script" uid="uid://bys2jo26d654a" path="res://scenes/component/vial_drop_component.gd" id="1_hqusn"]
 [ext_resource type="PackedScene" uid="uid://c8j2qneyiwkhy" path="res://scenes/game_object/experience_vial/experience_vial.tscn" id="2_de64x"]
+[ext_resource type="PackedScene" uid="uid://cqf4b23r5u4af" path="res://scenes/game_object/health_pickup/health_pickup.tscn" id="3_1vg2t"]
 
 [node name="VialDropComponent" type="Node"]
 script = ExtResource("1_hqusn")
 vial_scene = ExtResource("2_de64x")
+health_drop_chance = 0.05
+health_vial_scene = ExtResource("3_1vg2t")
