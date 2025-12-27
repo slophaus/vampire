@@ -12,6 +12,8 @@ var disabled := false
 func _ready():
 	gui_input.connect(on_gui_input)
 	mouse_entered.connect(on_mouse_entered)
+	focus_entered.connect(on_focus_entered)
+	focus_mode = Control.FOCUS_ALL
 
 
 func play_in(delay: float = 0):
@@ -47,12 +49,20 @@ func on_gui_input(event: InputEvent):
 	if disabled:
 		return
 
-	if event.is_action_pressed("left_click"):
+	if event.is_action_pressed("left_click") or event.is_action_pressed("ui_accept"):
 		select_card()
 
 
 func on_mouse_entered():
 	if disabled:
 		return true
+
+	grab_focus()
+	$HoverAnimationPlayer.play("hover")
+
+
+func on_focus_entered():
+	if disabled:
+		return
 
 	$HoverAnimationPlayer.play("hover")
