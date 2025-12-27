@@ -11,6 +11,8 @@ const ACCELERATION_SMOOTHING = 25
 @onready var visuals = $Visuals
 @onready var velocity_component = $VelocityComponent
 
+@export var player_number := 1
+
 
 var number_colliding_bodies := 0
 var base_speed := 0
@@ -44,10 +46,15 @@ func _process(delta):
 
 
 func get_movement_vector():	
-	var x_movement = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
-	var y_movement = Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
+	var suffix = get_player_action_suffix()
+	var x_movement = Input.get_action_strength("move_right" + suffix) - Input.get_action_strength("move_left" + suffix)
+	var y_movement = Input.get_action_strength("move_down" + suffix) - Input.get_action_strength("move_up" + suffix)
 	
 	return Vector2(x_movement, y_movement)
+
+
+func get_player_action_suffix() -> String:
+	return "" if player_number <= 1 else str(player_number)
 
 
 func check_deal_damage():
