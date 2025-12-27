@@ -5,8 +5,6 @@ class_name PauseMenu
 
 var options_scene = preload("res://scenes/ui/options_menu.tscn")
 var is_closing := false
-var menu_buttons: Array[Control] = []
-var selected_index := 0
 
 
 func _ready():
@@ -16,14 +14,6 @@ func _ready():
 	%ResumeButton.pressed.connect(on_resume_pressed)
 	%OptionsButton.pressed.connect(on_options_pressed)
 	%QuitButton.pressed.connect(on_quit_pressed)
-	menu_buttons = [
-		%ResumeButton,
-		%OptionsButton,
-		%QuitButton,
-	]
-	for button in menu_buttons:
-		button.focus_mode = Control.FOCUS_ALL
-	call_deferred("_focus_button", 0)
 	
 	$AnimationPlayer.play("default")
 	
@@ -38,18 +28,6 @@ func _unhandled_input(event):
 	if event.is_action_pressed("pause"):
 		close()
 		get_tree().root.set_input_as_handled()
-	elif event.is_action_pressed("ui_down"):
-		_focus_button(selected_index + 1)
-	elif event.is_action_pressed("ui_up"):
-		_focus_button(selected_index - 1)
-
-
-func _focus_button(index: int) -> void:
-	if menu_buttons.is_empty():
-		return
-
-	selected_index = clampi(index, 0, menu_buttons.size() - 1)
-	menu_buttons[selected_index].grab_focus()
 
 
 func close():
