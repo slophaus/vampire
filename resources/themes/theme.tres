@@ -25,6 +25,14 @@ region_rect = Rect2(18, 2, 12, 12)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ju7t5"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gmkho"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(1, 0.87, 0.2, 1)
+
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ipsqo"]
 texture = ExtResource("1_vusi2")
 texture_margin_left = 3.0
@@ -145,7 +153,7 @@ Button/colors/font_focus_color = Color(0.247059, 0.14902, 0.192157, 1)
 Button/colors/font_hover_color = Color(0.741176, 0.423529, 0.290196, 1)
 Button/colors/font_pressed_color = Color(0.247059, 0.14902, 0.192157, 1)
 Button/styles/disabled = SubResource("StyleBoxTexture_lwkpy")
-Button/styles/focus = SubResource("StyleBoxEmpty_ju7t5")
+Button/styles/focus = SubResource("StyleBoxFlat_gmkho")
 Button/styles/hover = SubResource("StyleBoxTexture_ipsqo")
 Button/styles/normal = SubResource("StyleBoxTexture_ohc1h")
 Button/styles/pressed = SubResource("StyleBoxTexture_2e4ds")
