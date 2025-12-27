@@ -13,6 +13,7 @@ const ACCELERATION_SMOOTHING = 25
 
 @export var player_number := 1
 @export var regen_rate := 2.0
+const REGEN_SLOWDOWN_FACTOR := 3.0
 
 signal regenerate_started
 signal regenerate_finished
@@ -43,7 +44,7 @@ func _process(delta):
 		velocity_component.velocity = Vector2.ZERO
 		velocity = Vector2.ZERO
 		animation_player.play("RESET")
-		health_component.heal(regen_rate * delta)
+		health_component.heal((regen_rate / REGEN_SLOWDOWN_FACTOR) * delta)
 		if health_component.current_health >= health_component.max_health:
 			end_regeneration()
 		return
