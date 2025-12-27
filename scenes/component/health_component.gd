@@ -5,6 +5,7 @@ signal died
 signal health_changed
 
 @export var max_health: float = 10
+@export var free_owner_on_death := true
 var current_health: float
 
 
@@ -18,6 +19,10 @@ func damage(damage_amount: float):
 	health_changed.emit()
 	Callable(check_death).call_deferred()
 
+func heal(heal_amount: float):
+	current_health = min(current_health + heal_amount, max_health)
+	health_changed.emit()
+
 
 func get_health_percent() -> float:
 	if max_health <= 0:
@@ -28,4 +33,5 @@ func get_health_percent() -> float:
 func check_death():
 	if current_health == 0:
 		died.emit()
-		owner.queue_free()
+		if free_owner_on_death && owner != null:
+			owner.queue_free()
