@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://biw4lngphcynu"]
+[gd_scene load_steps=26 format=3 uid="uid://biw4lngphcynu"]
 
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="1_5bkfq"]
 [ext_resource type="Texture2D" uid="uid://bj74fspmmt8fp" path="res://scenes/game_object/wizard_enemy/wizard_enemy.png" id="1_beb02"]
@@ -15,6 +15,7 @@
 [ext_resource type="AudioStream" uid="uid://dycvhorndvf1c" path="res://assets/audio/footstep_carpet_002.ogg" id="11_ujfiq"]
 [ext_resource type="AudioStream" uid="uid://dqqkhujcgssj6" path="res://assets/audio/footstep_carpet_003.ogg" id="12_66386"]
 [ext_resource type="AudioStream" uid="uid://bmnew52u2j6r5" path="res://assets/audio/footstep_carpet_004.ogg" id="13_ixqs1"]
+[ext_resource type="PackedScene" uid="uid://c2d86d4tq3k7w" path="res://scenes/ability/spell_ability/spell_ability.tscn" id="14_1v5bq"]
 [ext_resource type="Texture2D" uid="uid://grf1esxamv8l" path="res://sprites/dragon1_anim.png" id="16_hcfsk"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_4r80n"]
@@ -69,12 +70,13 @@ position = Vector2(0, -8)
 collision_layer = 8
 collision_mask = 9
 script = ExtResource("1_ta3ds")
+spell_ability = ExtResource("14_1v5bq")
 
 [node name="HealthComponent" parent="." instance=ExtResource("1_5bkfq")]
 max_health = 30.0
 
 [node name="VelocityComponent" parent="." instance=ExtResource("2_2sxlo")]
-max_speed = 60
+max_speed = 120
 acceleration = 2.0
 
 [node name="VialDropComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("4_blfg5")]
@@ -114,3 +116,7 @@ frame_progress = 0.793433
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 3)
 shape = SubResource("CircleShape2D_6q0gl")
+
+[node name="SpellTimer" type="Timer" parent="."]
+wait_time = 1.5
+autostart = true

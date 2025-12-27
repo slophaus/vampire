@@ -155,7 +155,7 @@ libraries = {
 }
 
 [node name="VelocityComponent" parent="." instance=ExtResource("2_c31g4")]
-max_speed = 90
+max_speed = 135
 acceleration = 25.0
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_3j6hq")]
