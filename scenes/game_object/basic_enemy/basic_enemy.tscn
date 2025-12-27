@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://bses7vk27cfvt"]
+[gd_scene load_steps=24 format=3 uid="uid://bses7vk27cfvt"]
 
 [ext_resource type="Script" uid="uid://d01scidly6bca" path="res://scenes/game_object/basic_enemy/basic_enemy.gd" id="1_gpcli"]
 [ext_resource type="Texture2D" uid="uid://cc6p0wg3ww2jf" path="res://scenes/game_object/basic_enemy/basic_enemy.png" id="1_m80w1"]
@@ -15,7 +15,7 @@
 [ext_resource type="AudioStream" uid="uid://dycvhorndvf1c" path="res://assets/audio/footstep_carpet_002.ogg" id="13_oy0ft"]
 [ext_resource type="AudioStream" uid="uid://dqqkhujcgssj6" path="res://assets/audio/footstep_carpet_003.ogg" id="14_6oeop"]
 [ext_resource type="AudioStream" uid="uid://bmnew52u2j6r5" path="res://assets/audio/footstep_carpet_004.ogg" id="15_yavv3"]
-[ext_resource type="Texture2D" uid="uid://jl2oabwlft0c" path="res://sprites/anim1.png" id="16_qku51"]
+[ext_resource type="Texture2D" uid="uid://dkk2iesa6c02e" path="res://sprites/mouse.png" id="17_ws2by"]
 
 [sub_resource type="Animation" id="Animation_lm0tv"]
 length = 0.001
@@ -87,36 +87,11 @@ shader_parameter/lerp_percent = 0.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_5yb0v"]
 radius = 13.0384
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ws2by"]
-atlas = ExtResource("16_qku51")
-region = Rect2(0, 0, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_fcdwx"]
-atlas = ExtResource("16_qku51")
-region = Rect2(32, 0, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_26myy"]
-atlas = ExtResource("16_qku51")
-region = Rect2(64, 0, 32, 32)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_nb0jk"]
-atlas = ExtResource("16_qku51")
-region = Rect2(96, 0, 32, 32)
-
 [sub_resource type="SpriteFrames" id="SpriteFrames_sdy2s"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_ws2by")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_fcdwx")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_26myy")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_nb0jk")
+"texture": ExtResource("17_ws2by")
 }],
 "loop": true,
 "name": &"default",

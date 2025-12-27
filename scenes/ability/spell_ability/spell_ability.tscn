@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dini725amwnfl"]
+[gd_scene load_steps=8 format=3 uid="uid://bg2cs3lwlhxbb"]
 
 [ext_resource type="Texture2D" uid="uid://hpmgxym8g133" path="res://scenes/ability/sword_ability/sword.png" id="1_65jmi"]
 [ext_resource type="Script" uid="uid://cnhjib1hg24yf" path="res://scenes/ability/sword_ability/sword_ability.gd" id="1_kdjon"]
@@ -107,14 +107,13 @@ _data = {
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2govn"]
 size = Vector2(15, 15)
 
-[node name="SwordAbility" type="Node2D"]
+[node name="SpellAbility" type="Node2D"]
 script = ExtResource("1_kdjon")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 &"": SubResource("AnimationLibrary_q5llv")
 }
-autoplay = "swing"
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_65jmi")

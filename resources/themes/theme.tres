@@ -23,8 +23,6 @@ texture_margin_right = 1.0
 texture_margin_bottom = 1.0
 region_rect = Rect2(18, 2, 12, 12)
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ju7t5"]
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gmkho"]
 bg_color = Color(0, 0, 0, 0)
 border_width_left = 4
