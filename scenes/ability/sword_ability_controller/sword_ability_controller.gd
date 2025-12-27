@@ -41,12 +41,7 @@ func on_timer_timeout():
 	foreground_layer.add_child(sword_instance)
 	sword_instance.hitbox_component.damage = base_damage * additional_damage_percent
 
-	sword_instance.global_position = enemies[0].global_position
-	sword_instance.global_position += Vector2.RIGHT.rotated(randf_range(0, TAU)) * 4  #살짝 랜덤한 주변으로. (TAU = 2PI = 360 degree)
-
-	# 적 방향으로
-	var enemy_direction = enemies[0].global_position - sword_instance.global_position
-	sword_instance.rotation = enemy_direction.angle()
+	sword_instance.setup(player.global_position, enemies[0].global_position, MAX_RANGE)
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary):
