@@ -34,6 +34,6 @@ func _physics_process(delta: float) -> void:
 func setup(start_position: Vector2, target_position: Vector2, range_limit: float) -> void:
 	global_position = start_position
 	direction = (target_position - start_position).normalized()
-	rotation = direction.angle()
+	rotation = direction.angle() + (PI / 2.0)
 	max_distance = range_limit
 	distance_traveled = 0.0
