@@ -15,7 +15,8 @@ var distance_traveled := 0.0
 
 func _ready():
 	animation_player.stop()
-	sprite.scale = Vector2.ONE
+	sprite.scale = Vector2.ONE * 1.5
+	sprite.modulate = Color(0.9, 0.5, 1.0)
 	collision_shape.disabled = false
 
 

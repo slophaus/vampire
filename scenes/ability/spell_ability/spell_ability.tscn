@@ -114,7 +114,6 @@ script = ExtResource("1_kdjon")
 libraries = {
 &"": SubResource("AnimationLibrary_q5llv")
 }
-autoplay = "swing"
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_65jmi")
