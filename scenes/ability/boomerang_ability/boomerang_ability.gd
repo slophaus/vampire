@@ -1,8 +1,8 @@
 extends Node2D
 class_name BoomerangAbility
 
-const SPEED := 420.0
-const MAX_HITS := 3
+const SPEED := 210.0
+const MAX_HITS := 10
 const RETURN_DISTANCE := 24.0
 
 @onready var hitbox_component := $HitboxComponent

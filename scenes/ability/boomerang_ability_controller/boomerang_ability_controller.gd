@@ -1,6 +1,6 @@
 extends Node
 
-const MAX_RANGE = 450
+const MAX_RANGE = 150
 
 @export var boomerang_ability_scene: PackedScene
 
