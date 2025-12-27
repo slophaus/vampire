@@ -42,7 +42,7 @@ func _focus_card(index: int) -> void:
 	if cards.is_empty():
 		return
 
-	selected_index = wrapi(index, 0, cards.size())
+	selected_index = clampi(index, 0, cards.size() - 1)
 	cards[selected_index].grab_focus()
 
 
