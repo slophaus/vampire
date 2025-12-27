@@ -9,10 +9,20 @@ class_name MetaUpgradeCard
 @onready var count_label: Label = %CountLabel
 
 var upgrade: MetaUpgrade
+var focus_stylebox: StyleBoxFlat
 
 
 func _ready():
 	purchase_button.pressed.connect(on_purchase_pressed)
+	gui_input.connect(on_gui_input)
+	mouse_entered.connect(on_mouse_entered)
+	focus_entered.connect(on_focus_entered)
+	focus_exited.connect(on_focus_exited)
+	focus_mode = Control.FOCUS_ALL
+	focus_stylebox = StyleBoxFlat.new()
+	focus_stylebox.bg_color = Color(0, 0, 0, 0)
+	focus_stylebox.border_color = Color(1, 0.87, 0.2)
+	focus_stylebox.set_border_width_all(4)
 
 
 func set_meta_upgrade(upgrade: MetaUpgrade) -> void:
@@ -42,6 +52,35 @@ func update_progress():
 
 func select_card():
 	$AnimationPlayer.play("selected")
+
+
+func on_gui_input(event: InputEvent) -> void:
+	if purchase_button.disabled:
+		return
+
+	if event.is_action_pressed("left_click") or event.is_action_pressed("ui_accept"):
+		on_purchase_pressed()
+
+
+func on_mouse_entered() -> void:
+	if purchase_button.disabled:
+		return
+
+	grab_focus()
+
+
+func on_focus_entered() -> void:
+	if purchase_button.disabled:
+		return
+
+	add_theme_stylebox_override("panel", focus_stylebox)
+
+
+func on_focus_exited() -> void:
+	if purchase_button.disabled:
+		return
+
+	remove_theme_stylebox_override("panel")
 
 
 func on_purchase_pressed():

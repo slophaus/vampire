@@ -5,6 +5,8 @@ class_name PauseMenu
 
 var options_scene = preload("res://scenes/ui/options_menu.tscn")
 var is_closing := false
+var menu_buttons: Array[Button] = []
+var selected_index := 0
 
 
 func _ready():
@@ -14,6 +16,11 @@ func _ready():
 	%ResumeButton.pressed.connect(on_resume_pressed)
 	%OptionsButton.pressed.connect(on_options_pressed)
 	%QuitButton.pressed.connect(on_quit_pressed)
+	menu_buttons = [
+		%ResumeButton,
+		%OptionsButton,
+		%QuitButton,
+	]
 	
 	$AnimationPlayer.play("default")
 	
@@ -22,12 +29,23 @@ func _ready():
 	tween.tween_property(panel_container, "scale", Vector2.ONE, 0.3) \
 		.set_ease(Tween.EASE_OUT) \
 		.set_trans(Tween.TRANS_BACK)
+	if not menu_buttons.is_empty():
+		call_deferred("_focus_button", 0)
 
 
 func _unhandled_input(event):
 	if event.is_action_pressed("pause"):
 		close()
 		get_tree().root.set_input_as_handled()
+		return
+	if menu_buttons.is_empty():
+		return
+
+	_update_selected_index_from_focus()
+	if event.is_action_pressed("ui_up"):
+		_focus_button(selected_index - 1)
+	elif event.is_action_pressed("ui_down"):
+		_focus_button(selected_index + 1)
 
 
 func close():
@@ -68,3 +86,17 @@ func on_quit_pressed():
 	await ScreenTransition.transitioned_halfway
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
+
+
+func _focus_button(index: int) -> void:
+	selected_index = clampi(index, 0, menu_buttons.size() - 1)
+	menu_buttons[selected_index].grab_focus()
+
+
+func _update_selected_index_from_focus() -> void:
+	var focused = get_viewport().gui_get_focus_owner()
+	if focused == null:
+		return
+	var button_index = menu_buttons.find(focused)
+	if button_index != -1:
+		selected_index = button_index
