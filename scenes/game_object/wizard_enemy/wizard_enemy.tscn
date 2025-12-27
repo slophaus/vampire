@@ -74,7 +74,7 @@ script = ExtResource("1_ta3ds")
 max_health = 30.0
 
 [node name="VelocityComponent" parent="." instance=ExtResource("2_2sxlo")]
-max_speed = 60
+max_speed = 45
 acceleration = 2.0
 
 [node name="VialDropComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("4_blfg5")]
