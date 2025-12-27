@@ -55,6 +55,7 @@ autoplay = "default"
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_00a7p")
+scale = Vector2(2, 2)
 
 [node name="HitboxComponent" parent="." instance=ExtResource("3_3sl5y")]
 
