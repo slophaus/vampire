@@ -16,10 +16,15 @@ func _ready():
 	focus_entered.connect(on_focus_entered)
 	focus_exited.connect(on_focus_exited)
 	focus_mode = Control.FOCUS_ALL
-	focus_stylebox = StyleBoxFlat.new()
-	focus_stylebox.bg_color = Color(0, 0, 0, 0)
-	focus_stylebox.border_color = Color(1, 0.87, 0.2)
-	focus_stylebox.set_border_width_all(4)
+	var base_stylebox = get_theme_stylebox("panel")
+	if base_stylebox:
+		focus_stylebox = base_stylebox.duplicate()
+	else:
+		focus_stylebox = StyleBoxFlat.new()
+	if focus_stylebox is StyleBoxFlat:
+		var flat_stylebox = focus_stylebox as StyleBoxFlat
+		flat_stylebox.border_color = Color(1, 0.87, 0.2)
+		flat_stylebox.set_border_width_all(4)
 
 
 func play_in(delay: float = 0):
