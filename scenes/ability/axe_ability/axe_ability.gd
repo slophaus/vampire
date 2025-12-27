@@ -3,16 +3,19 @@ class_name AxeAbility
 
 const MAX_RADIUS := 100
 const MAX_ROTATION := 2
+const MAX_HITS := 3
 
 @onready var hitbox_component := $HitboxComponent
 
 
 var base_rotation: Vector2
 var source_player: Node2D
+var hit_count := 0
 
 
 func _ready():
 	base_rotation = Vector2.RIGHT.rotated(randf_range(0, TAU))
+	hitbox_component.hit_landed.connect(on_hit_landed)
 	
 	var tween = create_tween()
 	tween.tween_method(tween_method, 0.0, float(MAX_ROTATION), 3)
@@ -31,3 +34,9 @@ func tween_method(rotations: float):
 		return
 
 	global_position = player.global_position + (current_direction * current_radius)
+
+
+func on_hit_landed(current_hits: int) -> void:
+	hit_count = current_hits
+	if hit_count >= MAX_HITS:
+		queue_free()
