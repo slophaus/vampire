@@ -37,10 +37,15 @@ func on_spell_timer_timeout():
 	if player == null:
 		return
 
-	var spell_instance = spell_ability.instantiate() as SpellAbility
+	var spell_instance = spell_ability.instantiate()
+	if spell_instance == null:
+		return
+	if not spell_instance is SpellAbility:
+		return
+	var spell_cast = spell_instance as SpellAbility
 	var foreground_layer = get_tree().get_first_node_in_group("foreground_layer")
 	if foreground_layer == null:
 		return
-	foreground_layer.add_child(spell_instance)
-	spell_instance.hitbox_component.damage = spell_damage
-	spell_instance.setup(global_position, player.global_position, spell_range)
+	foreground_layer.add_child(spell_cast)
+	spell_cast.hitbox_component.damage = spell_damage
+	spell_cast.setup(global_position, player.global_position, spell_range)
