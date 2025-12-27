@@ -12,11 +12,7 @@ func _ready():
 
 
 func on_timer_timeout():
-	var player = get_owner() as Node2D
-	if player != null && !player.is_in_group("player"):
-		player = null
-	if player == null:
-		player = get_tree().get_first_node_in_group("player") as Node2D
+	var player = get_player()
 	if player == null:
 		return
 	
@@ -34,3 +30,13 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 	match upgrade.id:
 		"axe_damage":
 			additional_damage_percent = 1 + (current_upgrades["axe_damage"]["quantity"] * 0.1)
+
+
+func get_player() -> Node2D:
+	var node: Node = self
+	while node != null:
+		if node is Node2D && node.is_in_group("player"):
+			return node as Node2D
+		node = node.get_parent()
+
+	return get_tree().get_first_node_in_group("player") as Node2D
