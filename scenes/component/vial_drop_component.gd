@@ -2,8 +2,10 @@ extends Node
 class_name VialDropComponent
 
 @export_range(0, 1) var drop_rate: float = .5
+@export_range(0, 1) var health_drop_chance: float = 0.05
 @export var health_component: HealthComponent
 @export var vial_scene: PackedScene
+@export var health_vial_scene: PackedScene
 
 
 func _ready():
@@ -19,14 +21,18 @@ func on_died():
 	if randf() > adjusted_drop_rate:
 		return
 	
-	if vial_scene == null:
+	var selected_vial_scene = vial_scene
+	if health_vial_scene != null and randf() < health_drop_chance:
+		selected_vial_scene = health_vial_scene
+
+	if selected_vial_scene == null:
 		return
 	
 	if not owner is Node2D:
 		return
 
 	var spawn_position = (owner as Node2D).global_position
-	var vial_instance = vial_scene.instantiate() as Node2D
+	var vial_instance = selected_vial_scene.instantiate() as Node2D
 	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
 	entities_layer.add_child(vial_instance)
 	vial_instance.global_position = spawn_position

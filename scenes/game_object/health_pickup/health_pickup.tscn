@@ -1,0 +1,29 @@
+[gd_scene load_steps=7 format=3 uid="uid://cqf4b23r5u4af"]
+
+[ext_resource type="Texture2D" uid="uid://bblt53p4rrcuj" path="res://sprites/fish.png" id="1_j8n2s"]
+[ext_resource type="Script" uid="uid://buhk55d8wybub" path="res://scenes/game_object/health_pickup/health_pickup.gd" id="2_6p7of"]
+[ext_resource type="PackedScene" uid="uid://bh478361trp2r" path="res://scenes/component/random_audio_stream_player_2d_component.tscn" id="3_3pc7v"]
+[ext_resource type="AudioStream" uid="uid://bynum3obom3gc" path="res://assets/audio/drop_001.ogg" id="4_1n7xl"]
+[ext_resource type="AudioStream" uid="uid://0n02txoakffv" path="res://assets/audio/drop_004.ogg" id="5_uxy3s"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_m33ed"]
+radius = 16.0
+
+[node name="HealthPickup" type="Node2D"]
+script = ExtResource("2_6p7of")
+
+[node name="RandomAudioStreamPlayer2DComponent" parent="." instance=ExtResource("3_3pc7v")]
+scale = Vector2(0.984781, 1.04643)
+max_distance = 300.0
+streams = Array[AudioStream]([ExtResource("4_1n7xl"), ExtResource("5_uxy3s")])
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 16
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("CircleShape2D_m33ed")
+debug_color = Color(1.15158e-07, 0.635899, 0.411579, 0.42)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_j8n2s")
