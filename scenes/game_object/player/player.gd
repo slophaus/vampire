@@ -12,24 +12,42 @@ const ACCELERATION_SMOOTHING = 25
 @onready var velocity_component = $VelocityComponent
 
 @export var player_number := 1
+@export var regen_rate := 2.0
 
+signal regenerate_started
+signal regenerate_finished
 
 var number_colliding_bodies := 0
 var base_speed := 0
+var is_regenerating := false
+var normal_visuals_modulate := Color.WHITE
+var last_health := 0.0
 
 
 func _ready():
 	base_speed = velocity_component.max_speed
+	normal_visuals_modulate = visuals.modulate
+	last_health = health_component.current_health
 	
 	$CollisionArea2D.body_entered.connect(on_body_entered)
 	$CollisionArea2D.body_exited.connect(on_body_exited)
 	damage_interval_timer.timeout.connect(on_damage_interval_timer_timeout)
 	health_component.health_changed.connect(on_health_changed)
+	health_component.died.connect(on_died)
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
 	update_health_display()
 
 
 func _process(delta):
+	if is_regenerating:
+		velocity_component.velocity = Vector2.ZERO
+		velocity = Vector2.ZERO
+		animation_player.play("RESET")
+		health_component.heal(regen_rate * delta)
+		if health_component.current_health >= health_component.max_health:
+			end_regeneration()
+		return
+
 	var movement_vector = get_movement_vector()
 	var direction = movement_vector.normalized()
 	velocity_component.accelerate_in_direction(direction)
@@ -58,6 +76,8 @@ func get_player_action_suffix() -> String:
 
 
 func check_deal_damage():
+	if is_regenerating:
+		return
 	if number_colliding_bodies == 0 || !damage_interval_timer.is_stopped():
 		return
 	
@@ -87,9 +107,31 @@ func on_damage_interval_timer_timeout():
 
 
 func on_health_changed():
-	GameEvents.emit_player_damaged()
+	if not is_regenerating and health_component.current_health < last_health:
+		GameEvents.emit_player_damaged()
+		$HitRandomStreamPlayer.play_random()
 	update_health_display()
-	$HitRandomStreamPlayer.play_random()
+	last_health = health_component.current_health
+
+
+func on_died():
+	if is_regenerating:
+		return
+	is_regenerating = true
+	visuals.modulate = Color.BLACK
+	health_component.current_health = 0
+	health_component.health_changed.emit()
+	damage_interval_timer.stop()
+	regenerate_started.emit()
+
+
+func end_regeneration():
+	is_regenerating = false
+	visuals.modulate = normal_visuals_modulate
+	health_component.current_health = health_component.max_health
+	health_component.health_changed.emit()
+	last_health = health_component.current_health
+	regenerate_finished.emit()
 
 
 func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades: Dictionary):
