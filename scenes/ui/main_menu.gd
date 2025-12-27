@@ -2,8 +2,6 @@ extends CanvasLayer
 
 
 var options_scene = preload("res://scenes/ui/options_menu.tscn")
-var menu_buttons: Array[Control] = []
-var selected_index := 0
 
 
 func _ready():
@@ -11,30 +9,6 @@ func _ready():
 	%UpgradesButton.pressed.connect(on_upgrades_pressed)
 	%OptionsButton.pressed.connect(on_options_pressed)
 	%QuitButton.pressed.connect(on_quit_pressed)
-	menu_buttons = [
-		%PlayButton,
-		%UpgradesButton,
-		%OptionsButton,
-		%QuitButton,
-	]
-	for button in menu_buttons:
-		button.focus_mode = Control.FOCUS_ALL
-	call_deferred("_focus_button", 0)
-
-
-func _unhandled_input(event):
-	if menu_buttons.is_empty():
-		return
-
-	if event.is_action_pressed("ui_down"):
-		_focus_button(selected_index + 1)
-	elif event.is_action_pressed("ui_up"):
-		_focus_button(selected_index - 1)
-
-
-func _focus_button(index: int) -> void:
-	selected_index = clampi(index, 0, menu_buttons.size() - 1)
-	menu_buttons[selected_index].grab_focus()
 
 
 func on_play_pressed():

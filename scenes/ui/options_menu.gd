@@ -7,8 +7,6 @@ signal back_pressed
 @onready var music_slider: Slider = %MusicSlider
 @onready var sfx_slider: Slider = %SfxSlider
 @onready var back_button: Button = %BackButton
-var menu_controls: Array[Control] = []
-var selected_index := 0
 
 
 func _ready():
@@ -17,30 +15,6 @@ func _ready():
 	music_slider.value_changed.connect(on_audio_slider_changed.bind("music"))
 	sfx_slider.value_changed.connect(on_audio_slider_changed.bind("sfx"))
 	update_display()
-	menu_controls = [
-		window_button,
-		music_slider,
-		sfx_slider,
-		back_button,
-	]
-	for control in menu_controls:
-		control.focus_mode = Control.FOCUS_ALL
-	call_deferred("_focus_control", 0)
-
-
-func _unhandled_input(event):
-	if menu_controls.is_empty():
-		return
-
-	if event.is_action_pressed("ui_down"):
-		_focus_control(selected_index + 1)
-	elif event.is_action_pressed("ui_up"):
-		_focus_control(selected_index - 1)
-
-
-func _focus_control(index: int) -> void:
-	selected_index = clampi(index, 0, menu_controls.size() - 1)
-	menu_controls[selected_index].grab_focus()
 
 
 func update_display():
