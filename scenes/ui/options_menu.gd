@@ -7,6 +7,14 @@ signal back_pressed
 @onready var music_slider: Slider = %MusicSlider
 @onready var sfx_slider: Slider = %SfxSlider
 @onready var back_button: Button = %BackButton
+@onready var focus_controls: Array[Control] = [
+	window_button,
+	music_slider,
+	sfx_slider,
+	back_button,
+]
+
+var selected_index := 0
 
 
 func _ready():
@@ -15,6 +23,33 @@ func _ready():
 	music_slider.value_changed.connect(on_audio_slider_changed.bind("music"))
 	sfx_slider.value_changed.connect(on_audio_slider_changed.bind("sfx"))
 	update_display()
+	if not focus_controls.is_empty():
+		call_deferred("_focus_control", 0)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if focus_controls.is_empty():
+		return
+
+	_update_selected_index_from_focus()
+	if event.is_action_pressed("ui_up"):
+		_focus_control(selected_index - 1)
+	elif event.is_action_pressed("ui_down"):
+		_focus_control(selected_index + 1)
+
+
+func _focus_control(index: int) -> void:
+	selected_index = clampi(index, 0, focus_controls.size() - 1)
+	focus_controls[selected_index].grab_focus()
+
+
+func _update_selected_index_from_focus() -> void:
+	var focused = get_viewport().gui_get_focus_owner()
+	if focused == null:
+		return
+	var control_index = focus_controls.find(focused)
+	if control_index != -1:
+		selected_index = control_index
 
 
 func update_display():
