@@ -8,6 +8,7 @@ const MAX_ROTATION := 2
 
 
 var base_rotation: Vector2
+var source_player: Node2D
 
 
 func _ready():
@@ -23,7 +24,9 @@ func tween_method(rotations: float):
 	var current_radius = percent * MAX_RADIUS
 	var current_direction = base_rotation.rotated(rotations * TAU)
 	
-	var player = get_tree().get_first_node_in_group("player") as Node2D
+	var player = source_player
+	if player == null:
+		player = get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return
 
