@@ -15,5 +15,7 @@ func _process(delta):
 func acquire_target():
 	var player_nodes = get_tree().get_nodes_in_group("player")
 	if player_nodes.size() > 0:
-		var player = player_nodes[0] as Node2D
-		target_position = player.global_position
+		var summed_position = Vector2.ZERO
+		for player in player_nodes:
+			summed_position += (player as Node2D).global_position
+		target_position = summed_position / float(player_nodes.size())
