@@ -7,13 +7,19 @@ signal selected
 @onready var description_label: Label = %DescriptionLabel
 
 var disabled := false
+var focus_stylebox: StyleBoxFlat
 
 
 func _ready():
 	gui_input.connect(on_gui_input)
 	mouse_entered.connect(on_mouse_entered)
 	focus_entered.connect(on_focus_entered)
+	focus_exited.connect(on_focus_exited)
 	focus_mode = Control.FOCUS_ALL
+	focus_stylebox = StyleBoxFlat.new()
+	focus_stylebox.bg_color = Color(0, 0, 0, 0)
+	focus_stylebox.border_color = Color(1, 0.87, 0.2)
+	focus_stylebox.set_border_width_all(4)
 
 
 func play_in(delay: float = 0):
@@ -65,4 +71,12 @@ func on_focus_entered():
 	if disabled:
 		return
 
+	add_theme_stylebox_override("panel", focus_stylebox)
 	$HoverAnimationPlayer.play("hover")
+
+
+func on_focus_exited():
+	if disabled:
+		return
+
+	remove_theme_stylebox_override("panel")
