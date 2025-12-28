@@ -40,6 +40,10 @@ func on_timer_timeout() -> void:
 
 	var targets = get_tree().get_nodes_in_group(target_group)
 	targets = targets.filter(func(target: Node2D):
+		if target == null or not is_instance_valid(target):
+			return false
+		if target.get("is_regenerating") == true:
+			return false
 		return target.global_position.distance_squared_to(owner_actor.global_position) < pow(MAX_RANGE, 2)
 	)
 	
