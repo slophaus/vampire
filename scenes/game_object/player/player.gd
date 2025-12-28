@@ -22,15 +22,15 @@ signal regenerate_finished
 var number_colliding_bodies := 0
 var base_speed := 0
 var is_regenerating := false
-var normal_visuals_modulate := Color.WHITE
+var base_tint := Color.WHITE
 var last_health := 0.0
 var flash_tween: Tween
 
 
 func _ready():
 	base_speed = velocity_component.max_speed
-	visuals.modulate = get_player_tint()
-	normal_visuals_modulate = visuals.modulate
+	base_tint = get_player_tint()
+	apply_base_tint()
 	last_health = health_component.current_health
 	
 	$hurtbox.body_entered.connect(on_body_entered)
@@ -140,6 +140,7 @@ func on_died():
 		return
 	is_regenerating = true
 	stop_flash()
+	visuals.self_modulate = Color.WHITE
 	visuals.modulate = Color.BLACK
 	health_component.current_health = 0
 	health_component.health_changed.emit()
@@ -150,7 +151,7 @@ func on_died():
 func end_regeneration():
 	is_regenerating = false
 	stop_flash()
-	visuals.modulate = normal_visuals_modulate
+	apply_base_tint()
 	health_component.current_health = health_component.max_health
 	health_component.health_changed.emit()
 	last_health = health_component.current_health
@@ -172,11 +173,13 @@ func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades:
 
 func flash_visuals(color: Color, duration: float = DAMAGE_FLASH_DURATION) -> void:
 	stop_flash()
+	visuals.self_modulate = Color.WHITE
 	visuals.modulate = color
 	flash_tween = create_tween()
-	flash_tween.tween_property(visuals, "modulate", normal_visuals_modulate, duration) \
+	flash_tween.tween_property(visuals, "modulate", Color.WHITE, duration) \
 		.set_trans(Tween.TRANS_QUAD) \
 		.set_ease(Tween.EASE_OUT)
+	flash_tween.tween_callback(func(): apply_base_tint())
 
 
 func stop_flash() -> void:
@@ -186,3 +189,8 @@ func stop_flash() -> void:
 
 func flash_experience_gain() -> void:
 	flash_visuals(Color(0.3, 0.6, 1.0), EXPERIENCE_FLASH_DURATION)
+
+
+func apply_base_tint() -> void:
+	visuals.modulate = Color.WHITE
+	visuals.self_modulate = base_tint
