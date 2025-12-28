@@ -1,6 +1,8 @@
 extends Node
 
 const MAX_RANGE = 450
+const PLAYER_HITBOX_LAYER = 4
+const ENEMY_HITBOX_LAYER = 2
 
 @export var sword_ability: PackedScene
 @export var owner_group := "player"
@@ -120,6 +122,10 @@ func spawn_sword(start_position: Vector2, target_position: Vector2) -> void:
 	foreground_layer.add_child(sword_instance)
 	sword_instance.hitbox_component.damage = base_damage * additional_damage_percent
 	sword_instance.hitbox_component.knockback = 250.0
+	if owner_group == "player":
+		sword_instance.hitbox_component.collision_layer = PLAYER_HITBOX_LAYER
+	else:
+		sword_instance.hitbox_component.collision_layer = ENEMY_HITBOX_LAYER
 
 	sword_instance.setup(start_position, target_position, MAX_RANGE)
 
