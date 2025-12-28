@@ -3,7 +3,7 @@ extends CharacterBody2D
 const MAX_SPEED = 125
 const ACCELERATION_SMOOTHING = 25
 const DAMAGE_FLASH_DURATION = 0.45
-const EXPERIENCE_FLASH_DURATION = DAMAGE_FLASH_DURATION / 2.0
+const EXPERIENCE_FLASH_DURATION = 0.2
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
