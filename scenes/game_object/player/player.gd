@@ -79,6 +79,10 @@ func can_attack() -> bool:
 	return not is_regenerating
 
 
+func is_regenerating_state() -> bool:
+	return is_regenerating
+
+
 func check_deal_damage():
 	if is_regenerating:
 		return
@@ -137,7 +141,10 @@ func end_regeneration():
 	regenerate_finished.emit()
 
 
-func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades: Dictionary):
+func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades: Dictionary, player: Node):
+	if player != self:
+		return
+
 	if ability_upgrade is Ability:
 		var ability = ability_upgrade as Ability
 		abilities.add_child(ability.ability_controller_scene.instantiate())
