@@ -1,7 +1,7 @@
 extends Node
 
 @export var health_component: HealthComponent
-@export var sprite: Sprite2D
+@export var sprite: CanvasItem
 @export var hit_flash_material: ShaderMaterial
 
 var hit_flash_tween: Tween
