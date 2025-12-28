@@ -24,11 +24,13 @@ func get_closest_player(from_position: Vector2) -> Node2D:
 	if players.is_empty():
 		return null
 
-	var closest_player = players[0] as Node2D
-	var closest_distance = from_position.distance_squared_to(closest_player.global_position)
+	var closest_player: Node2D = null
+	var closest_distance = INF
 	for player in players:
 		var player_node = player as Node2D
 		if player_node == null:
+			continue
+		if player_node.has_method("can_attack") and not player_node.can_attack():
 			continue
 		var distance = from_position.distance_squared_to(player_node.global_position)
 		if distance < closest_distance:
