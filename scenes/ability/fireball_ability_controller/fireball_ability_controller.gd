@@ -11,7 +11,6 @@ const ENEMY_HITBOX_LAYER = 2
 var base_damage = 2.0
 var additional_damage_percent: float = 1.0
 var base_wait_time := 0.0
-var base_wait_time_multiplier := 1.0
 var rate_reduction_percent := 0.0
 var fireball_level := 1
 var multi_shot_delay := 0.1
@@ -90,11 +89,6 @@ func set_player_number(new_player_number: int) -> void:
 	player_number = new_player_number
 
 
-func set_base_wait_time_multiplier(multiplier: float) -> void:
-	base_wait_time_multiplier = multiplier
-	update_timer_wait_time()
-
-
 func get_player_action_suffix(player: Node) -> String:
 	if player != null && player.has_method("get_player_action_suffix"):
 		return player.get_player_action_suffix()
@@ -151,4 +145,4 @@ func set_active(active: bool) -> void:
 
 
 func update_timer_wait_time() -> void:
-	$Timer.wait_time = base_wait_time * base_wait_time_multiplier * (1 - rate_reduction_percent)
+	$Timer.wait_time = base_wait_time * (1 - rate_reduction_percent)
