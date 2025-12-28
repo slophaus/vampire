@@ -19,6 +19,8 @@ func on_timer_timeout():
 	var player = get_player()
 	if player == null:
 		return
+	if player.has_method("can_attack") and not player.can_attack():
+		return
 
 	var aim_direction = get_aim_direction(player)
 	if aim_direction != Vector2.ZERO:
