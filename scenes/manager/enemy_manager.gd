@@ -2,6 +2,7 @@ extends Node
 
 # 10px outside
 const SPAWN_RADIUS = 375
+const MAX_ENEMIES = 500
 
 @export var basic_enemy_scene: PackedScene
 @export var wizard_enemy_scene: PackedScene
@@ -48,6 +49,9 @@ func get_spawn_position() -> Vector2:
 
 func on_timer_timeout():
 	timer.start()
+
+	if get_tree().get_nodes_in_group("enemy").size() >= MAX_ENEMIES:
+		return
 
 	var player = get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
