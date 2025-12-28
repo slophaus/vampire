@@ -12,12 +12,29 @@ func accelerate_to_player():
 	if owner_node2d == null:
 		return
 	
-	var player = get_tree().get_first_node_in_group("player") as Node2D
+	var player = get_closest_player(owner_node2d.global_position)
 	if player == null:
 		return
 	
 	var direction = (player.global_position - owner_node2d.global_position).normalized()
 	accelerate_in_direction(direction)
+
+func get_closest_player(from_position: Vector2) -> Node2D:
+	var players = get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		return null
+
+	var closest_player = players[0] as Node2D
+	var closest_distance = from_position.distance_squared_to(closest_player.global_position)
+	for player in players:
+		var player_node = player as Node2D
+		if player_node == null:
+			continue
+		var distance = from_position.distance_squared_to(player_node.global_position)
+		if distance < closest_distance:
+			closest_distance = distance
+			closest_player = player_node
+	return closest_player
 
 
 func accelerate_in_direction(direction: Vector2):
