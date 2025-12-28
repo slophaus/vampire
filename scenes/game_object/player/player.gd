@@ -31,6 +31,7 @@ var flash_tween: Tween
 func _ready():
 	base_speed = velocity_component.max_speed
 	player_color.color = get_player_tint()
+	player_color.visible = true
 	visuals.modulate = Color.WHITE
 	normal_visuals_modulate = visuals.modulate
 	last_health = health_component.current_health
@@ -86,9 +87,9 @@ func get_player_action_suffix() -> String:
 
 func get_player_tint() -> Color:
 	if player_number == 1:
-		return Color(1.0, 0.0, 0.0, 0.39)
+		return Color(1.0, 0.0, 0.0, 0.195)
 	if player_number == 2:
-		return Color(0.0, 0.0, 1.0, 0.39)
+		return Color(0.0, 0.0, 1.0, 0.195)
 	return Color(1.0, 1.0, 1.0, 0.0)
 
 
