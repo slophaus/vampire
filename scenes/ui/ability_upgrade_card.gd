@@ -105,8 +105,8 @@ func ensure_focus_stylebox() -> void:
 	if focus_stylebox != null:
 		return
 	var base_stylebox = get_theme_stylebox("panel")
-	if base_stylebox != null:
-		focus_stylebox = base_stylebox.duplicate()
+	if base_stylebox is StyleBoxFlat:
+		focus_stylebox = (base_stylebox as StyleBoxFlat).duplicate()
 	else:
 		focus_stylebox = StyleBoxFlat.new()
 	if focus_stylebox is StyleBoxFlat:
