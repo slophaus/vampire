@@ -209,10 +209,10 @@ frame_progress = 0.0404241
 
 [node name="enemy_color" type="ColorRect" parent="Visuals/mouse_sprite"]
 visible = false
-offset_left = -16.0
-offset_top = -16.0
-offset_right = 16.0
-offset_bottom = 16.0
+offset_left = -17.0
+offset_top = -17.0
+offset_right = 20.0
+offset_bottom = 19.0
 
 [node name="wizard_sprite" type="AnimatedSprite2D" parent="Visuals"]
 visible = false
@@ -222,11 +222,10 @@ sprite_frames = SubResource("SpriteFrames_iguem")
 autoplay = "default"
 
 [node name="enemy_color" type="ColorRect" parent="Visuals/wizard_sprite"]
-visible = false
-offset_left = -18.0
-offset_top = -18.0
-offset_right = 18.0
-offset_bottom = 18.0
+offset_left = -26.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 30.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -10)
