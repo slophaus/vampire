@@ -26,28 +26,28 @@ func _ready():
 
 
 func on_timer_timeout() -> void:
-	var owner = get_owner_actor()
-	if owner == null:
+	var owner_actor = get_owner_actor()
+	if owner_actor == null:
 		return
-	if owner.has_method("can_attack") and not owner.can_attack():
+	if owner_actor.has_method("can_attack") and not owner_actor.can_attack():
 		return
 
 	if owner_group == "player":
-		var aim_direction = get_aim_direction(owner)
+		var aim_direction = get_aim_direction(owner_actor)
 		if aim_direction != Vector2.ZERO:
-			await fire_fireballs(owner.global_position, owner.global_position + (aim_direction * MAX_RANGE))
+			await fire_fireballs(owner_actor.global_position, owner_actor.global_position + (aim_direction * MAX_RANGE))
 			return
 
 	var targets = get_tree().get_nodes_in_group(target_group)
 	targets = targets.filter(func(target: Node2D):
-		return target.global_position.distance_squared_to(owner.global_position) < pow(MAX_RANGE, 2)
+		return target.global_position.distance_squared_to(owner_actor.global_position) < pow(MAX_RANGE, 2)
 	)
 	
 	if targets.is_empty():
 		return
 
 	var selected_target = targets.pick_random()
-	await fire_fireballs(owner.global_position, selected_target.global_position)
+	await fire_fireballs(owner_actor.global_position, selected_target.global_position)
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
