@@ -1,7 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://c3lbj3a16jvv1"]
+[gd_scene load_steps=10 format=3 uid="uid://c3lbj3a16jvv1"]
 
-[ext_resource type="Texture2D" uid="uid://duj5d2s0twkq4" path="res://sprites/fireball.png" id="1_7y7qo"]
-[ext_resource type="Script" uid="uid://c3gpcq6nd1trd" path="res://scenes/ability/fireball_ability/fireball_ability.gd" id="2_4s6wp"]
+[ext_resource type="Texture2D" uid="uid://qdsoubk4rxdn" path="res://sprites/fireball.png" id="1_7y7qo"]
+[ext_resource type="Script" uid="uid://bb2qbt6va1sjt" path="res://scenes/ability/fireball_ability/fireball_ability.gd" id="2_4s6wp"]
 [ext_resource type="PackedScene" uid="uid://b07jrrt845lfp" path="res://scenes/component/hitbox_component.tscn" id="3_jm40a"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jt8kd"]
