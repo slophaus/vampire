@@ -40,10 +40,7 @@ func on_timer_timeout() -> void:
 	targets = targets.filter(func(target: Node2D):
 		return target.global_position.distance_squared_to(owner.global_position) < pow(MAX_RANGE, 2)
 	)
-	targets = targets.filter(func(target: Node2D):
-		return not is_target_regenerating(target)
-	)
-
+	
 	if targets.is_empty():
 		return
 
@@ -82,12 +79,6 @@ func resolve_player_number() -> int:
 	if player != null and player.has_method("get_player_action_suffix"):
 		return player.player_number
 	return player_number
-
-
-func is_target_regenerating(target: Node) -> bool:
-	if target == null:
-		return false
-	return target.get("is_regenerating") == true
 
 
 func set_player_number(new_player_number: int) -> void:

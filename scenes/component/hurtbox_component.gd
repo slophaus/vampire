@@ -6,7 +6,6 @@ signal hit
 @export var health_component: HealthComponent
 
 var floating_text_scene = preload("res://scenes/ui/floating_text.tscn")
-const ENEMY_HITBOX_LAYER = 2
 
 
 func _ready():
@@ -46,17 +45,7 @@ func should_ignore_hit(hitbox_component: HitboxComponent) -> bool:
 	if owner_node == null:
 		return false
 
-	if owner_node.get("is_regenerating") != true:
-		return false
-
-	var hitbox_owner = hitbox_component.get_parent()
-	if hitbox_owner == null:
-		return false
-
-	if not hitbox_owner is SwordAbility and not hitbox_owner is FireballAbility:
-		return false
-
-	return (hitbox_component.collision_layer & ENEMY_HITBOX_LAYER) != 0
+	return owner_node.get("is_regenerating") == true
 
 
 func apply_knockback(hitbox_component: HitboxComponent) -> void:
