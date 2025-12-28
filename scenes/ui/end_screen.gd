@@ -17,10 +17,8 @@ func _ready():
 		.set_trans(Tween.TRANS_BACK)
 	
 	get_tree().paused = true
-	%ContinueButton.pressed.connect(on_continue_button_pressed)
 	%QuitButton.pressed.connect(on_quit_button_pressed)
 	menu_buttons = [
-		%ContinueButton,
 		%QuitButton,
 	]
 	if not menu_buttons.is_empty():
@@ -49,14 +47,6 @@ func play_jingle(defeat: bool = false):
 		$DefeatStreamPlayer.play()
 	else:
 		$VictoryStreamPlayer.play()
-
-
-func on_continue_button_pressed():
-	ScreenTransition.transition()
-	await ScreenTransition.transitioned_halfway
-	
-	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/ui/meta_menu.tscn")
 
 
 func on_quit_button_pressed():
