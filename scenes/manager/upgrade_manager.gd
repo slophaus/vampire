@@ -127,6 +127,7 @@ func on_level_up(current_level: int):
 	if should_award_upgrade:
 		var upgrade_screen_instance = upgrade_screen_scene.instantiate()
 		add_child(upgrade_screen_instance)
+		upgrade_screen_instance.set_player_number(player.player_number)
 		var chosen_upgrades = pick_upgrades(player)
 		upgrade_screen_instance.set_ability_upgrades(chosen_upgrades)
 		upgrade_screen_instance.upgrade_selected.connect(on_upgrade_selected.bind(player))
