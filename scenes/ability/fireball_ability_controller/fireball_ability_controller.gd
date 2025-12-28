@@ -10,7 +10,9 @@ const ENEMY_HITBOX_LAYER = 2
 
 var base_damage = 2.5
 var additional_damage_percent: float = 1.0
-var base_wait_time
+var base_wait_time := 0.0
+var base_wait_time_multiplier := 1.0
+var rate_reduction_percent := 0.0
 var fireball_level := 1
 var multi_shot_delay := 0.1
 var player_number := 1
@@ -19,6 +21,7 @@ var player_number := 1
 func _ready():
 	player_number = resolve_player_number()
 	base_wait_time = $Timer.wait_time
+	update_timer_wait_time()
 	$Timer.timeout.connect(on_timer_timeout)
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
 
@@ -53,8 +56,8 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 		return
 	match upgrade.id:
 		"sword_rate":
-			var percent_reduction = current_upgrades["sword_rate"]["quantity"] * 0.1
-			$Timer.wait_time = base_wait_time * (1 - percent_reduction)
+			rate_reduction_percent = current_upgrades["sword_rate"]["quantity"] * 0.1
+			update_timer_wait_time()
 			$Timer.start()
 		"sword_damage":
 			additional_damage_percent = 1 + (current_upgrades["sword_damage"]["quantity"] * 0.15)
@@ -83,6 +86,11 @@ func resolve_player_number() -> int:
 
 func set_player_number(new_player_number: int) -> void:
 	player_number = new_player_number
+
+
+func set_base_wait_time_multiplier(multiplier: float) -> void:
+	base_wait_time_multiplier = multiplier
+	update_timer_wait_time()
 
 
 func get_player_action_suffix(player: Node) -> String:
@@ -138,3 +146,7 @@ func set_active(active: bool) -> void:
 		$Timer.start()
 	else:
 		$Timer.stop()
+
+
+func update_timer_wait_time() -> void:
+	$Timer.wait_time = base_wait_time * base_wait_time_multiplier * (1 - rate_reduction_percent)
