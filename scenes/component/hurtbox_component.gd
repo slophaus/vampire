@@ -53,7 +53,7 @@ func should_ignore_hit(hitbox_component: HitboxComponent) -> bool:
 	if hitbox_owner == null:
 		return false
 
-	if not hitbox_owner is SwordAbility:
+	if not hitbox_owner is SwordAbility and not hitbox_owner is FireballAbility:
 		return false
 
 	return (hitbox_component.collision_layer & ENEMY_HITBOX_LAYER) != 0
