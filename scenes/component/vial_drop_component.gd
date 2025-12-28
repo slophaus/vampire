@@ -1,7 +1,7 @@
 extends Node
 class_name VialDropComponent
 
-@export_range(0, 1) var drop_rate: float = .5
+@export_range(0, 1) var drop_rate: float = 1.0
 @export_range(0, 1) var health_drop_chance: float = 0.05
 @export var health_component: HealthComponent
 @export var vial_scene: PackedScene
