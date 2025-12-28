@@ -15,6 +15,15 @@ func _ready():
 	get_tree().paused = true
 
 
+func _input(event: InputEvent) -> void:
+	if cards.is_empty():
+		return
+	if is_event_for_player(event):
+		return
+	if event.is_action_pressed("ui_left") or event.is_action_pressed("ui_right") or event.is_action_pressed("ui_accept"):
+		get_viewport().set_input_as_handled()
+
+
 func set_ability_upgrades(upgrades: Array[AbilityUpgrade]):
 	var delay := 0.0
 	cards.clear()
