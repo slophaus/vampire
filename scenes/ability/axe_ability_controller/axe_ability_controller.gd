@@ -4,9 +4,11 @@ extends Node
 
 var base_damage = 10
 var additional_damage_percent: float = 1.0
+var player_number := 1
 
 
 func _ready():
+	player_number = resolve_player_number()
 	$Timer.timeout.connect(on_timer_timeout)
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
 
@@ -29,7 +31,9 @@ func on_timer_timeout():
 	axe_instance.hitbox_component.damage = base_damage * additional_damage_percent
 
 
-func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary):
+func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
+	if upgrade_player_number != player_number:
+		return
 	match upgrade.id:
 		"axe_damage":
 			additional_damage_percent = 1 + (current_upgrades["axe_damage"]["quantity"] * 0.1)
@@ -43,3 +47,14 @@ func get_player() -> Node2D:
 		node = node.get_parent()
 
 	return get_tree().get_first_node_in_group("player") as Node2D
+
+
+func resolve_player_number() -> int:
+	var player = get_player()
+	if player != null and player.has_method("get_player_action_suffix"):
+		return player.player_number
+	return player_number
+
+
+func set_player_number(new_player_number: int) -> void:
+	player_number = new_player_number

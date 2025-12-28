@@ -8,6 +8,7 @@ signal selected
 
 var disabled := false
 var focus_stylebox: StyleBoxFlat
+var controlling_player_number := 1
 
 
 func _ready():
@@ -16,10 +17,7 @@ func _ready():
 	focus_entered.connect(on_focus_entered)
 	focus_exited.connect(on_focus_exited)
 	focus_mode = Control.FOCUS_ALL
-	focus_stylebox = StyleBoxFlat.new()
-	focus_stylebox.bg_color = Color(0, 0, 0, 0)
-	focus_stylebox.border_color = Color(1, 0.87, 0.2)
-	focus_stylebox.set_border_width_all(4)
+	ensure_focus_stylebox()
 
 
 func play_in(delay: float = 0):
@@ -54,6 +52,8 @@ func select_card():
 func on_gui_input(event: InputEvent):
 	if disabled:
 		return
+	if not is_event_for_player(event):
+		return
 
 	if event.is_action_pressed("left_click") or event.is_action_pressed("ui_accept"):
 		select_card()
@@ -62,6 +62,8 @@ func on_gui_input(event: InputEvent):
 func on_mouse_entered():
 	if disabled:
 		return true
+	if controlling_player_number != 1:
+		return
 
 	grab_focus()
 	$HoverAnimationPlayer.play("hover")
@@ -80,3 +82,29 @@ func on_focus_exited():
 		return
 
 	remove_theme_stylebox_override("panel")
+
+
+func set_controlling_player(player_number: int) -> void:
+	controlling_player_number = player_number
+
+
+func set_focus_color(color: Color) -> void:
+	ensure_focus_stylebox()
+	focus_stylebox.border_color = color
+	if has_focus():
+		add_theme_stylebox_override("panel", focus_stylebox)
+
+
+func is_event_for_player(event: InputEvent) -> bool:
+	if controlling_player_number == 1:
+		return event.device == -1 or event.device == 0
+	return event.device == 1
+
+
+func ensure_focus_stylebox() -> void:
+	if focus_stylebox != null:
+		return
+	focus_stylebox = StyleBoxFlat.new()
+	focus_stylebox.bg_color = Color(0, 0, 0, 0)
+	focus_stylebox.border_color = Color(1, 0.87, 0.2)
+	focus_stylebox.set_border_width_all(4)

@@ -7,10 +7,12 @@ const MAX_RANGE = 450
 var base_damage = 5
 var additional_damage_percent: float = 1.0
 var base_wait_time
+var player_number := 1
 
 
 
 func _ready():
+	player_number = resolve_player_number()
 	base_wait_time = $Timer.wait_time
 	$Timer.timeout.connect(on_timer_timeout)
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
@@ -46,7 +48,9 @@ func on_timer_timeout():
 	spawn_sword(player.global_position, enemies[0].global_position)
 
 
-func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary):
+func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
+	if upgrade_player_number != player_number:
+		return
 	match upgrade.id:
 		"sword_rate":
 			var percent_reduction = current_upgrades["sword_rate"]["quantity"] * 0.1
@@ -64,6 +68,17 @@ func get_player() -> Node2D:
 		node = node.get_parent()
 
 	return get_tree().get_first_node_in_group("player") as Node2D
+
+
+func resolve_player_number() -> int:
+	var player = get_player()
+	if player != null and player.has_method("get_player_action_suffix"):
+		return player.player_number
+	return player_number
+
+
+func set_player_number(new_player_number: int) -> void:
+	player_number = new_player_number
 
 
 func get_player_action_suffix(player: Node) -> String:
