@@ -9,7 +9,7 @@ func _ready():
 	apply_random_tint()
 
 
-func _process(delta):
+func _physics_process(delta):
 	velocity_component.accelerate_to_player()
 	velocity_component.move(self)
 	
