@@ -8,12 +8,10 @@ var selected_index := 0
 
 func _ready():
 	%PlayButton.pressed.connect(on_play_pressed)
-	%UpgradesButton.pressed.connect(on_upgrades_pressed)
 	%OptionsButton.pressed.connect(on_options_pressed)
 	%QuitButton.pressed.connect(on_quit_pressed)
 	menu_buttons = [
 		%PlayButton,
-		%UpgradesButton,
 		%OptionsButton,
 		%QuitButton,
 	]
@@ -50,13 +48,6 @@ func on_play_pressed():
 	ScreenTransition.transition()
 	await ScreenTransition.transitioned_halfway
 	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
-
-
-func on_upgrades_pressed():
-	ScreenTransition.transition()
-	await ScreenTransition.transitioned_halfway
-	get_tree().change_scene_to_file("res://scenes/ui/meta_menu.tscn")
-
 
 func on_options_pressed():
 	ScreenTransition.transition()
