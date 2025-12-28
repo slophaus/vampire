@@ -189,20 +189,44 @@ target_group = "player"
 
 [node name="RatSprite" type="Sprite2D" parent="Visuals"]
 visible = false
+clip_children = 2
 texture = ExtResource("1_m80w1")
 offset = Vector2(2.08165e-12, -4)
 
+[node name="enemy_color" type="ColorRect" parent="Visuals/RatSprite"]
+visible = false
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+
 [node name="mouse_sprite" type="AnimatedSprite2D" parent="Visuals"]
+clip_children = 2
 position = Vector2(2, -15)
 sprite_frames = SubResource("SpriteFrames_sdy2s")
 autoplay = "default"
 frame_progress = 0.0404241
 
+[node name="enemy_color" type="ColorRect" parent="Visuals/mouse_sprite"]
+visible = false
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+
 [node name="wizard_sprite" type="AnimatedSprite2D" parent="Visuals"]
 visible = false
+clip_children = 2
 position = Vector2(1, -12)
 sprite_frames = SubResource("SpriteFrames_iguem")
 autoplay = "default"
+
+[node name="enemy_color" type="ColorRect" parent="Visuals/wizard_sprite"]
+visible = false
+offset_left = -18.0
+offset_top = -18.0
+offset_right = 18.0
+offset_bottom = 18.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -10)

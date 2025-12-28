@@ -32,9 +32,13 @@ const ENEMY_TYPES = {
 @onready var mouse_sprite: AnimatedSprite2D = $Visuals/mouse_sprite
 @onready var wizard_sprite: AnimatedSprite2D = $Visuals/wizard_sprite
 @onready var rat_sprite: Sprite2D = $Visuals/RatSprite
+@onready var mouse_color: ColorRect = $Visuals/mouse_sprite/enemy_color
+@onready var wizard_color: ColorRect = $Visuals/wizard_sprite/enemy_color
+@onready var rat_color: ColorRect = $Visuals/RatSprite/enemy_color
 @onready var rat_texture: Texture2D = rat_sprite.texture
 
 var facing_multiplier := -1
+var enemy_tint := Color.WHITE
 
 
 func _ready():
@@ -87,4 +91,13 @@ func on_hit():
 func apply_random_tint():
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	visuals.modulate = Color.from_hsv(rng.randf(), 0.2, 1.0)
+	enemy_tint = Color.from_hsv(rng.randf(), 0.2, 1.0)
+	apply_enemy_tint()
+
+
+func apply_enemy_tint() -> void:
+	for tint_rect in [mouse_color, wizard_color, rat_color]:
+		if tint_rect == null:
+			continue
+		tint_rect.color = enemy_tint
+		tint_rect.visible = true
