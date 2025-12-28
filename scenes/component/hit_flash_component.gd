@@ -9,6 +9,17 @@ var hit_flash_tween: Tween
 
 func _ready():
 	health_component.health_changed.connect(on_health_changed)
+	apply_material()
+
+
+func set_sprite(new_sprite: CanvasItem) -> void:
+	sprite = new_sprite
+	apply_material()
+
+
+func apply_material() -> void:
+	if sprite == null:
+		return
 	sprite.material = hit_flash_material
 
 

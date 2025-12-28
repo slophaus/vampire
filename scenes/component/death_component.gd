@@ -5,13 +5,14 @@ extends Node2D
 
 
 func _ready():
-	$GPUParticles2D.texture = sprite.texture
 	health_component.died.connect(on_died)
 
 
 func on_died():
 	if owner == null || not owner is Node2D:
 		return
+
+	$GPUParticles2D.texture = sprite.texture
 
 	var spawn_position = owner.global_position
 
