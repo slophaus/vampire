@@ -8,7 +8,7 @@ const ENEMY_HITBOX_LAYER = 2
 @export var owner_group := "player"
 @export var target_group := "enemy"
 
-var base_damage = 2.5
+var base_damage = 2.0
 var additional_damage_percent: float = 1.0
 var base_wait_time := 0.0
 var base_wait_time_multiplier := 1.0

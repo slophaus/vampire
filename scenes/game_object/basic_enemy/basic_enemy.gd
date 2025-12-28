@@ -8,7 +8,7 @@ const ENEMY_TYPES = {
 		"facing_multiplier": -1
 	},
 	1: {
-		"max_health": 30.0,
+		"max_health": 10.0,
 		"max_speed": 45,
 		"acceleration": 2.0,
 		"facing_multiplier": 1
@@ -67,7 +67,7 @@ func apply_enemy_type(index: int) -> void:
 	wizard_sprite.visible = enemy_index == 1
 	rat_sprite.visible = enemy_index == 2
 	fireball_ability_controller.set_active(enemy_index == 1)
-	fireball_ability_controller.set_base_wait_time_multiplier(3.0 if enemy_index == 1 else 1.0)
+	fireball_ability_controller.set_base_wait_time_multiplier(1.0)
 
 	rat_sprite.texture = rat_texture
 
