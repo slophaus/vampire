@@ -40,8 +40,11 @@ func disable_collision():
 
 func on_area_entered(other_area: Area2D):
 	var player = other_area.get_parent() as Node2D
-	if player != null && player.is_in_group("player"):
-		collected_player = player
+	if player == null || not player.is_in_group("player"):
+		return
+	if player.is_regenerating:
+		return
+	collected_player = player
 	Callable(disable_collision).call_deferred()
 	
 	var tween = create_tween()
