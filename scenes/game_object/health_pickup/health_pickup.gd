@@ -1,9 +1,8 @@
 extends Node2D
 
-@export var heal_amount: float = 1.0
-
 @onready var collision_shape_2d = $Area2D/CollisionShape2D
 @onready var sprite = $Sprite2D
+var collected_player: Node2D
 
 
 func _ready():
@@ -11,7 +10,9 @@ func _ready():
 
 
 func tween_collect(percent: float, start_position: Vector2):
-	var player = get_tree().get_first_node_in_group("player") as Node2D
+	var player = collected_player
+	if player == null:
+		player = get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return
 	
@@ -23,11 +24,13 @@ func tween_collect(percent: float, start_position: Vector2):
 
 
 func collect():
-	var player = get_tree().get_first_node_in_group("player") as Node
+	var player = collected_player
+	if player == null:
+		player = get_tree().get_first_node_in_group("player") as Node
 	if player != null:
 		var health_component = player.get_node_or_null("HealthComponent") as HealthComponent
 		if health_component != null:
-			health_component.heal(heal_amount)
+			health_component.heal(health_component.max_health)
 	queue_free()
 
 
@@ -36,6 +39,9 @@ func disable_collision():
 
 
 func on_area_entered(other_area: Area2D):
+	var player = other_area.get_parent() as Node2D
+	if player != null && player.is_in_group("player"):
+		collected_player = player
 	Callable(disable_collision).call_deferred()
 	
 	var tween = create_tween()
