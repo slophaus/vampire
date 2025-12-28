@@ -72,3 +72,5 @@ func on_arena_difficulty_increased(arena_difficulty: int):
 	
 	if arena_difficulty == 8:
 		enemy_table.add_item(1, 5)
+	if arena_difficulty == 12:
+		enemy_table.add_item(2, 4)

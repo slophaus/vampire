@@ -15,8 +15,8 @@ const ENEMY_TYPES = {
 	},
 	2: {
 		"max_health": 10.0,
-		"max_speed": 30,
-		"acceleration": 5.0,
+		"max_speed": 70,
+		"acceleration": 7.0,
 		"facing_multiplier": -1
 	}
 }
@@ -30,8 +30,8 @@ const ENEMY_TYPES = {
 @onready var death_component = $DeathComponent
 @onready var mouse_sprite: AnimatedSprite2D = $Visuals/mouse_sprite
 @onready var wizard_sprite: AnimatedSprite2D = $Visuals/wizard_sprite
-@onready var static_sprite: Sprite2D = $Visuals/StaticSprite
-@onready var basic_texture: Texture2D = static_sprite.texture
+@onready var rat_sprite: Sprite2D = $Visuals/RatSprite
+@onready var rat_texture: Texture2D = rat_sprite.texture
 
 var facing_multiplier := -1
 
@@ -64,18 +64,18 @@ func apply_enemy_type(index: int) -> void:
 
 	mouse_sprite.visible = enemy_index == 0
 	wizard_sprite.visible = enemy_index == 1
-	static_sprite.visible = enemy_index == 2
+	rat_sprite.visible = enemy_index == 2
 
-	static_sprite.texture = basic_texture
+	rat_sprite.texture = rat_texture
 
 	var active_sprite: CanvasItem = mouse_sprite
 	if enemy_index == 1:
 		active_sprite = wizard_sprite
 	elif enemy_index == 2:
-		active_sprite = static_sprite
+		active_sprite = rat_sprite
 
 	hit_flash_component.set_sprite(active_sprite)
-	death_component.sprite = static_sprite
+	death_component.sprite = rat_sprite
 
 
 func on_hit():
