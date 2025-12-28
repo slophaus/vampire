@@ -6,6 +6,7 @@ extends Node
 var current_upgrades = {}
 var upgrade_pool: WeightedTable = WeightedTable.new()
 
+var upgrade_boomerang := preload("res://resources/upgrades/boomerang.tres")
 var upgrade_axe := preload("res://resources/upgrades/axe.tres")
 var upgrade_axe_damage := preload("res://resources/upgrades/axe_damage.tres")
 var upgrade_sword_rate := preload("res://resources/upgrades/sword_rate.tres")
@@ -18,6 +19,7 @@ var rng := RandomNumberGenerator.new()
 func _ready():
 	# axe damage는 axe 얻을 때 풀에 추가
 	upgrade_pool.add_item(upgrade_axe, 10)
+	upgrade_pool.add_item(upgrade_boomerang, 10)
 	upgrade_pool.add_item(upgrade_sword_rate, 10)
 	upgrade_pool.add_item(upgrade_sword_damage, 10)
 	upgrade_pool.add_item(upgrade_player_speed, 5)

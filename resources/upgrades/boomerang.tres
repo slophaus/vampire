@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Ability" load_steps=3 format=3 uid="uid://blf8cxx5t33bw"]
+
+[ext_resource type="PackedScene" uid="uid://c7m8p0l0kvfie" path="res://scenes/ability/boomerang_ability_controller/boomerang_ability_controller.tscn" id="1_q7ivf"]
+[ext_resource type="Script" uid="uid://duf3ekbiwieac" path="res://resources/upgrades/ability.gd" id="1_yjgia"]
+
+[resource]
+script = ExtResource("1_yjgia")
+ability_controller_scene = ExtResource("1_q7ivf")
+id = "boomerang"
+max_quantity = 1
+name = "Boomerang"
+description = "Throw a boomerang that returns to you."
