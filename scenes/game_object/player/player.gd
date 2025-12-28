@@ -23,8 +23,6 @@ var is_regenerating := false
 var normal_visuals_modulate := Color.WHITE
 var last_health := 0.0
 var flash_tween: Tween
-var collisions_disabled := false
-var saved_collision_state := {}
 
 
 func _ready():
@@ -67,15 +65,6 @@ func _process(delta):
 	var move_sign = sign(movement_vector.x)
 	if move_sign != 0:
 		visuals.scale = Vector2(move_sign, 1)
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if player_number != 1:
-		return
-	if event is InputEventJoypadButton and event.pressed:
-		if event.device == 0 and event.button_index == JOY_BUTTON_BACK:
-			toggle_collisions()
-			get_tree().root.set_input_as_handled()
 
 
 func get_movement_vector():	
@@ -182,32 +171,3 @@ func flash_visuals(color: Color) -> void:
 func stop_flash() -> void:
 	if flash_tween != null and flash_tween.is_running():
 		flash_tween.kill()
-
-
-func toggle_collisions() -> void:
-	collisions_disabled = !collisions_disabled
-	if collisions_disabled:
-		saved_collision_state.clear()
-		_store_and_disable_collisions(get_tree().root)
-		return
-	for node in saved_collision_state.keys():
-		if not is_instance_valid(node):
-			continue
-		var state = saved_collision_state[node]
-		node.collision_layer = state.layer
-		node.collision_mask = state.mask
-	saved_collision_state.clear()
-
-
-func _store_and_disable_collisions(node: Node) -> void:
-	if node is CollisionObject2D:
-		var collision_node := node as CollisionObject2D
-		if not saved_collision_state.has(collision_node):
-			saved_collision_state[collision_node] = {
-				"layer": collision_node.collision_layer,
-				"mask": collision_node.collision_mask,
-			}
-		collision_node.collision_layer = 0
-		collision_node.collision_mask = 0
-	for child in node.get_children():
-		_store_and_disable_collisions(child)
