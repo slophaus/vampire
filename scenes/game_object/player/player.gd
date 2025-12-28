@@ -11,6 +11,7 @@ const EXPERIENCE_FLASH_DURATION = 0.1
 @onready var abilities = $Abilities
 @onready var animation_player = $AnimationPlayer
 @onready var visuals = $Visuals
+@onready var player_color = $Visuals/player_sprite/player_color
 @onready var velocity_component = $VelocityComponent
 
 @export var player_number := 1
@@ -29,7 +30,8 @@ var flash_tween: Tween
 
 func _ready():
 	base_speed = velocity_component.max_speed
-	visuals.modulate = get_player_tint()
+	player_color.color = get_player_tint()
+	visuals.modulate = Color.WHITE
 	normal_visuals_modulate = visuals.modulate
 	last_health = health_component.current_health
 	
@@ -84,10 +86,10 @@ func get_player_action_suffix() -> String:
 
 func get_player_tint() -> Color:
 	if player_number == 1:
-		return Color(1.0, 0.66, 0.66)
+		return Color(1.0, 0.0, 0.0, 0.39)
 	if player_number == 2:
-		return Color(0.66, 0.66, 1.0)
-	return Color.WHITE
+		return Color(0.0, 0.0, 1.0, 0.39)
+	return Color(1.0, 1.0, 1.0, 0.0)
 
 
 func can_attack() -> bool:
