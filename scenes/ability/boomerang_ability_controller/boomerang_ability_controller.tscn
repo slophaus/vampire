@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://c7m8p0l0kvfie"]
 
-[ext_resource type="Script" uid="uid://c8c2f6mmtlqsf" path="res://scenes/ability/boomerang_ability_controller/boomerang_ability_controller.gd" id="1_5o6q4"]
-[ext_resource type="PackedScene" uid="uid://f5o2fh2s52k4h" path="res://scenes/ability/boomerang_ability/boomerang_ability.tscn" id="2_6a2u2"]
+[ext_resource type="Script" path="res://scenes/ability/boomerang_ability_controller/boomerang_ability_controller.gd" id="1_5o6q4"]
+[ext_resource type="PackedScene" path="res://scenes/ability/boomerang_ability/boomerang_ability.tscn" id="2_6a2u2"]
 
 [node name="BoomerangAbilityController" type="Node"]
 script = ExtResource("1_5o6q4")
