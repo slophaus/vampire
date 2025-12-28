@@ -11,8 +11,10 @@ var players_by_number: Dictionary = {}
 var upgrade_boomerang := preload("res://resources/upgrades/boomerang.tres")
 var upgrade_axe := preload("res://resources/upgrades/axe.tres")
 var upgrade_axe_damage := preload("res://resources/upgrades/axe_damage.tres")
+var upgrade_axe_level := preload("res://resources/upgrades/axe_level.tres")
 var upgrade_sword_rate := preload("res://resources/upgrades/sword_rate.tres")
 var upgrade_sword_damage := preload("res://resources/upgrades/sword_damage.tres")
+var upgrade_sword_level := preload("res://resources/upgrades/sword_level.tres")
 var upgrade_player_speed := preload("res://resources/upgrades/player_speed.tres")
 
 var rng := RandomNumberGenerator.new()
@@ -37,6 +39,7 @@ func create_upgrade_pool() -> WeightedTable:
 	upgrade_pool.add_item(upgrade_boomerang, 10)
 	upgrade_pool.add_item(upgrade_sword_rate, 10)
 	upgrade_pool.add_item(upgrade_sword_damage, 10)
+	upgrade_pool.add_item(upgrade_sword_level, 10)
 	upgrade_pool.add_item(upgrade_player_speed, 5)
 	return upgrade_pool
 
@@ -66,6 +69,7 @@ func apply_upgrade(upgrade: AbilityUpgrade, player_number: int):
 func update_upgrade_pool(chosen_upgrade: AbilityUpgrade, upgrade_pool: WeightedTable):
 	if chosen_upgrade.id == upgrade_axe.id:
 		upgrade_pool.add_item(upgrade_axe_damage, 10)
+		upgrade_pool.add_item(upgrade_axe_level, 10)
 
 
 func pick_upgrades(player_number: int) -> Array[AbilityUpgrade]:
