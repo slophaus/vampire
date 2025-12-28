@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://bpgwbwa1p3m6i"]
+[gd_scene load_steps=25 format=3 uid="uid://bpgwbwa1p3m6i"]
 
 [ext_resource type="Script" uid="uid://cfd7lntaw45s6" path="res://scenes/game_object/player/player.gd" id="1_dj72w"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_3j6hq"]
@@ -65,6 +65,9 @@ animations = [{
 "name": &"default",
 "speed": 5.0
 }]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_oxhc3"]
+blend_mode = 3
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_wmo3f"]
 radius = 7.0
@@ -134,6 +137,7 @@ frame_progress = 0.111067
 
 [node name="player_color" type="ColorRect" parent="Visuals/player_sprite"]
 visible = false
+material = SubResource("CanvasItemMaterial_oxhc3")
 offset_left = -17.6318
 offset_top = -14.8107
 offset_right = 22.3682

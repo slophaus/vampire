@@ -91,7 +91,7 @@ func on_hit():
 func apply_random_tint():
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	enemy_tint = Color.from_hsv(rng.randf(), 1.0, rng.randf(), .2)
+	enemy_tint = Color.from_hsv(rng.randf(), .25, 1.0, 1.0)
 	apply_enemy_tint()
 
 

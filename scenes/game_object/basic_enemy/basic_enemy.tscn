@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://bses7vk27cfvt"]
+[gd_scene load_steps=34 format=3 uid="uid://bses7vk27cfvt"]
 
 [ext_resource type="Script" uid="uid://d01scidly6bca" path="res://scenes/game_object/basic_enemy/basic_enemy.gd" id="1_gpcli"]
 [ext_resource type="Texture2D" uid="uid://cc6p0wg3ww2jf" path="res://sprites/rat.png" id="1_m80w1"]
@@ -89,6 +89,9 @@ shader_parameter/lerp_percent = 0.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_5yb0v"]
 radius = 13.0384
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_fcdwx"]
+blend_mode = 3
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_sdy2s"]
 animations = [{
 "frames": [{
@@ -99,6 +102,9 @@ animations = [{
 "name": &"default",
 "speed": 5.0
 }]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_26myy"]
+blend_mode = 3
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cb80a"]
 atlas = ExtResource("18_ql8xh")
@@ -135,6 +141,9 @@ animations = [{
 "name": &"default",
 "speed": 5.0
 }]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_nb0jk"]
+blend_mode = 3
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_5o3ap"]
 
@@ -195,6 +204,7 @@ offset = Vector2(2.08165e-12, -4)
 
 [node name="enemy_color" type="ColorRect" parent="Visuals/RatSprite"]
 visible = false
+material = SubResource("CanvasItemMaterial_fcdwx")
 offset_left = -20.0
 offset_top = -20.0
 offset_right = 20.0
@@ -209,6 +219,7 @@ frame_progress = 0.0404241
 
 [node name="enemy_color" type="ColorRect" parent="Visuals/mouse_sprite"]
 visible = false
+material = SubResource("CanvasItemMaterial_26myy")
 offset_left = -17.0
 offset_top = -17.0
 offset_right = 20.0
@@ -222,6 +233,7 @@ sprite_frames = SubResource("SpriteFrames_iguem")
 autoplay = "default"
 
 [node name="enemy_color" type="ColorRect" parent="Visuals/wizard_sprite"]
+material = SubResource("CanvasItemMaterial_nb0jk")
 offset_left = -26.0
 offset_top = -20.0
 offset_right = 20.0

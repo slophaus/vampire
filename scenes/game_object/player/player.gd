@@ -87,9 +87,9 @@ func get_player_action_suffix() -> String:
 
 func get_player_tint() -> Color:
 	if player_number == 1:
-		return Color(1.0, 0.0, 0.0, 0.195)
+		return Color(1.0, 0.75, 0.75, 1.0)
 	if player_number == 2:
-		return Color(0.0, 0.0, 1.0, 0.195)
+		return Color(0.75, 0.75, 1.0, 1.0)
 	return Color(1.0, 1.0, 1.0, 0.0)
 
 
