@@ -1,7 +1,7 @@
 extends Node2D
 class_name FireballAbility
 
-const SPEED := 225.0
+const SPEED := 150.0
 const MAX_HITS := 3
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
