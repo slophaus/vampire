@@ -47,7 +47,7 @@ window/size/mode.debug=0
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/globalize-plugins/plugin.cfg", "res://addons/wakatime/plugin.cfg")
+enabled=PackedStringArray("res://addons/globalize-plugins/plugin.cfg")
 
 [gui]
 
