@@ -27,7 +27,9 @@ func tween_collect(percent: float, start_position: Vector2):
 
 
 func collect():
-	GameEvents.emit_experience_vial_collected(1)
+	GameEvents.emit_experience_vial_collected(0.5)
+	if collected_player != null and collected_player.has_method("flash_experience_gain"):
+		collected_player.flash_experience_gain()
 	queue_free()
 
 

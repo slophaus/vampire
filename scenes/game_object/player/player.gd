@@ -2,6 +2,8 @@ extends CharacterBody2D
 
 const MAX_SPEED = 125
 const ACCELERATION_SMOOTHING = 25
+const DAMAGE_FLASH_DURATION = 0.45
+const EXPERIENCE_FLASH_DURATION = DAMAGE_FLASH_DURATION / 2.0
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
@@ -159,11 +161,11 @@ func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades:
 		velocity_component.max_speed = base_speed + (base_speed * current_upgrades["player_speed"]["quantity"] * 0.1)
 
 
-func flash_visuals(color: Color) -> void:
+func flash_visuals(color: Color, duration: float = DAMAGE_FLASH_DURATION) -> void:
 	stop_flash()
 	visuals.modulate = color
 	flash_tween = create_tween()
-	flash_tween.tween_property(visuals, "modulate", normal_visuals_modulate, 0.45) \
+	flash_tween.tween_property(visuals, "modulate", normal_visuals_modulate, duration) \
 		.set_trans(Tween.TRANS_QUAD) \
 		.set_ease(Tween.EASE_OUT)
 
@@ -171,3 +173,7 @@ func flash_visuals(color: Color) -> void:
 func stop_flash() -> void:
 	if flash_tween != null and flash_tween.is_running():
 		flash_tween.kill()
+
+
+func flash_experience_gain() -> void:
+	flash_visuals(Color(0.3, 0.6, 1.0), EXPERIENCE_FLASH_DURATION)
