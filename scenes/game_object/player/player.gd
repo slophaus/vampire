@@ -84,9 +84,9 @@ func get_player_action_suffix() -> String:
 
 func get_player_tint() -> Color:
 	if player_number == 1:
-		return Color(1.0, 0.66, 0.66)
+		return Color(1.0, 0.35, 0.35)
 	if player_number == 2:
-		return Color(0.66, 0.66, 1.0)
+		return Color(0.35, 0.35, 1.0)
 	return Color.WHITE
 
 
@@ -151,6 +151,7 @@ func on_died():
 func end_regeneration():
 	is_regenerating = false
 	stop_flash()
+	visuals.modulate = Color.WHITE
 	apply_base_tint()
 	health_component.current_health = health_component.max_health
 	health_component.health_changed.emit()
@@ -192,5 +193,4 @@ func flash_experience_gain() -> void:
 
 
 func apply_base_tint() -> void:
-	visuals.modulate = Color.WHITE
 	visuals.self_modulate = base_tint
