@@ -45,7 +45,11 @@ func on_timer_timeout():
 	spawn_boomerang(player.global_position, enemies[0].global_position, player)
 
 
-func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary):
+func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, target_player: Node):
+	var player = get_player()
+	if player != target_player:
+		return
+
 	match upgrade.id:
 		"boomerang_rate":
 			var percent_reduction = current_upgrades["boomerang_rate"]["quantity"] * 0.1
