@@ -14,9 +14,9 @@ const ENEMY_TYPES = {
 		"facing_multiplier": 1
 	},
 	2: {
-		"max_health": 10.0,
-		"max_speed": 70,
-		"acceleration": 7.0,
+		"max_health": 50.0,
+		"max_speed": 105,
+		"acceleration": 1.5,
 		"facing_multiplier": -1
 	}
 }
