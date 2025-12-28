@@ -2,6 +2,7 @@ extends Node2D
 class_name BoomerangAbility
 
 const SPEED := 210.0
+const SPIN_SPEED := TAU * 3.0
 const MAX_HITS := 10
 const RETURN_DISTANCE := 24.0
 
@@ -13,6 +14,8 @@ var distance_traveled := 0.0
 var returning := false
 var source_player: Node2D
 var hit_count := 0
+var current_speed := 0.0
+var deceleration := 0.0
 
 
 func _ready():
@@ -32,15 +35,16 @@ func _physics_process(delta: float) -> void:
 		if global_position.distance_to(player.global_position) <= RETURN_DISTANCE:
 			queue_free()
 			return
-
-	var movement = direction * SPEED * delta
-	global_position += movement
-	rotation = direction.angle() + (PI / 2.0)
-
-	if not returning:
-		distance_traveled += movement.length()
-		if distance_traveled >= max_distance:
+		current_speed = min(current_speed + deceleration * delta, SPEED)
+	else:
+		current_speed = max(current_speed - deceleration * delta, 0.0)
+		distance_traveled += current_speed * delta
+		if distance_traveled >= max_distance or current_speed <= 0.0:
 			returning = true
+
+	var movement = direction * current_speed * delta
+	global_position += movement
+	rotation += SPIN_SPEED * delta
 
 
 func setup(start_position: Vector2, target_position: Vector2, range_limit: float, player: Node2D) -> void:
@@ -51,6 +55,8 @@ func setup(start_position: Vector2, target_position: Vector2, range_limit: float
 	distance_traveled = 0.0
 	returning = false
 	source_player = player
+	current_speed = SPEED
+	deceleration = (SPEED * SPEED) / (2.0 * max_distance)
 
 
 func on_hit_landed(current_hits: int) -> void:
