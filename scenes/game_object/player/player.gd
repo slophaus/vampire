@@ -22,6 +22,7 @@ var base_speed := 0
 var is_regenerating := false
 var normal_visuals_modulate := Color.WHITE
 var last_health := 0.0
+var flash_tween: Tween
 
 
 func _ready():
@@ -116,6 +117,9 @@ func on_health_changed():
 	if not is_regenerating and health_component.current_health < last_health:
 		GameEvents.emit_player_damaged()
 		$HitRandomStreamPlayer.play_random()
+		flash_visuals(Color(1, 0.3, 0.3))
+	elif not is_regenerating and health_component.current_health > last_health:
+		flash_visuals(Color(0.3, 1, 0.3))
 	update_health_display()
 	last_health = health_component.current_health
 
@@ -124,6 +128,7 @@ func on_died():
 	if is_regenerating:
 		return
 	is_regenerating = true
+	stop_flash()
 	visuals.modulate = Color.BLACK
 	health_component.current_health = 0
 	health_component.health_changed.emit()
@@ -133,6 +138,7 @@ func on_died():
 
 func end_regeneration():
 	is_regenerating = false
+	stop_flash()
 	visuals.modulate = normal_visuals_modulate
 	health_component.current_health = health_component.max_health
 	health_component.health_changed.emit()
@@ -151,3 +157,17 @@ func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades:
 		abilities.add_child(ability_controller)
 	elif ability_upgrade.id == "player_speed":
 		velocity_component.max_speed = base_speed + (base_speed * current_upgrades["player_speed"]["quantity"] * 0.1)
+
+
+func flash_visuals(color: Color) -> void:
+	stop_flash()
+	visuals.modulate = color
+	flash_tween = create_tween()
+	flash_tween.tween_property(visuals, "modulate", normal_visuals_modulate, 0.15) \
+		.set_trans(Tween.TRANS_QUAD) \
+		.set_ease(Tween.EASE_OUT)
+
+
+func stop_flash() -> void:
+	if flash_tween != null and flash_tween.is_running():
+		flash_tween.kill()
