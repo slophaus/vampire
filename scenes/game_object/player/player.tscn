@@ -133,6 +133,7 @@ autoplay = "default"
 frame_progress = 0.111067
 
 [node name="player_color" type="ColorRect" parent="Visuals/player_sprite"]
+visible = false
 offset_left = -17.6318
 offset_top = -14.8107
 offset_right = 22.3682
