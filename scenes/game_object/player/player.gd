@@ -163,7 +163,7 @@ func flash_visuals(color: Color) -> void:
 	stop_flash()
 	visuals.modulate = color
 	flash_tween = create_tween()
-	flash_tween.tween_property(visuals, "modulate", normal_visuals_modulate, 0.15) \
+	flash_tween.tween_property(visuals, "modulate", normal_visuals_modulate, 0.45) \
 		.set_trans(Tween.TRANS_QUAD) \
 		.set_ease(Tween.EASE_OUT)
 
