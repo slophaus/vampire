@@ -60,14 +60,8 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 	if upgrade_player_number != player_number:
 		return
 	match upgrade.id:
-		"sword_rate":
-			rate_reduction_percent = current_upgrades["sword_rate"]["quantity"] * 0.1
-			update_timer_wait_time()
-			$Timer.start()
-		"sword_damage":
-			additional_damage_percent = 1 + (current_upgrades["sword_damage"]["quantity"] * 0.15)
-		"sword_level":
-			fireball_level = 1 + current_upgrades["sword_level"]["quantity"]
+		"fireball_level":
+			fireball_level = 1 + current_upgrades["fireball_level"]["quantity"]
 
 
 func get_owner_actor() -> Node2D:
