@@ -3,21 +3,47 @@ class_name VelocityComponent
 
 @export var max_speed: int = 30
 @export var acceleration: float = 5
+@export var target_refresh_interval: float = 2.0
  
 var velocity := Vector2.ZERO
+var cached_player: Node2D = null
+var time_since_target_refresh := 0.0
 
 
 func accelerate_to_player():
 	var owner_node2d = owner as Node2D
 	if owner_node2d == null:
 		return
-	
-	var player = get_closest_player(owner_node2d.global_position)
-	if player == null:
+
+	if cached_player == null:
+		refresh_target_player(owner_node2d.global_position)
+
+	if cached_player == null:
 		return
 	
-	var direction = (player.global_position - owner_node2d.global_position).normalized()
+	var direction = (cached_player.global_position - owner_node2d.global_position).normalized()
 	accelerate_in_direction(direction)
+
+
+func _ready() -> void:
+	set_process(true)
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	time_since_target_refresh = rng.randf_range(0.0, target_refresh_interval)
+
+
+func _process(delta: float) -> void:
+	time_since_target_refresh += delta
+	if time_since_target_refresh >= target_refresh_interval:
+		time_since_target_refresh = 0.0
+		var owner_node2d = owner as Node2D
+		if owner_node2d == null:
+			return
+		refresh_target_player(owner_node2d.global_position)
+
+
+func refresh_target_player(from_position: Vector2) -> void:
+	cached_player = get_closest_player(from_position)
 
 func get_closest_player(from_position: Vector2) -> Node2D:
 	var players = get_tree().get_nodes_in_group("player")
