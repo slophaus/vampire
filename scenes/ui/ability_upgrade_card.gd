@@ -104,7 +104,12 @@ func is_event_for_player(event: InputEvent) -> bool:
 func ensure_focus_stylebox() -> void:
 	if focus_stylebox != null:
 		return
-	focus_stylebox = StyleBoxFlat.new()
-	focus_stylebox.bg_color = Color(0, 0, 0, 0)
-	focus_stylebox.border_color = Color(1, 0.87, 0.2)
-	focus_stylebox.set_border_width_all(4)
+	var base_stylebox = get_theme_stylebox("panel")
+	if base_stylebox != null:
+		focus_stylebox = base_stylebox.duplicate()
+	else:
+		focus_stylebox = StyleBoxFlat.new()
+	if focus_stylebox is StyleBoxFlat:
+		var flat_stylebox = focus_stylebox as StyleBoxFlat
+		flat_stylebox.border_color = Color(1, 0.87, 0.2)
+		flat_stylebox.set_border_width_all(4)

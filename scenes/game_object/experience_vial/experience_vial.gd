@@ -3,6 +3,7 @@ extends Node2D
 
 @onready var collision_shape_2d = $Area2D/CollisionShape2D
 @onready var sprite = $Sprite2D
+var collected_player: Node2D
 
 
 
@@ -11,7 +12,9 @@ func _ready():
 
 
 func tween_collect(percent: float, start_position: Vector2):
-	var player = get_tree().get_first_node_in_group("player") as Node2D
+	var player = collected_player
+	if player == null:
+		player = get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return
 	
@@ -33,6 +36,9 @@ func disable_collision():
 
 
 func on_area_entered(other_area: Area2D):
+	var player = other_area.get_parent() as Node2D
+	if player != null && player.is_in_group("player"):
+		collected_player = player
 	Callable(disable_collision).call_deferred()
 	
 	var tween = create_tween()

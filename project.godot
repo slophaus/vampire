@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="survivor-tutorial"
+config/name="Vampire"
 config/description="Keep survive.."
 run/main_scene="uid://mapie6ivpd7j"
 config/use_custom_user_dir=true
