@@ -9,6 +9,12 @@ func _ready():
 	health_component.died.connect(on_died)
 
 
+func set_sprite(new_sprite: Sprite2D) -> void:
+	sprite = new_sprite
+	if $GPUParticles2D != null:
+		$GPUParticles2D.texture = sprite.texture
+
+
 func on_died():
 	if owner == null || not owner is Node2D:
 		return
