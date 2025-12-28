@@ -7,5 +7,5 @@
 [node name="VialDropComponent" type="Node"]
 script = ExtResource("1_hqusn")
 vial_scene = ExtResource("2_de64x")
-health_drop_chance = 0.05
+health_drop_chance = 0.025
 health_vial_scene = ExtResource("3_1vg2t")

@@ -12,7 +12,7 @@ const ACCELERATION_SMOOTHING = 25
 @onready var velocity_component = $VelocityComponent
 
 @export var player_number := 1
-@export var regen_rate := 2.0
+@export var regen_rate := 0.67
 
 signal regenerate_started
 signal regenerate_finished
