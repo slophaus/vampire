@@ -28,6 +28,7 @@ const ENEMY_TYPES = {
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var hit_flash_component = $HitFlashComponent
 @onready var death_component = $DeathComponent
+@onready var sword_ability_controller = $Abilities/SwordAbilityController
 @onready var mouse_sprite: AnimatedSprite2D = $Visuals/mouse_sprite
 @onready var wizard_sprite: AnimatedSprite2D = $Visuals/wizard_sprite
 @onready var rat_sprite: Sprite2D = $Visuals/RatSprite
@@ -65,6 +66,7 @@ func apply_enemy_type(index: int) -> void:
 	mouse_sprite.visible = enemy_index == 0
 	wizard_sprite.visible = enemy_index == 1
 	rat_sprite.visible = enemy_index == 2
+	sword_ability_controller.set_active(enemy_index == 1)
 
 	rat_sprite.texture = rat_texture
 

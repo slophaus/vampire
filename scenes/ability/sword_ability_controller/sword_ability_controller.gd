@@ -3,6 +3,8 @@ extends Node
 const MAX_RANGE = 450
 
 @export var sword_ability: PackedScene
+@export var owner_group := "player"
+@export var target_group := "enemy"
 
 var base_damage = 5
 var additional_damage_percent: float = 1.0
@@ -21,33 +23,34 @@ func _ready():
 
 
 func on_timer_timeout() -> void:
-	var player = get_player()
-	if player == null:
+	var owner = get_owner_actor()
+	if owner == null:
 		return
-	if player.has_method("can_attack") and not player.can_attack():
-		return
-
-	var aim_direction = get_aim_direction(player)
-	if aim_direction != Vector2.ZERO:
-		await fire_swords(player.global_position, player.global_position + (aim_direction * MAX_RANGE))
+	if owner.has_method("can_attack") and not owner.can_attack():
 		return
 
-	var enemies = get_tree().get_nodes_in_group("enemy")
-	enemies = enemies.filter(func(enemy: Node2D):
-		return enemy.global_position.distance_squared_to(player.global_position) < pow(MAX_RANGE, 2)
+	if owner_group == "player":
+		var aim_direction = get_aim_direction(owner)
+		if aim_direction != Vector2.ZERO:
+			await fire_swords(owner.global_position, owner.global_position + (aim_direction * MAX_RANGE))
+			return
+
+	var targets = get_tree().get_nodes_in_group(target_group)
+	targets = targets.filter(func(target: Node2D):
+		return target.global_position.distance_squared_to(owner.global_position) < pow(MAX_RANGE, 2)
 	)
 	
-	if enemies.is_empty():
+	if targets.is_empty():
 		return
 	
-	enemies.sort_custom(func(a: Node2D, b: Node2D):
-		var a_distance = a.global_position.distance_squared_to(player.global_position)
-		var b_distance = b.global_position.distance_squared_to(player.global_position)
+	targets.sort_custom(func(a: Node2D, b: Node2D):
+		var a_distance = a.global_position.distance_squared_to(owner.global_position)
+		var b_distance = b.global_position.distance_squared_to(owner.global_position)
 		
 		return a_distance < b_distance
 	)
 	
-	await fire_swords(player.global_position, enemies[0].global_position)
+	await fire_swords(owner.global_position, targets[0].global_position)
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
@@ -64,18 +67,20 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 			sword_level = 1 + current_upgrades["sword_level"]["quantity"]
 
 
-func get_player() -> Node2D:
+func get_owner_actor() -> Node2D:
 	var node: Node = self
 	while node != null:
-		if node is Node2D && node.is_in_group("player"):
+		if node is Node2D && node.is_in_group(owner_group):
 			return node as Node2D
 		node = node.get_parent()
 
-	return get_tree().get_first_node_in_group("player") as Node2D
+	return get_tree().get_first_node_in_group(owner_group) as Node2D
 
 
 func resolve_player_number() -> int:
-	var player = get_player()
+	if owner_group != "player":
+		return player_number
+	var player = get_owner_actor()
 	if player != null and player.has_method("get_player_action_suffix"):
 		return player.player_number
 	return player_number
@@ -124,3 +129,13 @@ func fire_swords(start_position: Vector2, target_position: Vector2) -> void:
 		spawn_sword(start_position, target_position)
 		if shot_index < sword_level - 1:
 			await get_tree().create_timer(multi_shot_delay).timeout
+
+
+func set_active(active: bool) -> void:
+	set_process(active)
+	set_physics_process(active)
+	set_process_input(active)
+	if active:
+		$Timer.start()
+	else:
+		$Timer.stop()
