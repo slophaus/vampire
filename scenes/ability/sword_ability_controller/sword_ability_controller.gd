@@ -90,9 +90,9 @@ func get_player_action_suffix(player: Node) -> String:
 		return player.get_player_action_suffix()
 
 	if player != null:
-		var player_number = player.get("player_number")
-		if typeof(player_number) == TYPE_INT && player_number > 1:
-			return str(player_number)
+		var player_number_value = player.get("player_number")
+		if typeof(player_number_value) == TYPE_INT && player_number_value > 1:
+			return str(player_number_value)
 
 	return ""
 
