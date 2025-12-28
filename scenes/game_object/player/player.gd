@@ -35,6 +35,9 @@ func _ready():
 	health_component.health_changed.connect(on_health_changed)
 	health_component.died.connect(on_died)
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
+	for ability in abilities.get_children():
+		if ability.has_method("set_player_number"):
+			ability.set_player_number(player_number)
 	update_health_display()
 
 
@@ -137,9 +140,14 @@ func end_regeneration():
 	regenerate_finished.emit()
 
 
-func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades: Dictionary):
+func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
+	if upgrade_player_number != player_number:
+		return
 	if ability_upgrade is Ability:
 		var ability = ability_upgrade as Ability
-		abilities.add_child(ability.ability_controller_scene.instantiate())
+		var ability_controller = ability.ability_controller_scene.instantiate()
+		if ability_controller.has_method("set_player_number"):
+			ability_controller.set_player_number(player_number)
+		abilities.add_child(ability_controller)
 	elif ability_upgrade.id == "player_speed":
 		velocity_component.max_speed = base_speed + (base_speed * current_upgrades["player_speed"]["quantity"] * 0.1)

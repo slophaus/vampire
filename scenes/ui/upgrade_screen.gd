@@ -7,6 +7,8 @@ signal upgrade_selected(upgrade: AbilityUpgrade)
 
 var cards: Array[AbilityUpgradeCard] = []
 var selected_index := 0
+var controlling_player_number := 1
+var highlight_color := Color.RED
 
 
 func _ready():
@@ -19,6 +21,8 @@ func set_ability_upgrades(upgrades: Array[AbilityUpgrade]):
 	for upgrade in upgrades:
 		var card_instance = upgrade_card_scene.instantiate()
 		card_container.add_child(card_instance)
+		card_instance.set_controlling_player(controlling_player_number)
+		card_instance.set_focus_color(highlight_color)
 		card_instance.set_ability_upgrade(upgrade)
 		card_instance.play_in(delay)
 		card_instance.selected.connect(on_upgrade_selected.bind(upgrade))
@@ -30,6 +34,8 @@ func set_ability_upgrades(upgrades: Array[AbilityUpgrade]):
 
 func _unhandled_input(event: InputEvent) -> void:
 	if cards.is_empty():
+		return
+	if not is_event_for_player(event):
 		return
 
 	if event.is_action_pressed("ui_left"):
@@ -52,3 +58,17 @@ func on_upgrade_selected(upgrade: AbilityUpgrade):
 	await $AnimationPlayer.animation_finished
 	get_tree().paused = false
 	queue_free()
+
+
+func set_controlling_player(player_number: int) -> void:
+	controlling_player_number = player_number
+	highlight_color = Color.RED if player_number == 1 else Color.BLUE
+	for card in cards:
+		card.set_controlling_player(controlling_player_number)
+		card.set_focus_color(highlight_color)
+
+
+func is_event_for_player(event: InputEvent) -> bool:
+	if controlling_player_number == 1:
+		return event.device == -1 or event.device == 0
+	return event.device == 1
