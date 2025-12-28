@@ -19,6 +19,7 @@ script = ExtResource("1_v8wic")
 end_screen_scene = ExtResource("2_8tx6c")
 
 [node name="Vignette" parent="." instance=ExtResource("12_jgtmh")]
+visible = false
 
 [node name="ArenaTimeUI" parent="." node_paths=PackedStringArray("arena_time_manager") instance=ExtResource("1_sfy4a")]
 arena_time_manager = NodePath("../ArenaTimeManager")
