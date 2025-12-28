@@ -29,6 +29,7 @@ func on_timer_timeout():
 	axe_instance.source_player = player
 	axe_instance.global_position = player.global_position
 	axe_instance.hitbox_component.damage = base_damage * additional_damage_percent
+	axe_instance.hitbox_component.knockback = 0.0
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):

@@ -49,3 +49,9 @@ func move(character_body: CharacterBody2D):
 	character_body.move_and_slide()
 
 	velocity = character_body.velocity
+
+
+func apply_knockback(direction: Vector2, strength: float) -> void:
+	if direction == Vector2.ZERO or strength <= 0:
+		return
+	velocity += direction.normalized() * strength

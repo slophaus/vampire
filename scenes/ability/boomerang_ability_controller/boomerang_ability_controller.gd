@@ -109,5 +109,6 @@ func spawn_boomerang(start_position: Vector2, target_position: Vector2, player: 
 	var foreground_layer = get_tree().get_first_node_in_group("foreground_layer")
 	foreground_layer.add_child(boomerang_instance)
 	boomerang_instance.hitbox_component.damage = base_damage * additional_damage_percent
+	boomerang_instance.hitbox_component.knockback = 80.0
 
 	boomerang_instance.setup(start_position, target_position, MAX_RANGE, player)
