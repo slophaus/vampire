@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://cqf4b23r5u4af"]
 
-[ext_resource type="Texture2D" uid="uid://bblt53p4rrcuj" path="res://sprites/fish.png" id="1_j8n2s"]
-[ext_resource type="Script" uid="uid://buhk55d8wybub" path="res://scenes/game_object/health_pickup/health_pickup.gd" id="2_6p7of"]
+[ext_resource type="Texture2D" path="res://sprites/fish.png" id="1_j8n2s"]
+[ext_resource type="Script" path="res://scenes/game_object/health_pickup/health_pickup.gd" id="2_6p7of"]
 [ext_resource type="PackedScene" uid="uid://bh478361trp2r" path="res://scenes/component/random_audio_stream_player_2d_component.tscn" id="3_3pc7v"]
 [ext_resource type="AudioStream" uid="uid://bynum3obom3gc" path="res://assets/audio/drop_001.ogg" id="4_1n7xl"]
 [ext_resource type="AudioStream" uid="uid://0n02txoakffv" path="res://assets/audio/drop_004.ogg" id="5_uxy3s"]
