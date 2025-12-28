@@ -2,7 +2,8 @@ extends Node2D
 class_name BoomerangAbility
 
 const SPEED := 210.0
-const SPIN_SPEED := TAU * 3.0
+const RETURN_SPEED_MULTIPLIER := 2.0
+const SPIN_SPEED := TAU * 1.5
 const MAX_HITS := 10
 const RETURN_DISTANCE := 24.0
 
@@ -35,7 +36,7 @@ func _physics_process(delta: float) -> void:
 		if global_position.distance_to(player.global_position) <= RETURN_DISTANCE:
 			queue_free()
 			return
-		current_speed = min(current_speed + deceleration * delta, SPEED)
+		current_speed = min(current_speed + (deceleration * RETURN_SPEED_MULTIPLIER) * delta, SPEED * RETURN_SPEED_MULTIPLIER)
 	else:
 		current_speed = max(current_speed - deceleration * delta, 0.0)
 		distance_traveled += current_speed * delta
