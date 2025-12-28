@@ -6,6 +6,7 @@ extends CharacterBody2D
 
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
+	apply_random_tint()
 
 
 func _process(delta):
@@ -19,3 +20,9 @@ func _process(delta):
 
 func on_hit():
 	$HitRandomAudioPlayerComponent.play_random()
+
+
+func apply_random_tint():
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	visuals.modulate = Color.from_hsv(rng.randf(), 0.2, 1.0)
