@@ -28,7 +28,7 @@ func tween_collect(percent: float, start_position: Vector2):
 
 func collect():
 	var player = collected_player
-	if player == null or player.is_regenerating:
+	if player == null or not is_instance_valid(player) or player.is_regenerating:
 		queue_free()
 		return
 	GameEvents.emit_experience_vial_collected(0.25)

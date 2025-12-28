@@ -27,7 +27,7 @@ func collect():
 	var player = collected_player
 	if player == null:
 		player = get_tree().get_first_node_in_group("player") as Node
-	if player != null:
+	if player != null and is_instance_valid(player) and not player.is_regenerating:
 		var health_component = player.get_node_or_null("HealthComponent") as HealthComponent
 		if health_component != null:
 			health_component.heal(health_component.max_health)
