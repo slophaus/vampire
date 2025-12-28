@@ -4,6 +4,8 @@ extends Node
 
 var base_damage = 10
 var additional_damage_percent: float = 1.0
+var axe_level := 1
+var multi_shot_delay := 0.1
 var player_number := 1
 
 
@@ -13,7 +15,7 @@ func _ready():
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
 
 
-func on_timer_timeout():
+func on_timer_timeout() -> void:
 	var player = get_player()
 	if player == null:
 		return
@@ -23,13 +25,8 @@ func on_timer_timeout():
 	var foreground = get_tree().get_first_node_in_group("foreground_layer") as Node2D
 	if foreground == null:
 		return
-	
-	var axe_instance = axe_ability_scene.instantiate() as AxeAbility
-	foreground.add_child(axe_instance)
-	axe_instance.source_player = player
-	axe_instance.global_position = player.global_position
-	axe_instance.hitbox_component.damage = base_damage * additional_damage_percent
-	axe_instance.hitbox_component.knockback = 0.0
+
+	await spawn_axes(player, foreground)
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
@@ -38,6 +35,8 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 	match upgrade.id:
 		"axe_damage":
 			additional_damage_percent = 1 + (current_upgrades["axe_damage"]["quantity"] * 0.1)
+		"axe_level":
+			axe_level = 1 + current_upgrades["axe_level"]["quantity"]
 
 
 func get_player() -> Node2D:
@@ -59,3 +58,15 @@ func resolve_player_number() -> int:
 
 func set_player_number(new_player_number: int) -> void:
 	player_number = new_player_number
+
+
+func spawn_axes(player: Node2D, foreground: Node2D) -> void:
+	for shot_index in range(axe_level):
+		var axe_instance = axe_ability_scene.instantiate() as AxeAbility
+		foreground.add_child(axe_instance)
+		axe_instance.source_player = player
+		axe_instance.global_position = player.global_position
+		axe_instance.hitbox_component.damage = base_damage * additional_damage_percent
+		axe_instance.hitbox_component.knockback = 0.0
+		if shot_index < axe_level - 1:
+			await get_tree().create_timer(multi_shot_delay).timeout

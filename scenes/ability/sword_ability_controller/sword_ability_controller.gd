@@ -7,6 +7,8 @@ const MAX_RANGE = 450
 var base_damage = 5
 var additional_damage_percent: float = 1.0
 var base_wait_time
+var sword_level := 1
+var multi_shot_delay := 0.1
 var player_number := 1
 
 
@@ -18,7 +20,7 @@ func _ready():
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
 
 
-func on_timer_timeout():
+func on_timer_timeout() -> void:
 	var player = get_player()
 	if player == null:
 		return
@@ -27,7 +29,7 @@ func on_timer_timeout():
 
 	var aim_direction = get_aim_direction(player)
 	if aim_direction != Vector2.ZERO:
-		spawn_sword(player.global_position, player.global_position + (aim_direction * MAX_RANGE))
+		await fire_swords(player.global_position, player.global_position + (aim_direction * MAX_RANGE))
 		return
 
 	var enemies = get_tree().get_nodes_in_group("enemy")
@@ -45,7 +47,7 @@ func on_timer_timeout():
 		return a_distance < b_distance
 	)
 	
-	spawn_sword(player.global_position, enemies[0].global_position)
+	await fire_swords(player.global_position, enemies[0].global_position)
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
@@ -58,6 +60,8 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 			$Timer.start()
 		"sword_damage":
 			additional_damage_percent = 1 + (current_upgrades["sword_damage"]["quantity"] * 0.15)
+		"sword_level":
+			sword_level = 1 + current_upgrades["sword_level"]["quantity"]
 
 
 func get_player() -> Node2D:
@@ -113,3 +117,10 @@ func spawn_sword(start_position: Vector2, target_position: Vector2) -> void:
 	sword_instance.hitbox_component.knockback = 250.0
 
 	sword_instance.setup(start_position, target_position, MAX_RANGE)
+
+
+func fire_swords(start_position: Vector2, target_position: Vector2) -> void:
+	for shot_index in range(sword_level):
+		spawn_sword(start_position, target_position)
+		if shot_index < sword_level - 1:
+			await get_tree().create_timer(multi_shot_delay).timeout
