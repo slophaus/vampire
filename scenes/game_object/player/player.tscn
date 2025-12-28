@@ -165,7 +165,6 @@ free_owner_on_death = false
 
 [node name="SwordAbilityController" parent="Abilities" instance=ExtResource("2_d4cwq")]
 
-
 [node name="HitRandomStreamPlayer" parent="." instance=ExtResource("5_h4wrb")]
 streams = Array[AudioStream]([ExtResource("6_nkk6h"), ExtResource("7_o48fe"), ExtResource("8_67nyn"), ExtResource("9_4kg8n"), ExtResource("10_fa7we")])
 
