@@ -75,6 +75,10 @@ func get_player_action_suffix() -> String:
 	return "" if player_number <= 1 else str(player_number)
 
 
+func can_attack() -> bool:
+	return not is_regenerating
+
+
 func check_deal_damage():
 	if is_regenerating:
 		return

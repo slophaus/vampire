@@ -15,6 +15,8 @@ func on_timer_timeout():
 	var player = get_player()
 	if player == null:
 		return
+	if player.has_method("can_attack") and not player.can_attack():
+		return
 	
 	var foreground = get_tree().get_first_node_in_group("foreground_layer") as Node2D
 	if foreground == null:
