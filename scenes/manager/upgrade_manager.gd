@@ -15,6 +15,7 @@ var upgrade_axe_level := preload("res://resources/upgrades/axe_level.tres")
 var upgrade_sword_rate := preload("res://resources/upgrades/sword_rate.tres")
 var upgrade_sword_damage := preload("res://resources/upgrades/sword_damage.tres")
 var upgrade_sword_level := preload("res://resources/upgrades/sword_level.tres")
+var upgrade_fireball_level := preload("res://resources/upgrades/fireball_level.tres")
 var upgrade_player_speed := preload("res://resources/upgrades/player_speed.tres")
 
 var rng := RandomNumberGenerator.new()
@@ -40,6 +41,7 @@ func create_upgrade_pool() -> WeightedTable:
 	upgrade_pool.add_item(upgrade_sword_rate, 10)
 	upgrade_pool.add_item(upgrade_sword_damage, 10)
 	upgrade_pool.add_item(upgrade_sword_level, 10)
+	upgrade_pool.add_item(upgrade_fireball_level, 10)
 	upgrade_pool.add_item(upgrade_player_speed, 5)
 	return upgrade_pool
 
