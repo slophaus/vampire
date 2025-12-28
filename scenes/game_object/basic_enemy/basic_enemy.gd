@@ -33,8 +33,6 @@ const ENEMY_TYPES = {
 @onready var static_sprite: Sprite2D = $Visuals/StaticSprite
 @onready var basic_texture: Texture2D = static_sprite.texture
 
-const WIZARD_TEXTURE = preload("res://scenes/game_object/wizard_enemy/wizard_enemy.png")
-
 var facing_multiplier := -1
 
 
@@ -68,7 +66,7 @@ func apply_enemy_type(index: int) -> void:
 	wizard_sprite.visible = enemy_index == 1
 	static_sprite.visible = enemy_index == 2
 
-	static_sprite.texture = WIZARD_TEXTURE if enemy_index == 1 else basic_texture
+	static_sprite.texture = basic_texture
 
 	var active_sprite: CanvasItem = mouse_sprite
 	if enemy_index == 1:
