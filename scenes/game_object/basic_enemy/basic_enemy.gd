@@ -67,7 +67,6 @@ func apply_enemy_type(index: int) -> void:
 	wizard_sprite.visible = enemy_index == 1
 	rat_sprite.visible = enemy_index == 2
 	fireball_ability_controller.set_active(enemy_index == 1)
-	fireball_ability_controller.set_base_wait_time_multiplier(1.0)
 
 	rat_sprite.texture = rat_texture
 
