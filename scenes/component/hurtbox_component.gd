@@ -22,6 +22,7 @@ func on_area_entered(other_area: Area2D):
 	var hitbox_component = other_area as HitboxComponent
 	health_component.damage(hitbox_component.damage)
 	hitbox_component.register_hit()
+	apply_knockback(hitbox_component)
 
 	var floating_text = floating_text_scene.instantiate() as FloatingText
 	get_tree().get_first_node_in_group("foreground_layer").add_child(floating_text)
@@ -35,3 +36,19 @@ func on_area_entered(other_area: Area2D):
 	floating_text.start(fmt_string % hitbox_component.damage)
 	
 	hit.emit()
+
+
+func apply_knockback(hitbox_component: HitboxComponent) -> void:
+	if hitbox_component.knockback <= 0:
+		return
+
+	var owner_node = get_parent() as Node2D
+	if owner_node == null:
+		return
+
+	var velocity_component = owner_node.get_node_or_null("VelocityComponent") as VelocityComponent
+	if velocity_component == null:
+		return
+
+	var knockback_direction = (owner_node.global_position - hitbox_component.global_position).normalized()
+	velocity_component.apply_knockback(knockback_direction, hitbox_component.knockback)
