@@ -1,8 +1,7 @@
-[gd_scene load_steps=31 format=3 uid="uid://bses7vk27cfvt"]
+[gd_scene load_steps=24 format=3 uid="uid://bses7vk27cfvt"]
 
 [ext_resource type="Script" uid="uid://d01scidly6bca" path="res://scenes/game_object/basic_enemy/basic_enemy.gd" id="1_gpcli"]
 [ext_resource type="Texture2D" uid="uid://cc6p0wg3ww2jf" path="res://scenes/game_object/basic_enemy/basic_enemy.png" id="1_m80w1"]
-[ext_resource type="Texture2D" uid="uid://bj74fspmmt8fp" path="res://scenes/game_object/wizard_enemy/wizard_enemy.png" id="1_w3i0g"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_en8ir"]
 [ext_resource type="PackedScene" uid="uid://ci3popyfx4vbv" path="res://scenes/component/vial_drop_component.tscn" id="3_v8t1l"]
 [ext_resource type="PackedScene" uid="uid://cn4jjvvblm8lp" path="res://scenes/component/velocity_component.tscn" id="4_7n42o"]
@@ -16,7 +15,6 @@
 [ext_resource type="AudioStream" uid="uid://dycvhorndvf1c" path="res://assets/audio/footstep_carpet_002.ogg" id="13_oy0ft"]
 [ext_resource type="AudioStream" uid="uid://dqqkhujcgssj6" path="res://assets/audio/footstep_carpet_003.ogg" id="14_6oeop"]
 [ext_resource type="AudioStream" uid="uid://bmnew52u2j6r5" path="res://assets/audio/footstep_carpet_004.ogg" id="15_yavv3"]
-[ext_resource type="Texture2D" uid="uid://grf1esxamv8l" path="res://sprites/dragon1_anim.png" id="16_hcfsk"]
 [ext_resource type="Texture2D" uid="uid://dkk2iesa6c02e" path="res://sprites/mouse.png" id="17_ws2by"]
 
 [sub_resource type="Animation" id="Animation_lm0tv"]
@@ -100,60 +98,19 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_vrtha"]
-atlas = ExtResource("16_hcfsk")
-region = Rect2(0, 0, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ka3t7"]
-atlas = ExtResource("16_hcfsk")
-region = Rect2(64, 0, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_8twg8"]
-atlas = ExtResource("16_hcfsk")
-region = Rect2(128, 0, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_mk8uf"]
-atlas = ExtResource("16_hcfsk")
-region = Rect2(192, 0, 64, 64)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_wizard"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_vrtha")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ka3t7")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_8twg8")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_mk8uf")
-}],
-"loop": true,
-"name": &"default",
-"speed": 5.0
-}]
-
 [sub_resource type="CircleShape2D" id="CircleShape2D_5o3ap"]
 
-[node name="Enemy" type="CharacterBody2D" groups=["enemy"]]
+[node name="BasicEnemy" type="CharacterBody2D" groups=["enemy"]]
 collision_layer = 8
 collision_mask = 9
 motion_mode = 1
 script = ExtResource("1_gpcli")
-enemy_index = 0
-mouse_sprite_frames = SubResource("SpriteFrames_sdy2s")
-wizard_sprite_frames = SubResource("SpriteFrames_wizard")
-mouse_texture = ExtResource("1_m80w1")
-wizard_texture = ExtResource("1_w3i0g")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 &"": SubResource("AnimationLibrary_xajbr")
 }
-autoplay = ""
+autoplay = "walk"
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_en8ir")]
 
