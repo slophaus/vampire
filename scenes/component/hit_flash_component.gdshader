@@ -10,8 +10,7 @@ void fragment() {
 	// Called for every pixel the material is visible on.
 	vec4 texture_color = texture(TEXTURE, UV);
 	vec4 final_color = mix(texture_color, vec4(1.0, 1.0, 1.0, texture_color.a), lerp_percent);
-	vec4 modulate_color = COLOR;
-	COLOR = final_color * modulate_color;
+	COLOR = final_color;
 }
 
 //void light() {
