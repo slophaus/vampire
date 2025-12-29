@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://gsyk0iqo1m50" path="res://scenes/component/hurtbox_component.tscn" id="3_yy0i2"]
 
 [node name="WormEnemy" type="CharacterBody2D" groups=["enemy"]]
-collision_layer = 9
+collision_layer = 16
 collision_mask = 9
 motion_mode = 1
 script = ExtResource("1_0r4sg")
