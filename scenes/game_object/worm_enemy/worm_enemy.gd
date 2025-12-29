@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 const TILE_SIZE := 16.0
-const MOVE_INTERVAL := 0.4
+const MOVE_INTERVAL := 0.8
 const TURN_CHANCE := 0.3
 
 @export var turn_delay := 4.0
@@ -9,6 +9,7 @@ const TURN_CHANCE := 0.3
 @onready var segment_container := $Visuals/Segments
 @onready var collision_container := self
 @onready var hurtbox_segments := $HurtboxComponent
+@onready var hit_flash_component = $HitFlashComponent
 
 var move_timer := 0.0
 var segment_positions: Array[Vector2] = []
@@ -30,6 +31,7 @@ func _finish_spawn() -> void:
 	cache_segments()
 	initialize_direction()
 	initialize_segments()
+	apply_hit_flash()
 	visible = true
 
 
@@ -60,7 +62,7 @@ func cache_segments() -> void:
 		if child is CollisionShape2D:
 			hurtbox_shapes.append(child)
 
-	segment_count = min(segment_sprites.size(), min(segment_shapes.size(), hurtbox_shapes.size()))
+	segment_count = min(segment_sprites.size(), segment_shapes.size())
 
 
 func initialize_direction() -> void:
@@ -110,7 +112,16 @@ func update_segments() -> void:
 		var local_position = segment_positions[index] - global_position
 		segment_sprites[index].position = local_position
 		segment_shapes[index].position = local_position
-		hurtbox_shapes[index].position = local_position
+		if index == 0 and not hurtbox_shapes.is_empty():
+			hurtbox_shapes[0].position = local_position
+
+
+func apply_hit_flash() -> void:
+	if hit_flash_component == null:
+		return
+	if segment_sprites.is_empty():
+		return
+	hit_flash_component.set_sprite(segment_sprites[0])
 
 
 func get_scene_center() -> Vector2:
