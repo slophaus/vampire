@@ -1,10 +1,10 @@
 extends CharacterBody2D
 
 const TILE_SIZE := 16.0
-const MOVE_INTERVAL := 0.25
+const MOVE_INTERVAL := 0.4
 const TURN_CHANCE := 0.3
 
-@export var turn_delay := 3.0
+@export var turn_delay := 4.0
 
 @onready var segment_container := $Visuals/Segments
 @onready var collision_container := self
@@ -22,9 +22,15 @@ var time_alive := 0.0
 
 func _ready() -> void:
 	randomize()
+	visible = false
+	call_deferred("_finish_spawn")
+
+
+func _finish_spawn() -> void:
 	cache_segments()
 	initialize_direction()
 	initialize_segments()
+	visible = true
 
 
 func _physics_process(delta: float) -> void:
