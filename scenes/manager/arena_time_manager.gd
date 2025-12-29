@@ -9,7 +9,7 @@ const DIFFICULTY_INTERVAL := 15
 
 @onready var timer = $Timer
 
-var arena_difficulty = 0
+var arena_difficulty = 6
 
 
 func _ready():

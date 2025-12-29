@@ -49,6 +49,8 @@ func initialize_segments() -> void:
 
 		var sprite = Sprite2D.new()
 		sprite.texture = preload("res://sprites/fireball.png")
+		sprite.region_enabled = true
+		sprite.region_rect = Rect2(Vector2.ZERO, Vector2(TILE_SIZE, TILE_SIZE))
 		sprite.modulate = Color(0.2, 1.0, 0.2, 1.0)
 		visuals.add_child(sprite)
 		segment_sprites.append(sprite)

@@ -21,6 +21,8 @@ func _ready():
 	timer.wait_time = base_spawn_time
 	timer.timeout.connect(on_timer_timeout)
 	arena_time_manager.arena_difficulty_increased.connect(on_arena_difficulty_increased)
+	if arena_time_manager != null and arena_time_manager.get_arena_difficulty() > 0:
+		on_arena_difficulty_increased(arena_time_manager.get_arena_difficulty())
 
 
 func get_spawn_position() -> Vector2:
