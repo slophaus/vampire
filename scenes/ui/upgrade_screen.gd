@@ -24,7 +24,7 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-func set_ability_upgrades(upgrades: Array[AbilityUpgrade]):
+func set_ability_upgrades(upgrades: Array[AbilityUpgrade], current_upgrades: Dictionary):
 	var delay := 0.0
 	cards.clear()
 	for upgrade in upgrades:
@@ -32,13 +32,32 @@ func set_ability_upgrades(upgrades: Array[AbilityUpgrade]):
 		card_container.add_child(card_instance)
 		card_instance.set_controlling_player(controlling_player_number)
 		card_instance.set_focus_color(highlight_color)
-		card_instance.set_ability_upgrade(upgrade)
+		var display_name = get_display_name(upgrade, current_upgrades)
+		var display_description = get_display_description(upgrade)
+		card_instance.set_ability_upgrade(upgrade, display_name, display_description)
 		card_instance.play_in(delay)
 		card_instance.selected.connect(on_upgrade_selected.bind(upgrade))
 		cards.append(card_instance)
 		delay += 0.2
 	if not cards.is_empty():
 		call_deferred("_focus_card", 0)
+
+
+func get_display_name(upgrade: AbilityUpgrade, current_upgrades: Dictionary) -> String:
+	if upgrade.id == "fireball":
+		return "Fireball Level 1"
+	if upgrade.id in ["sword_level", "axe_level", "fireball_level"]:
+		var base_name = upgrade.name.replace(" Level", "")
+		var current_quantity = 0
+		if current_upgrades.has(upgrade.id):
+			current_quantity = current_upgrades[upgrade.id]["quantity"]
+		var next_level = current_quantity + 2
+		return "%s Level %d" % [base_name, next_level]
+	return upgrade.name
+
+
+func get_display_description(upgrade: AbilityUpgrade) -> String:
+	return upgrade.description
 
 
 func _unhandled_input(event: InputEvent) -> void:

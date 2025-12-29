@@ -30,9 +30,9 @@ func play_discard():
 	$AnimationPlayer.play("discard")
 
 
-func set_ability_upgrade(upgrade: AbilityUpgrade) -> void:
-	name_label.text = upgrade.name
-	description_label.text = upgrade.description
+func set_ability_upgrade(upgrade: AbilityUpgrade, display_name: String = "", display_description: String = "") -> void:
+	name_label.text = display_name if display_name != "" else upgrade.name
+	description_label.text = display_description if display_description != "" else upgrade.description
 
 
 func select_card():

@@ -12,6 +12,7 @@ var upgrade_boomerang := preload("res://resources/upgrades/boomerang.tres")
 var upgrade_axe := preload("res://resources/upgrades/axe.tres")
 var upgrade_axe_damage := preload("res://resources/upgrades/axe_damage.tres")
 var upgrade_axe_level := preload("res://resources/upgrades/axe_level.tres")
+var upgrade_fireball := preload("res://resources/upgrades/fireball.tres")
 var upgrade_sword_rate := preload("res://resources/upgrades/sword_rate.tres")
 var upgrade_sword_damage := preload("res://resources/upgrades/sword_damage.tres")
 var upgrade_sword_level := preload("res://resources/upgrades/sword_level.tres")
@@ -38,10 +39,10 @@ func create_upgrade_pool() -> WeightedTable:
 	# axe damage는 axe 얻을 때 풀에 추가
 	upgrade_pool.add_item(upgrade_axe, 10)
 	upgrade_pool.add_item(upgrade_boomerang, 10)
+	upgrade_pool.add_item(upgrade_fireball, 10)
 	upgrade_pool.add_item(upgrade_sword_rate, 10)
 	upgrade_pool.add_item(upgrade_sword_damage, 10)
 	upgrade_pool.add_item(upgrade_sword_level, 10)
-	upgrade_pool.add_item(upgrade_fireball_level, 10)
 	upgrade_pool.add_item(upgrade_player_speed, 5)
 	return upgrade_pool
 
@@ -72,6 +73,8 @@ func update_upgrade_pool(chosen_upgrade: AbilityUpgrade, upgrade_pool: WeightedT
 	if chosen_upgrade.id == upgrade_axe.id:
 		upgrade_pool.add_item(upgrade_axe_damage, 10)
 		upgrade_pool.add_item(upgrade_axe_level, 10)
+	if chosen_upgrade.id == upgrade_fireball.id:
+		upgrade_pool.add_item(upgrade_fireball_level, 10)
 
 
 func pick_upgrades(player_number: int) -> Array[AbilityUpgrade]:
@@ -120,7 +123,7 @@ func on_level_up(current_level: int):
 	add_child(upgrade_screen_instance)
 	upgrade_screen_instance.set_controlling_player(upgrade_player_number)
 	var chosen_upgrades = pick_upgrades(upgrade_player_number)
-	upgrade_screen_instance.set_ability_upgrades(chosen_upgrades)
+	upgrade_screen_instance.set_ability_upgrades(chosen_upgrades, current_upgrades_by_player[upgrade_player_number])
 	upgrade_screen_instance.upgrade_selected.connect(on_upgrade_selected.bind(upgrade_player_number))
 	current_turn_player_number = get_next_player_number(current_turn_player_number)
 

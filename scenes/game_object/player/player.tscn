@@ -4,7 +4,6 @@
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_3j6hq"]
 [ext_resource type="PackedScene" uid="uid://cn4jjvvblm8lp" path="res://scenes/component/velocity_component.tscn" id="2_c31g4"]
 [ext_resource type="PackedScene" uid="uid://b20x14h768t03" path="res://scenes/ability/sword_ability_controller/sword_ability_controller.tscn" id="2_d4cwq"]
-[ext_resource type="PackedScene" uid="uid://b1rgnu4v5t5yp" path="res://scenes/ability/fireball_ability_controller/fireball_ability_controller.tscn" id="3_2vijm"]
 [ext_resource type="PackedScene" uid="uid://gsyk0iqo1m50" path="res://scenes/component/hurtbox_component.tscn" id="3_8chf6"]
 [ext_resource type="PackedScene" uid="uid://bh478361trp2r" path="res://scenes/component/random_audio_stream_player_2d_component.tscn" id="5_h4wrb"]
 [ext_resource type="AudioStream" uid="uid://c0iqpwbocebd6" path="res://assets/audio/impactMining_000.ogg" id="6_nkk6h"]
@@ -96,8 +95,6 @@ free_owner_on_death = false
 [node name="Abilities" type="Node" parent="."]
 
 [node name="SwordAbilityController" parent="Abilities" instance=ExtResource("2_d4cwq")]
-
-[node name="FireballAbilityController" parent="Abilities" instance=ExtResource("3_2vijm")]
 
 [node name="HitRandomStreamPlayer" parent="." instance=ExtResource("5_h4wrb")]
 streams = Array[AudioStream]([ExtResource("6_nkk6h"), ExtResource("7_o48fe"), ExtResource("8_67nyn"), ExtResource("9_4kg8n"), ExtResource("10_fa7we")])

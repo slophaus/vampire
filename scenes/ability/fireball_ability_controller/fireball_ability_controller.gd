@@ -9,6 +9,7 @@ const ENEMY_HITBOX_LAYER = 2
 @export var target_group := "enemy"
 
 var base_damage = 2.0
+var damage_per_level = 2.0
 var additional_damage_percent: float = 1.0
 var base_wait_time := 0.0
 var rate_reduction_percent := 0.0
@@ -115,7 +116,8 @@ func spawn_fireball(start_position: Vector2, target_position: Vector2) -> void:
 	var fireball_instance = fireball_ability.instantiate() as FireballAbility
 	var foreground_layer = get_tree().get_first_node_in_group("foreground_layer")
 	foreground_layer.add_child(fireball_instance)
-	fireball_instance.hitbox_component.damage = base_damage * additional_damage_percent
+	var level_damage = base_damage + (damage_per_level * (fireball_level - 1))
+	fireball_instance.hitbox_component.damage = level_damage * additional_damage_percent
 	fireball_instance.hitbox_component.knockback = 250.0
 	if owner_group == "player":
 		fireball_instance.hitbox_component.collision_layer = PLAYER_HITBOX_LAYER
