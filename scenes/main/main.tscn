@@ -60,6 +60,6 @@ player_number = 2
 
 [node name="Enemy" parent="Entities" instance=ExtResource("13_th5th")]
 position = Vector2(528, 259)
-enemy_index = 1
+enemy_index = 2
 
 [node name="Foreground" type="Node2D" parent="." groups=["foreground_layer"]]
