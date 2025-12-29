@@ -1,6 +1,7 @@
 extends CanvasLayer
 
-@export var arena_time_manager: Node
+@export var arena_time_manager: ArenaTimeManager
+@export var enemy_manager: EnemyManager
 @onready var label = %Label
 @onready var stats_label = %StatsLabel
 
@@ -10,9 +11,16 @@ func _process(delta):
 
 	var time_elapsed = arena_time_manager.get_time_elapsed()
 	label.text = format_seconds_to_string(time_elapsed)
-	stats_label.text = "FPS: %d\nEnemies: %d" % [
+	var spawn_rate = 0.0
+	if enemy_manager != null:
+		spawn_rate = enemy_manager.get_spawn_rate()
+
+	stats_label.text = "FPS: %d\nEnemies: %d\nDifficulty: %d\nNext Diff: %s\nSpawn Rate: %.2f/s" % [
 		Engine.get_frames_per_second(),
-		get_tree().get_nodes_in_group("enemy").size()
+		get_tree().get_nodes_in_group("enemy").size(),
+		arena_time_manager.get_arena_difficulty(),
+		format_seconds_to_string(arena_time_manager.get_time_until_next_difficulty()),
+		spawn_rate
 	]
 
 

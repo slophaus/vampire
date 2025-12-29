@@ -28,6 +28,15 @@ func get_time_elapsed():
 	return timer.wait_time - timer.time_left
 
 
+func get_arena_difficulty() -> int:
+	return arena_difficulty
+
+
+func get_time_until_next_difficulty() -> float:
+	var next_time_target = timer.wait_time - ((arena_difficulty + 1) * DIFFICULTY_INTERVAL)
+	return max(0.0, timer.time_left - next_time_target)
+
+
 func on_timer_timeout():
 	var end_screen_instance = end_screen_scene.instantiate()
 	add_child(end_screen_instance)

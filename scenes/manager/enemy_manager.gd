@@ -1,4 +1,5 @@
 extends Node
+class_name EnemyManager
 
 # 10px outside
 const SPAWN_RADIUS = 375
@@ -63,6 +64,13 @@ func on_timer_timeout():
 	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
 	entities_layer.add_child(enemy)
 	enemy.global_position = get_spawn_position()
+
+
+func get_spawn_rate() -> float:
+	if timer.wait_time <= 0.0:
+		return 0.0
+
+	return 1.0 / timer.wait_time
 
 
 func on_arena_difficulty_increased(arena_difficulty: int):
