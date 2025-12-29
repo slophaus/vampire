@@ -7,8 +7,8 @@ const TURN_CHANCE := 0.3
 @export var turn_delay := 3.0
 
 @onready var segment_container := $Visuals/Segments
-@onready var collision_container := $CollisionSegments
-@onready var hurtbox_segments := $HurtboxComponent/CollisionSegments
+@onready var collision_container := self
+@onready var hurtbox_segments := $HurtboxComponent
 
 var move_timer := 0.0
 var segment_positions: Array[Vector2] = []
