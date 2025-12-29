@@ -6,6 +6,7 @@ const SPAWN_RADIUS = 375
 const MAX_ENEMIES = 500
 
 @export var enemy_scene: PackedScene
+@export var worm_scene: PackedScene
 @export var arena_time_manager: ArenaTimeManager
 
 @onready var timer = $Timer
@@ -58,8 +59,9 @@ func on_timer_timeout():
 		return
 	
 	var enemy_index = enemy_table.pick_item()
-	var enemy = enemy_scene.instantiate() as Node2D
-	enemy.set("enemy_index", enemy_index)
+	var enemy = get_enemy_scene(enemy_index).instantiate() as Node2D
+	if enemy_index != 3:
+		enemy.set("enemy_index", enemy_index)
 	
 	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
 	entities_layer.add_child(enemy)
@@ -73,11 +75,19 @@ func get_spawn_rate() -> float:
 	return 1.0 / timer.wait_time
 
 
+func get_enemy_scene(enemy_index: int) -> PackedScene:
+	if enemy_index == 3 and worm_scene != null:
+		return worm_scene
+	return enemy_scene
+
+
 func on_arena_difficulty_increased(arena_difficulty: int):
 	var time_off = (0.1 / 12) * arena_difficulty
 	time_off = min(time_off, 0.7)
 	timer.wait_time = base_spawn_time - time_off
 	
+	if arena_difficulty == 6:
+		enemy_table.add_item(3, 4)
 	if arena_difficulty == 8:
 		enemy_table.add_item(1, 5)
 	if arena_difficulty == 12:

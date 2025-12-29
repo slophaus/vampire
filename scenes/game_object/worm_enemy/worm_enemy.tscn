@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://cwl7f4qnc4l8g"]
+
+[ext_resource type="Script" uid="uid://wje8ovdv3g3jn" path="res://scenes/game_object/worm_enemy/worm_enemy.gd" id="1_0r4sg"]
+[ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_8h4ly"]
+[ext_resource type="PackedScene" uid="uid://gsyk0iqo1m50" path="res://scenes/component/hurtbox_component.tscn" id="3_yy0i2"]
+
+[node name="WormEnemy" type="CharacterBody2D" groups=["enemy"]]
+collision_layer = 9
+collision_mask = 9
+motion_mode = 1
+script = ExtResource("1_0r4sg")
+
+[node name="HealthComponent" parent="." instance=ExtResource("2_8h4ly")]
+max_health = 30.0
+
+[node name="HurtboxComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_yy0i2")]
+visible = false
+health_component = NodePath("../HealthComponent")
+
+[node name="Visuals" type="Node2D" parent="."]
