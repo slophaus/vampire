@@ -18,12 +18,6 @@ const ENEMY_TYPES = {
 		"max_speed": 105,
 		"acceleration": 1.5,
 		"facing_multiplier": -1
-	},
-	3: {
-		"max_health": 35.0,
-		"max_speed": 20,
-		"acceleration": 4.0,
-		"facing_multiplier": 1
 	}
 }
 
@@ -41,16 +35,10 @@ const ENEMY_TYPES = {
 @onready var mouse_color: ColorRect = $Visuals/mouse_sprite/enemy_color
 @onready var wizard_color: ColorRect = $Visuals/wizard_sprite/enemy_color
 @onready var rat_color: ColorRect = $Visuals/RatSprite/enemy_color
-@onready var worm_sprite: Sprite2D = $Visuals/WormSprite
-@onready var worm_color: ColorRect = $Visuals/WormSprite/enemy_color
 @onready var rat_texture: Texture2D = rat_sprite.texture
 
 var facing_multiplier := -1
 var enemy_tint := Color.WHITE
-var worm_direction := Vector2.RIGHT
-var worm_turn_timer := 0.0
-var worm_turn_interval := 1.5
-var worm_rng := RandomNumberGenerator.new()
 
 
 func _ready():
@@ -60,10 +48,6 @@ func _ready():
 
 
 func _physics_process(delta):
-	if enemy_index == 3:
-		update_worm_movement(delta)
-		return
-
 	velocity_component.accelerate_to_player()
 	velocity_component.move(self)
 
@@ -86,7 +70,6 @@ func apply_enemy_type(index: int) -> void:
 	mouse_sprite.visible = enemy_index == 0
 	wizard_sprite.visible = enemy_index == 1
 	rat_sprite.visible = enemy_index == 2
-	worm_sprite.visible = enemy_index == 3
 	fireball_ability_controller.set_active(enemy_index == 1)
 
 	rat_sprite.texture = rat_texture
@@ -96,13 +79,9 @@ func apply_enemy_type(index: int) -> void:
 		active_sprite = wizard_sprite
 	elif enemy_index == 2:
 		active_sprite = rat_sprite
-	elif enemy_index == 3:
-		active_sprite = worm_sprite
 
 	hit_flash_component.set_sprite(active_sprite)
 	death_component.sprite = rat_sprite
-	update_collision_profile()
-	initialize_worm_state()
 
 
 func on_hit():
@@ -117,42 +96,8 @@ func apply_random_tint():
 
 
 func apply_enemy_tint() -> void:
-	for tint_rect in [mouse_color, wizard_color, rat_color, worm_color]:
+	for tint_rect in [mouse_color, wizard_color, rat_color]:
 		if tint_rect == null:
 			continue
 		tint_rect.color = enemy_tint
 		tint_rect.visible = true
-
-
-func update_worm_movement(delta: float) -> void:
-	worm_turn_timer += delta
-	if worm_turn_timer >= worm_turn_interval:
-		worm_turn_timer = 0.0
-		worm_turn_interval = worm_rng.randf_range(0.8, 1.6)
-		var turn_direction = 1 if worm_rng.randi_range(0, 1) == 0 else -1
-		worm_direction = worm_direction.rotated(deg_to_rad(90 * turn_direction)).normalized()
-
-	velocity_component.accelerate_in_direction(worm_direction)
-	velocity_component.move(self)
-
-	if worm_direction.x != 0:
-		visuals.scale = Vector2(sign(worm_direction.x) * facing_multiplier, 1)
-
-
-func update_collision_profile() -> void:
-	if enemy_index == 3:
-		collision_layer = 1
-		collision_mask = 9
-	else:
-		collision_layer = 8
-		collision_mask = 9
-
-
-func initialize_worm_state() -> void:
-	if enemy_index != 3:
-		return
-	worm_rng.randomize()
-	var directions = [Vector2.RIGHT, Vector2.LEFT, Vector2.UP, Vector2.DOWN]
-	worm_direction = directions[worm_rng.randi_range(0, directions.size() - 1)]
-	worm_turn_interval = worm_rng.randf_range(0.8, 1.6)
-	worm_turn_timer = worm_rng.randf_range(0.0, worm_turn_interval)

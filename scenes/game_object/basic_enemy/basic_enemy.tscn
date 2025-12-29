@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3 uid="uid://bses7vk27cfvt"]
+[gd_scene load_steps=34 format=3 uid="uid://bses7vk27cfvt"]
 
 [ext_resource type="Script" uid="uid://d01scidly6bca" path="res://scenes/game_object/basic_enemy/basic_enemy.gd" id="1_gpcli"]
 [ext_resource type="Texture2D" uid="uid://cc6p0wg3ww2jf" path="res://sprites/rat.png" id="1_m80w1"]
@@ -18,7 +18,6 @@
 [ext_resource type="AudioStream" uid="uid://bmnew52u2j6r5" path="res://assets/audio/footstep_carpet_004.ogg" id="15_yavv3"]
 [ext_resource type="Texture2D" uid="uid://dkk2iesa6c02e" path="res://sprites/mouse.png" id="17_ws2by"]
 [ext_resource type="Texture2D" uid="uid://grf1esxamv8l" path="res://sprites/dragon1_anim.png" id="18_ql8xh"]
-[ext_resource type="Texture2D" uid="uid://b48d0gkna2b7l" path="res://sprites/fish.png" id="19_6kcm6"]
 
 [sub_resource type="Animation" id="Animation_lm0tv"]
 length = 0.001
@@ -205,20 +204,6 @@ texture = ExtResource("1_m80w1")
 offset = Vector2(2.08165e-12, -4)
 
 [node name="enemy_color" type="ColorRect" parent="Visuals/RatSprite"]
-visible = false
-material = SubResource("CanvasItemMaterial_fcdwx")
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-
-[node name="WormSprite" type="Sprite2D" parent="Visuals"]
-visible = false
-clip_children = 2
-texture = ExtResource("19_6kcm6")
-offset = Vector2(0, -4)
-
-[node name="enemy_color" type="ColorRect" parent="Visuals/WormSprite"]
 visible = false
 material = SubResource("CanvasItemMaterial_fcdwx")
 offset_left = -20.0
