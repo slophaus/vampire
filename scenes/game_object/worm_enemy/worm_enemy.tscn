@@ -42,6 +42,15 @@ shape = SubResource("RectangleShape2D_v5n7q")
 [node name="Segment6" type="CollisionShape2D" parent="HurtboxComponent"]
 shape = SubResource("RectangleShape2D_v5n7q")
 
+[node name="Segment7" type="CollisionShape2D" parent="HurtboxComponent"]
+shape = SubResource("RectangleShape2D_v5n7q")
+
+[node name="Segment8" type="CollisionShape2D" parent="HurtboxComponent"]
+shape = SubResource("RectangleShape2D_v5n7q")
+
+[node name="Segment9" type="CollisionShape2D" parent="HurtboxComponent"]
+shape = SubResource("RectangleShape2D_v5n7q")
+
 [node name="Segment0" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_v5n7q")
 
@@ -61,6 +70,15 @@ shape = SubResource("RectangleShape2D_v5n7q")
 shape = SubResource("RectangleShape2D_v5n7q")
 
 [node name="Segment6" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_v5n7q")
+
+[node name="Segment7" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_v5n7q")
+
+[node name="Segment8" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_v5n7q")
+
+[node name="Segment9" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_v5n7q")
 
 [node name="Visuals" type="Node2D" parent="."]
@@ -104,6 +122,24 @@ region_rect = Rect2(0, 0, 16, 16)
 modulate = Color(0.2, 1, 0.2, 1)
 
 [node name="Segment6" type="Sprite2D" parent="Visuals/Segments"]
+texture = ExtResource("4_q2ydu")
+region_enabled = true
+region_rect = Rect2(0, 0, 16, 16)
+modulate = Color(0.2, 1, 0.2, 1)
+
+[node name="Segment7" type="Sprite2D" parent="Visuals/Segments"]
+texture = ExtResource("4_q2ydu")
+region_enabled = true
+region_rect = Rect2(0, 0, 16, 16)
+modulate = Color(0.2, 1, 0.2, 1)
+
+[node name="Segment8" type="Sprite2D" parent="Visuals/Segments"]
+texture = ExtResource("4_q2ydu")
+region_enabled = true
+region_rect = Rect2(0, 0, 16, 16)
+modulate = Color(0.2, 1, 0.2, 1)
+
+[node name="Segment9" type="Sprite2D" parent="Visuals/Segments"]
 texture = ExtResource("4_q2ydu")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
