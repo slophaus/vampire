@@ -21,50 +21,46 @@ max_health = 30.0
 visible = false
 health_component = NodePath("../HealthComponent")
 
-[node name="CollisionSegments" type="Node2D" parent="HurtboxComponent"]
-
-[node name="Segment0" type="CollisionShape2D" parent="HurtboxComponent/CollisionSegments"]
+[node name="Segment0" type="CollisionShape2D" parent="HurtboxComponent"]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="Segment1" type="CollisionShape2D" parent="HurtboxComponent/CollisionSegments"]
+[node name="Segment1" type="CollisionShape2D" parent="HurtboxComponent"]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="Segment2" type="CollisionShape2D" parent="HurtboxComponent/CollisionSegments"]
+[node name="Segment2" type="CollisionShape2D" parent="HurtboxComponent"]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="Segment3" type="CollisionShape2D" parent="HurtboxComponent/CollisionSegments"]
+[node name="Segment3" type="CollisionShape2D" parent="HurtboxComponent"]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="Segment4" type="CollisionShape2D" parent="HurtboxComponent/CollisionSegments"]
+[node name="Segment4" type="CollisionShape2D" parent="HurtboxComponent"]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="Segment5" type="CollisionShape2D" parent="HurtboxComponent/CollisionSegments"]
+[node name="Segment5" type="CollisionShape2D" parent="HurtboxComponent"]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="Segment6" type="CollisionShape2D" parent="HurtboxComponent/CollisionSegments"]
+[node name="Segment6" type="CollisionShape2D" parent="HurtboxComponent"]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="CollisionSegments" type="Node2D" parent="."]
-
-[node name="Segment0" type="CollisionShape2D" parent="CollisionSegments"]
+[node name="Segment0" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="Segment1" type="CollisionShape2D" parent="CollisionSegments"]
+[node name="Segment1" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="Segment2" type="CollisionShape2D" parent="CollisionSegments"]
+[node name="Segment2" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="Segment3" type="CollisionShape2D" parent="CollisionSegments"]
+[node name="Segment3" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="Segment4" type="CollisionShape2D" parent="CollisionSegments"]
+[node name="Segment4" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="Segment5" type="CollisionShape2D" parent="CollisionSegments"]
+[node name="Segment5" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="Segment6" type="CollisionShape2D" parent="CollisionSegments"]
+[node name="Segment6" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_v5n7q")
 
 [node name="Visuals" type="Node2D" parent="."]
