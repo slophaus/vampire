@@ -4,6 +4,7 @@ extends Node
 
 var base_damage = 10
 var additional_damage_percent: float = 1.0
+var base_penetration := 3
 var axe_level := 1
 var multi_shot_delay := 0.1
 var player_number := 1
@@ -68,5 +69,6 @@ func spawn_axes(player: Node2D, foreground: Node2D) -> void:
 		axe_instance.global_position = player.global_position
 		axe_instance.hitbox_component.damage = base_damage * additional_damage_percent
 		axe_instance.hitbox_component.knockback = 0.0
+		axe_instance.hitbox_component.penetration = base_penetration
 		if shot_index < axe_level - 1:
 			await get_tree().create_timer(multi_shot_delay).timeout

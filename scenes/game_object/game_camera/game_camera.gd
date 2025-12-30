@@ -1,6 +1,7 @@
 extends Camera2D
 
 @export var target_dot_path: NodePath
+@export var show_average_position_dot := false
 
 var target_position = Vector2.ZERO
 
@@ -9,6 +10,8 @@ var target_position = Vector2.ZERO
 
 func _ready():
 	make_current()
+	if target_dot != null:
+		target_dot.visible = show_average_position_dot
 
 
 func _process(delta):
@@ -23,5 +26,5 @@ func acquire_target():
 		for player in player_nodes:
 			summed_position += (player as Node2D).global_position
 		target_position = summed_position / float(player_nodes.size())
-		if target_dot != null:
+		if target_dot != null and show_average_position_dot:
 			target_dot.global_position = target_position

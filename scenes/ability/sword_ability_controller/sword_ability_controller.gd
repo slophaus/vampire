@@ -10,6 +10,7 @@ const ENEMY_HITBOX_LAYER = 2
 
 var base_damage = 5
 var additional_damage_percent: float = 1.0
+var base_penetration := 3
 var base_wait_time
 var sword_level := 1
 var multi_shot_delay := 0.1
@@ -122,6 +123,7 @@ func spawn_sword(start_position: Vector2, target_position: Vector2) -> void:
 	foreground_layer.add_child(sword_instance)
 	sword_instance.hitbox_component.damage = base_damage * additional_damage_percent
 	sword_instance.hitbox_component.knockback = 250.0
+	sword_instance.hitbox_component.penetration = base_penetration
 	if owner_group == "player":
 		sword_instance.hitbox_component.collision_layer = PLAYER_HITBOX_LAYER
 	else:

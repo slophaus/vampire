@@ -9,6 +9,7 @@ var upgrade_pools_by_player: Dictionary = {}
 var players_by_number: Dictionary = {}
 
 var upgrade_boomerang := preload("res://resources/upgrades/boomerang.tres")
+var upgrade_boomerang_level := preload("res://resources/upgrades/boomerang_level.tres")
 var upgrade_axe := preload("res://resources/upgrades/axe.tres")
 var upgrade_axe_damage := preload("res://resources/upgrades/axe_damage.tres")
 var upgrade_axe_level := preload("res://resources/upgrades/axe_level.tres")
@@ -65,6 +66,8 @@ func apply_upgrade(upgrade: AbilityUpgrade, player_number: int):
 
 
 func update_upgrade_pool(chosen_upgrade: AbilityUpgrade, upgrade_pool: WeightedTable):
+	if chosen_upgrade.id == upgrade_boomerang.id:
+		upgrade_pool.add_item(upgrade_boomerang_level, 10)
 	if chosen_upgrade.id == upgrade_axe.id:
 		upgrade_pool.add_item(upgrade_axe_damage, 10)
 		upgrade_pool.add_item(upgrade_axe_level, 10)
