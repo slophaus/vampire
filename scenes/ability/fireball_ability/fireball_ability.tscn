@@ -41,12 +41,14 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_5h1e1"]
-radius = 6.0
+radius = 9.0
 
 [node name="FireballAbility" type="Node2D"]
 script = ExtResource("2_4s6wp")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -5)
+scale = Vector2(1.6, 1.6)
 sprite_frames = SubResource("SpriteFrames_2tadk")
 autoplay = "default"
 
