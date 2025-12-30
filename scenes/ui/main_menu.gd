@@ -30,9 +30,9 @@ func _ready():
 		%ThreePlayerButton,
 		%FourPlayerButton,
 	]
-	_apply_player_count_button_style()
 	%OnePlayerButton.button_pressed = true
 	GameEvents.player_count = 1
+	_update_player_count_selection(%OnePlayerButton)
 	if not menu_buttons.is_empty():
 		call_deferred("_focus_button", 0)
 
@@ -69,16 +69,29 @@ func on_play_pressed():
 
 func on_player_count_selected(player_count: int) -> void:
 	GameEvents.player_count = player_count
+	var selected_button = _get_player_count_button(player_count)
+	if selected_button != null:
+		_update_player_count_selection(selected_button)
 
-func _apply_player_count_button_style() -> void:
+func _update_player_count_selection(selected_button: Button) -> void:
 	if player_count_buttons.is_empty():
 		return
-	var selected_style = player_count_buttons[0].get_theme_stylebox("focus").duplicate()
-	if selected_style is StyleBoxFlat:
-		selected_style.bg_color = Color(0, 0, 0, 0)
 	for button in player_count_buttons:
-		button.add_theme_stylebox_override("pressed", selected_style)
-		button.add_theme_stylebox_override("hover_pressed", selected_style)
+		var selection_border = button.get_node_or_null("SelectionBorder")
+		if selection_border is CanvasItem:
+			selection_border.visible = button == selected_button
+
+func _get_player_count_button(player_count: int) -> Button:
+	match player_count:
+		1:
+			return %OnePlayerButton
+		2:
+			return %TwoPlayerButton
+		3:
+			return %ThreePlayerButton
+		4:
+			return %FourPlayerButton
+	return null
 
 func on_options_pressed():
 	ScreenTransition.transition()
