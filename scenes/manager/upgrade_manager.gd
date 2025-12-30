@@ -2,6 +2,7 @@ extends Node
 
 @export var experience_manager: ExperienceManager
 @export var upgrade_screen_scene: PackedScene
+@export var upgrade_option_count := 4
 
 var current_turn_player_number := 1
 var current_upgrades_by_player: Dictionary = {}
@@ -78,7 +79,7 @@ func update_upgrade_pool(chosen_upgrade: AbilityUpgrade, upgrade_pool: WeightedT
 func pick_upgrades(player_number: int) -> Array[AbilityUpgrade]:
 	var upgrade_pool = upgrade_pools_by_player[player_number]
 	var chosen_upgrades: Array[AbilityUpgrade] = []
-	for i in 2:
+	for i in upgrade_option_count:
 		if upgrade_pool.items.size() == chosen_upgrades.size():  # no more viable upgrade
 			break
 
