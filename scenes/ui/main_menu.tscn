@@ -62,6 +62,20 @@ toggle_mode = true
 button_group = SubResource("ButtonGroup_kq7yu")
 text = "2 Player"
 
+[node name="ThreePlayerButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/PlayerCountContainer" instance=ExtResource("2_8jljl")]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_kq7yu")
+text = "3 Player"
+
+[node name="FourPlayerButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/PlayerCountContainer" instance=ExtResource("2_8jljl")]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_kq7yu")
+text = "4 Player"
+
 [node name="PlayButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" instance=ExtResource("2_8jljl")]
 unique_name_in_owner = true
 layout_mode = 2

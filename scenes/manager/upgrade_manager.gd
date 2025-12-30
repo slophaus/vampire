@@ -27,9 +27,13 @@ func _ready():
 		if player.has_method("get_player_action_suffix"):
 			players_by_number[player.player_number] = player
 
-	for player_number in players_by_number.keys():
+	var player_numbers = get_player_numbers()
+	for player_number in player_numbers:
 		current_upgrades_by_player[player_number] = {}
 		upgrade_pools_by_player[player_number] = create_upgrade_pool()
+
+	if not player_numbers.is_empty():
+		current_turn_player_number = player_numbers[0]
 
 	experience_manager.level_up.connect(on_level_up)
 
@@ -129,29 +133,37 @@ func on_level_up(current_level: int):
 
 
 func get_next_player_number(player_number: int) -> int:
-	if players_by_number.size() < 2:
+	var player_numbers = get_player_numbers()
+	if player_numbers.is_empty():
 		return player_number
-	var other_player_number = player_number
-	for candidate in players_by_number.keys():
-		if candidate != player_number:
-			other_player_number = candidate
-			break
-	return other_player_number
+	if player_numbers.size() == 1:
+		return player_numbers[0]
+	var current_index = player_numbers.find(player_number)
+	if current_index == -1:
+		return player_numbers[0]
+	return player_numbers[(current_index + 1) % player_numbers.size()]
 
 
 func get_upgrade_player_number() -> int:
-	if players_by_number.is_empty():
+	var player_numbers = get_player_numbers()
+	if player_numbers.is_empty():
 		return 0
-	var current_player = players_by_number.get(current_turn_player_number, null)
-	var other_player_number = get_next_player_number(current_turn_player_number)
-	if current_player == null:
-		return current_turn_player_number
-	if current_player.is_regenerating:
-		var other_player = players_by_number.get(other_player_number, null)
-		if other_player != null:
-			return other_player_number
-	return current_turn_player_number
+	var start_index = player_numbers.find(current_turn_player_number)
+	if start_index == -1:
+		start_index = 0
+	for offset in player_numbers.size():
+		var candidate_number = player_numbers[(start_index + offset) % player_numbers.size()]
+		var candidate_player = players_by_number.get(candidate_number, null)
+		if candidate_player != null and not candidate_player.is_regenerating:
+			return candidate_number
+	return player_numbers[start_index]
 
 
 func on_upgrade_selected(upgrade: AbilityUpgrade, player_number: int):
 	apply_upgrade(upgrade, player_number)
+
+
+func get_player_numbers() -> Array:
+	var player_numbers = players_by_number.keys()
+	player_numbers.sort()
+	return player_numbers

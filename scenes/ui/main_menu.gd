@@ -9,12 +9,16 @@ var selected_index := 0
 func _ready():
 	%OnePlayerButton.pressed.connect(on_player_count_selected.bind(1))
 	%TwoPlayerButton.pressed.connect(on_player_count_selected.bind(2))
+	%ThreePlayerButton.pressed.connect(on_player_count_selected.bind(3))
+	%FourPlayerButton.pressed.connect(on_player_count_selected.bind(4))
 	%PlayButton.pressed.connect(on_play_pressed)
 	%OptionsButton.pressed.connect(on_options_pressed)
 	%QuitButton.pressed.connect(on_quit_pressed)
 	menu_buttons = [
 		%OnePlayerButton,
 		%TwoPlayerButton,
+		%ThreePlayerButton,
+		%FourPlayerButton,
 		%PlayButton,
 		%OptionsButton,
 		%QuitButton,

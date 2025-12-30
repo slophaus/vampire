@@ -96,9 +96,14 @@ func set_focus_color(color: Color) -> void:
 
 
 func is_event_for_player(event: InputEvent) -> bool:
+	var device_id = get_player_device_id(controlling_player_number)
 	if controlling_player_number == 1:
-		return event.device == -1 or event.device == 0
-	return event.device == 1
+		return event.device == -1 or event.device == device_id
+	return event.device == device_id
+
+
+func get_player_device_id(player_number: int) -> int:
+	return max(player_number - 1, 0)
 
 
 func ensure_focus_stylebox() -> void:
