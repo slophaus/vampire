@@ -89,6 +89,7 @@ func expire() -> void:
 		return
 	is_expiring = true
 	disable_collision()
+	burn_particles.scale = sprite.scale
 	burn_particles.emitting = true
 	burn_particles.restart()
 	var tween = create_tween()
