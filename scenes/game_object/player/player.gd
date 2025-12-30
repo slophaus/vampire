@@ -4,12 +4,6 @@ const MAX_SPEED = 125
 const ACCELERATION_SMOOTHING = 25
 const DAMAGE_FLASH_DURATION = 0.45
 const EXPERIENCE_FLASH_DURATION = 0.1
-const AIM_LASER_RANGE = 450.0
-const AIM_MIN_INPUT = 0.1
-const AIM_LINE_WIDTH = 2.0
-const AIM_LINE_ALPHA = 0.75
-const AIM_CIRCLE_ALPHA = 0.9
-const AIM_CIRCLE_PADDING = 4.0
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
@@ -35,10 +29,6 @@ var is_regenerating := false
 var normal_visuals_modulate := Color.WHITE
 var last_health := 0.0
 var flash_tween: Tween
-var aim_active := false
-var aim_line_end := Vector2.ZERO
-var aim_hit_target: Node2D
-var aim_hit_radius := 0.0
 
 const UPGRADE_DOT_SIZE := 4.0
 const UPGRADE_DOT_RADIUS := 2
@@ -73,9 +63,6 @@ func _process(delta):
 		health_component.heal(regen_rate * delta)
 		if health_component.current_health >= health_component.max_health:
 			end_regeneration()
-		aim_active = false
-		aim_hit_target = null
-		update()
 		return
 
 	var movement_vector = get_movement_vector()
@@ -92,20 +79,6 @@ func _process(delta):
 	if move_sign != 0:
 		visuals.scale = Vector2(move_sign, 1)
 
-	update_aim_visuals()
-
-
-func _draw() -> void:
-	if not aim_active:
-		return
-	var line_color = get_player_tint()
-	line_color.a = AIM_LINE_ALPHA
-	draw_line(Vector2.ZERO, to_local(aim_line_end), line_color, AIM_LINE_WIDTH)
-	if aim_hit_target != null and is_instance_valid(aim_hit_target):
-		var circle_color = get_player_tint()
-		circle_color.a = AIM_CIRCLE_ALPHA
-		draw_circle(to_local(aim_hit_target.global_position), aim_hit_radius, circle_color)
-
 
 func get_movement_vector():	
 	var suffix = get_player_action_suffix()
@@ -117,63 +90,6 @@ func get_movement_vector():
 
 func get_player_action_suffix() -> String:
 	return "" if player_number <= 1 else str(player_number)
-
-
-func get_aim_vector() -> Vector2:
-	var suffix = get_player_action_suffix()
-	var x_aim = Input.get_action_strength("aim_right" + suffix) - Input.get_action_strength("aim_left" + suffix)
-	var y_aim = Input.get_action_strength("aim_down" + suffix) - Input.get_action_strength("aim_up" + suffix)
-	return Vector2(x_aim, y_aim)
-
-
-func update_aim_visuals() -> void:
-	var aim_vector = get_aim_vector()
-	if aim_vector.length() < AIM_MIN_INPUT:
-		if aim_active:
-			aim_active = false
-			aim_hit_target = null
-			update()
-		return
-
-	var aim_direction = aim_vector.normalized()
-	var start = global_position
-	var desired_end = start + (aim_direction * AIM_LASER_RANGE)
-	var space_state = get_world_2d().direct_space_state
-	var query = PhysicsRayQueryParameters2D.create(start, desired_end, 8)
-	query.exclude = [self]
-	var result = space_state.intersect_ray(query)
-	if result.is_empty():
-		aim_line_end = desired_end
-		aim_hit_target = null
-		aim_hit_radius = 0.0
-	else:
-		aim_line_end = result.position
-		var collider = result.collider as Node2D
-		if collider != null and collider.is_in_group("enemy"):
-			aim_hit_target = collider
-			aim_hit_radius = get_enemy_highlight_radius(collider)
-		else:
-			aim_hit_target = null
-			aim_hit_radius = 0.0
-
-	aim_active = true
-	update()
-
-
-func get_enemy_highlight_radius(enemy: Node2D) -> float:
-	var collision_shape = enemy.get_node_or_null("CollisionShape2D") as CollisionShape2D
-	if collision_shape == null or collision_shape.shape == null:
-		return 18.0
-	var shape = collision_shape.shape
-	if shape is CircleShape2D:
-		return (shape as CircleShape2D).radius + AIM_CIRCLE_PADDING
-	if shape is RectangleShape2D:
-		var extents = (shape as RectangleShape2D).extents
-		return max(extents.x, extents.y) + AIM_CIRCLE_PADDING
-	if shape is CapsuleShape2D:
-		var capsule = shape as CapsuleShape2D
-		return max(capsule.radius, capsule.height * 0.5) + AIM_CIRCLE_PADDING
-	return 18.0
 
 
 func get_player_tint() -> Color:
