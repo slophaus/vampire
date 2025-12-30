@@ -47,13 +47,11 @@ shape = SubResource("RectangleShape2D_v5n7q")
 [node name="Segments" type="Node2D" parent="Visuals"]
 
 [node name="Segment0" type="Sprite2D" parent="Visuals/Segments"]
-modulate = Color(0.2, 1, 0.2, 1)
 clip_children = 2
 texture = ExtResource("6_dcn7l")
 region_rect = Rect2(112, 16, 16, 16)
 
 [node name="segment_color" type="ColorRect" parent="Visuals/Segments/Segment0"]
-visible = false
 material = SubResource("CanvasItemMaterial_e1o1h")
 offset_left = -8.0
 offset_top = -8.0
