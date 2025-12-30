@@ -28,7 +28,7 @@ max_health = 120.0
 
 [node name="HitFlashComponent" parent="." node_paths=PackedStringArray("health_component", "sprite") instance=ExtResource("6_h7r1w")]
 health_component = NodePath("../HealthComponent")
-sprite = NodePath("../Visuals/Segments/Segment0")
+sprite = NodePath("../Visuals/Segments/HeadPrototype")
 hit_flash_material = SubResource("ShaderMaterial_p7l3g")
 
 [node name="HurtboxComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_yy0i2")]
@@ -46,12 +46,24 @@ shape = SubResource("RectangleShape2D_v5n7q")
 
 [node name="Segments" type="Node2D" parent="Visuals"]
 
-[node name="Segment0" type="Sprite2D" parent="Visuals/Segments"]
+[node name="HeadPrototype" type="Sprite2D" parent="Visuals/Segments"]
 clip_children = 2
 texture = ExtResource("6_dcn7l")
 region_rect = Rect2(112, 16, 16, 16)
 
-[node name="segment_color" type="ColorRect" parent="Visuals/Segments/Segment0"]
+[node name="segment_color" type="ColorRect" parent="Visuals/Segments/HeadPrototype"]
+material = SubResource("CanvasItemMaterial_e1o1h")
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="BodyPrototype" type="Sprite2D" parent="Visuals/Segments"]
+clip_children = 2
+texture = ExtResource("6_dcn7l")
+region_rect = Rect2(112, 16, 16, 16)
+
+[node name="segment_color" type="ColorRect" parent="Visuals/Segments/BodyPrototype"]
 material = SubResource("CanvasItemMaterial_e1o1h")
 offset_left = -8.0
 offset_top = -8.0
