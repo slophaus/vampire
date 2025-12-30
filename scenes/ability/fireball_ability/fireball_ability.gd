@@ -2,7 +2,8 @@ extends Node2D
 class_name FireballAbility
 
 const SPEED := 150.0
-const BASE_PENETRATION := 3
+const BASE_PENETRATION := 1
+const BASE_SPLASH_RADIUS := 48.0
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -12,6 +13,9 @@ var direction := Vector2.ZERO
 var max_distance := 0.0
 var distance_traveled := 0.0
 var hit_count := 0
+var target_group := "enemy"
+var has_exploded := false
+var last_hit_target: Node2D
 
 
 func _ready():
@@ -20,6 +24,8 @@ func _ready():
 	if hitbox_component.penetration <= 0:
 		hitbox_component.penetration = BASE_PENETRATION
 	hitbox_component.hit_landed.connect(on_hit_landed)
+	hitbox_component.area_entered.connect(on_area_entered)
+	hitbox_component.body_entered.connect(on_body_entered)
 
 
 func _physics_process(delta: float) -> void:
@@ -45,4 +51,64 @@ func setup(start_position: Vector2, target_position: Vector2, range_limit: float
 func on_hit_landed(current_hits: int) -> void:
 	hit_count = current_hits
 	if hit_count >= hitbox_component.penetration:
+		explode(last_hit_target)
 		queue_free()
+
+
+func on_area_entered(area: Area2D) -> void:
+	if area is HurtboxComponent:
+		var hurtbox_component = area as HurtboxComponent
+		var parent_node = hurtbox_component.get_parent() as Node2D
+		if parent_node != null:
+			last_hit_target = parent_node
+
+
+func on_body_entered(body: Node) -> void:
+	if body is Node2D and body.is_in_group(target_group):
+		last_hit_target = body as Node2D
+
+
+func explode(excluded_target: Node2D = null) -> void:
+	if has_exploded:
+		return
+	has_exploded = true
+
+	var splash_radius = BASE_SPLASH_RADIUS * scale.x
+	var splash_radius_squared = pow(splash_radius, 2)
+	for target in get_tree().get_nodes_in_group(target_group):
+		if target == null or not is_instance_valid(target):
+			continue
+		if target == excluded_target:
+			continue
+		if target.get("is_regenerating") == true:
+			continue
+		var target_node = target as Node2D
+		if target_node == null:
+			continue
+		if target_node.global_position.distance_squared_to(global_position) > splash_radius_squared:
+			continue
+		apply_splash_damage(target_node)
+
+
+func apply_splash_damage(target: Node2D) -> void:
+	var hurtbox_component = target.get_node_or_null("HurtboxComponent") as HurtboxComponent
+	if hurtbox_component != null and hurtbox_component.health_component != null:
+		var splash_hitbox := HitboxComponent.new()
+		splash_hitbox.damage = hitbox_component.damage
+		splash_hitbox.knockback = hitbox_component.knockback
+		splash_hitbox.global_position = global_position
+		hurtbox_component.on_area_entered(splash_hitbox)
+		return
+
+	var health_component = target.get_node_or_null("HealthComponent") as HealthComponent
+	if health_component == null:
+		return
+
+	health_component.damage(hitbox_component.damage)
+
+	var velocity_component = target.get_node_or_null("VelocityComponent") as VelocityComponent
+	if velocity_component == null or hitbox_component.knockback <= 0:
+		return
+
+	var knockback_direction = (target.global_position - global_position).normalized()
+	velocity_component.apply_knockback(knockback_direction, hitbox_component.knockback)

@@ -3,8 +3,8 @@ extends Node
 const MAX_RANGE = 450
 const PLAYER_ATTACK_LAYER = 4
 const ENEMY_ATTACK_LAYER = 8
-const BASE_PENETRATION = 3
-const PENETRATION_PER_LEVEL = 1
+const BASE_PENETRATION = 1
+const PENETRATION_PER_LEVEL = 0
 const BASE_SCALE = 1.0
 const SCALE_PER_LEVEL = 0.15
 
@@ -124,6 +124,7 @@ func spawn_fireball(start_position: Vector2, target_position: Vector2) -> void:
 	fireball_instance.hitbox_component.damage = level_damage * additional_damage_percent
 	fireball_instance.hitbox_component.knockback = 250.0
 	fireball_instance.hitbox_component.penetration = BASE_PENETRATION + (PENETRATION_PER_LEVEL * (fireball_level - 1))
+	fireball_instance.target_group = target_group
 	fireball_instance.scale = Vector2.ONE * (BASE_SCALE + (SCALE_PER_LEVEL * (fireball_level - 1)))
 	if target_group == "player":
 		fireball_instance.hitbox_component.collision_layer = ENEMY_ATTACK_LAYER
