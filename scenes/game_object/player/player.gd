@@ -5,7 +5,7 @@ const ACCELERATION_SMOOTHING = 25
 const DAMAGE_FLASH_DURATION = 0.45
 const EXPERIENCE_FLASH_DURATION = 0.1
 const AIM_DEADZONE = 0.1
-const AIM_LASER_LENGTH = 160.0
+const AIM_LASER_LENGTH = 240.0
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
