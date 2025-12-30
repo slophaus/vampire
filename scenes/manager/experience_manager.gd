@@ -4,7 +4,7 @@ class_name ExperienceManager
 signal experience_updated(current_experience: float, target_experience: float)
 signal level_up(new_level: int)
 
-const TARGET_EXPERIENCE_GROWTH = 3;
+const TARGET_EXPERIENCE_GROWTH = 2;
 
 var current_experience = 0
 var current_level = 1
