@@ -9,7 +9,7 @@ const WORM_COLLISION_LAYER := 1
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var collision_shape: CollisionShape2D = $HitboxComponent/CollisionShape2D
-@onready var dust_particles: GPUParticles2D = $DustParticles
+@export var dust_poof_scene: PackedScene
 
 var direction := Vector2.ZERO
 var max_distance := 0.0
@@ -63,10 +63,10 @@ func despawn() -> void:
 
 
 func spawn_dust() -> void:
-	if dust_particles == null:
+	if dust_poof_scene == null:
 		return
 
-	var dust_instance = dust_particles.duplicate() as GPUParticles2D
+	var dust_instance = dust_poof_scene.instantiate() as GPUParticles2D
 	if dust_instance == null:
 		return
 

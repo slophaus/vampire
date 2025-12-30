@@ -1,26 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://dini725amwnfl"]
+[gd_scene load_steps=8 format=3 uid="uid://dini725amwnfl"]
 
 [ext_resource type="Texture2D" uid="uid://hpmgxym8g133" path="res://scenes/ability/sword_ability/sword.png" id="1_65jmi"]
 [ext_resource type="Script" uid="uid://cnhjib1hg24yf" path="res://scenes/ability/sword_ability/sword_ability.gd" id="1_kdjon"]
-[ext_resource type="PackedScene" uid="uid://b07jrrt845lfp" path="res://scenes/component/hitbox_component.tscn" id="2_xrg4e"]
-
-[sub_resource type="Gradient" id="Gradient_rokg3"]
-colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_6m8it"]
-gradient = SubResource("Gradient_rokg3")
-width = 4
-height = 4
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_oqx8g"]
-direction = Vector3(0, -1, 0)
-spread = 180.0
-initial_velocity = 180.0
-gravity = Vector3(0, 0, 0)
-damping = 18.0
-scale_min = 0.6
-scale_max = 1.1
-color = Color(1, 1, 1, 1)
+[ext_resource type="PackedScene" uid="uid://dk1dn8kxraq24" path="res://scenes/vfx/poof.tscn" id="2_6vdv7"]
+[ext_resource type="PackedScene" uid="uid://b07jrrt845lfp" path="res://scenes/component/hitbox_component.tscn" id="3_xrg4e"]
 
 [sub_resource type="Animation" id="Animation_jsajo"]
 length = 0.001
@@ -127,6 +110,7 @@ size = Vector2(15, 15)
 
 [node name="SwordAbility" type="Node2D"]
 script = ExtResource("1_kdjon")
+dust_poof_scene = ExtResource("2_6vdv7")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -138,17 +122,7 @@ autoplay = "swing"
 texture = ExtResource("1_65jmi")
 offset = Vector2(2.08165e-12, -4)
 
-[node name="DustParticles" type="GPUParticles2D" parent="."]
-emitting = false
-amount = 18
-lifetime = 0.18
-one_shot = true
-preprocess = 0.0
-visibility_rect = Rect2(-16, -16, 32, 32)
-process_material = SubResource("ParticleProcessMaterial_oqx8g")
-texture = SubResource("GradientTexture2D_6m8it")
-
-[node name="HitboxComponent" parent="." instance=ExtResource("2_xrg4e")]
+[node name="HitboxComponent" parent="." instance=ExtResource("3_xrg4e")]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
 shape = SubResource("RectangleShape2D_2govn")
