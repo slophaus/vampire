@@ -23,7 +23,7 @@ signal regenerate_finished
 
 var floating_text_scene = preload("res://scenes/ui/floating_text.tscn")
 
-var number_colliding_bodies := 0
+var colliding_enemies: Dictionary = {}
 var base_speed := 0
 var is_regenerating := false
 var normal_visuals_modulate := Color.WHITE
@@ -103,10 +103,12 @@ func can_attack() -> bool:
 func check_deal_damage():
 	if is_regenerating:
 		return
-	if number_colliding_bodies == 0 || !damage_interval_timer.is_stopped():
+	if colliding_enemies.is_empty() || !damage_interval_timer.is_stopped():
 		return
-	
-	health_component.damage(1)
+	var contact_damage = get_contact_damage()
+	if contact_damage <= 0:
+		return
+	health_component.damage(contact_damage)
 	damage_interval_timer.start()
 
 
@@ -118,16 +120,30 @@ func update_health_display():
 
 
 func on_body_entered(other_body: Node2D):
-	number_colliding_bodies += 1
+	if other_body == null or not other_body.is_in_group("enemy"):
+		return
+	var contact_damage = other_body.get("contact_damage")
+	var resolved_damage := 1.0
+	if typeof(contact_damage) in [TYPE_INT, TYPE_FLOAT]:
+		resolved_damage = float(contact_damage)
+	colliding_enemies[other_body] = resolved_damage
 	check_deal_damage()
 
 
 func on_body_exited(other_body: Node2D):
-	number_colliding_bodies -= 1
+	if colliding_enemies.has(other_body):
+		colliding_enemies.erase(other_body)
 
 
 func on_damage_interval_timer_timeout():
 	check_deal_damage()
+
+
+func get_contact_damage() -> float:
+	var max_damage := 0.0
+	for damage_value in colliding_enemies.values():
+		max_damage = max(max_damage, float(damage_value))
+	return max_damage
 
 
 func on_health_changed():
