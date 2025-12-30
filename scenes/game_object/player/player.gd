@@ -75,6 +75,7 @@ func _process(delta):
 	var direction = movement_vector.normalized()
 	velocity_component.accelerate_in_direction(direction)
 	velocity_component.move(self)
+	_clamp_to_camera_bounds()
 	
 	if movement_vector.x != 0 || movement_vector.y != 0:
 		animation_player.play("walk")
@@ -93,6 +94,19 @@ func get_movement_vector():
 	var y_movement = Input.get_action_strength("move_down" + suffix) - Input.get_action_strength("move_up" + suffix)
 	
 	return Vector2(x_movement, y_movement)
+
+
+func _clamp_to_camera_bounds() -> void:
+	var camera = get_viewport().get_camera_2d()
+	if camera == null:
+		return
+	var viewport_rect = camera.get_viewport().get_visible_rect()
+	var half_size = viewport_rect.size * 0.5 * camera.zoom
+	var center = camera.get_screen_center_position()
+	var min_bounds = center - half_size
+	var max_bounds = center + half_size
+	global_position.x = clamp(global_position.x, min_bounds.x, max_bounds.x)
+	global_position.y = clamp(global_position.y, min_bounds.y, max_bounds.y)
 
 func get_aim_direction() -> Vector2:
 	var suffix = get_player_action_suffix()
