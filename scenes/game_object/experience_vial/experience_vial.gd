@@ -25,8 +25,6 @@ func _ready():
 	burn_particles.texture = sprite.texture
 	burn_particles.emitting = false
 	burn_particles.scale = Vector2(0.2, 0.2)
-	if flame_particles.process_material != null:
-		flame_particles.process_material = flame_particles.process_material.duplicate()
 	animation_player.play("flame_velocity")
 
 
