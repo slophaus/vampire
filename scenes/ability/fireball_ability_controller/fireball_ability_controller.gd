@@ -126,6 +126,7 @@ func spawn_fireball(start_position: Vector2, target_position: Vector2) -> void:
 	fireball_instance.hitbox_component.penetration = BASE_PENETRATION + (PENETRATION_PER_LEVEL * (fireball_level - 1))
 	fireball_instance.target_group = target_group
 	fireball_instance.scale = Vector2.ONE * (BASE_SCALE + (SCALE_PER_LEVEL * (fireball_level - 1)))
+	fireball_instance.refresh_splash_visual()
 	if target_group == "player":
 		fireball_instance.hitbox_component.collision_layer = ENEMY_ATTACK_LAYER
 	else:
@@ -135,10 +136,7 @@ func spawn_fireball(start_position: Vector2, target_position: Vector2) -> void:
 
 
 func fire_fireballs(start_position: Vector2, target_position: Vector2) -> void:
-	for shot_index in range(fireball_level):
-		spawn_fireball(start_position, target_position)
-		if shot_index < fireball_level - 1:
-			await get_tree().create_timer(multi_shot_delay).timeout
+	spawn_fireball(start_position, target_position)
 
 
 func set_active(active: bool) -> void:
