@@ -42,13 +42,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	_update_selected_index_from_focus()
-	if event.is_action_pressed("ui_left"):
-		if _handle_player_count_horizontal(-1):
-			return
-	elif event.is_action_pressed("ui_right"):
-		if _handle_player_count_horizontal(1):
-			return
-	elif event.is_action_pressed("ui_up"):
+	if event.is_action_pressed("ui_up"):
 		_focus_button(selected_index - 1)
 	elif event.is_action_pressed("ui_down"):
 		_focus_button(selected_index + 1)
@@ -86,22 +80,6 @@ func _update_player_count_selection(selected_button: Button) -> void:
 		var selection_border = button.get_node_or_null("SelectionBorder")
 		if selection_border is CanvasItem:
 			selection_border.visible = button == selected_button
-
-
-func _handle_player_count_horizontal(direction: int) -> bool:
-	if player_count_buttons.is_empty():
-		return false
-	var focused = get_viewport().gui_get_focus_owner()
-	var current_index = player_count_buttons.find(focused)
-	if current_index == -1:
-		return false
-	var next_index = wrapi(current_index + direction, 0, player_count_buttons.size())
-	var next_button = player_count_buttons[next_index]
-	next_button.grab_focus()
-	next_button.button_pressed = true
-	on_player_count_selected(next_index + 1)
-	get_viewport().set_input_as_handled()
-	return true
 
 func _get_player_count_button(player_count: int) -> Button:
 	match player_count:
