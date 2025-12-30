@@ -90,6 +90,10 @@ func get_player_tint() -> Color:
 		return Color(1.0, 0.75, 0.75, 1.0)
 	if player_number == 2:
 		return Color(0.75, 0.75, 1.0, 1.0)
+	if player_number == 3:
+		return Color(0.75, 1.0, 0.75, 1.0)
+	if player_number == 4:
+		return Color(1.0, 0.9, 0.6, 1.0)
 	return Color(1.0, 1.0, 1.0, 0.0)
 
 

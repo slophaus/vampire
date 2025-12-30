@@ -4,12 +4,16 @@ extends Node
 @export var end_screen_scene: PackedScene
 
 var paused_menu_scene = preload("res://scenes/ui/pause_menu.tscn")
+var player_scene = preload("res://scenes/game_object/player/player.tscn")
 var player_regenerating := {}
 var game_over := false
 
 
-func _ready():
+func _enter_tree():
 	_apply_player_count()
+
+
+func _ready():
 	for player in get_tree().get_nodes_in_group("player"):
 		player.regenerate_started.connect(on_player_regenerate_started.bind(player))
 		player.regenerate_finished.connect(on_player_regenerate_finished.bind(player))
@@ -23,12 +27,36 @@ func _unhandled_input(event):
 
 
 func _apply_player_count() -> void:
-	if GameEvents.player_count >= 2:
-		return
+	var desired_count = clampi(GameEvents.player_count, 1, 4)
+	var players_by_number := {}
 	for player in get_tree().get_nodes_in_group("player"):
 		var player_number = player.get("player_number")
-		if typeof(player_number) == TYPE_INT and player_number > 1:
+		if typeof(player_number) == TYPE_INT:
+			players_by_number[player_number] = player
+
+	for player in get_tree().get_nodes_in_group("player"):
+		var player_number = player.get("player_number")
+		if typeof(player_number) == TYPE_INT and player_number > desired_count:
 			player.queue_free()
+
+	var base_player = players_by_number.get(1, null)
+	if base_player == null:
+		return
+	var base_position = base_player.position
+	var spawn_offsets = {
+		2: Vector2(80, 40),
+		3: Vector2(-80, 40),
+		4: Vector2(0, -80),
+	}
+	var entities_layer = get_node("Entities")
+	for player_number in range(2, desired_count + 1):
+		if players_by_number.has(player_number):
+			continue
+		var player_instance = player_scene.instantiate()
+		player_instance.player_number = player_number
+		player_instance.position = base_position + spawn_offsets.get(player_number, Vector2.ZERO)
+		player_instance.name = "Player%d" % player_number
+		entities_layer.add_child(player_instance)
 
 
 func on_player_regenerate_started(player):
