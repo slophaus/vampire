@@ -12,6 +12,7 @@ radius = 16.0
 [sub_resource type="Animation" id="Animation_tfr8w"]
 resource_name = "flame_velocity"
 length = 8.0
+step = 1.0
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
