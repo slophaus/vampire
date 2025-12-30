@@ -57,4 +57,4 @@ enemy_index = 2
 [node name="Foreground" type="Node2D" parent="." groups=["foreground_layer"]]
 
 [node name="WormEnemy" parent="." instance=ExtResource("14_7smn1")]
-position = Vector2(771, 393)
+position = Vector2(716, 350)
