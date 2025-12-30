@@ -13,7 +13,8 @@ const TURN_CHANCE := 0.3
 @onready var collision_container := self
 @onready var hurtbox_segments := $HurtboxComponent
 @onready var hit_flash_component = $HitFlashComponent
-@onready var segment_template: Sprite2D = $Visuals/Segments/Segment0
+@onready var head_template: Sprite2D = $Visuals/Segments/HeadPrototype
+@onready var body_template: Sprite2D = $Visuals/Segments/BodyPrototype
 @onready var collision_template: CollisionShape2D = $Segment0
 @onready var hurtbox_template: CollisionShape2D = $HurtboxComponent/Segment0
 
@@ -62,7 +63,14 @@ func cache_segments() -> void:
 	hurtbox_shapes.clear()
 	segment_tints.clear()
 
+	if head_template != null and not head_template.is_queued_for_deletion():
+		segment_sprites.append(head_template)
+		segment_tints.append(head_template.get_node_or_null("segment_color"))
 	for child in segment_container.get_children():
+		if child == head_template:
+			continue
+		if child == body_template and not body_template.visible:
+			continue
 		if child is Sprite2D and not child.is_queued_for_deletion():
 			segment_sprites.append(child)
 			segment_tints.append(child.get_node_or_null("segment_color"))
@@ -79,16 +87,22 @@ func build_segments() -> void:
 	segment_count = max(segment_count, 1)
 
 	for child in segment_container.get_children():
-		if child != segment_template and child is Sprite2D:
+		if child != head_template and child != body_template and child is Sprite2D:
 			child.queue_free()
 	for child in collision_container.get_children():
 		if child != collision_template and child is CollisionShape2D:
 			child.queue_free()
 
+	var body_count = max(segment_count - 1, 0)
+	if body_count == 0:
+		body_template.hide()
+	else:
+		body_template.show()
+		for index in range(1, body_count):
+			var sprite = body_template.duplicate()
+			sprite.name = "BodySegment%s" % index
+			segment_container.add_child(sprite)
 	for index in range(1, segment_count):
-		var sprite = segment_template.duplicate()
-		sprite.name = "Segment%s" % index
-		segment_container.add_child(sprite)
 		var shape = collision_template.duplicate()
 		shape.name = "Segment%s" % index
 		collision_container.add_child(shape)
