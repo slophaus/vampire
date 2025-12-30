@@ -4,6 +4,8 @@ const MAX_SPEED = 125
 const ACCELERATION_SMOOTHING = 25
 const DAMAGE_FLASH_DURATION = 0.45
 const EXPERIENCE_FLASH_DURATION = 0.1
+const AIM_DEADZONE = 0.1
+const AIM_LASER_LENGTH = 160.0
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
@@ -14,6 +16,7 @@ const EXPERIENCE_FLASH_DURATION = 0.1
 @onready var visuals = $Visuals
 @onready var player_color = $Visuals/player_sprite/player_color
 @onready var velocity_component = $VelocityComponent
+@onready var aim_laser: Line2D = $AimLaser
 
 @export var player_number := 1
 @export var regen_rate := 0.67
@@ -38,6 +41,8 @@ func _ready():
 	base_speed = velocity_component.max_speed
 	player_color.color = get_player_tint()
 	player_color.visible = true
+	aim_laser.visible = false
+	_update_aim_laser_color()
 	visuals.modulate = Color.WHITE
 	normal_visuals_modulate = visuals.modulate
 	last_health = health_component.current_health
@@ -60,6 +65,7 @@ func _process(delta):
 		velocity_component.velocity = Vector2.ZERO
 		velocity = Vector2.ZERO
 		animation_player.play("RESET")
+		aim_laser.visible = false
 		health_component.heal(regen_rate * delta)
 		if health_component.current_health >= health_component.max_health:
 			end_regeneration()
@@ -78,6 +84,7 @@ func _process(delta):
 	var move_sign = sign(movement_vector.x)
 	if move_sign != 0:
 		visuals.scale = Vector2(move_sign, 1)
+	_update_aim_laser()
 
 
 func get_movement_vector():	
@@ -86,6 +93,15 @@ func get_movement_vector():
 	var y_movement = Input.get_action_strength("move_down" + suffix) - Input.get_action_strength("move_up" + suffix)
 	
 	return Vector2(x_movement, y_movement)
+
+func get_aim_direction() -> Vector2:
+	var suffix = get_player_action_suffix()
+	var x_aim = Input.get_action_strength("aim_right" + suffix) - Input.get_action_strength("aim_left" + suffix)
+	var y_aim = Input.get_action_strength("aim_down" + suffix) - Input.get_action_strength("aim_up" + suffix)
+	var aim_vector = Vector2(x_aim, y_aim)
+	if aim_vector.length() < AIM_DEADZONE:
+		return Vector2.ZERO
+	return aim_vector.normalized()
 
 
 func get_player_action_suffix() -> String:
@@ -98,6 +114,21 @@ func get_player_tint() -> Color:
 
 func can_attack() -> bool:
 	return not is_regenerating
+
+
+func _update_aim_laser() -> void:
+	var aim_direction = get_aim_direction()
+	if aim_direction == Vector2.ZERO:
+		aim_laser.visible = false
+		return
+	aim_laser.visible = true
+	aim_laser.points = PackedVector2Array([Vector2.ZERO, aim_direction * AIM_LASER_LENGTH])
+
+
+func _update_aim_laser_color() -> void:
+	var laser_color = get_player_tint()
+	laser_color.a = 0.8
+	aim_laser.default_color = laser_color
 
 
 func check_deal_damage():
