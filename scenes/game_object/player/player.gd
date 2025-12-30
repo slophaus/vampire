@@ -8,6 +8,7 @@ const EXPERIENCE_FLASH_DURATION = 0.1
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
 @onready var health_bar = $HealthBar
+@onready var upgrade_dots = $UpgradeDots
 @onready var abilities = $Abilities
 @onready var animation_player = $AnimationPlayer
 @onready var visuals = $Visuals
@@ -26,6 +27,9 @@ var is_regenerating := false
 var normal_visuals_modulate := Color.WHITE
 var last_health := 0.0
 var flash_tween: Tween
+
+const UPGRADE_DOT_SIZE := 4.0
+const UPGRADE_DOT_RADIUS := 2
 
 
 func _ready():
@@ -46,6 +50,7 @@ func _ready():
 		if ability.has_method("set_player_number"):
 			ability.set_player_number(player_number)
 	update_health_display()
+	set_upgrade_dot_count(0)
 
 
 func _process(delta):
@@ -167,6 +172,33 @@ func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades:
 		abilities.add_child(ability_controller)
 	elif ability_upgrade.id == "player_speed":
 		velocity_component.max_speed = base_speed + (base_speed * current_upgrades["player_speed"]["quantity"] * 0.2)
+	update_upgrade_dots(current_upgrades)
+
+
+func update_upgrade_dots(current_upgrades: Dictionary) -> void:
+	var total_upgrades := 0
+	for upgrade_data in current_upgrades.values():
+		if typeof(upgrade_data) == TYPE_DICTIONARY and upgrade_data.has("quantity"):
+			total_upgrades += int(upgrade_data["quantity"])
+	set_upgrade_dot_count(total_upgrades)
+
+
+func set_upgrade_dot_count(count: int) -> void:
+	if upgrade_dots == null:
+		return
+	for child in upgrade_dots.get_children():
+		child.queue_free()
+	if count <= 0:
+		return
+	var dot_color = get_player_tint()
+	for i in range(count):
+		var dot = Panel.new()
+		dot.custom_minimum_size = Vector2(UPGRADE_DOT_SIZE, UPGRADE_DOT_SIZE)
+		var dot_style = StyleBoxFlat.new()
+		dot_style.bg_color = dot_color
+		dot_style.set_corner_radius_all(UPGRADE_DOT_RADIUS)
+		dot.add_theme_stylebox_override("panel", dot_style)
+		upgrade_dots.add_child(dot)
 
 
 func flash_visuals(color: Color, duration: float = DAMAGE_FLASH_DURATION) -> void:

@@ -3,12 +3,25 @@ extends Node2D
 
 @onready var collision_shape_2d = $Area2D/CollisionShape2D
 @onready var sprite = $Sprite2D
+@onready var burn_particles = $BurnParticles
+@onready var expire_timer = $ExpireTimer
+
+@export var lifetime := 8.0
+@export var expire_shrink_duration := 0.2
+@export var burn_scale := Vector2(1.2, 1.2)
+
 var collected_player: Node2D
+var is_collecting := false
+var is_expiring := false
 
 
 
 func _ready():
 	$Area2D.area_entered.connect(on_area_entered)
+	expire_timer.timeout.connect(on_expire_timeout)
+	expire_timer.start(lifetime)
+	burn_particles.emitting = false
+	burn_particles.scale = Vector2(0.2, 0.2)
 
 
 func tween_collect(percent: float, start_position: Vector2):
@@ -42,13 +55,17 @@ func disable_collision():
 
 
 func on_area_entered(other_area: Area2D):
+	if is_collecting or is_expiring:
+		return
 	var player = other_area.get_parent() as Node2D
 	if player == null || not player.is_in_group("player"):
 		return
 	if player.is_regenerating:
 		return
+	is_collecting = true
 	collected_player = player
 	Callable(disable_collision).call_deferred()
+	expire_timer.stop()
 	
 	var tween = create_tween()
 	tween.set_parallel()
@@ -60,3 +77,26 @@ func on_area_entered(other_area: Area2D):
 	tween.tween_callback(collect)
 	
 	$RandomAudioStreamPlayer2DComponent.play_random()
+
+
+func on_expire_timeout() -> void:
+	expire()
+
+
+func expire() -> void:
+	if is_expiring or is_collecting:
+		return
+	is_expiring = true
+	disable_collision()
+	burn_particles.emitting = true
+	burn_particles.restart()
+	var tween = create_tween()
+	tween.set_parallel()
+	tween.tween_property(sprite, "scale", Vector2.ZERO, expire_shrink_duration) \
+		.set_trans(Tween.TRANS_QUAD) \
+		.set_ease(Tween.EASE_IN)
+	tween.tween_property(burn_particles, "scale", burn_scale, expire_shrink_duration) \
+		.set_trans(Tween.TRANS_QUAD) \
+		.set_ease(Tween.EASE_OUT)
+	tween.chain()
+	tween.tween_callback(queue_free)

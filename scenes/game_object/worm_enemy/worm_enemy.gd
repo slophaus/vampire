@@ -232,6 +232,13 @@ func is_position_blocked(candidate_position: Vector2) -> bool:
 			if occupied == candidate_position:
 				return true
 
+	for player in get_tree().get_nodes_in_group("player"):
+		var player_node := player as Node2D
+		if player_node == null:
+			continue
+		if snap_to_grid(player_node.global_position) == candidate_position:
+			return true
+
 	return false
 
 
