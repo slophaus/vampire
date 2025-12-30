@@ -5,11 +5,15 @@ const MOVE_INTERVAL := 0.8
 const TURN_CHANCE := 0.3
 
 @export var turn_delay := 4.0
+@export_range(1, 64, 1) var segment_count := 15
 
 @onready var segment_container := $Visuals/Segments
 @onready var collision_container := self
 @onready var hurtbox_segments := $HurtboxComponent
 @onready var hit_flash_component = $HitFlashComponent
+@onready var segment_template: Sprite2D = $Visuals/Segments/Segment0
+@onready var collision_template: CollisionShape2D = $Segment0
+@onready var hurtbox_template: CollisionShape2D = $HurtboxComponent/Segment0
 
 var move_timer := 0.0
 var segment_positions: Array[Vector2] = []
@@ -17,7 +21,6 @@ var direction := Vector2.RIGHT
 var segment_sprites: Array[Sprite2D] = []
 var segment_shapes: Array[CollisionShape2D] = []
 var hurtbox_shapes: Array[CollisionShape2D] = []
-var segment_count := 0
 var time_alive := 0.0
 
 
@@ -28,6 +31,7 @@ func _ready() -> void:
 
 
 func _finish_spawn() -> void:
+	build_segments()
 	cache_segments()
 	global_position = snap_to_grid(global_position)
 	initialize_direction()
@@ -54,16 +58,34 @@ func cache_segments() -> void:
 	hurtbox_shapes.clear()
 
 	for child in segment_container.get_children():
-		if child is Sprite2D:
+		if child is Sprite2D and not child.is_queued_for_deletion():
 			segment_sprites.append(child)
 	for child in collision_container.get_children():
-		if child is CollisionShape2D:
+		if child is CollisionShape2D and not child.is_queued_for_deletion():
 			segment_shapes.append(child)
 	for child in hurtbox_segments.get_children():
-		if child is CollisionShape2D:
+		if child is CollisionShape2D and not child.is_queued_for_deletion():
 			hurtbox_shapes.append(child)
+	segment_count = min(segment_sprites.size(), segment_shapes.size(), segment_count)
 
-	segment_count = min(segment_sprites.size(), segment_shapes.size())
+
+func build_segments() -> void:
+	segment_count = max(segment_count, 1)
+
+	for child in segment_container.get_children():
+		if child != segment_template and child is Sprite2D:
+			child.queue_free()
+	for child in collision_container.get_children():
+		if child != collision_template and child is CollisionShape2D:
+			child.queue_free()
+
+	for index in range(1, segment_count):
+		var sprite = segment_template.duplicate()
+		sprite.name = "Segment%s" % index
+		segment_container.add_child(sprite)
+		var shape = collision_template.duplicate()
+		shape.name = "Segment%s" % index
+		collision_container.add_child(shape)
 
 
 func initialize_direction() -> void:
