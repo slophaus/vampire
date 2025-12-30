@@ -6,8 +6,10 @@ func _ready():
 	pass
 
 
-func start(text: String):
-	$Label.text = text
+func start(text: String, color: Color = Color.WHITE):
+	var label = $Label
+	label.text = text
+	label.add_theme_color_override("font_color", color)
 	
 	var tween = create_tween()
 	tween.set_parallel()

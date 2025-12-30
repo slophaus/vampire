@@ -129,7 +129,7 @@ func on_level_up(current_level: int):
 	var chosen_upgrades = pick_upgrades(upgrade_player_number)
 	upgrade_screen_instance.set_ability_upgrades(chosen_upgrades, current_upgrades_by_player[upgrade_player_number])
 	upgrade_screen_instance.upgrade_selected.connect(on_upgrade_selected.bind(upgrade_player_number))
-	current_turn_player_number = get_next_player_number(current_turn_player_number)
+	current_turn_player_number = get_next_player_number(upgrade_player_number)
 
 
 func get_next_player_number(player_number: int) -> int:

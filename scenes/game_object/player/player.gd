@@ -21,6 +21,8 @@ const EXPERIENCE_FLASH_DURATION = 0.1
 signal regenerate_started
 signal regenerate_finished
 
+var floating_text_scene = preload("res://scenes/ui/floating_text.tscn")
+
 var number_colliding_bodies := 0
 var base_speed := 0
 var is_regenerating := false
@@ -130,6 +132,7 @@ func on_damage_interval_timer_timeout():
 
 func on_health_changed():
 	if not is_regenerating and health_component.current_health < last_health:
+		spawn_damage_text(last_health - health_component.current_health)
 		GameEvents.emit_player_damaged()
 		$HitRandomStreamPlayer.play_random()
 		flash_visuals(Color(1, 0.3, 0.3))
@@ -137,6 +140,20 @@ func on_health_changed():
 		flash_visuals(Color(0.3, 1, 0.3))
 	update_health_display()
 	last_health = health_component.current_health
+
+
+func spawn_damage_text(damage_amount: float) -> void:
+	if damage_amount <= 0:
+		return
+	var floating_text = floating_text_scene.instantiate() as FloatingText
+	get_tree().get_first_node_in_group("foreground_layer").add_child(floating_text)
+
+	floating_text.global_position = global_position + (Vector2.UP * 16)
+
+	var fmt_string := "%0.1f"
+	if is_equal_approx(damage_amount, int(damage_amount)):
+		fmt_string = "%0.0f"
+	floating_text.start(fmt_string % damage_amount, Color(1, 0.3, 0.3))
 
 
 func on_died():
