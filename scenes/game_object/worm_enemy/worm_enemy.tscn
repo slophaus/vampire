@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cwl7f4qnc4l8g"]
+[gd_scene load_steps=10 format=3 uid="uid://cwl7f4qnc4l8g"]
 
 [ext_resource type="Script" uid="uid://baaesj1y55fv4" path="res://scenes/game_object/worm_enemy/worm_enemy.gd" id="1_0r4sg"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_8h4ly"]
@@ -14,6 +14,9 @@ shader_parameter/lerp_percent = 0.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_v5n7q"]
 size = Vector2(16, 16)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_e1o1h"]
+blend_mode = 3
 
 [node name="WormEnemy" type="CharacterBody2D" groups=["enemy", "worm"]]
 collision_mask = 10
@@ -45,5 +48,14 @@ shape = SubResource("RectangleShape2D_v5n7q")
 
 [node name="Segment0" type="Sprite2D" parent="Visuals/Segments"]
 modulate = Color(0.2, 1, 0.2, 1)
+clip_children = 2
 texture = ExtResource("6_dcn7l")
 region_rect = Rect2(112, 16, 16, 16)
+
+[node name="segment_color" type="ColorRect" parent="Visuals/Segments/Segment0"]
+visible = false
+material = SubResource("CanvasItemMaterial_e1o1h")
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0

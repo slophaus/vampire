@@ -6,6 +6,8 @@ const TURN_CHANCE := 0.3
 
 @export var turn_delay := 4.0
 @export_range(1, 64, 1) var segment_count := 15
+@export var head_tint := Color(0.85, 0.35, 0.55, 1.0)
+@export var body_tint := Color(1.0, 0.65, 0.8, 1.0)
 
 @onready var segment_container := $Visuals/Segments
 @onready var collision_container := self
@@ -21,6 +23,7 @@ var direction := Vector2.RIGHT
 var segment_sprites: Array[Sprite2D] = []
 var segment_shapes: Array[CollisionShape2D] = []
 var hurtbox_shapes: Array[CollisionShape2D] = []
+var segment_tints: Array = []
 var time_alive := 0.0
 
 
@@ -36,6 +39,7 @@ func _finish_spawn() -> void:
 	global_position = snap_to_grid(global_position)
 	initialize_direction()
 	initialize_segments()
+	apply_segment_tints()
 	apply_hit_flash()
 	visible = true
 
@@ -56,10 +60,12 @@ func cache_segments() -> void:
 	segment_sprites.clear()
 	segment_shapes.clear()
 	hurtbox_shapes.clear()
+	segment_tints.clear()
 
 	for child in segment_container.get_children():
 		if child is Sprite2D and not child.is_queued_for_deletion():
 			segment_sprites.append(child)
+			segment_tints.append(child.get_node_or_null("segment_color"))
 	for child in collision_container.get_children():
 		if child is CollisionShape2D and not child.is_queued_for_deletion():
 			segment_shapes.append(child)
@@ -152,6 +158,7 @@ func update_segments() -> void:
 	for index in range(segment_count):
 		var local_position = segment_positions[index] - global_position
 		segment_sprites[index].position = local_position
+		segment_sprites[index].rotation = get_segment_rotation(index)
 		segment_shapes[index].position = local_position
 		if index == 0 and not hurtbox_shapes.is_empty():
 			hurtbox_shapes[0].position = local_position
@@ -163,6 +170,27 @@ func apply_hit_flash() -> void:
 	if segment_sprites.is_empty():
 		return
 	hit_flash_component.set_sprite(segment_sprites[0])
+
+
+func apply_segment_tints() -> void:
+	for index in range(segment_tints.size()):
+		var tint_rect: ColorRect = segment_tints[index]
+		if tint_rect == null:
+			continue
+		if index == 0:
+			tint_rect.color = head_tint
+		else:
+			tint_rect.color = body_tint
+		tint_rect.visible = true
+
+
+func get_segment_rotation(index: int) -> float:
+	var segment_direction := direction
+	if index > 0 and index < segment_positions.size():
+		var delta = segment_positions[index - 1] - segment_positions[index]
+		if delta != Vector2.ZERO:
+			segment_direction = delta.normalized()
+	return segment_direction.angle() + (PI / 2.0)
 
 
 func get_scene_center() -> Vector2:
