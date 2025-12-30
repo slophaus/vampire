@@ -5,6 +5,7 @@ extends Node2D
 @onready var sprite = $Sprite2D
 @onready var burn_particles = $BurnParticles
 @onready var flame_particles = $Flame
+@onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var expire_timer = $ExpireTimer
 
 @export var lifetime := 8.0
@@ -26,13 +27,8 @@ func _ready():
 	burn_particles.scale = Vector2(0.2, 0.2)
 	flame_particles.emitting = true
 	flame_particles.scale = Vector2(0.2, 0.2)
-	var flame_material = flame_particles.process_material as ParticleProcessMaterial
-	if flame_material != null:
-		flame_material.initial_velocity_min = 4.0
-		flame_material.initial_velocity_max = 8.0
-		var tween = create_tween()
-		tween.tween_property(flame_material, "initial_velocity_min", 40.0, lifetime)
-		tween.tween_property(flame_material, "initial_velocity_max", 90.0, lifetime)
+	animation_player.speed_scale = 1.0 / lifetime
+	animation_player.play("flame_velocity")
 
 
 func tween_collect(percent: float, start_position: Vector2):
