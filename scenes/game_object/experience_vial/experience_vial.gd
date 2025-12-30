@@ -27,9 +27,7 @@ func _ready():
 	burn_particles.scale = Vector2(0.2, 0.2)
 	flame_particles.emitting = true
 	flame_particles.scale = Vector2(0.2, 0.2)
-	var flame_animation = animation_player.get_animation("flame_velocity")
-	if flame_animation != null and lifetime > 0.0:
-		animation_player.speed_scale = flame_animation.length / lifetime
+	animation_player.speed_scale = 1.0
 	animation_player.play("flame_velocity")
 
 
