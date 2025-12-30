@@ -3,11 +3,20 @@ extends CharacterBody2D
 const TILE_SIZE := 16.0
 const MOVE_INTERVAL := 0.8
 const TURN_CHANCE := 0.3
+const SEGMENT_EXPLOSION_DELAY := 0.08
+const EXPLOSION_STREAMS := [
+	preload("res://assets/audio/impactMining_000.ogg"),
+	preload("res://assets/audio/impactMining_001.ogg"),
+	preload("res://assets/audio/impactMining_002.ogg"),
+	preload("res://assets/audio/impactMining_003.ogg"),
+	preload("res://assets/audio/impactMining_004.ogg"),
+]
 
 @export var turn_delay := 4.0
 @export_range(1, 64, 1) var segment_count := 15
 @export var head_tint := Color(0.85, 0.35, 0.55, 1.0)
 @export var body_tint := Color(1.0, 0.65, 0.8, 1.0)
+@export var poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
 
 @onready var segment_container := $Visuals/Segments
 @onready var collision_container := self
@@ -17,6 +26,7 @@ const TURN_CHANCE := 0.3
 @onready var body_template: Sprite2D = $Visuals/Segments/BodyPrototype
 @onready var collision_template: CollisionShape2D = $Segment0
 @onready var hurtbox_template: CollisionShape2D = $HurtboxComponent/Segment0
+@onready var health_component: HealthComponent = $HealthComponent
 
 var move_timer := 0.0
 var segment_positions: Array[Vector2] = []
@@ -26,11 +36,15 @@ var segment_shapes: Array[CollisionShape2D] = []
 var hurtbox_shapes: Array[CollisionShape2D] = []
 var segment_tints: Array = []
 var time_alive := 0.0
+var is_dying := false
 
 
 func _ready() -> void:
 	randomize()
 	visible = false
+	if health_component != null:
+		health_component.free_owner_on_death = false
+		health_component.died.connect(_on_died)
 	call_deferred("_finish_spawn")
 
 
@@ -46,6 +60,8 @@ func _finish_spawn() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if is_dying:
+		return
 	time_alive += delta
 	move_timer += delta
 	if move_timer < MOVE_INTERVAL:
@@ -244,3 +260,67 @@ func is_position_blocked(candidate_position: Vector2) -> bool:
 
 func get_occupied_positions() -> Array[Vector2]:
 	return segment_positions.duplicate()
+
+
+func _on_died() -> void:
+	if is_dying:
+		return
+	is_dying = true
+	set_physics_process(false)
+	_start_segment_explosions()
+
+
+func _start_segment_explosions() -> void:
+	if segment_positions.is_empty():
+		queue_free()
+		return
+
+	for index in range(segment_count):
+		_explode_segment(index)
+		await get_tree().create_timer(SEGMENT_EXPLOSION_DELAY).timeout
+
+	queue_free()
+
+
+func _explode_segment(index: int) -> void:
+	var segment_position := segment_positions[index]
+	if index < segment_sprites.size():
+		segment_sprites[index].visible = false
+	if index < segment_shapes.size():
+		segment_shapes[index].disabled = true
+	if index < hurtbox_shapes.size():
+		hurtbox_shapes[index].disabled = true
+	_spawn_poof(segment_position)
+	_play_explosion_sound(segment_position)
+
+
+func _spawn_poof(position: Vector2) -> void:
+	if poof_scene == null:
+		return
+	var poof_instance = poof_scene.instantiate() as GPUParticles2D
+	if poof_instance == null:
+		return
+	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
+	if entities_layer != null:
+		entities_layer.add_child(poof_instance)
+	else:
+		add_child(poof_instance)
+	poof_instance.global_position = position
+	poof_instance.emitting = true
+	poof_instance.restart()
+
+
+func _play_explosion_sound(position: Vector2) -> void:
+	if EXPLOSION_STREAMS.is_empty():
+		return
+	var audio_player := RandomAudioStreamPlayer2DComponent.new()
+	audio_player.streams = EXPLOSION_STREAMS
+	audio_player.bus = &"sfx"
+	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
+	if entities_layer != null:
+		entities_layer.add_child(audio_player)
+	else:
+		add_child(audio_player)
+	audio_player.global_position = position
+	audio_player.finished.connect(audio_player.queue_free)
+	audio_player.play_random()
