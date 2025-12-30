@@ -4,6 +4,7 @@ extends CanvasLayer
 var options_scene = preload("res://scenes/ui/options_menu.tscn")
 var menu_buttons: Array[Button] = []
 var selected_index := 0
+var player_count_buttons: Array[Button] = []
 
 
 func _ready():
@@ -23,6 +24,13 @@ func _ready():
 		%OptionsButton,
 		%QuitButton,
 	]
+	player_count_buttons = [
+		%OnePlayerButton,
+		%TwoPlayerButton,
+		%ThreePlayerButton,
+		%FourPlayerButton,
+	]
+	_apply_player_count_button_style()
 	%OnePlayerButton.button_pressed = true
 	GameEvents.player_count = 1
 	if not menu_buttons.is_empty():
@@ -61,6 +69,16 @@ func on_play_pressed():
 
 func on_player_count_selected(player_count: int) -> void:
 	GameEvents.player_count = player_count
+
+func _apply_player_count_button_style() -> void:
+	if player_count_buttons.is_empty():
+		return
+	var selected_style = player_count_buttons[0].get_theme_stylebox("focus").duplicate()
+	if selected_style is StyleBoxFlat:
+		selected_style.bg_color = Color(0, 0, 0, 0)
+	for button in player_count_buttons:
+		button.add_theme_stylebox_override("pressed", selected_style)
+		button.add_theme_stylebox_override("hover_pressed", selected_style)
 
 func on_options_pressed():
 	ScreenTransition.transition()

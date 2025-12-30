@@ -9,11 +9,8 @@ var player_regenerating := {}
 var game_over := false
 
 
-func _enter_tree():
-	_apply_player_count()
-
-
 func _ready():
+	_apply_player_count()
 	for player in get_tree().get_nodes_in_group("player"):
 		player.regenerate_started.connect(on_player_regenerate_started.bind(player))
 		player.regenerate_finished.connect(on_player_regenerate_finished.bind(player))
