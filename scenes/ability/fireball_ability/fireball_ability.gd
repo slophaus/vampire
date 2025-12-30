@@ -4,6 +4,9 @@ class_name FireballAbility
 const SPEED := 150.0
 const BASE_PENETRATION := 1
 const BASE_SPLASH_RADIUS := 48.0
+const SPLASH_STROKE_WIDTH := 2.0
+const SPLASH_ARC_POINTS := 48
+const SPLASH_COLOR := Color(1.0, 0.45, 0.2, 0.5)
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -21,6 +24,7 @@ var last_hit_target: Node2D
 func _ready():
 	animated_sprite.play()
 	collision_shape.disabled = false
+	queue_redraw()
 	if hitbox_component.penetration <= 0:
 		hitbox_component.penetration = BASE_PENETRATION
 	hitbox_component.hit_landed.connect(on_hit_landed)
@@ -46,6 +50,15 @@ func setup(start_position: Vector2, target_position: Vector2, range_limit: float
 	rotation = direction.angle() - (PI / 2.0)
 	max_distance = range_limit
 	distance_traveled = 0.0
+
+
+func refresh_splash_visual() -> void:
+	queue_redraw()
+
+
+func _draw() -> void:
+	var splash_radius = BASE_SPLASH_RADIUS * scale.x
+	draw_arc(Vector2.ZERO, splash_radius, 0.0, TAU, SPLASH_ARC_POINTS, SPLASH_COLOR, SPLASH_STROKE_WIDTH)
 
 
 func on_hit_landed(current_hits: int) -> void:
