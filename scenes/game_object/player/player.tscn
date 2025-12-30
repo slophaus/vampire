@@ -151,7 +151,7 @@ offset_bottom = 25.1893
 
 [node name="hurtbox" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_8chf6")]
 visible = false
-collision_mask = 8
+collision_mask = 12
 health_component = NodePath("../HealthComponent")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="hurtbox"]
