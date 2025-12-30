@@ -5,22 +5,19 @@ const ENEMY_TYPES = {
 		"max_health": 10.0,
 		"max_speed": 30,
 		"acceleration": 5.0,
-		"facing_multiplier": -1,
-		"contact_damage": 1.0
+		"facing_multiplier": -1
 	},
 	1: {
 		"max_health": 10.0,
 		"max_speed": 45,
 		"acceleration": 2.0,
-		"facing_multiplier": 1,
-		"contact_damage": 1.0
+		"facing_multiplier": 1
 	},
 	2: {
-		"max_health": 37.5,
+		"max_health": 50.0,
 		"max_speed": 105,
 		"acceleration": 1.5,
-		"facing_multiplier": -1,
-		"contact_damage": 2.0
+		"facing_multiplier": -1
 	}
 }
 
@@ -42,7 +39,6 @@ const ENEMY_TYPES = {
 
 var facing_multiplier := -1
 var enemy_tint := Color.WHITE
-var contact_damage := 1.0
 
 
 func _ready():
@@ -67,7 +63,6 @@ func apply_enemy_type(index: int) -> void:
 	facing_multiplier = enemy_data["facing_multiplier"]
 	velocity_component.max_speed = enemy_data["max_speed"]
 	velocity_component.acceleration = enemy_data["acceleration"]
-	contact_damage = enemy_data["contact_damage"]
 
 	health_component.max_health = enemy_data["max_health"]
 	health_component.current_health = enemy_data["max_health"]
