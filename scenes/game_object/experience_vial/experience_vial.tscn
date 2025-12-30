@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://c8j2qneyiwkhy"]
+[gd_scene load_steps=8 format=3 uid="uid://c8j2qneyiwkhy"]
 
 [ext_resource type="Texture2D" uid="uid://b8voe6odvmhn5" path="res://scenes/game_object/experience_vial/experience_vial.png" id="1_d72hl"]
 [ext_resource type="Script" uid="uid://bcjoj8gs1o0l6" path="res://scenes/game_object/experience_vial/experience_vial.gd" id="1_iipyn"]
@@ -9,8 +9,21 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_xs8ts"]
 radius = 16.0
 
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_kt8dq"]
+direction = Vector3(0, -1, 0)
+spread = 45.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 20.0
+initial_velocity_max = 40.0
+scale_min = 0.4
+scale_max = 0.8
+color = Color(0.4, 0.8, 1, 1)
+
 [node name="ExperienceVial" type="Node2D"]
 script = ExtResource("1_iipyn")
+
+[node name="ExpireTimer" type="Timer" parent="."]
+one_shot = true
 
 [node name="RandomAudioStreamPlayer2DComponent" parent="." instance=ExtResource("2_tpb62")]
 scale = Vector2(0.984781, 1.04643)
@@ -27,3 +40,11 @@ debug_color = Color(1.15158e-07, 0.635899, 0.411579, 0.42)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_d72hl")
+
+[node name="BurnParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 16
+one_shot = true
+explosiveness = 0.8
+lifetime = 0.5
+process_material = SubResource("ParticleProcessMaterial_kt8dq")

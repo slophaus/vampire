@@ -9,9 +9,9 @@ var player_color_indices := [0, 1, 2, 3]
 
 const PLAYER_COLOR_OPTIONS := [
 	Color(1, 0, 0),
-	Color(0, 0, 1),
-	Color(0, 1, 0),
-	Color(0, 0, 0),
+	Color(0.4, 0.7, 1),
+	Color(0, 0.6, 0),
+	Color(0.15, 0.15, 0.15),
 	Color(1, 1, 0),
 	Color(1, 0.5, 0),
 	Color(0.6, 0, 0.8),
