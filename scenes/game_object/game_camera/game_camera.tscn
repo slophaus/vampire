@@ -1,6 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://5jwlcn6cm23o"]
+[gd_scene load_steps=3 format=3 uid="uid://5jwlcn6cm23o"]
 
 [ext_resource type="Script" uid="uid://ddbtqa0ueyvkq" path="res://scenes/game_object/game_camera/game_camera.gd" id="1_ttled"]
+[ext_resource type="Script" uid="uid://bv1gse6a35c6u" path="res://scenes/game_object/game_camera/average_position_dot.gd" id="2_wlh45"]
 
 [node name="GameCamera" type="Camera2D"]
 script = ExtResource("1_ttled")
+target_dot_path = NodePath("AveragePositionDot")
+
+[node name="AveragePositionDot" type="Node2D" parent="."]
+z_index = 10
+script = ExtResource("2_wlh45")
