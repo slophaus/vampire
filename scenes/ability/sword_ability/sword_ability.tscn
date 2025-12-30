@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://b07jrrt845lfp" path="res://scenes/component/hitbox_component.tscn" id="2_xrg4e"]
 
 [sub_resource type="Gradient" id="Gradient_rokg3"]
-colors = PackedColorArray(0.78, 0.7, 0.55, 1, 0.78, 0.7, 0.55, 0)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_6m8it"]
 gradient = SubResource("Gradient_rokg3")
@@ -15,12 +15,12 @@ height = 4
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_oqx8g"]
 direction = Vector3(0, -1, 0)
 spread = 180.0
-initial_velocity = 60.0
-gravity = Vector3(0, 120, 0)
-damping = 8.0
-scale_min = 0.4
-scale_max = 0.8
-color = Color(0.78, 0.7, 0.55, 1)
+initial_velocity = 180.0
+gravity = Vector3(0, 0, 0)
+damping = 18.0
+scale_min = 0.6
+scale_max = 1.1
+color = Color(1, 1, 1, 1)
 
 [sub_resource type="Animation" id="Animation_jsajo"]
 length = 0.001
@@ -140,8 +140,8 @@ offset = Vector2(2.08165e-12, -4)
 
 [node name="DustParticles" type="GPUParticles2D" parent="."]
 emitting = false
-amount = 10
-lifetime = 0.4
+amount = 18
+lifetime = 0.18
 one_shot = true
 preprocess = 0.0
 visibility_rect = Rect2(-16, -16, 32, 32)
