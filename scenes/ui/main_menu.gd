@@ -5,6 +5,7 @@ var options_scene = preload("res://scenes/ui/options_menu.tscn")
 var menu_buttons: Array[Button] = []
 var selected_index := 0
 var player_count_buttons: Array[Button] = []
+var player_color_buttons: Array[Button] = []
 
 
 func _ready():
@@ -30,9 +31,11 @@ func _ready():
 		%ThreePlayerButton,
 		%FourPlayerButton,
 	]
+	player_color_buttons = player_count_buttons.duplicate()
 	%OnePlayerButton.button_pressed = true
 	GameEvents.player_count = 1
 	_update_player_count_selection(%OnePlayerButton)
+	_refresh_player_count_button_colors()
 	if not menu_buttons.is_empty():
 		call_deferred("_focus_button", 0)
 
@@ -46,6 +49,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		_focus_button(selected_index - 1)
 	elif event.is_action_pressed("ui_down"):
 		_focus_button(selected_index + 1)
+	elif event.is_action_pressed("ui_left"):
+		_handle_player_count_horizontal(-1)
+	elif event.is_action_pressed("ui_right"):
+		_handle_player_count_horizontal(1)
+	elif event.is_action_pressed("cycle_player_color") and event.device == 0:
+		_cycle_active_player_color()
 
 
 func _focus_button(index: int) -> void:
@@ -92,6 +101,42 @@ func _get_player_count_button(player_count: int) -> Button:
 		4:
 			return %FourPlayerButton
 	return null
+
+
+func _handle_player_count_horizontal(direction: int) -> void:
+	var focused = get_viewport().gui_get_focus_owner()
+	if focused == null or focused not in player_color_buttons:
+		return
+	var current_index = player_color_buttons.find(focused)
+	if current_index == -1:
+		return
+	var target_index = clampi(current_index + direction, 0, player_color_buttons.size() - 1)
+	selected_index = target_index
+	player_color_buttons[target_index].grab_focus()
+	get_viewport().set_input_as_handled()
+
+
+func _cycle_active_player_color() -> void:
+	var focused = get_viewport().gui_get_focus_owner()
+	if focused == null or focused not in player_color_buttons:
+		return
+	var player_index = player_color_buttons.find(focused) + 1
+	if player_index <= 0:
+		return
+	GameEvents.cycle_player_color(player_index)
+	_refresh_player_count_button_colors()
+	get_viewport().set_input_as_handled()
+
+
+func _refresh_player_count_button_colors() -> void:
+	for index in range(player_color_buttons.size()):
+		var button = player_color_buttons[index]
+		var color = GameEvents.get_player_color(index + 1)
+		button.add_theme_color_override("font_color", color)
+		button.add_theme_color_override("font_hover_color", color)
+		button.add_theme_color_override("font_pressed_color", color)
+		button.add_theme_color_override("font_focus_color", color)
+		button.add_theme_color_override("font_disabled_color", color)
 
 func on_options_pressed():
 	ScreenTransition.transition()

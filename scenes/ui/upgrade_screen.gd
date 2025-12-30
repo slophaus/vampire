@@ -108,13 +108,4 @@ func get_player_device_id(player_number: int) -> int:
 
 
 func get_player_highlight_color(player_number: int) -> Color:
-	match player_number:
-		1:
-			return Color.RED
-		2:
-			return Color.BLUE
-		3:
-			return Color(0.3, 0.85, 0.3)
-		4:
-			return Color(1.0, 0.75, 0.3)
-	return Color.WHITE
+	return GameEvents.get_player_color(player_number)
