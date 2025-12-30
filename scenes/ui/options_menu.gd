@@ -15,6 +15,8 @@ signal back_pressed
 ]
 
 var selected_index := 0
+var last_navigation_time := -1.0
+const NAVIGATION_REPEAT_DELAY := 0.2
 
 
 func _ready():
@@ -33,8 +35,14 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	_update_selected_index_from_focus()
 	if event.is_action_pressed("ui_up"):
+		if not _can_navigate():
+			return
+		last_navigation_time = _get_time()
 		_focus_control(selected_index - 1)
 	elif event.is_action_pressed("ui_down"):
+		if not _can_navigate():
+			return
+		last_navigation_time = _get_time()
 		_focus_control(selected_index + 1)
 
 
@@ -100,3 +108,11 @@ func on_back_pressed():
 	ScreenTransition.transition()
 	await ScreenTransition.transitioned_halfway
 	back_pressed.emit()
+
+
+func _can_navigate() -> bool:
+	return _get_time() - last_navigation_time >= NAVIGATION_REPEAT_DELAY
+
+
+func _get_time() -> float:
+	return Time.get_ticks_msec() / 1000.0
