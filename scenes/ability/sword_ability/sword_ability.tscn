@@ -1,8 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://dini725amwnfl"]
+[gd_scene load_steps=9 format=3 uid="uid://dini725amwnfl"]
 
 [ext_resource type="Texture2D" uid="uid://hpmgxym8g133" path="res://scenes/ability/sword_ability/sword.png" id="1_65jmi"]
 [ext_resource type="Script" uid="uid://cnhjib1hg24yf" path="res://scenes/ability/sword_ability/sword_ability.gd" id="1_kdjon"]
-[ext_resource type="PackedScene" uid="uid://dk1dn8kxraq24" path="res://scenes/vfx/poof.tscn" id="2_6vdv7"]
+[ext_resource type="PackedScene" uid="uid://b6b4mqp1d8c30" path="res://scenes/vfx/poof.tscn" id="2_6vdv7"]
 [ext_resource type="PackedScene" uid="uid://b07jrrt845lfp" path="res://scenes/component/hitbox_component.tscn" id="3_xrg4e"]
 
 [sub_resource type="Animation" id="Animation_jsajo"]
