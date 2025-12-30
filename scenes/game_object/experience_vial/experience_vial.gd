@@ -20,6 +20,7 @@ func _ready():
 	$Area2D.area_entered.connect(on_area_entered)
 	expire_timer.timeout.connect(on_expire_timeout)
 	expire_timer.start(lifetime)
+	burn_particles.texture = sprite.texture
 	burn_particles.emitting = false
 	burn_particles.scale = Vector2(0.2, 0.2)
 
