@@ -29,6 +29,7 @@ func _ready() -> void:
 
 func _finish_spawn() -> void:
 	cache_segments()
+	global_position = snap_to_grid(global_position)
 	initialize_direction()
 	initialize_segments()
 	apply_hit_flash()
@@ -42,7 +43,7 @@ func _physics_process(delta: float) -> void:
 		return
 	move_timer -= MOVE_INTERVAL
 
-	maybe_turn()
+	direction = choose_direction()
 	advance_segments()
 	update_segments()
 
@@ -88,20 +89,38 @@ func initialize_segments() -> void:
 	update_segments()
 
 
-func maybe_turn() -> void:
-	if time_alive < turn_delay:
-		return
-	if randf() > TURN_CHANCE:
-		return
+func choose_direction() -> Vector2:
+	if segment_positions.is_empty():
+		return direction
+
+	var forward = direction
 	var left = Vector2(-direction.y, direction.x)
 	var right = Vector2(direction.y, -direction.x)
-	direction = left if randf() < 0.5 else right
+	var backward = -direction
+
+	var should_turn = time_alive >= turn_delay and randf() <= TURN_CHANCE
+	var ordered: Array[Vector2] = []
+	if should_turn:
+		if randf() < 0.5:
+			ordered = [left, right, forward]
+		else:
+			ordered = [right, left, forward]
+	else:
+		ordered = [forward, left, right]
+	ordered.append(backward)
+
+	for candidate in ordered:
+		var candidate_position = segment_positions[0] + (candidate * TILE_SIZE)
+		if not is_position_blocked(candidate_position):
+			return candidate
+
+	return ordered[0]
 
 
 func advance_segments() -> void:
 	if segment_positions.is_empty():
 		return
-	var new_head = segment_positions[0] + (direction * TILE_SIZE)
+	var new_head = snap_to_grid(segment_positions[0] + (direction * TILE_SIZE))
 	segment_positions.insert(0, new_head)
 	segment_positions.pop_back()
 	global_position = new_head
@@ -129,3 +148,28 @@ func get_scene_center() -> Vector2:
 	if camera != null:
 		return camera.get_screen_center_position()
 	return Vector2.ZERO
+
+
+func snap_to_grid(position: Vector2) -> Vector2:
+	return position.snapped(Vector2(TILE_SIZE, TILE_SIZE))
+
+
+func is_position_blocked(candidate_position: Vector2) -> bool:
+	for occupied in segment_positions:
+		if occupied == candidate_position:
+			return true
+
+	for worm in get_tree().get_nodes_in_group("worm"):
+		if worm == self:
+			continue
+		if not worm.has_method("get_occupied_positions"):
+			continue
+		for occupied in worm.get_occupied_positions():
+			if occupied == candidate_position:
+				return true
+
+	return false
+
+
+func get_occupied_positions() -> Array[Vector2]:
+	return segment_positions.duplicate()
