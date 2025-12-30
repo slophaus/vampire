@@ -23,17 +23,8 @@ var rng := RandomNumberGenerator.new()
 
 
 func _ready():
-	for player in get_tree().get_nodes_in_group("player"):
-		if player.has_method("get_player_action_suffix"):
-			players_by_number[player.player_number] = player
-
-	var player_numbers = get_player_numbers()
-	for player_number in player_numbers:
-		current_upgrades_by_player[player_number] = {}
-		upgrade_pools_by_player[player_number] = create_upgrade_pool()
-
-	if not player_numbers.is_empty():
-		current_turn_player_number = player_numbers[0]
+	refresh_players()
+	call_deferred("refresh_players")
 
 	experience_manager.level_up.connect(on_level_up)
 
@@ -120,6 +111,7 @@ func pick_upgrades(player_number: int) -> Array[AbilityUpgrade]:
 
 
 func on_level_up(current_level: int):
+	refresh_players()
 	var upgrade_player_number = get_upgrade_player_number()
 	if upgrade_player_number == 0:
 		return
@@ -167,3 +159,21 @@ func get_player_numbers() -> Array:
 	var player_numbers = players_by_number.keys()
 	player_numbers.sort()
 	return player_numbers
+
+
+func refresh_players() -> void:
+	for player in get_tree().get_nodes_in_group("player"):
+		if not player.has_method("get_player_action_suffix"):
+			continue
+		var player_number = player.player_number
+		if players_by_number.has(player_number):
+			continue
+		players_by_number[player_number] = player
+		current_upgrades_by_player[player_number] = {}
+		upgrade_pools_by_player[player_number] = create_upgrade_pool()
+
+	var player_numbers = get_player_numbers()
+	if player_numbers.is_empty():
+		return
+	if not player_numbers.has(current_turn_player_number):
+		current_turn_player_number = player_numbers[0]

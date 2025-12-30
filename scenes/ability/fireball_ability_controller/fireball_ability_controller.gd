@@ -1,8 +1,8 @@
 extends Node
 
 const MAX_RANGE = 450
-const PLAYER_HITBOX_LAYER = 4
-const ENEMY_HITBOX_LAYER = 2
+const PLAYER_ATTACK_LAYER = 4
+const ENEMY_ATTACK_LAYER = 8
 
 @export var fireball_ability: PackedScene
 @export var owner_group := "player"
@@ -120,9 +120,9 @@ func spawn_fireball(start_position: Vector2, target_position: Vector2) -> void:
 	fireball_instance.hitbox_component.damage = level_damage * additional_damage_percent
 	fireball_instance.hitbox_component.knockback = 250.0
 	if target_group == "player":
-		fireball_instance.hitbox_component.collision_layer = PLAYER_HITBOX_LAYER
+		fireball_instance.hitbox_component.collision_layer = ENEMY_ATTACK_LAYER
 	else:
-		fireball_instance.hitbox_component.collision_layer = ENEMY_HITBOX_LAYER
+		fireball_instance.hitbox_component.collision_layer = PLAYER_ATTACK_LAYER
 
 	fireball_instance.setup(start_position, target_position, MAX_RANGE)
 
