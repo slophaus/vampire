@@ -9,10 +9,14 @@ extends Node2D
 @export var lifetime := 8.0
 @export var expire_shrink_duration := 0.2
 @export var burn_scale := Vector2(1.2, 1.2)
+@export var flame_rise_offset := Vector2(0.0, -18.0)
+@export var flame_start_scale := Vector2(0.2, 0.2)
 
 var collected_player: Node2D
 var is_collecting := false
 var is_expiring := false
+var lifetime_tween: Tween
+var burn_start_position: Vector2
 
 
 
@@ -21,8 +25,21 @@ func _ready():
 	expire_timer.timeout.connect(on_expire_timeout)
 	expire_timer.start(lifetime)
 	burn_particles.texture = sprite.texture
-	burn_particles.emitting = false
-	burn_particles.scale = Vector2(0.2, 0.2)
+	burn_particles.one_shot = false
+	burn_particles.emitting = true
+	burn_particles.scale = flame_start_scale
+	burn_start_position = burn_particles.position
+	lifetime_tween = create_tween()
+	lifetime_tween.set_parallel()
+	lifetime_tween.tween_property(sprite, "scale", Vector2.ZERO, lifetime) \
+		.set_trans(Tween.TRANS_QUAD) \
+		.set_ease(Tween.EASE_IN)
+	lifetime_tween.tween_property(burn_particles, "scale", burn_scale, lifetime) \
+		.set_trans(Tween.TRANS_QUAD) \
+		.set_ease(Tween.EASE_OUT)
+	lifetime_tween.tween_property(burn_particles, "position", burn_start_position + flame_rise_offset, lifetime) \
+		.set_trans(Tween.TRANS_QUAD) \
+		.set_ease(Tween.EASE_OUT)
 
 
 func tween_collect(percent: float, start_position: Vector2):
@@ -48,6 +65,8 @@ func collect():
 	GameEvents.emit_experience_vial_collected(0.25)
 	if player.has_method("flash_experience_gain"):
 		player.flash_experience_gain()
+	if lifetime_tween != null:
+		lifetime_tween.kill()
 	queue_free()
 
 
@@ -89,16 +108,11 @@ func expire() -> void:
 		return
 	is_expiring = true
 	disable_collision()
-	burn_particles.scale = sprite.scale
+	if lifetime_tween != null:
+		lifetime_tween.kill()
 	burn_particles.emitting = true
-	burn_particles.restart()
+	burn_particles.position = burn_start_position + flame_rise_offset
+	burn_particles.scale = burn_scale
 	var tween = create_tween()
-	tween.set_parallel()
-	tween.tween_property(sprite, "scale", Vector2.ZERO, expire_shrink_duration) \
-		.set_trans(Tween.TRANS_QUAD) \
-		.set_ease(Tween.EASE_IN)
-	tween.tween_property(burn_particles, "scale", burn_scale, expire_shrink_duration) \
-		.set_trans(Tween.TRANS_QUAD) \
-		.set_ease(Tween.EASE_OUT)
-	tween.chain()
+	tween.tween_interval(expire_shrink_duration)
 	tween.tween_callback(queue_free)
