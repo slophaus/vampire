@@ -15,7 +15,7 @@ shader_parameter/lerp_percent = 0.0
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_v5n7q"]
 size = Vector2(16, 16)
 
-[node name="WormEnemy" type="CharacterBody2D" groups=["enemy"]]
+[node name="WormEnemy" type="CharacterBody2D" groups=["enemy", "worm"]]
 collision_mask = 10
 motion_mode = 1
 script = ExtResource("1_0r4sg")
