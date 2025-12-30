@@ -1,6 +1,10 @@
 extends Camera2D
 
+@export var target_dot_path: NodePath
+
 var target_position = Vector2.ZERO
+
+@onready var target_dot = get_node_or_null(target_dot_path) as Node2D
 
 
 func _ready():
@@ -19,3 +23,5 @@ func acquire_target():
 		for player in player_nodes:
 			summed_position += (player as Node2D).global_position
 		target_position = summed_position / float(player_nodes.size())
+		if target_dot != null:
+			target_dot.global_position = target_position

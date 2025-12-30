@@ -17,6 +17,7 @@ const AIM_LASER_LENGTH = 240.0
 @onready var player_color = $Visuals/player_sprite/player_color
 @onready var velocity_component = $VelocityComponent
 @onready var aim_laser: Line2D = $AimLaser
+@onready var player_collision_shape: CollisionShape2D = $CollisionShape2D
 
 @export var player_number := 1
 @export var regen_rate := 0.67
@@ -75,6 +76,7 @@ func _process(delta):
 	var direction = movement_vector.normalized()
 	velocity_component.accelerate_in_direction(direction)
 	velocity_component.move(self)
+	_clamp_to_camera_bounds()
 	
 	if movement_vector.x != 0 || movement_vector.y != 0:
 		animation_player.play("walk")
@@ -85,6 +87,29 @@ func _process(delta):
 	if move_sign != 0:
 		visuals.scale = Vector2(move_sign, 1)
 	_update_aim_laser()
+
+
+func _clamp_to_camera_bounds() -> void:
+	var camera := get_viewport().get_camera_2d()
+	if camera == null:
+		return
+	var viewport_size := get_viewport_rect().size
+	var half_size := viewport_size * camera.zoom * 0.5
+	var padding := _get_collision_padding()
+	var min_position := camera.global_position - half_size + Vector2(padding, padding)
+	var max_position := camera.global_position + half_size - Vector2(padding, padding)
+	global_position = global_position.clamp(min_position, max_position)
+
+
+func _get_collision_padding() -> float:
+	if player_collision_shape == null:
+		return 0.0
+	var shape = player_collision_shape.shape
+	if shape is CircleShape2D:
+		return shape.radius
+	if shape is RectangleShape2D:
+		return max(shape.size.x, shape.size.y) * 0.5
+	return 0.0
 
 
 func get_movement_vector():	
