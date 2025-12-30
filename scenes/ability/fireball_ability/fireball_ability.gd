@@ -7,6 +7,7 @@ const BASE_SPLASH_RADIUS := 48.0
 const SPLASH_STROKE_WIDTH := 2.0
 const SPLASH_ARC_POINTS := 48
 const SPLASH_COLOR := Color(1.0, 0.45, 0.2, 0.5)
+const SPLASH_VISUAL_DURATION := 0.15
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -19,6 +20,7 @@ var hit_count := 0
 var target_group := "enemy"
 var has_exploded := false
 var last_hit_target: Node2D
+var show_splash_indicator := false
 
 
 func _ready():
@@ -50,6 +52,7 @@ func setup(start_position: Vector2, target_position: Vector2, range_limit: float
 	rotation = direction.angle() - (PI / 2.0)
 	max_distance = range_limit
 	distance_traveled = 0.0
+	show_splash_indicator = false
 
 
 func refresh_splash_visual() -> void:
@@ -57,6 +60,8 @@ func refresh_splash_visual() -> void:
 
 
 func _draw() -> void:
+	if not show_splash_indicator:
+		return
 	var splash_radius = BASE_SPLASH_RADIUS * scale.x
 	draw_arc(Vector2.ZERO, splash_radius, 0.0, TAU, SPLASH_ARC_POINTS, SPLASH_COLOR, SPLASH_STROKE_WIDTH)
 
@@ -65,7 +70,6 @@ func on_hit_landed(current_hits: int) -> void:
 	hit_count = current_hits
 	if hit_count >= hitbox_component.penetration:
 		explode(last_hit_target)
-		queue_free()
 
 
 func on_area_entered(area: Area2D) -> void:
@@ -85,6 +89,10 @@ func explode(excluded_target: Node2D = null) -> void:
 	if has_exploded:
 		return
 	has_exploded = true
+	show_splash_indicator = true
+	direction = Vector2.ZERO
+	collision_shape.disabled = true
+	refresh_splash_visual()
 
 	var splash_radius = BASE_SPLASH_RADIUS * scale.x
 	var splash_radius_squared = pow(splash_radius, 2)
@@ -101,6 +109,9 @@ func explode(excluded_target: Node2D = null) -> void:
 		if target_node.global_position.distance_squared_to(global_position) > splash_radius_squared:
 			continue
 		apply_splash_damage(target_node)
+
+	await get_tree().create_timer(SPLASH_VISUAL_DURATION).timeout
+	queue_free()
 
 
 func apply_splash_damage(target: Node2D) -> void:

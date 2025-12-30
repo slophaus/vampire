@@ -37,12 +37,6 @@ func on_timer_timeout() -> void:
 	if owner_actor.has_method("can_attack") and not owner_actor.can_attack():
 		return
 
-	if owner_group == "player":
-		var aim_direction = get_aim_direction(owner_actor)
-		if aim_direction != Vector2.ZERO:
-			await fire_fireballs(owner_actor.global_position, owner_actor.global_position + (aim_direction * MAX_RANGE))
-			return
-
 	var targets = get_tree().get_nodes_in_group(target_group)
 	targets = targets.filter(func(target: Node2D):
 		if target == null or not is_instance_valid(target):
@@ -91,31 +85,6 @@ func resolve_player_number() -> int:
 func set_player_number(new_player_number: int) -> void:
 	player_number = new_player_number
 
-
-func get_player_action_suffix(player: Node) -> String:
-	if player != null && player.has_method("get_player_action_suffix"):
-		return player.get_player_action_suffix()
-
-	if player != null:
-		var player_number_value = player.get("player_number")
-		if typeof(player_number_value) == TYPE_INT && player_number_value > 1:
-			return str(player_number_value)
-
-	return ""
-
-
-func get_aim_direction(player: Node2D) -> Vector2:
-	var suffix = get_player_action_suffix(player)
-	var x_aim = Input.get_action_strength("aim_right" + suffix) - Input.get_action_strength("aim_left" + suffix)
-	var y_aim = Input.get_action_strength("aim_down" + suffix) - Input.get_action_strength("aim_up" + suffix)
-	var aim_vector = Vector2(x_aim, y_aim)
-
-	if aim_vector.length() < 0.1:
-		return Vector2.ZERO
-
-	return aim_vector.normalized()
-
-
 func spawn_fireball(start_position: Vector2, target_position: Vector2) -> void:
 	var fireball_instance = fireball_ability.instantiate() as FireballAbility
 	var foreground_layer = get_tree().get_first_node_in_group("foreground_layer")
@@ -126,7 +95,6 @@ func spawn_fireball(start_position: Vector2, target_position: Vector2) -> void:
 	fireball_instance.hitbox_component.penetration = BASE_PENETRATION + (PENETRATION_PER_LEVEL * (fireball_level - 1))
 	fireball_instance.target_group = target_group
 	fireball_instance.scale = Vector2.ONE * (BASE_SCALE + (SCALE_PER_LEVEL * (fireball_level - 1)))
-	fireball_instance.refresh_splash_visual()
 	if target_group == "player":
 		fireball_instance.hitbox_component.collision_layer = ENEMY_ATTACK_LAYER
 	else:
