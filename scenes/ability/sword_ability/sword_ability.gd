@@ -9,6 +9,7 @@ const WORM_COLLISION_LAYER := 1
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var collision_shape: CollisionShape2D = $HitboxComponent/CollisionShape2D
+@onready var dust_particles: GPUParticles2D = $DustParticles
 
 var direction := Vector2.ZERO
 var max_distance := 0.0
@@ -34,7 +35,7 @@ func _physics_process(delta: float) -> void:
 	distance_traveled += movement.length()
 
 	if distance_traveled >= max_distance:
-		queue_free()
+		despawn()
 
 
 func setup(start_position: Vector2, target_position: Vector2, range_limit: float) -> void:
@@ -48,9 +49,28 @@ func setup(start_position: Vector2, target_position: Vector2, range_limit: float
 func on_hit_landed(current_hits: int) -> void:
 	hit_count = current_hits
 	if hit_count >= MAX_HITS:
-		queue_free()
+		despawn()
 
 
 func on_body_entered(body: Node) -> void:
 	if body != null and body.is_in_group("worm"):
-		queue_free()
+		despawn()
+
+
+func despawn() -> void:
+	spawn_dust()
+	queue_free()
+
+
+func spawn_dust() -> void:
+	if dust_particles == null:
+		return
+
+	var dust_instance = dust_particles.duplicate() as GPUParticles2D
+	if dust_instance == null:
+		return
+
+	dust_instance.global_position = global_position
+	dust_instance.emitting = true
+	dust_instance.finished.connect(dust_instance.queue_free)
+	get_tree().current_scene.add_child(dust_instance)

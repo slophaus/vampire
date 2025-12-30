@@ -1,8 +1,26 @@
-[gd_scene load_steps=8 format=3 uid="uid://dini725amwnfl"]
+[gd_scene load_steps=11 format=3 uid="uid://dini725amwnfl"]
 
 [ext_resource type="Texture2D" uid="uid://hpmgxym8g133" path="res://scenes/ability/sword_ability/sword.png" id="1_65jmi"]
 [ext_resource type="Script" uid="uid://cnhjib1hg24yf" path="res://scenes/ability/sword_ability/sword_ability.gd" id="1_kdjon"]
 [ext_resource type="PackedScene" uid="uid://b07jrrt845lfp" path="res://scenes/component/hitbox_component.tscn" id="2_xrg4e"]
+
+[sub_resource type="Gradient" id="Gradient_rokg3"]
+colors = PackedColorArray(0.78, 0.7, 0.55, 1, 0.78, 0.7, 0.55, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_6m8it"]
+gradient = SubResource("Gradient_rokg3")
+width = 4
+height = 4
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_oqx8g"]
+direction = Vector3(0, -1, 0)
+spread = 180.0
+initial_velocity = 60.0
+gravity = Vector3(0, 120, 0)
+damping = 8.0
+scale_min = 0.4
+scale_max = 0.8
+color = Color(0.78, 0.7, 0.55, 1)
 
 [sub_resource type="Animation" id="Animation_jsajo"]
 length = 0.001
@@ -82,7 +100,7 @@ tracks/2/keys = {
 "transitions": PackedFloat32Array(1),
 "values": [{
 "args": [],
-"method": &"queue_free"
+"method": &"despawn"
 }]
 }
 tracks/3/type = "value"
@@ -119,6 +137,16 @@ autoplay = "swing"
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_65jmi")
 offset = Vector2(2.08165e-12, -4)
+
+[node name="DustParticles" type="GPUParticles2D" parent="."]
+emitting = false
+amount = 10
+lifetime = 0.4
+one_shot = true
+preprocess = 0.0
+visibility_rect = Rect2(-16, -16, 32, 32)
+process_material = SubResource("ParticleProcessMaterial_oqx8g")
+texture = SubResource("GradientTexture2D_6m8it")
 
 [node name="HitboxComponent" parent="." instance=ExtResource("2_xrg4e")]
 
