@@ -9,6 +9,7 @@ var game_over := false
 
 
 func _ready():
+	_apply_player_count()
 	for player in get_tree().get_nodes_in_group("player"):
 		player.regenerate_started.connect(on_player_regenerate_started.bind(player))
 		player.regenerate_finished.connect(on_player_regenerate_finished.bind(player))
@@ -19,6 +20,15 @@ func _unhandled_input(event):
 	if event.is_action_pressed("pause"):
 		add_child(paused_menu_scene.instantiate())
 		get_tree().root.set_input_as_handled()
+
+
+func _apply_player_count() -> void:
+	if GameEvents.player_count >= 2:
+		return
+	for player in get_tree().get_nodes_in_group("player"):
+		var player_number = player.get("player_number")
+		if typeof(player_number) == TYPE_INT and player_number > 1:
+			player.queue_free()
 
 
 func on_player_regenerate_started(player):

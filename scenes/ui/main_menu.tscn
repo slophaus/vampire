@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://cdaelw5lh4xey"]
+[gd_scene load_steps=6 format=3 uid="uid://cdaelw5lh4xey"]
 
 [ext_resource type="Script" uid="uid://c1n23ojig5ww8" path="res://scenes/ui/main_menu.gd" id="1_vrpen"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="1_y67uk"]
 [ext_resource type="PackedScene" uid="uid://dumjej53vmw4d" path="res://scenes/ui/sound_button.tscn" id="2_8jljl"]
 [ext_resource type="PackedScene" uid="uid://gisddfn8bqx" path="res://scenes/ui/vignette.tscn" id="2_swaud"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_kq7yu"]
 
 [node name="MainMenu" type="CanvasLayer"]
 script = ExtResource("1_vrpen")
@@ -41,6 +43,24 @@ layout_mode = 2
 theme_type_variation = &"BlueOutlineLabel"
 theme_override_font_sizes/font_size = 32
 text = "Arena Arena"
+
+[node name="PlayerCountContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="OnePlayerButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/PlayerCountContainer" instance=ExtResource("2_8jljl")]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_kq7yu")
+text = "1 Player"
+
+[node name="TwoPlayerButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/PlayerCountContainer" instance=ExtResource("2_8jljl")]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_kq7yu")
+text = "2 Player"
 
 [node name="PlayButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" instance=ExtResource("2_8jljl")]
 unique_name_in_owner = true

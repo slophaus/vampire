@@ -7,14 +7,20 @@ var selected_index := 0
 
 
 func _ready():
+	%OnePlayerButton.pressed.connect(on_player_count_selected.bind(1))
+	%TwoPlayerButton.pressed.connect(on_player_count_selected.bind(2))
 	%PlayButton.pressed.connect(on_play_pressed)
 	%OptionsButton.pressed.connect(on_options_pressed)
 	%QuitButton.pressed.connect(on_quit_pressed)
 	menu_buttons = [
+		%OnePlayerButton,
+		%TwoPlayerButton,
 		%PlayButton,
 		%OptionsButton,
 		%QuitButton,
 	]
+	%OnePlayerButton.button_pressed = true
+	GameEvents.player_count = 1
 	if not menu_buttons.is_empty():
 		call_deferred("_focus_button", 0)
 
@@ -48,6 +54,9 @@ func on_play_pressed():
 	ScreenTransition.transition()
 	await ScreenTransition.transitioned_halfway
 	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
+
+func on_player_count_selected(player_count: int) -> void:
+	GameEvents.player_count = player_count
 
 func on_options_pressed():
 	ScreenTransition.transition()

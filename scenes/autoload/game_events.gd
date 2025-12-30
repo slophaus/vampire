@@ -4,6 +4,8 @@ signal experience_vial_collected(number: float)
 signal ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, player_number: int)
 signal player_damaged
 
+var player_count := 1
+
 
 func emit_experience_vial_collected(number: float):
 	experience_vial_collected.emit(number)
