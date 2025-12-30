@@ -4,7 +4,7 @@ const TILE_SIZE := 16.0
 const MOVE_INTERVAL := 0.8
 const TURN_CHANCE := 0.3
 const SEGMENT_EXPLOSION_DELAY := 0.08
-const EXPLOSION_STREAMS := [
+const EXPLOSION_STREAMS: Array[AudioStream] = [
 	preload("res://assets/audio/impactMining_000.ogg"),
 	preload("res://assets/audio/impactMining_001.ogg"),
 	preload("res://assets/audio/impactMining_002.ogg"),
