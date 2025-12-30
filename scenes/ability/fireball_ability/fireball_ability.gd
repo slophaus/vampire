@@ -2,7 +2,7 @@ extends Node2D
 class_name FireballAbility
 
 const SPEED := 150.0
-const MAX_HITS := 3
+const BASE_PENETRATION := 3
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -17,6 +17,8 @@ var hit_count := 0
 func _ready():
 	animated_sprite.play()
 	collision_shape.disabled = false
+	if hitbox_component.penetration <= 0:
+		hitbox_component.penetration = BASE_PENETRATION
 	hitbox_component.hit_landed.connect(on_hit_landed)
 
 
@@ -42,5 +44,5 @@ func setup(start_position: Vector2, target_position: Vector2, range_limit: float
 
 func on_hit_landed(current_hits: int) -> void:
 	hit_count = current_hits
-	if hit_count >= MAX_HITS:
+	if hit_count >= hitbox_component.penetration:
 		queue_free()

@@ -3,7 +3,7 @@ class_name AxeAbility
 
 const MAX_RADIUS := 100
 const MAX_ROTATION := 2
-const MAX_HITS := 3
+const BASE_PENETRATION := 3
 
 @onready var hitbox_component := $HitboxComponent
 
@@ -15,6 +15,8 @@ var hit_count := 0
 
 func _ready():
 	base_rotation = Vector2.RIGHT.rotated(randf_range(0, TAU))
+	if hitbox_component.penetration <= 0:
+		hitbox_component.penetration = BASE_PENETRATION
 	hitbox_component.hit_landed.connect(on_hit_landed)
 	
 	var tween = create_tween()
@@ -38,5 +40,5 @@ func tween_method(rotations: float):
 
 func on_hit_landed(current_hits: int) -> void:
 	hit_count = current_hits
-	if hit_count >= MAX_HITS:
+	if hit_count >= hitbox_component.penetration:
 		queue_free()

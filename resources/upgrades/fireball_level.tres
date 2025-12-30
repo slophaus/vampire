@@ -7,4 +7,4 @@ script = ExtResource("1_kofdu")
 id = "fireball_level"
 max_quantity = 0
 name = "Fireball Level"
-description = "Adds an extra fireball per attack and increases fireball damage by 2."
+description = "Adds an extra fireball per attack, increasing fireball damage, size, and penetration."

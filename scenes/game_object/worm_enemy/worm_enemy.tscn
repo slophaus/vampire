@@ -24,7 +24,7 @@ motion_mode = 1
 script = ExtResource("1_0r4sg")
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_8h4ly")]
-max_health = 120.0
+max_health = 20.0
 
 [node name="HitFlashComponent" parent="." node_paths=PackedStringArray("health_component", "sprite") instance=ExtResource("6_h7r1w")]
 health_component = NodePath("../HealthComponent")

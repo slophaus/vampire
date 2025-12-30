@@ -2,7 +2,7 @@ extends Node2D
 class_name SwordAbility
 
 const SPEED := 450.0
-const MAX_HITS := 3
+const BASE_PENETRATION := 3
 const WORM_COLLISION_LAYER := 1
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
@@ -22,6 +22,8 @@ func _ready():
 	sprite.scale = Vector2.ONE
 	collision_shape.disabled = false
 	hitbox_component.collision_mask = WORM_COLLISION_LAYER
+	if hitbox_component.penetration <= 0:
+		hitbox_component.penetration = BASE_PENETRATION
 	hitbox_component.hit_landed.connect(on_hit_landed)
 	hitbox_component.body_entered.connect(on_body_entered)
 
@@ -48,7 +50,7 @@ func setup(start_position: Vector2, target_position: Vector2, range_limit: float
 
 func on_hit_landed(current_hits: int) -> void:
 	hit_count = current_hits
-	if hit_count >= MAX_HITS:
+	if hit_count >= hitbox_component.penetration:
 		despawn()
 
 

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AbilityUpgrade" load_steps=2 format=3 uid="uid://dil8v1vu65apm"]
+
+[ext_resource type="Script" uid="uid://bo62cjqkynv4i" path="res://resources/upgrades/ability_upgrade.gd" id="1_ibioa"]
+
+[resource]
+script = ExtResource("1_ibioa")
+id = "boomerang_level"
+max_quantity = 0
+name = "Boomerang Level"
+description = "Throws a boomerang that reaches farther and hits more enemies."

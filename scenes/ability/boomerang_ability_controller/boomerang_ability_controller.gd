@@ -1,12 +1,16 @@
 extends Node
 
-const MAX_RANGE = 150
+const BASE_RANGE = 150
+const RANGE_PER_LEVEL = 25
+const BASE_PENETRATION = 10
+const PENETRATION_PER_LEVEL = 2
 
 @export var boomerang_ability_scene: PackedScene
 
 var base_damage = 4
 var additional_damage_percent: float = 1.0
 var base_wait_time
+var boomerang_level := 1
 var player_number := 1
 
 
@@ -26,12 +30,12 @@ func on_timer_timeout():
 
 	var aim_direction = get_aim_direction(player)
 	if aim_direction != Vector2.ZERO:
-		spawn_boomerang(player.global_position, player.global_position + (aim_direction * MAX_RANGE), player)
+		spawn_boomerang(player.global_position, player.global_position + (aim_direction * get_boomerang_range()), player)
 		return
 
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	enemies = enemies.filter(func(enemy: Node2D):
-		return enemy.global_position.distance_squared_to(player.global_position) < pow(MAX_RANGE, 2)
+		return enemy.global_position.distance_squared_to(player.global_position) < pow(get_boomerang_range(), 2)
 	)
 
 	if enemies.is_empty():
@@ -57,6 +61,8 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 			$Timer.start()
 		"boomerang_damage":
 			additional_damage_percent = 1 + (current_upgrades["boomerang_damage"]["quantity"] * 0.15)
+		"boomerang_level":
+			boomerang_level = 1 + current_upgrades["boomerang_level"]["quantity"]
 
 
 func get_player() -> Node2D:
@@ -110,5 +116,10 @@ func spawn_boomerang(start_position: Vector2, target_position: Vector2, player: 
 	foreground_layer.add_child(boomerang_instance)
 	boomerang_instance.hitbox_component.damage = base_damage * additional_damage_percent
 	boomerang_instance.hitbox_component.knockback = 80.0
+	boomerang_instance.hitbox_component.penetration = BASE_PENETRATION + (PENETRATION_PER_LEVEL * (boomerang_level - 1))
 
-	boomerang_instance.setup(start_position, target_position, MAX_RANGE, player)
+	boomerang_instance.setup(start_position, target_position, get_boomerang_range(), player)
+
+
+func get_boomerang_range() -> float:
+	return BASE_RANGE + (RANGE_PER_LEVEL * (boomerang_level - 1))

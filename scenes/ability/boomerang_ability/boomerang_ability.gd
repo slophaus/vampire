@@ -4,7 +4,7 @@ class_name BoomerangAbility
 const SPEED := 210.0
 const RETURN_SPEED_MULTIPLIER := 2.0
 const SPIN_SPEED := TAU * 1.5
-const MAX_HITS := 10
+const BASE_PENETRATION := 10
 const RETURN_DISTANCE := 24.0
 
 @onready var hitbox_component := $HitboxComponent
@@ -20,6 +20,8 @@ var deceleration := 0.0
 
 
 func _ready():
+	if hitbox_component.penetration <= 0:
+		hitbox_component.penetration = BASE_PENETRATION
 	hitbox_component.hit_landed.connect(on_hit_landed)
 
 
@@ -62,5 +64,5 @@ func setup(start_position: Vector2, target_position: Vector2, range_limit: float
 
 func on_hit_landed(current_hits: int) -> void:
 	hit_count = current_hits
-	if hit_count >= MAX_HITS:
+	if hit_count >= hitbox_component.penetration:
 		queue_free()
