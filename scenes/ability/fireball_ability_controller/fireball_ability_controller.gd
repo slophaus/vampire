@@ -119,7 +119,7 @@ func spawn_fireball(start_position: Vector2, target_position: Vector2) -> void:
 	var level_damage = base_damage + (damage_per_level * (fireball_level - 1))
 	fireball_instance.hitbox_component.damage = level_damage * additional_damage_percent
 	fireball_instance.hitbox_component.knockback = 250.0
-	if owner_group == "player":
+	if target_group == "player":
 		fireball_instance.hitbox_component.collision_layer = PLAYER_HITBOX_LAYER
 	else:
 		fireball_instance.hitbox_component.collision_layer = ENEMY_HITBOX_LAYER
