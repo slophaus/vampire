@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://mapie6ivpd7j"]
+[gd_scene load_steps=15 format=3 uid="uid://mapie6ivpd7j"]
 
 [ext_resource type="PackedScene" uid="uid://5jwlcn6cm23o" path="res://scenes/game_object/game_camera/game_camera.tscn" id="1_4i4ay"]
 [ext_resource type="PackedScene" uid="uid://bpgwbwa1p3m6i" path="res://scenes/game_object/player/player.tscn" id="1_55gsj"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://c5b76ailnfref" path="res://scenes/manager/upgrade_manager.tscn" id="6_08ukk"]
 [ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="13_th5th"]
 [ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="14_7smn1"]
+[ext_resource type="PackedScene" uid="uid://c8j2qneyiwkhy" path="res://scenes/game_object/experience_vial/experience_vial.tscn" id="14_raeie"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_v8wic")
@@ -58,3 +59,6 @@ enemy_index = 2
 
 [node name="WormEnemy" parent="." instance=ExtResource("14_7smn1")]
 position = Vector2(716, 350)
+
+[node name="ExperienceVial" parent="." instance=ExtResource("14_raeie")]
+position = Vector2(428, 411)
