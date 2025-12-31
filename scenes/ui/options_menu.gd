@@ -16,7 +16,7 @@ signal back_pressed
 
 var selected_index := 0
 var last_navigation_time := -1.0
-const NAVIGATION_REPEAT_DELAY := 0.35
+const NAVIGATION_REPEAT_DELAY := 0.2
 
 
 func _ready():
