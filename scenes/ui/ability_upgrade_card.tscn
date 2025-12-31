@@ -195,8 +195,6 @@ _data = {
 
 [node name="AbilityUpgradeCard" type="PanelContainer" groups=["upgrade_card"]]
 custom_minimum_size = Vector2(112.5, 112.5)
-size_flags_horizontal = 3
-size_flags_vertical = 3
 offset_right = 90.0
 offset_bottom = 112.5
 pivot_offset = Vector2(56.25, 56.25)
