@@ -30,6 +30,7 @@ const MOUSE_EATABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt"]
 
 @export var enemy_index := 0
 @export var mouse_eat_radius := 12.0
+@export var mouse_eat_cooldown := 0.6
 @export var dig_poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
 
 @onready var visuals := $Visuals
@@ -50,6 +51,7 @@ var tile_eater: TileEater
 var facing_multiplier := -1
 var enemy_tint := Color.WHITE
 var contact_damage := 1.0
+var mouse_eat_timer := 0.0
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
 	apply_enemy_type(enemy_index)
@@ -64,7 +66,10 @@ func _physics_process(delta):
 	apply_enemy_separation()
 	velocity_component.move(self)
 	if enemy_index == 0 and tile_eater != null:
-		tile_eater.try_convert_tiles_in_radius(global_position, mouse_eat_radius, MOUSE_EATABLE_TILE_TYPES)
+		mouse_eat_timer = max(mouse_eat_timer - delta, 0.0)
+		if mouse_eat_timer <= 0.0:
+			tile_eater.try_convert_tiles_in_radius(global_position, mouse_eat_radius, MOUSE_EATABLE_TILE_TYPES)
+			mouse_eat_timer = max(mouse_eat_cooldown, 0.0)
 
 	var move_sign = sign(velocity.x)
 	if move_sign != 0:
