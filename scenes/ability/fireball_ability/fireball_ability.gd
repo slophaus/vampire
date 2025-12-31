@@ -12,6 +12,7 @@ const SPLASH_VISUAL_DURATION := 0.15
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape: CollisionShape2D = $HitboxComponent/CollisionShape2D
+@export var explosion_scene: PackedScene = preload("res://scenes/vfx/explosion.tscn")
 
 var direction := Vector2.ZERO
 var max_distance := 0.0
@@ -90,6 +91,7 @@ func explode(excluded_target: Node2D = null) -> void:
 	if has_exploded:
 		return
 	has_exploded = true
+	spawn_explosion()
 	show_splash_indicator = true
 	direction = Vector2.ZERO
 	collision_shape.disabled = true
@@ -113,6 +115,18 @@ func explode(excluded_target: Node2D = null) -> void:
 
 	await get_tree().create_timer(SPLASH_VISUAL_DURATION).timeout
 	queue_free()
+
+
+func spawn_explosion() -> void:
+	if explosion_scene == null:
+		return
+	var explosion_instance = explosion_scene.instantiate() as GPUParticles2D
+	if explosion_instance == null:
+		return
+	explosion_instance.global_position = global_position
+	explosion_instance.emitting = true
+	explosion_instance.finished.connect(explosion_instance.queue_free)
+	get_tree().current_scene.add_child(explosion_instance)
 
 
 func apply_splash_damage(target: Node2D) -> void:
