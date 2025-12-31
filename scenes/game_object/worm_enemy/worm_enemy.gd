@@ -4,6 +4,7 @@ const TILE_SIZE := 16.0
 const MOVE_INTERVAL := 0.8
 const TURN_CHANCE := 0.3
 const SEGMENT_EXPLOSION_DELAY := 0.08
+const WORM_EATABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt", "wall"]
 const EXPLOSION_STREAMS: Array[AudioStream] = [
 	preload("res://assets/audio/impactMining_000.ogg"),
 	preload("res://assets/audio/impactMining_001.ogg"),
@@ -28,7 +29,7 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 @onready var collision_template: CollisionShape2D = $Segment0
 @onready var hurtbox_template: CollisionShape2D = $HurtboxComponent/Segment0
 @onready var health_component: HealthComponent = $HealthComponent
-@onready var arena_tilemap := _find_arena_tilemap()
+var tile_eater: TileEater
 
 @onready var body_texture: Texture2D = body_template.texture
 @onready var body_region_rect: Rect2 = body_template.region_rect
@@ -43,10 +44,6 @@ var hurtbox_shapes: Array[CollisionShape2D] = []
 var segment_tints: Array = []
 var time_alive := 0.0
 var is_dying := false
-var walkable_tile_source_id := -1
-var walkable_tile_atlas := Vector2i.ZERO
-var walkable_tile_alternative := 0
-
 
 func _ready() -> void:
 	randomize()
@@ -63,7 +60,8 @@ func _finish_spawn() -> void:
 	global_position = snap_to_grid(global_position)
 	initialize_direction()
 	initialize_segments()
-	cache_walkable_tile()
+	tile_eater = TileEater.new(self)
+	tile_eater.cache_walkable_tile()
 	apply_segment_tints()
 	apply_hit_flash()
 	visible = true
@@ -199,7 +197,8 @@ func advance_segments() -> void:
 	segment_positions.insert(0, new_head)
 	segment_positions.pop_back()
 	global_position = new_head
-	eat_tile_at_position(new_head)
+	if tile_eater != null:
+		tile_eater.try_convert_tile(new_head, WORM_EATABLE_TILE_TYPES)
 
 
 func update_segments() -> void:
@@ -285,53 +284,6 @@ func get_scene_center() -> Vector2:
 	if camera != null:
 		return camera.get_screen_center_position()
 	return Vector2.ZERO
-
-
-func _find_arena_tilemap() -> TileMap:
-	for node in get_tree().get_nodes_in_group("arena_tilemap"):
-		var tilemap := node as TileMap
-		if tilemap != null:
-			return tilemap
-	return null
-
-
-func cache_walkable_tile() -> void:
-	if arena_tilemap == null:
-		return
-	var sample_position := global_position
-	for player in get_tree().get_nodes_in_group("player"):
-		var player_node := player as Node2D
-		if player_node != null:
-			sample_position = player_node.global_position
-			break
-	var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(sample_position))
-	var source_id = arena_tilemap.get_cell_source_id(0, cell)
-	if source_id == -1:
-		return
-	walkable_tile_source_id = source_id
-	walkable_tile_atlas = arena_tilemap.get_cell_atlas_coords(0, cell)
-	walkable_tile_alternative = arena_tilemap.get_cell_alternative_tile(0, cell)
-
-
-func eat_tile_at_position(position: Vector2) -> void:
-	if arena_tilemap == null:
-		return
-	if walkable_tile_source_id == -1:
-		return
-	var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(position))
-	var source_id = arena_tilemap.get_cell_source_id(0, cell)
-	if source_id == -1:
-		return
-	if source_id == walkable_tile_source_id:
-		if arena_tilemap.get_cell_atlas_coords(0, cell) == walkable_tile_atlas \
-				and arena_tilemap.get_cell_alternative_tile(0, cell) == walkable_tile_alternative:
-			return
-	var tile_data := arena_tilemap.get_cell_tile_data(0, cell)
-	if tile_data == null:
-		return
-	if tile_data.get_collision_polygons_count(0) <= 0:
-		return
-	arena_tilemap.set_cell(0, cell, walkable_tile_source_id, walkable_tile_atlas, walkable_tile_alternative)
 
 
 func snap_to_grid(position: Vector2) -> Vector2:
