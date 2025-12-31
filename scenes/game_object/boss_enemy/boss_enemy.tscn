@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3 uid="uid://bses7vk27cfvt"]
+[gd_scene load_steps=40 format=3 uid="uid://bses7vk27cfvt"]
 
 [ext_resource type="Script" path="res://scenes/game_object/boss_enemy/boss_enemy.gd" id="1_gpcli"]
 [ext_resource type="Texture2D" uid="uid://cc6p0wg3ww2jf" path="res://sprites/rat.png" id="1_m80w1"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://cjxiijis5jocn" path="res://scenes/component/death_component.tscn" id="4_j8jii"]
 [ext_resource type="PackedScene" uid="uid://b1rgnu4v5t5yp" path="res://scenes/ability/fireball_ability_controller/fireball_ability_controller.tscn" id="5_m1ysn"]
 [ext_resource type="PackedScene" uid="uid://bnvjt5ntscb8x" path="res://scenes/ability/dig_ability_controller/dig_ability_controller.tscn" id="6_82h32"]
+[ext_resource type="PackedScene" uid="uid://b20x14h768t03" path="res://scenes/ability/sword_ability_controller/sword_ability_controller.tscn" id="7_pes6a"]
 [ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="6_jhg8v"]
 [ext_resource type="PackedScene" uid="uid://bkkq5ohgbnkxw" path="res://scenes/component/hit_flash_component.tscn" id="7_4kqgf"]
 [ext_resource type="PackedScene" uid="uid://bh478361trp2r" path="res://scenes/component/random_audio_stream_player_2d_component.tscn" id="10_74ju1"]
@@ -204,6 +205,17 @@ hit_flash_material = SubResource("ShaderMaterial_ollop")
 health_component = NodePath("../HealthComponent")
 sprite = NodePath("../Visuals/RatSprite")
 
+[node name="HealthBar" type="ProgressBar" parent="."]
+custom_minimum_size = Vector2(48, 6)
+offset_left = -24.0
+offset_top = -70.0
+offset_right = 24.0
+offset_bottom = -64.0
+pivot_offset = Vector2(24, 3)
+max_value = 1.0
+value = 1.0
+show_percentage = false
+
 [node name="HitRandomAudioPlayerComponent" parent="." instance=ExtResource("10_74ju1")]
 max_distance = 300.0
 streams = Array[AudioStream]([ExtResource("10_d8kjc"), ExtResource("12_2b1bb"), ExtResource("13_oy0ft"), ExtResource("14_6oeop"), ExtResource("15_yavv3")])
@@ -225,6 +237,13 @@ target_group = "player"
 
 [node name="DigAbilityController" parent="Abilities" instance=ExtResource("6_82h32")]
 owner_group = "enemy"
+
+[node name="SwordAbilityController" parent="Abilities" instance=ExtResource("7_pes6a")]
+owner_group = "enemy"
+target_group = "player"
+
+[node name="MinionSpawnTimer" type="Timer" parent="."]
+one_shot = true
 
 [node name="Visuals" type="Node2D" parent="."]
 
