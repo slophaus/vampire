@@ -6,7 +6,7 @@ var base_damage = 10
 var additional_damage_percent: float = 1.0
 var base_penetration := 3
 var axe_level := 1
-var multi_shot_delay := 0.1
+var multi_shot_delay := 0.3
 var player_number := 1
 
 
