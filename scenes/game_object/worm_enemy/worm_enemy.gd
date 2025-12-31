@@ -24,9 +24,14 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 @onready var hit_flash_component = $HitFlashComponent
 @onready var head_template: Sprite2D = $Visuals/Segments/HeadPrototype
 @onready var body_template: Sprite2D = $Visuals/Segments/BodyPrototype
+@onready var turn_template: Sprite2D = $Visuals/Segments/TurnPrototype
 @onready var collision_template: CollisionShape2D = $Segment0
 @onready var hurtbox_template: CollisionShape2D = $HurtboxComponent/Segment0
 @onready var health_component: HealthComponent = $HealthComponent
+
+@onready var body_texture: Texture2D = body_template.texture
+@onready var body_region_rect: Rect2 = body_template.region_rect
+@onready var turn_texture: Texture2D = turn_template.texture
 
 var move_timer := 0.0
 var segment_positions: Array[Vector2] = []
@@ -83,7 +88,7 @@ func cache_segments() -> void:
 		segment_sprites.append(head_template)
 		segment_tints.append(head_template.get_node_or_null("segment_color"))
 	for child in segment_container.get_children():
-		if child == head_template:
+		if child == head_template or child == turn_template:
 			continue
 		if child == body_template and not body_template.visible:
 			continue
@@ -187,8 +192,19 @@ func advance_segments() -> void:
 func update_segments() -> void:
 	for index in range(segment_count):
 		var local_position = segment_positions[index] - global_position
-		segment_sprites[index].position = local_position
-		segment_sprites[index].rotation = get_segment_rotation(index)
+		var sprite := segment_sprites[index]
+		sprite.position = local_position
+		if index == 0:
+			sprite.rotation = get_segment_rotation(index)
+		elif is_turn_segment(index):
+			sprite.texture = turn_texture
+			sprite.region_enabled = false
+			sprite.rotation = get_turn_rotation(index)
+		else:
+			sprite.texture = body_texture
+			sprite.region_enabled = true
+			sprite.region_rect = body_region_rect
+			sprite.rotation = get_segment_rotation(index)
 		segment_shapes[index].position = local_position
 		if index == 0 and not hurtbox_shapes.is_empty():
 			hurtbox_shapes[0].position = local_position
@@ -221,6 +237,33 @@ func get_segment_rotation(index: int) -> float:
 		if delta != Vector2.ZERO:
 			segment_direction = delta.normalized()
 	return segment_direction.angle() + (PI / 2.0)
+
+
+func is_turn_segment(index: int) -> bool:
+	if index <= 0 or index >= segment_positions.size() - 1:
+		return false
+	var previous = segment_positions[index - 1]
+	var current = segment_positions[index]
+	var next = segment_positions[index + 1]
+	return previous.x != next.x and previous.y != next.y
+
+
+func get_turn_rotation(index: int) -> float:
+	var previous = segment_positions[index - 1]
+	var current = segment_positions[index]
+	var next = segment_positions[index + 1]
+	var in_dir = (previous - current).normalized()
+	var out_dir = (next - current).normalized()
+
+	if (in_dir == Vector2.UP and out_dir == Vector2.RIGHT) or (in_dir == Vector2.RIGHT and out_dir == Vector2.UP):
+		return 0.0
+	if (in_dir == Vector2.RIGHT and out_dir == Vector2.DOWN) or (in_dir == Vector2.DOWN and out_dir == Vector2.RIGHT):
+		return PI / 2.0
+	if (in_dir == Vector2.DOWN and out_dir == Vector2.LEFT) or (in_dir == Vector2.LEFT and out_dir == Vector2.DOWN):
+		return PI
+	if (in_dir == Vector2.LEFT and out_dir == Vector2.UP) or (in_dir == Vector2.UP and out_dir == Vector2.LEFT):
+		return -PI / 2.0
+	return 0.0
 
 
 func get_scene_center() -> Vector2:
