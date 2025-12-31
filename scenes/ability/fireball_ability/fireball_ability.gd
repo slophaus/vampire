@@ -21,6 +21,7 @@ var target_group := "enemy"
 var has_exploded := false
 var last_hit_target: Node2D
 var show_splash_indicator := false
+var splash_radius_bonus := 0.0
 
 
 func _ready():
@@ -62,7 +63,7 @@ func refresh_splash_visual() -> void:
 func _draw() -> void:
 	if not show_splash_indicator:
 		return
-	var splash_radius = BASE_SPLASH_RADIUS * scale.x
+	var splash_radius = (BASE_SPLASH_RADIUS * scale.x) + splash_radius_bonus
 	draw_arc(Vector2.ZERO, splash_radius, 0.0, TAU, SPLASH_ARC_POINTS, SPLASH_COLOR, SPLASH_STROKE_WIDTH)
 
 
@@ -94,7 +95,7 @@ func explode(excluded_target: Node2D = null) -> void:
 	collision_shape.disabled = true
 	refresh_splash_visual()
 
-	var splash_radius = BASE_SPLASH_RADIUS * scale.x
+	var splash_radius = (BASE_SPLASH_RADIUS * scale.x) + splash_radius_bonus
 	var splash_radius_squared = pow(splash_radius, 2)
 	for target in get_tree().get_nodes_in_group(target_group):
 		if target == null or not is_instance_valid(target):

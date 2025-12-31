@@ -7,13 +7,14 @@ const BASE_PENETRATION = 1
 const PENETRATION_PER_LEVEL = 0
 const BASE_SCALE = 1.0
 const SCALE_PER_LEVEL = 0.15
+const SPLASH_RADIUS_PER_LEVEL = 6.0
 
 @export var fireball_ability: PackedScene
 @export var owner_group := "player"
 @export var target_group := "enemy"
 
 var base_damage = 2.0
-var damage_per_level = 2.0
+var damage_per_level = 3.0
 var additional_damage_percent: float = 1.0
 var base_wait_time := 0.0
 var rate_reduction_percent := 0.0
@@ -95,6 +96,7 @@ func spawn_fireball(start_position: Vector2, target_position: Vector2) -> void:
 	fireball_instance.hitbox_component.penetration = BASE_PENETRATION + (PENETRATION_PER_LEVEL * (fireball_level - 1))
 	fireball_instance.target_group = target_group
 	fireball_instance.scale = Vector2.ONE * (BASE_SCALE + (SCALE_PER_LEVEL * (fireball_level - 1)))
+	fireball_instance.splash_radius_bonus = SPLASH_RADIUS_PER_LEVEL * (fireball_level - 1)
 	if target_group == "player":
 		fireball_instance.hitbox_component.collision_layer = ENEMY_ATTACK_LAYER
 	else:

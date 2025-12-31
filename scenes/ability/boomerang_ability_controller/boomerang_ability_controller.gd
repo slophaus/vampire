@@ -3,11 +3,12 @@ extends Node
 const BASE_RANGE = 150
 const RANGE_PER_LEVEL = 25
 const BASE_PENETRATION = 10
-const PENETRATION_PER_LEVEL = 2
+const PENETRATION_PER_LEVEL = 3
 
 @export var boomerang_ability_scene: PackedScene
 
 var base_damage = 4
+var damage_per_level = 2
 var additional_damage_percent: float = 1.0
 var base_wait_time
 var boomerang_level := 1
@@ -114,7 +115,8 @@ func spawn_boomerang(start_position: Vector2, target_position: Vector2, player: 
 	var boomerang_instance = boomerang_ability_scene.instantiate() as BoomerangAbility
 	var foreground_layer = get_tree().get_first_node_in_group("foreground_layer")
 	foreground_layer.add_child(boomerang_instance)
-	boomerang_instance.hitbox_component.damage = base_damage * additional_damage_percent
+	var level_damage = base_damage + (damage_per_level * (boomerang_level - 1))
+	boomerang_instance.hitbox_component.damage = level_damage * additional_damage_percent
 	boomerang_instance.hitbox_component.knockback = 80.0
 	boomerang_instance.hitbox_component.penetration = BASE_PENETRATION + (PENETRATION_PER_LEVEL * (boomerang_level - 1))
 
