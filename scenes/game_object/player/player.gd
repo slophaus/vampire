@@ -43,6 +43,7 @@ var normal_visuals_modulate := Color.WHITE
 var last_health := 0.0
 var flash_tween: Tween
 var near_death_time := 0.0
+var has_defeat_visuals := false
 
 const UPGRADE_DOT_SIZE := 4.0
 const UPGRADE_DOT_RADIUS := 2
@@ -259,13 +260,10 @@ func on_died():
 	if is_regenerating:
 		return
 	is_regenerating = true
-	spawn_explosion()
-	stop_flash()
-	stop_near_death_flash()
-	visuals.visible = false
-	health_bar.visible = false
-	upgrade_dots.visible = false
-	aim_laser.visible = false
+	if GameEvents.player_count <= 1:
+		trigger_defeat_visuals()
+	else:
+		aim_laser.visible = false
 	health_component.current_health = 0
 	health_component.health_changed.emit()
 	damage_interval_timer.stop()
@@ -285,6 +283,18 @@ func end_regeneration():
 	health_component.health_changed.emit()
 	last_health = health_component.current_health
 	regenerate_finished.emit()
+
+func trigger_defeat_visuals() -> void:
+	if has_defeat_visuals:
+		return
+	has_defeat_visuals = true
+	spawn_explosion()
+	stop_flash()
+	stop_near_death_flash()
+	visuals.visible = false
+	health_bar.visible = false
+	upgrade_dots.visible = false
+	aim_laser.visible = false
 
 
 func spawn_explosion() -> void:
