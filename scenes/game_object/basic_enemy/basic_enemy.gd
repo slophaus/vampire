@@ -26,12 +26,7 @@ const ENEMY_TYPES = {
 
 const SEPARATION_RADIUS := 15.0
 const SEPARATION_PUSH_STRENGTH := 5.0
-const MOUSE_EATABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt"]
-
 @export var enemy_index := 0
-@export var mouse_eat_radius := 7.0
-@export var mouse_eat_cooldown := 2.0
-@export var dig_poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
 
 @onready var visuals := $Visuals
 @onready var velocity_component: VelocityComponent = $VelocityComponent
@@ -39,6 +34,7 @@ const MOUSE_EATABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt"]
 @onready var hit_flash_component = $HitFlashComponent
 @onready var death_component = $DeathComponent
 @onready var fireball_ability_controller = $Abilities/FireballAbilityController
+@onready var dig_ability_controller = $Abilities/DigAbilityController
 @onready var mouse_sprite: AnimatedSprite2D = $Visuals/mouse_sprite
 @onready var wizard_sprite: AnimatedSprite2D = $Visuals/wizard_sprite
 @onready var rat_sprite: Sprite2D = $Visuals/RatSprite
@@ -46,30 +42,22 @@ const MOUSE_EATABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt"]
 @onready var wizard_color: ColorRect = $Visuals/wizard_sprite/enemy_color
 @onready var rat_color: ColorRect = $Visuals/RatSprite/enemy_color
 @onready var rat_texture: Texture2D = rat_sprite.texture
-var tile_eater: TileEater
 
 var facing_multiplier := -1
 var enemy_tint := Color.WHITE
 var contact_damage := 1.0
-var mouse_eat_timer := 0.0
+var mouse_has_dig_level_two := false
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
 	apply_enemy_type(enemy_index)
-	apply_random_tint()
-	tile_eater = TileEater.new(self)
-	tile_eater.cache_walkable_tile()
-	tile_eater.tile_converted.connect(_on_tile_converted)
+	assign_mouse_dig_level()
+	apply_enemy_tint_for_type()
 
 
 func _physics_process(delta):
 	velocity_component.accelerate_to_player()
 	apply_enemy_separation()
 	velocity_component.move(self)
-	if enemy_index == 0 and tile_eater != null:
-		mouse_eat_timer = max(mouse_eat_timer - delta, 0.0)
-		if mouse_eat_timer <= 0.0:
-			tile_eater.try_convert_tiles_in_radius(global_position, mouse_eat_radius, MOUSE_EATABLE_TILE_TYPES)
-			mouse_eat_timer = max(mouse_eat_cooldown, 0.0)
 
 	var move_sign = sign(velocity.x)
 	if move_sign != 0:
@@ -113,6 +101,7 @@ func apply_enemy_type(index: int) -> void:
 	wizard_sprite.visible = enemy_index == 1
 	rat_sprite.visible = enemy_index == 2
 	fireball_ability_controller.set_active(enemy_index == 1)
+	dig_ability_controller.set_active(enemy_index == 0)
 
 	rat_sprite.texture = rat_texture
 
@@ -136,6 +125,13 @@ func apply_random_tint():
 	enemy_tint = Color.from_hsv(rng.randf(), .25, 1.0, 1.0)
 	apply_enemy_tint()
 
+func apply_enemy_tint_for_type() -> void:
+	if enemy_index == 0 and mouse_has_dig_level_two:
+		enemy_tint = Color.BLACK
+		apply_enemy_tint()
+		return
+	apply_random_tint()
+
 
 func apply_enemy_tint() -> void:
 	for tint_rect in [mouse_color, wizard_color, rat_color]:
@@ -145,16 +141,12 @@ func apply_enemy_tint() -> void:
 		tint_rect.visible = true
 
 
-func _on_tile_converted(world_position: Vector2) -> void:
+func assign_mouse_dig_level() -> void:
 	if enemy_index != 0:
+		mouse_has_dig_level_two = false
+		dig_ability_controller.set_dig_level(1)
 		return
-	if dig_poof_scene == null:
-		return
-	var poof_instance = dig_poof_scene.instantiate() as GPUParticles2D
-	if poof_instance == null:
-		return
-	get_tree().current_scene.add_child(poof_instance)
-	poof_instance.global_position = world_position
-	poof_instance.emitting = true
-	poof_instance.restart()
-	poof_instance.finished.connect(poof_instance.queue_free)
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	mouse_has_dig_level_two = rng.randf() < 0.1
+	dig_ability_controller.set_dig_level(2 if mouse_has_dig_level_two else 1)
