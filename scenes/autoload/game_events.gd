@@ -23,6 +23,10 @@ const PLAYER_COLOR_OPTIONS := [
 ]
 
 
+func _ready() -> void:
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
+
+
 func emit_experience_vial_collected(number: float):
 	experience_vial_collected.emit(number)
 
