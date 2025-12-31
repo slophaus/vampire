@@ -189,8 +189,8 @@ func update_health_display():
 func update_health_bar_size() -> void:
 	if health_bar == null or base_max_health <= 0.0:
 		return
-	var health_ratio := health_component.max_health / base_max_health
-	var width := max(base_health_bar_width, base_health_bar_width * health_ratio)
+	var health_ratio: float = float(health_component.max_health) / base_max_health
+	var width: float = max(base_health_bar_width, base_health_bar_width * health_ratio)
 	health_bar.custom_minimum_size.x = width
 	health_bar.offset_left = -width * 0.5
 	health_bar.offset_right = width * 0.5
