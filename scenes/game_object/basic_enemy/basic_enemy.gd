@@ -24,6 +24,9 @@ const ENEMY_TYPES = {
 	}
 }
 
+const SEPARATION_RADIUS := 10.0
+const SEPARATION_PUSH_STRENGTH := 20.0
+
 @export var enemy_index := 0
 
 @onready var visuals := $Visuals
@@ -53,11 +56,33 @@ func _ready():
 
 func _physics_process(delta):
 	velocity_component.accelerate_to_player()
+	apply_enemy_separation()
 	velocity_component.move(self)
 
 	var move_sign = sign(velocity.x)
 	if move_sign != 0:
 		visuals.scale = Vector2(move_sign * facing_multiplier, 1)
+
+
+func apply_enemy_separation() -> void:
+	var separation_distance := SEPARATION_RADIUS * 2.0
+	var separation_force := Vector2.ZERO
+
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if enemy == self:
+			continue
+		var enemy_node = enemy as Node2D
+		if enemy_node == null:
+			continue
+		var offset = global_position - enemy_node.global_position
+		var distance = offset.length()
+		if distance == 0.0 or distance >= separation_distance:
+			continue
+		var push_strength = (separation_distance - distance) / separation_distance
+		separation_force += offset.normalized() * push_strength
+
+	if separation_force != Vector2.ZERO:
+		velocity_component.velocity += separation_force.normalized() * SEPARATION_PUSH_STRENGTH
 
 
 func apply_enemy_type(index: int) -> void:
