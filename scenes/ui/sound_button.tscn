@@ -7,11 +7,11 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y2hct"]
 draw_center = false
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(1, 0.87, 0.2, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.258824, 0.694118, 0.945098, 1)
 
 [node name="SoundButton" type="Button"]
 offset_right = 6.0
@@ -22,6 +22,10 @@ script = ExtResource("1_7ydko")
 
 [node name="SelectionBorder" type="Panel" parent="."]
 visible = false
+offset_left = -6.0
+offset_top = -6.0
+offset_right = 6.0
+offset_bottom = 6.0
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
