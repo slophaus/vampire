@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://bpgwbwa1p3m6i"]
+[gd_scene load_steps=27 format=3 uid="uid://bpgwbwa1p3m6i"]
 
 [ext_resource type="Script" uid="uid://cfd7lntaw45s6" path="res://scenes/game_object/player/player.gd" id="1_dj72w"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_3j6hq"]
@@ -12,6 +12,7 @@
 [ext_resource type="AudioStream" uid="uid://cxe07k1ndgj6w" path="res://assets/audio/impactMining_003.ogg" id="9_4kg8n"]
 [ext_resource type="AudioStream" uid="uid://cj6ias6hl71vm" path="res://assets/audio/impactMining_004.ogg" id="10_fa7we"]
 [ext_resource type="Texture2D" uid="uid://c5mnjpo0ktrqg" path="res://sprites/dingo_small.png" id="12_oxhc3"]
+[ext_resource type="Shader" path="res://scenes/game_object/player/near_death_flash.gdshader" id="13_2bnhf"]
 
 [sub_resource type="Animation" id="Animation_j7pfq"]
 length = 0.001
@@ -68,6 +69,10 @@ animations = [{
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_oxhc3"]
 blend_mode = 3
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2bnhf"]
+shader = ExtResource("13_2bnhf")
+shader_parameter/flash_color = Color(1, 1, 1, 1)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_wmo3f"]
 radius = 7.0
@@ -155,6 +160,13 @@ offset_left = -17.6318
 offset_top = -14.8107
 offset_right = 22.3682
 offset_bottom = 25.1893
+
+[node name="NearDeathFlash" type="AnimatedSprite2D" parent="Visuals/player_sprite"]
+visible = false
+material = SubResource("ShaderMaterial_2bnhf")
+position = Vector2(0, 0)
+sprite_frames = SubResource("SpriteFrames_gme53")
+animation = &"default"
 
 [node name="hurtbox" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_8chf6")]
 visible = false
