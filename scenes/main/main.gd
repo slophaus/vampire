@@ -81,6 +81,9 @@ func are_all_players_regenerating() -> bool:
 
 func trigger_defeat():
 	game_over = true
+	for player in get_tree().get_nodes_in_group("player"):
+		if player.has_method("trigger_defeat_visuals"):
+			player.trigger_defeat_visuals()
 	await get_tree().create_timer(DEFEAT_MENU_DELAY).timeout
 	var end_screen_instance = end_screen_scene.instantiate() as EndScreen
 	add_child(end_screen_instance)
