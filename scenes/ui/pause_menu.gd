@@ -8,7 +8,7 @@ var is_closing := false
 var menu_buttons: Array[Button] = []
 var selected_index := 0
 var last_navigation_time := -1.0
-const NAVIGATION_REPEAT_DELAY := 0.2
+const NAVIGATION_REPEAT_DELAY := 0.35
 
 
 func _ready():
