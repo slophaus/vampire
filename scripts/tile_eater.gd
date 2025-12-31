@@ -2,6 +2,8 @@ extends RefCounted
 class_name TileEater
 
 const CUSTOM_DATA_KEY := "tile_type"
+const FILLED_DIRT_TILE_TYPE := "filled_dirt"
+const POOF_SCENE := preload("res://scenes/vfx/poof.tscn")
 
 var owner: Node2D
 var arena_tilemap: TileMap
@@ -77,6 +79,8 @@ func _try_convert_tile_cell(cell: Vector2i, allowed_types: Array[String]) -> voi
 		return
 	if tile_data.get_collision_polygons_count(0) <= 0:
 		return
+	if tile_type == FILLED_DIRT_TILE_TYPE:
+		_spawn_filled_dirt_poof(cell)
 	arena_tilemap.set_cell(0, cell, walkable_tile_source_id, walkable_tile_atlas, walkable_tile_alternative)
 
 
@@ -88,3 +92,25 @@ func _find_arena_tilemap() -> TileMap:
 		if tilemap != null:
 			return tilemap
 	return null
+
+
+func _spawn_filled_dirt_poof(cell: Vector2i) -> void:
+	if POOF_SCENE == null or arena_tilemap == null:
+		return
+	var poof_instance = POOF_SCENE.instantiate() as GPUParticles2D
+	if poof_instance == null:
+		return
+	var tile_size := arena_tilemap.tile_set.tile_size
+	var local_position := arena_tilemap.map_to_local(cell) + Vector2(tile_size) * 0.5
+	poof_instance.global_position = arena_tilemap.to_global(local_position)
+	poof_instance.emitting = true
+	poof_instance.restart()
+	var entities_layer: Node2D
+	for node in arena_tilemap.get_tree().get_nodes_in_group("entities_layer"):
+		entities_layer = node as Node2D
+		if entities_layer != null:
+			break
+	if entities_layer != null:
+		entities_layer.add_child(poof_instance)
+	else:
+		arena_tilemap.get_tree().current_scene.add_child(poof_instance)
