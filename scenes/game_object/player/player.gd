@@ -6,6 +6,7 @@ const DAMAGE_FLASH_DURATION = 0.45
 const EXPERIENCE_FLASH_DURATION = 0.1
 const AIM_DEADZONE = 0.1
 const AIM_LASER_LENGTH = 240.0
+const NEAR_DEATH_RED = Color(1.0, 0.1, 0.1)
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
@@ -14,13 +15,17 @@ const AIM_LASER_LENGTH = 240.0
 @onready var abilities = $Abilities
 @onready var animation_player = $AnimationPlayer
 @onready var visuals = $Visuals
+@onready var player_sprite: AnimatedSprite2D = $Visuals/player_sprite
 @onready var player_color = $Visuals/player_sprite/player_color
+@onready var near_death_flash = $Visuals/player_sprite/NearDeathFlash
 @onready var velocity_component = $VelocityComponent
 @onready var aim_laser: Line2D = $AimLaser
 @onready var player_collision_shape: CollisionShape2D = $CollisionShape2D
 
 @export var player_number := 1
 @export var regen_rate := 0.67
+@export var near_death_threshold := 0.2
+@export var near_death_flash_speed := 6.0
 
 signal regenerate_started
 signal regenerate_finished
@@ -33,6 +38,7 @@ var is_regenerating := false
 var normal_visuals_modulate := Color.WHITE
 var last_health := 0.0
 var flash_tween: Tween
+var near_death_time := 0.0
 
 const UPGRADE_DOT_SIZE := 4.0
 const UPGRADE_DOT_RADIUS := 2
@@ -42,6 +48,8 @@ func _ready():
 	base_speed = velocity_component.max_speed
 	player_color.color = get_player_tint()
 	player_color.visible = true
+	if near_death_flash != null:
+		near_death_flash.visible = false
 	aim_laser.visible = false
 	_update_aim_laser_color()
 	visuals.modulate = Color.WHITE
@@ -63,6 +71,7 @@ func _ready():
 
 func _process(delta):
 	if is_regenerating:
+		stop_near_death_flash()
 		velocity_component.velocity = Vector2.ZERO
 		velocity = Vector2.ZERO
 		animation_player.play("RESET")
@@ -87,6 +96,7 @@ func _process(delta):
 	if move_sign != 0:
 		visuals.scale = Vector2(move_sign, 1)
 	_update_aim_laser()
+	_update_near_death_flash(delta)
 
 
 func _clamp_to_camera_bounds() -> void:
@@ -233,6 +243,7 @@ func on_died():
 		return
 	is_regenerating = true
 	stop_flash()
+	stop_near_death_flash()
 	visuals.modulate = Color.BLACK
 	health_component.current_health = 0
 	health_component.health_changed.emit()
@@ -243,6 +254,7 @@ func on_died():
 func end_regeneration():
 	is_regenerating = false
 	stop_flash()
+	stop_near_death_flash()
 	visuals.modulate = normal_visuals_modulate
 	health_component.current_health = health_component.max_health
 	health_component.health_changed.emit()
@@ -302,6 +314,39 @@ func flash_visuals(color: Color, duration: float = DAMAGE_FLASH_DURATION) -> voi
 func stop_flash() -> void:
 	if flash_tween != null and flash_tween.is_running():
 		flash_tween.kill()
+
+
+func _update_near_death_flash(delta: float) -> void:
+	if near_death_flash == null or health_component == null:
+		return
+	if health_component.current_health <= 0:
+		stop_near_death_flash()
+		return
+	if health_component.get_health_percent() > near_death_threshold:
+		stop_near_death_flash()
+		return
+	near_death_flash.visible = true
+	if near_death_flash.sprite_frames != player_sprite.sprite_frames:
+		near_death_flash.sprite_frames = player_sprite.sprite_frames
+	if near_death_flash.animation != player_sprite.animation:
+		near_death_flash.play(player_sprite.animation)
+	near_death_flash.frame = player_sprite.frame
+	near_death_flash.frame_progress = player_sprite.frame_progress
+	near_death_time += delta * near_death_flash_speed
+	var pulse = (sin(near_death_time * TAU) + 1.0) * 0.5
+	var flash_color = NEAR_DEATH_RED.lerp(Color.WHITE, pulse)
+	flash_color.a = 1.0
+	var flash_material := near_death_flash.material as ShaderMaterial
+	if flash_material != null:
+		flash_material.set_shader_parameter("flash_color", flash_color)
+
+
+func stop_near_death_flash() -> void:
+	if near_death_flash == null:
+		return
+	near_death_flash.visible = false
+	near_death_flash.stop()
+	near_death_time = 0.0
 
 
 func flash_experience_gain() -> void:
