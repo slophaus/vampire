@@ -22,3 +22,19 @@
 | Sword Damage (`sword_damage`) | Always in pool | +35% sword damage per level. |
 | Sword Rate (`sword_rate`) | Always in pool | +20% sword attack rate per level. |
 | Move Speed (`player_speed`) | Always in pool | +20% player movement speed per level. |
+
+## Enemies
+
+### Basic enemy types
+
+| Enemy | Spawn behavior | Stats | Notes |
+| --- | --- | --- | --- |
+| Mouse | Always in pool | 10 HP, 30 max speed, 5.0 acceleration, 1 contact damage | Small melee chaser. |
+| Wizard | Added at arena difficulty 8 | 10 HP, 45 max speed, 2.0 acceleration, 1 contact damage | Ranged caster that fires fireballs. |
+| Rat | Added at arena difficulty 12 | 37.5 HP, 105 max speed, 1.5 acceleration, 2 contact damage | Fast bruiser with higher contact damage. |
+
+### Worm enemy
+
+| Enemy | Spawn behavior | Stats | Notes |
+| --- | --- | --- | --- |
+| Worm | Added at arena difficulty 6 | 20 HP, 15 segments, moves every 0.8s | Grid-based mover that avoids overlapping bodies, digs through blocked tiles, and explodes segments on death. |
