@@ -11,6 +11,7 @@ const BASE_PENETRATION := 3
 var base_rotation: Vector2
 var source_player: Node2D
 var hit_count := 0
+@export var spiral_duration := 2.0
 
 
 func _ready():
@@ -20,7 +21,7 @@ func _ready():
 	hitbox_component.hit_landed.connect(on_hit_landed)
 	
 	var tween = create_tween()
-	tween.tween_method(tween_method, 0.0, float(MAX_ROTATION), 3)
+	tween.tween_method(tween_method, 0.0, float(MAX_ROTATION), spiral_duration)
 	tween.tween_callback(queue_free)
 
 

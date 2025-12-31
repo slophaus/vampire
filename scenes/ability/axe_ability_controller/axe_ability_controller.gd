@@ -35,7 +35,7 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 		return
 	match upgrade.id:
 		"axe_damage":
-			additional_damage_percent = 1 + (current_upgrades["axe_damage"]["quantity"] * 0.1)
+			additional_damage_percent = 1 + (current_upgrades["axe_damage"]["quantity"] * 0.25)
 		"axe_level":
 			axe_level = 1 + current_upgrades["axe_level"]["quantity"]
 
