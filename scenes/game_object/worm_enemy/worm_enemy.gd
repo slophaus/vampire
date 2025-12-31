@@ -177,14 +177,14 @@ func choose_direction() -> Vector2:
 
 	for candidate in ordered:
 		var candidate_position = segment_positions[0] + (candidate * TILE_SIZE)
-		if is_position_blocked(candidate_position):
+		if is_position_blocked(candidate_position, false):
 			continue
 		if not is_position_adjacent_to_body(candidate_position):
 			return candidate
 
 	for candidate in ordered:
 		var candidate_position = segment_positions[0] + (candidate * TILE_SIZE)
-		if not is_position_blocked(candidate_position):
+		if not is_position_blocked(candidate_position, false):
 			return candidate
 
 	return ordered[0]
@@ -197,6 +197,9 @@ func advance_segments() -> void:
 	segment_positions.insert(0, new_head)
 	segment_positions.pop_back()
 	global_position = new_head
+	if is_worm_collision(new_head):
+		_on_died()
+		return
 	if tile_eater != null:
 		tile_eater.try_convert_tile(new_head, WORM_EATABLE_TILE_TYPES)
 
@@ -291,19 +294,20 @@ func snap_to_grid(position: Vector2) -> Vector2:
 	return (position - offset).snapped(Vector2(TILE_SIZE, TILE_SIZE)) + offset
 
 
-func is_position_blocked(candidate_position: Vector2) -> bool:
-	for occupied in segment_positions:
-		if occupied == candidate_position:
-			return true
-
-	for worm in get_tree().get_nodes_in_group("worm"):
-		if worm == self:
-			continue
-		if not worm.has_method("get_occupied_positions"):
-			continue
-		for occupied in worm.get_occupied_positions():
+func is_position_blocked(candidate_position: Vector2, include_worms: bool = true) -> bool:
+	if include_worms:
+		for occupied in segment_positions:
 			if occupied == candidate_position:
 				return true
+
+		for worm in get_tree().get_nodes_in_group("worm"):
+			if worm == self:
+				continue
+			if not worm.has_method("get_occupied_positions"):
+				continue
+			for occupied in worm.get_occupied_positions():
+				if occupied == candidate_position:
+					return true
 
 	for player in get_tree().get_nodes_in_group("player"):
 		var player_node := player as Node2D
@@ -339,6 +343,24 @@ func is_adjacent(a: Vector2, b: Vector2) -> bool:
 
 func get_occupied_positions() -> Array[Vector2]:
 	return segment_positions.duplicate()
+
+
+func is_worm_collision(candidate_position: Vector2) -> bool:
+	var last_index = max(segment_positions.size() - 1, 0)
+	for index in range(last_index):
+		if segment_positions[index] == candidate_position:
+			return true
+
+	for worm in get_tree().get_nodes_in_group("worm"):
+		if worm == self:
+			continue
+		if not worm.has_method("get_occupied_positions"):
+			continue
+		for occupied in worm.get_occupied_positions():
+			if occupied == candidate_position:
+				return true
+
+	return false
 
 
 func _on_died() -> void:
