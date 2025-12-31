@@ -300,9 +300,13 @@ func _apply_segment_tint(index: int) -> void:
 func get_segment_rotation(index: int) -> float:
 	var segment_direction := direction
 	if index > 0 and index < segment_positions.size():
-		var delta = segment_positions[index - 1] - segment_positions[index]
-		if delta != Vector2.ZERO:
-			segment_direction = delta.normalized()
+		var search_index = index
+		while search_index > 0:
+			var delta = segment_positions[search_index - 1] - segment_positions[search_index]
+			if delta != Vector2.ZERO:
+				segment_direction = delta.normalized()
+				break
+			search_index -= 1
 	return segment_direction.angle() + (PI / 2.0)
 
 
