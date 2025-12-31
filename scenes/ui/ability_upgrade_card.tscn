@@ -75,7 +75,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.4),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [Vector2(2.08165e-12, 2.08165e-12), Vector2(1.2, 1.2), Vector2(1, 1)]
+"values": [Vector2(2.08165e-12, 2.08165e-12), Vector2(1.1, 1.1), Vector2(1, 1)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -104,7 +104,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.4),
 "transitions": PackedFloat32Array(1, 2, 1),
 "update": 0,
-"values": [Vector2(1, 1), Vector2(1.2, 1.2), Vector2(2.08165e-12, 2.08165e-12)]
+"values": [Vector2(1, 1), Vector2(1.1, 1.1), Vector2(2.08165e-12, 2.08165e-12)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -194,10 +194,10 @@ _data = {
 }
 
 [node name="AbilityUpgradeCard" type="PanelContainer" groups=["upgrade_card"]]
-custom_minimum_size = Vector2(150, 150)
-offset_right = 120.0
-offset_bottom = 150.0
-pivot_offset = Vector2(75, 75)
+custom_minimum_size = Vector2(112.5, 112.5)
+offset_right = 90.0
+offset_bottom = 112.5
+pivot_offset = Vector2(56.25, 56.25)
 script = ExtResource("1_vrw8k")
 
 [node name="HoverPlayerComponent" parent="." instance=ExtResource("2_hegi4")]
@@ -241,7 +241,7 @@ theme_type_variation = &"AlternatePanelContainer"
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"BlueOutlineLabel"
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 24
 text = "Test name"
 horizontal_alignment = 1
 vertical_alignment = 1
