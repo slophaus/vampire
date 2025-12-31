@@ -39,6 +39,29 @@ func try_convert_tile(position: Vector2, allowed_types: Array[String]) -> void:
 	if walkable_tile_source_id == -1:
 		return
 	var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(position))
+	_try_convert_tile_cell(cell, allowed_types)
+
+
+func try_convert_tiles_in_radius(position: Vector2, radius: float, allowed_types: Array[String]) -> void:
+	if arena_tilemap == null:
+		return
+	if walkable_tile_source_id == -1:
+		return
+	if radius <= 0.0:
+		return
+	var tile_size := arena_tilemap.tile_set.tile_size
+	if tile_size.x <= 0 or tile_size.y <= 0:
+		return
+	var center_cell = arena_tilemap.local_to_map(arena_tilemap.to_local(position))
+	var radius_x = int(ceil(radius / float(tile_size.x)))
+	var radius_y = int(ceil(radius / float(tile_size.y)))
+	for offset_y in range(-radius_y, radius_y + 1):
+		for offset_x in range(-radius_x, radius_x + 1):
+			var cell = center_cell + Vector2i(offset_x, offset_y)
+			_try_convert_tile_cell(cell, allowed_types)
+
+
+func _try_convert_tile_cell(cell: Vector2i, allowed_types: Array[String]) -> void:
 	var source_id = arena_tilemap.get_cell_source_id(0, cell)
 	if source_id == -1:
 		return

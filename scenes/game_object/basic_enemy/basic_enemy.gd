@@ -29,6 +29,7 @@ const SEPARATION_PUSH_STRENGTH := 5.0
 const MOUSE_EATABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt"]
 
 @export var enemy_index := 0
+@export var mouse_eat_radius := 12.0
 
 @onready var visuals := $Visuals
 @onready var velocity_component: VelocityComponent = $VelocityComponent
@@ -61,7 +62,7 @@ func _physics_process(delta):
 	apply_enemy_separation()
 	velocity_component.move(self)
 	if enemy_index == 0 and tile_eater != null:
-		tile_eater.try_convert_tile(global_position, MOUSE_EATABLE_TILE_TYPES)
+		tile_eater.try_convert_tiles_in_radius(global_position, mouse_eat_radius, MOUSE_EATABLE_TILE_TYPES)
 
 	var move_sign = sign(velocity.x)
 	if move_sign != 0:
