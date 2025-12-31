@@ -26,7 +26,7 @@ const ENEMY_TYPES = {
 
 const SEPARATION_RADIUS := 15.0
 const SEPARATION_PUSH_STRENGTH := 5.0
-const MOUSE_DIG_LEVEL_TWO_TINT := Color(0.3, 0.3, 0.3)
+const MOUSE_DIG_LEVEL_TWO_TINT := Color(0.25, 0.25, 1)
 @export var enemy_index := 0
 
 @onready var visuals := $Visuals
