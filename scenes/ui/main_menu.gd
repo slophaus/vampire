@@ -7,7 +7,7 @@ var selected_index := 0
 var player_count_buttons: Array[Button] = []
 var player_color_buttons: Array[Button] = []
 var last_navigation_time := -1.0
-const NAVIGATION_REPEAT_DELAY := 0.35
+const NAVIGATION_REPEAT_DELAY := 0.2
 
 
 func _ready():
@@ -49,30 +49,24 @@ func _unhandled_input(event: InputEvent) -> void:
 	_update_selected_index_from_focus()
 	if event.is_action_pressed("ui_up"):
 		if not _can_navigate():
-			get_viewport().set_input_as_handled()
 			return
 		last_navigation_time = _get_time()
 		_focus_button(selected_index - 1)
 	elif event.is_action_pressed("ui_down"):
 		if not _can_navigate():
-			get_viewport().set_input_as_handled()
 			return
 		last_navigation_time = _get_time()
 		_focus_button(selected_index + 1)
 	elif event.is_action_pressed("ui_left"):
-		if _is_player_count_focused():
-			if not _can_navigate():
-				get_viewport().set_input_as_handled()
-				return
-			last_navigation_time = _get_time()
-			_handle_player_count_horizontal(-1)
+		if not _can_navigate():
+			return
+		last_navigation_time = _get_time()
+		_handle_player_count_horizontal(-1)
 	elif event.is_action_pressed("ui_right"):
-		if _is_player_count_focused():
-			if not _can_navigate():
-				get_viewport().set_input_as_handled()
-				return
-			last_navigation_time = _get_time()
-			_handle_player_count_horizontal(1)
+		if not _can_navigate():
+			return
+		last_navigation_time = _get_time()
+		_handle_player_count_horizontal(1)
 	elif event.is_action_pressed("cycle_player_color") and event.device == 0:
 		_cycle_active_player_color()
 
@@ -121,11 +115,6 @@ func _get_player_count_button(player_count: int) -> Button:
 		4:
 			return %FourPlayerButton
 	return null
-
-
-func _is_player_count_focused() -> bool:
-	var focused = get_viewport().gui_get_focus_owner()
-	return focused != null and focused in player_color_buttons
 
 
 func _handle_player_count_horizontal(direction: int) -> void:
