@@ -1,4 +1,4 @@
-extends Node
+extends Node2D
 
 const DIGGABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt"]
 
