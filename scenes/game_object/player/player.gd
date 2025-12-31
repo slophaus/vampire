@@ -35,6 +35,7 @@ var floating_text_scene = preload("res://scenes/ui/floating_text.tscn")
 var colliding_enemies: Dictionary = {}
 var base_speed := 0
 var base_max_health := 0.0
+var base_health_bar_width := 0.0
 var is_regenerating := false
 var normal_visuals_modulate := Color.WHITE
 var last_health := 0.0
@@ -48,6 +49,7 @@ const UPGRADE_DOT_RADIUS := 2
 func _ready():
 	base_speed = velocity_component.max_speed
 	base_max_health = health_component.max_health
+	base_health_bar_width = health_bar.custom_minimum_size.x
 	player_color.color = get_player_tint()
 	player_color.visible = true
 	if near_death_flash != null:
@@ -67,6 +69,7 @@ func _ready():
 	for ability in abilities.get_children():
 		if ability.has_method("set_player_number"):
 			ability.set_player_number(player_number)
+	update_health_bar_size()
 	update_health_display()
 	set_upgrade_dot_count(0)
 
@@ -183,6 +186,15 @@ func check_deal_damage():
 func update_health_display():
 	health_bar.value = health_component.get_health_percent()
 
+func update_health_bar_size() -> void:
+	if health_bar == null or base_max_health <= 0.0:
+		return
+	var health_ratio := health_component.max_health / base_max_health
+	var width := max(base_health_bar_width, base_health_bar_width * health_ratio)
+	health_bar.custom_minimum_size.x = width
+	health_bar.offset_left = -width * 0.5
+	health_bar.offset_right = width * 0.5
+	health_bar.pivot_offset = Vector2(width * 0.5, health_bar.pivot_offset.y)
 
 #---------------------------------------------
 
@@ -278,6 +290,7 @@ func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades:
 	elif ability_upgrade.id == "player_health":
 		health_component.max_health = base_max_health + (current_upgrades["player_health"]["quantity"] * 8.0)
 		health_component.heal(8.0)
+		update_health_bar_size()
 	update_upgrade_dots(current_upgrades)
 
 
