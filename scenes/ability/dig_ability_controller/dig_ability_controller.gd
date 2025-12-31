@@ -74,6 +74,8 @@ func set_player_number(new_player_number: int) -> void:
 
 
 func _on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int) -> void:
+	if owner_group != "player":
+		return
 	if upgrade_player_number != player_number:
 		return
 	if upgrade.id == "dig_level":
@@ -85,3 +87,17 @@ func _get_diggable_tile_types() -> Array[String]:
 	if dig_level >= 2:
 		tile_types.append_array(WALL_DIGGABLE_TILE_TYPES)
 	return tile_types
+
+
+func set_active(active: bool) -> void:
+	set_process(active)
+	set_physics_process(active)
+	set_process_input(active)
+	if active:
+		$Timer.start()
+	else:
+		$Timer.stop()
+
+
+func set_dig_level(new_level: int) -> void:
+	dig_level = max(new_level, 1)
