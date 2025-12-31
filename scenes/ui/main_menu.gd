@@ -46,25 +46,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	selected_index = update_selected_index_from_focus(menu_buttons, selected_index)
-	if event.is_action_pressed("ui_up"):
-		if not can_navigate():
-			return
-		mark_navigation()
+	if should_navigate("ui_up", event):
 		selected_index = focus_item(selected_index - 1, menu_buttons)
-	elif event.is_action_pressed("ui_down"):
-		if not can_navigate():
-			return
-		mark_navigation()
+	elif should_navigate("ui_down", event):
 		selected_index = focus_item(selected_index + 1, menu_buttons)
-	elif event.is_action_pressed("ui_left"):
-		if not can_navigate():
-			return
-		mark_navigation()
+	elif should_navigate("ui_left", event):
 		_handle_player_count_horizontal(-1)
-	elif event.is_action_pressed("ui_right"):
-		if not can_navigate():
-			return
-		mark_navigation()
+	elif should_navigate("ui_right", event):
 		_handle_player_count_horizontal(1)
 	elif event.is_action_pressed("cycle_player_color") and event.device == 0:
 		_cycle_active_player_color()
