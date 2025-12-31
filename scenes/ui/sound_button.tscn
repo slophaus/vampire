@@ -7,11 +7,11 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y2hct"]
 draw_center = false
-border_width_left = 6
-border_width_top = 6
-border_width_right = 6
-border_width_bottom = 6
-border_color = Color(0.258824, 0.694118, 0.945098, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0, 0, 1)
 
 [node name="SoundButton" type="Button"]
 offset_right = 6.0

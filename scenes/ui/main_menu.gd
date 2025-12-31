@@ -7,7 +7,7 @@ var selected_index := 0
 var player_count_buttons: Array[Button] = []
 var player_color_buttons: Array[Button] = []
 var last_navigation_time := -1.0
-const NAVIGATION_REPEAT_DELAY := 0.2
+const NAVIGATION_REPEAT_DELAY := 0.35
 
 
 func _ready():
