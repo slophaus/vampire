@@ -114,7 +114,7 @@ func apply_enemy_type(index: int) -> void:
 		active_sprite = rat_sprite
 
 	hit_flash_component.set_sprite(active_sprite)
-	death_component.sprite = dragon_sprite
+	death_component.sprite = active_sprite
 
 
 func on_hit():
