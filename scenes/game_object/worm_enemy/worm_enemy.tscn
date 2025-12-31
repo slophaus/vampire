@@ -6,7 +6,7 @@
 [ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="5_owowv"]
 [ext_resource type="Texture2D" uid="uid://crrxkfeyeohmh" path="res://sprites/metroid_can.png" id="6_dcn7l"]
 [ext_resource type="PackedScene" uid="uid://bkkq5ohgbnkxw" path="res://scenes/component/hit_flash_component.tscn" id="6_h7r1w"]
-[ext_resource type="Texture2D" uid="uid://dnulx3t78peyl" path="res://sprites/metroid_elbow.png" id="7_5yf6x"]
+[ext_resource type="Texture2D" uid="uid://k8kyda065ipn" path="res://sprites/metroid_elbow.png" id="7_5yf6x"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_p7l3g"]
 resource_local_to_scene = true
