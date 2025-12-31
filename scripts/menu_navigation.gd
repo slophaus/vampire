@@ -4,14 +4,25 @@ extends CanvasLayer
 const NAVIGATION_REPEAT_DELAY := 0.35
 
 var last_navigation_time := -1.0
+var navigation_hold := {}
 
 
-func can_navigate() -> bool:
-	return _get_time() - last_navigation_time >= NAVIGATION_REPEAT_DELAY
-
-
-func mark_navigation() -> void:
-	last_navigation_time = _get_time()
+func should_navigate(action: StringName, event: InputEvent) -> bool:
+	if not navigation_hold.has(action):
+		navigation_hold[action] = false
+	if event.is_action_released(action):
+		navigation_hold[action] = false
+		return false
+	if not event.is_action_pressed(action):
+		return false
+	if not navigation_hold[action]:
+		navigation_hold[action] = true
+		last_navigation_time = _get_time()
+		return true
+	if _get_time() - last_navigation_time >= NAVIGATION_REPEAT_DELAY:
+		last_navigation_time = _get_time()
+		return true
+	return false
 
 
 func focus_item(index: int, items: Array) -> int:

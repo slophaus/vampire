@@ -43,15 +43,9 @@ func _unhandled_input(event):
 		return
 
 	selected_index = update_selected_index_from_focus(menu_buttons, selected_index)
-	if event.is_action_pressed("ui_up"):
-		if not can_navigate():
-			return
-		mark_navigation()
+	if should_navigate("ui_up", event):
 		selected_index = focus_item(selected_index - 1, menu_buttons)
-	elif event.is_action_pressed("ui_down"):
-		if not can_navigate():
-			return
-		mark_navigation()
+	elif should_navigate("ui_down", event):
 		selected_index = focus_item(selected_index + 1, menu_buttons)
 
 
@@ -93,4 +87,3 @@ func on_quit_pressed():
 	await ScreenTransition.transitioned_halfway
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
-
