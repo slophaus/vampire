@@ -2,32 +2,32 @@ extends CharacterBody2D
 
 const ENEMY_TYPES = {
 	0: {
-		"max_health": 10.0,
-		"max_speed": 30,
-		"acceleration": 5.0,
-		"facing_multiplier": -1,
-		"contact_damage": 1
+		"max_health": 150.0,
+		"max_speed": 70,
+		"acceleration": 2.5,
+		"facing_multiplier": 1,
+		"contact_damage": 4
 	},
 	1: {
-		"max_health": 10.0,
-		"max_speed": 45,
-		"acceleration": 2.0,
+		"max_health": 150.0,
+		"max_speed": 70,
+		"acceleration": 2.5,
 		"facing_multiplier": 1,
-		"contact_damage": 1
+		"contact_damage": 4
 	},
 	2: {
-		"max_health": 37.5,
-		"max_speed": 105,
-		"acceleration": 1.5,
-		"facing_multiplier": -1,
-		"contact_damage": 2
+		"max_health": 150.0,
+		"max_speed": 70,
+		"acceleration": 2.5,
+		"facing_multiplier": 1,
+		"contact_damage": 4
 	}
 }
 
 const SEPARATION_RADIUS := 15.0
 const SEPARATION_PUSH_STRENGTH := 5.0
 const MOUSE_DIG_LEVEL_TWO_TINT := Color(0.25, 0.25, 1)
-@export var enemy_index := 0
+@export var enemy_index := 1
 
 @onready var visuals := $Visuals
 @onready var velocity_component: VelocityComponent = $VelocityComponent
@@ -51,6 +51,7 @@ var mouse_has_dig_level_two := false
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
 	apply_enemy_type(enemy_index)
+	fireball_ability_controller.fireball_level = 3
 	assign_mouse_dig_level()
 	apply_enemy_tint_for_type()
 
@@ -113,7 +114,7 @@ func apply_enemy_type(index: int) -> void:
 		active_sprite = rat_sprite
 
 	hit_flash_component.set_sprite(active_sprite)
-	death_component.sprite = rat_sprite
+	death_component.sprite = dragon_sprite
 
 
 func on_hit():
