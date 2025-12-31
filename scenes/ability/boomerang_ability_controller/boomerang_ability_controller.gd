@@ -4,6 +4,7 @@ const BASE_RANGE = 120
 const RANGE_PER_LEVEL = 25
 const BASE_PENETRATION = 10
 const PENETRATION_PER_LEVEL = 3
+const SIZE_PER_LEVEL = 0.3
 
 @export var boomerang_ability_scene: PackedScene
 
@@ -119,6 +120,7 @@ func spawn_boomerang(start_position: Vector2, target_position: Vector2, player: 
 	boomerang_instance.hitbox_component.damage = level_damage * additional_damage_percent
 	boomerang_instance.hitbox_component.knockback = 80.0
 	boomerang_instance.hitbox_component.penetration = BASE_PENETRATION + (PENETRATION_PER_LEVEL * (boomerang_level - 1))
+	boomerang_instance.scale = Vector2.ONE * (1.0 + (SIZE_PER_LEVEL * (boomerang_level - 1)))
 
 	boomerang_instance.setup(start_position, target_position, get_boomerang_range(), player)
 
