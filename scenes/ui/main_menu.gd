@@ -46,13 +46,13 @@ func _input(event: InputEvent) -> void:
 		return
 
 	selected_index = update_selected_index_from_focus(menu_buttons, selected_index)
-	if should_navigate("ui_up", event):
+	if should_navigate("ui_up"):
 		selected_index = focus_item(selected_index - 1, menu_buttons)
-	elif should_navigate("ui_down", event):
+	elif should_navigate("ui_down"):
 		selected_index = focus_item(selected_index + 1, menu_buttons)
-	elif should_navigate("ui_left", event):
+	elif should_navigate("ui_left"):
 		_handle_player_count_horizontal(-1)
-	elif should_navigate("ui_right", event):
+	elif should_navigate("ui_right"):
 		_handle_player_count_horizontal(1)
 	elif event.is_action_pressed("cycle_player_color") and event.device == 0:
 		_cycle_active_player_color()

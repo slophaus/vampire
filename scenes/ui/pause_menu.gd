@@ -43,9 +43,9 @@ func _input(event):
 		return
 
 	selected_index = update_selected_index_from_focus(menu_buttons, selected_index)
-	if should_navigate("ui_up", event):
+	if should_navigate("ui_up"):
 		selected_index = focus_item(selected_index - 1, menu_buttons)
-	elif should_navigate("ui_down", event):
+	elif should_navigate("ui_down"):
 		selected_index = focus_item(selected_index + 1, menu_buttons)
 
 
