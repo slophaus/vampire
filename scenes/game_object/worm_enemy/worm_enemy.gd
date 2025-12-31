@@ -78,6 +78,9 @@ func _physics_process(delta: float) -> void:
 
 	direction = choose_direction()
 	advance_segments()
+	if did_collide_with_worm():
+		_handle_collision_death()
+		return
 	update_segments()
 
 
@@ -335,6 +338,34 @@ func is_position_adjacent_to_body(candidate_position: Vector2) -> bool:
 func is_adjacent(a: Vector2, b: Vector2) -> bool:
 	var delta = a - b
 	return abs(delta.x) + abs(delta.y) == TILE_SIZE
+
+
+func did_collide_with_worm() -> bool:
+	if segment_positions.size() < 2:
+		return false
+	var head_position = segment_positions[0]
+	for index in range(1, segment_positions.size()):
+		if segment_positions[index] == head_position:
+			return true
+	for worm in get_tree().get_nodes_in_group("worm"):
+		if worm == self:
+			continue
+		if not worm.has_method("get_occupied_positions"):
+			continue
+		for occupied in worm.get_occupied_positions():
+			if occupied == head_position:
+				return true
+	return false
+
+
+func _handle_collision_death() -> void:
+	if is_dying:
+		return
+	if health_component != null:
+		health_component.current_health = 0
+		health_component.check_death()
+	else:
+		_on_died()
 
 
 func get_occupied_positions() -> Array[Vector2]:
