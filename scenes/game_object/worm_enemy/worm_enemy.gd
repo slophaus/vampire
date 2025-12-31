@@ -174,6 +174,13 @@ func choose_direction() -> Vector2:
 
 	for candidate in ordered:
 		var candidate_position = segment_positions[0] + (candidate * TILE_SIZE)
+		if is_position_blocked(candidate_position):
+			continue
+		if not is_position_adjacent_to_body(candidate_position):
+			return candidate
+
+	for candidate in ordered:
+		var candidate_position = segment_positions[0] + (candidate * TILE_SIZE)
 		if not is_position_blocked(candidate_position):
 			return candidate
 
@@ -300,6 +307,28 @@ func is_position_blocked(candidate_position: Vector2) -> bool:
 			return true
 
 	return false
+
+
+func is_position_adjacent_to_body(candidate_position: Vector2) -> bool:
+	for index in range(1, segment_positions.size()):
+		if is_adjacent(candidate_position, segment_positions[index]):
+			return true
+
+	for worm in get_tree().get_nodes_in_group("worm"):
+		if worm == self:
+			continue
+		if not worm.has_method("get_occupied_positions"):
+			continue
+		for occupied in worm.get_occupied_positions():
+			if is_adjacent(candidate_position, occupied):
+				return true
+
+	return false
+
+
+func is_adjacent(a: Vector2, b: Vector2) -> bool:
+	var delta = a - b
+	return abs(delta.x) + abs(delta.y) == TILE_SIZE
 
 
 func get_occupied_positions() -> Array[Vector2]:
