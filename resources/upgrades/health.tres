@@ -6,5 +6,5 @@
 script = ExtResource("1_wd7rq")
 id = "player_health"
 max_quantity = 5
-name = "Vitality"
+name = "Health"
 description = "Increase max health by 8 and heal 8."
