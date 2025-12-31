@@ -7,7 +7,7 @@ const BASE_PENETRATION = 1
 const PENETRATION_PER_LEVEL = 0
 const BASE_SCALE = 1.0
 const SCALE_PER_LEVEL = 0.15
-const SPLASH_RADIUS_PER_LEVEL = 6.0
+const SPLASH_RADIUS_PER_LEVEL = 3.0
 
 @export var fireball_ability: PackedScene
 @export var owner_group := "player"
