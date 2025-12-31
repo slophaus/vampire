@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://bnvjt5ntscb8x"]
+
+[ext_resource type="Script" uid="uid://bpc4c72j5ghd1" path="res://scenes/ability/dig_ability_controller/dig_ability_controller.gd" id="1_3x5h3"]
+
+[node name="DigAbilityController" type="Node"]
+script = ExtResource("1_3x5h3")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 2.0
+autostart = false
