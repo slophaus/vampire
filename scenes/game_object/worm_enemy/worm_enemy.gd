@@ -335,7 +335,7 @@ func eat_tile_at_position(position: Vector2) -> void:
 
 
 func snap_to_grid(position: Vector2) -> Vector2:
-	return position.snapped(Vector2(TILE_SIZE, TILE_SIZE)) + Vector2(TILE_SIZE / 2.0, TILE_SIZE / 2.0)
+	return position.snapped(Vector2(TILE_SIZE, TILE_SIZE))
 
 
 func is_position_blocked(candidate_position: Vector2) -> bool:
