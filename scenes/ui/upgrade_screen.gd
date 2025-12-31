@@ -38,7 +38,7 @@ func set_ability_upgrades(upgrades: Array[AbilityUpgrade], current_upgrades: Dic
 		card_instance.play_in(delay)
 		card_instance.selected.connect(on_upgrade_selected.bind(upgrade))
 		cards.append(card_instance)
-		delay += 0.2
+		delay += 0.1
 	if not cards.is_empty():
 		call_deferred("_focus_card", 0)
 
