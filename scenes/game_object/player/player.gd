@@ -262,7 +262,10 @@ func on_died():
 	spawn_explosion()
 	stop_flash()
 	stop_near_death_flash()
-	visuals.modulate = Color.BLACK
+	visuals.visible = false
+	health_bar.visible = false
+	upgrade_dots.visible = false
+	aim_laser.visible = false
 	health_component.current_health = 0
 	health_component.health_changed.emit()
 	damage_interval_timer.stop()
@@ -274,6 +277,10 @@ func end_regeneration():
 	stop_flash()
 	stop_near_death_flash()
 	visuals.modulate = normal_visuals_modulate
+	visuals.visible = true
+	health_bar.visible = true
+	upgrade_dots.visible = true
+	aim_laser.visible = false
 	health_component.current_health = health_component.max_health
 	health_component.health_changed.emit()
 	last_health = health_component.current_health
