@@ -133,12 +133,10 @@ points = PackedVector2Array(0, 0, 0, 0)
 width = 1.0
 
 [node name="PickupArea2D" type="Area2D" parent="."]
-visible = false
 collision_layer = 16
 collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PickupArea2D"]
-position = Vector2(2.08165e-12, -5)
 shape = SubResource("CircleShape2D_rcy15")
 debug_color = Color(4.3074e-06, 0.636303, 0.406577, 0.42)
 
@@ -146,7 +144,7 @@ debug_color = Color(4.3074e-06, 0.636303, 0.406577, 0.42)
 
 [node name="player_sprite" type="AnimatedSprite2D" parent="Visuals"]
 clip_children = 2
-position = Vector2(1.90735e-06, -25)
+position = Vector2(3, -18)
 rotation = -3.14159
 scale = Vector2(1.41789, -1.41789)
 sprite_frames = SubResource("SpriteFrames_gme53")
@@ -167,16 +165,12 @@ material = SubResource("ShaderMaterial_2bnhf")
 sprite_frames = SubResource("SpriteFrames_gme53")
 
 [node name="hurtbox" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_8chf6")]
-visible = false
 collision_mask = 8
 health_component = NodePath("../HealthComponent")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="hurtbox"]
-position = Vector2(0, -7)
 shape = SubResource("CircleShape2D_wmo3f")
 debug_color = Color(0.921138, 0, 0.380155, 0.419608)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
-position = Vector2(2.08165e-12, -5)
 shape = SubResource("CircleShape2D_jme47")
