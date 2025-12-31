@@ -18,7 +18,7 @@
 
 | Upgrade | Availability | Effect |
 | --- | --- | --- |
-| Axe Damage (`axe_damage`) | Added after unlocking Axe | +10% axe damage per level. |
+| Axe Damage (`axe_damage`) | Added after unlocking Axe | +50% axe damage per level. |
 | Sword Damage (`sword_damage`) | Always in pool | +25% sword damage per level. |
 | Sword Rate (`sword_rate`) | Always in pool | +20% sword attack rate per level. |
 | Move Speed (`player_speed`) | Always in pool | +20% player movement speed per level. |
