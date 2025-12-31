@@ -7,6 +7,7 @@ const EXPERIENCE_FLASH_DURATION = 0.1
 const AIM_DEADZONE = 0.1
 const AIM_LASER_LENGTH = 240.0
 const NEAR_DEATH_RED = Color(1.0, 0.1, 0.1)
+const REGENERATING_TINT = Color(0, 0, 0, 1)
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
@@ -54,7 +55,7 @@ func _ready():
 	base_max_health = health_component.max_health
 	base_health_bar_width = health_bar.custom_minimum_size.x
 	base_health_bar_left = health_bar.offset_left
-	player_color.color = get_player_tint()
+	_update_player_tint()
 	player_color.visible = true
 	if near_death_flash != null:
 		near_death_flash.visible = false
@@ -160,6 +161,12 @@ func can_attack() -> bool:
 	return not is_regenerating
 
 
+func _update_player_tint() -> void:
+	var tint = REGENERATING_TINT if is_regenerating else get_player_tint()
+	player_color.color = tint
+	_update_aim_laser_color()
+
+
 func _update_aim_laser() -> void:
 	var aim_direction = get_aim_direction()
 	if aim_direction == Vector2.ZERO:
@@ -260,6 +267,7 @@ func on_died():
 	if is_regenerating:
 		return
 	is_regenerating = true
+	_update_player_tint()
 	if GameEvents.player_count <= 1:
 		trigger_defeat_visuals()
 	else:
@@ -274,6 +282,7 @@ func end_regeneration():
 	is_regenerating = false
 	stop_flash()
 	stop_near_death_flash()
+	_update_player_tint()
 	visuals.modulate = normal_visuals_modulate
 	visuals.visible = true
 	health_bar.visible = true
