@@ -85,13 +85,13 @@ func _configure_focus_navigation() -> void:
 	%ThreePlayerButton.focus_neighbor_left = %TwoPlayerButton.get_path()
 	%ThreePlayerButton.focus_neighbor_right = %FourPlayerButton.get_path()
 	%FourPlayerButton.focus_neighbor_left = %ThreePlayerButton.get_path()
-	%OnePlayerButton.focus_neighbor_down = %PlayButton.get_path()
-	%TwoPlayerButton.focus_neighbor_down = %PlayButton.get_path()
-	%ThreePlayerButton.focus_neighbor_down = %PlayButton.get_path()
-	%FourPlayerButton.focus_neighbor_down = %PlayButton.get_path()
-	%PlayButton.focus_neighbor_up = %OnePlayerButton.get_path()
-	%OptionsButton.focus_neighbor_up = %PlayButton.get_path()
-	%QuitButton.focus_neighbor_up = %OptionsButton.get_path()
+	%OnePlayerButton.focus_neighbor_bottom = %PlayButton.get_path()
+	%TwoPlayerButton.focus_neighbor_bottom = %PlayButton.get_path()
+	%ThreePlayerButton.focus_neighbor_bottom = %PlayButton.get_path()
+	%FourPlayerButton.focus_neighbor_bottom = %PlayButton.get_path()
+	%PlayButton.focus_neighbor_top = %OnePlayerButton.get_path()
+	%OptionsButton.focus_neighbor_top = %PlayButton.get_path()
+	%QuitButton.focus_neighbor_top = %OptionsButton.get_path()
 
 
 func _refresh_player_count_button_colors() -> void:
