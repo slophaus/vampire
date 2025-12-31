@@ -7,8 +7,7 @@ var options_scene = preload("res://scenes/ui/options_menu.tscn")
 var is_closing := false
 var menu_buttons: Array[Button] = []
 var selected_index := 0
-var last_navigation_time := -1.0
-const NAVIGATION_REPEAT_DELAY := 0.2
+var menu_navigation := MenuNavigation.new()
 
 
 func _ready():
@@ -44,15 +43,21 @@ func _unhandled_input(event):
 		return
 
 	_update_selected_index_from_focus()
-	if event.is_action_pressed("ui_up"):
-		if not _can_navigate():
+	if event is InputEventJoypadMotion:
+		var vertical_direction = menu_navigation.get_axis_direction(event, JOY_AXIS_LEFT_Y)
+		if vertical_direction != 0:
+			_focus_button(selected_index + vertical_direction)
+			get_viewport().set_input_as_handled()
 			return
-		last_navigation_time = _get_time()
+	if event.is_action_pressed("ui_up"):
+		if not menu_navigation.can_navigate():
+			return
+		menu_navigation.mark_navigated()
 		_focus_button(selected_index - 1)
 	elif event.is_action_pressed("ui_down"):
-		if not _can_navigate():
+		if not menu_navigation.can_navigate():
 			return
-		last_navigation_time = _get_time()
+		menu_navigation.mark_navigated()
 		_focus_button(selected_index + 1)
 
 
@@ -108,11 +113,3 @@ func _update_selected_index_from_focus() -> void:
 	var button_index = menu_buttons.find(focused)
 	if button_index != -1:
 		selected_index = button_index
-
-
-func _can_navigate() -> bool:
-	return _get_time() - last_navigation_time >= NAVIGATION_REPEAT_DELAY
-
-
-func _get_time() -> float:
-	return Time.get_ticks_msec() / 1000.0
