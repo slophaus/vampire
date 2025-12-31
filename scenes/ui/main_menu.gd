@@ -1,4 +1,4 @@
-extends CanvasLayer
+extends MenuNavigation
 
 
 var options_scene = preload("res://scenes/ui/options_menu.tscn")
@@ -6,8 +6,6 @@ var menu_buttons: Array[Button] = []
 var selected_index := 0
 var player_count_buttons: Array[Button] = []
 var player_color_buttons: Array[Button] = []
-var last_navigation_time := -1.0
-const NAVIGATION_REPEAT_DELAY := 0.35
 
 
 func _ready():
@@ -39,50 +37,37 @@ func _ready():
 	_update_player_count_selection(%OnePlayerButton)
 	_refresh_player_count_button_colors()
 	if not menu_buttons.is_empty():
-		call_deferred("_focus_button", 0)
+		await get_tree().process_frame
+		selected_index = focus_item(0, menu_buttons)
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if menu_buttons.is_empty():
 		return
 
-	_update_selected_index_from_focus()
+	selected_index = update_selected_index_from_focus(menu_buttons, selected_index)
 	if event.is_action_pressed("ui_up"):
-		if not _can_navigate():
+		if not can_navigate():
 			return
-		last_navigation_time = _get_time()
-		_focus_button(selected_index - 1)
+		mark_navigation()
+		selected_index = focus_item(selected_index - 1, menu_buttons)
 	elif event.is_action_pressed("ui_down"):
-		if not _can_navigate():
+		if not can_navigate():
 			return
-		last_navigation_time = _get_time()
-		_focus_button(selected_index + 1)
+		mark_navigation()
+		selected_index = focus_item(selected_index + 1, menu_buttons)
 	elif event.is_action_pressed("ui_left"):
-		if not _can_navigate():
+		if not can_navigate():
 			return
-		last_navigation_time = _get_time()
+		mark_navigation()
 		_handle_player_count_horizontal(-1)
 	elif event.is_action_pressed("ui_right"):
-		if not _can_navigate():
+		if not can_navigate():
 			return
-		last_navigation_time = _get_time()
+		mark_navigation()
 		_handle_player_count_horizontal(1)
 	elif event.is_action_pressed("cycle_player_color") and event.device == 0:
 		_cycle_active_player_color()
-
-
-func _focus_button(index: int) -> void:
-	selected_index = clampi(index, 0, menu_buttons.size() - 1)
-	menu_buttons[selected_index].grab_focus()
-
-
-func _update_selected_index_from_focus() -> void:
-	var focused = get_viewport().gui_get_focus_owner()
-	if focused == null:
-		return
-	var button_index = menu_buttons.find(focused)
-	if button_index != -1:
-		selected_index = button_index
 
 
 func on_play_pressed():
@@ -125,8 +110,7 @@ func _handle_player_count_horizontal(direction: int) -> void:
 	if current_index == -1:
 		return
 	var target_index = clampi(current_index + direction, 0, player_color_buttons.size() - 1)
-	selected_index = target_index
-	player_color_buttons[target_index].grab_focus()
+	selected_index = focus_item(target_index, player_color_buttons)
 	get_viewport().set_input_as_handled()
 
 
@@ -152,13 +136,6 @@ func _refresh_player_count_button_colors() -> void:
 		button.add_theme_color_override("font_focus_color", color)
 		button.add_theme_color_override("font_disabled_color", color)
 
-
-func _can_navigate() -> bool:
-	return _get_time() - last_navigation_time >= NAVIGATION_REPEAT_DELAY
-
-
-func _get_time() -> float:
-	return Time.get_ticks_msec() / 1000.0
 
 func on_options_pressed():
 	ScreenTransition.transition()

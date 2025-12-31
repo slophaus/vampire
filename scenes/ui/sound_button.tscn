@@ -22,10 +22,10 @@ script = ExtResource("1_7ydko")
 
 [node name="SelectionBorder" type="Panel" parent="."]
 visible = false
-offset_left = -6.0
-offset_top = -6.0
-offset_right = 6.0
-offset_bottom = 6.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
