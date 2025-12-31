@@ -65,7 +65,7 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 			$Timer.wait_time = base_wait_time * (1 - percent_reduction)
 			$Timer.start()
 		"sword_damage":
-			additional_damage_percent = 1 + (current_upgrades["sword_damage"]["quantity"] * 0.25)
+			additional_damage_percent = 1 + (current_upgrades["sword_damage"]["quantity"] * 0.35)
 		"sword_level":
 			sword_level = 1 + current_upgrades["sword_level"]["quantity"]
 
