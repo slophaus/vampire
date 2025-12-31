@@ -260,6 +260,9 @@ func on_died():
 	if is_regenerating:
 		return
 	is_regenerating = true
+	stop_flash()
+	stop_near_death_flash()
+	visuals.modulate = Color.BLACK
 	if GameEvents.player_count <= 1:
 		trigger_defeat_visuals()
 	else:
