@@ -10,13 +10,13 @@ const NAVIGATION_REPEAT_DELAY := 0.2
 
 func _ready():
 	panel_container.pivot_offset = panel_container.size / 2
-	panel_container.scale = Vector2.ZERO
+	panel_container.scale = Vector2.ONE
+	panel_container.modulate = Color(1, 1, 1, 0)
 	
 	var tween = create_tween()
-	tween.tween_property(panel_container, "scale", Vector2.ZERO, 0)
-	tween.tween_property(panel_container, "scale", Vector2.ONE, 0.3) \
+	tween.tween_property(panel_container, "modulate", Color.WHITE, 0.6) \
 		.set_ease(Tween.EASE_OUT) \
-		.set_trans(Tween.TRANS_BACK)
+		.set_trans(Tween.TRANS_QUAD)
 	
 	get_tree().paused = true
 	%QuitButton.pressed.connect(on_quit_button_pressed)
