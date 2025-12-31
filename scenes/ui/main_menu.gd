@@ -11,6 +11,8 @@ const NAVIGATION_REPEAT_DELAY := 0.2
 
 
 func _ready():
+	if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_WINDOWED:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
 	%OnePlayerButton.pressed.connect(on_player_count_selected.bind(1))
 	%TwoPlayerButton.pressed.connect(on_player_count_selected.bind(2))
 	%ThreePlayerButton.pressed.connect(on_player_count_selected.bind(3))
