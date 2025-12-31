@@ -21,6 +21,7 @@ const NEAR_DEATH_RED = Color(1.0, 0.1, 0.1)
 @onready var velocity_component = $VelocityComponent
 @onready var aim_laser: Line2D = $AimLaser
 @onready var player_collision_shape: CollisionShape2D = $CollisionShape2D
+@onready var hurtbox: Area2D = $hurtbox
 
 @export var player_number := 1
 @export var regen_rate := 0.67
@@ -39,6 +40,7 @@ var base_max_health := 0.0
 var base_health_bar_width := 0.0
 var base_health_bar_left := 0.0
 var is_regenerating := false
+var is_defeated := false
 var normal_visuals_modulate := Color.WHITE
 var last_health := 0.0
 var flash_tween: Tween
@@ -78,6 +80,8 @@ func _ready():
 
 
 func _process(delta):
+	if is_defeated:
+		return
 	if is_regenerating:
 		stop_near_death_flash()
 		velocity_component.velocity = Vector2.ZERO
@@ -270,6 +274,8 @@ func on_died():
 
 
 func end_regeneration():
+	if is_defeated:
+		return
 	is_regenerating = false
 	stop_flash()
 	stop_near_death_flash()
@@ -278,6 +284,27 @@ func end_regeneration():
 	health_component.health_changed.emit()
 	last_health = health_component.current_health
 	regenerate_finished.emit()
+
+
+func set_defeated() -> void:
+	if is_defeated:
+		return
+	is_defeated = true
+	stop_flash()
+	stop_near_death_flash()
+	velocity_component.velocity = Vector2.ZERO
+	velocity = Vector2.ZERO
+	aim_laser.visible = false
+	visuals.visible = false
+	if health_bar != null:
+		health_bar.visible = false
+	if upgrade_dots != null:
+		upgrade_dots.visible = false
+	if player_collision_shape != null:
+		player_collision_shape.disabled = true
+	if hurtbox != null:
+		hurtbox.monitoring = false
+		hurtbox.monitorable = false
 
 
 func spawn_explosion() -> void:
