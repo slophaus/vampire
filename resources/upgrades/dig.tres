@@ -9,4 +9,4 @@ ability_controller_scene = ExtResource("1_su4gk")
 id = "dig"
 max_quantity = 1
 name = "Dig"
-description = "Dig through dirt like the mouse to open paths."
+description = "Dig through dirt to open paths."
