@@ -46,6 +46,8 @@ func get_spawn_position() -> Vector2:
 		var spawn_position = get_random_point_in_rect(area)
 		if offscreen_rect.has_point(spawn_position):
 			continue
+		if not is_spawn_tile_walkable(spawn_position):
+			continue
 		if is_spawn_path_clear(player.global_position, spawn_position):
 			return spawn_position
 
@@ -125,6 +127,16 @@ func is_spawn_path_clear(start_position: Vector2, end_position: Vector2) -> bool
 	)
 	var result = get_tree().root.world_2d.direct_space_state.intersect_ray(query_parameters)
 	return result.is_empty()
+
+
+func is_spawn_tile_walkable(spawn_position: Vector2) -> bool:
+	if arena_tilemap == null:
+		return true
+	var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(spawn_position))
+	var tile_data = arena_tilemap.get_cell_tile_data(0, cell)
+	if tile_data == null:
+		return false
+	return tile_data.get_collision_polygons_count(0) == 0
 
 
 func on_timer_timeout():

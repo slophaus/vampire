@@ -28,6 +28,7 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 @onready var collision_template: CollisionShape2D = $Segment0
 @onready var hurtbox_template: CollisionShape2D = $HurtboxComponent/Segment0
 @onready var health_component: HealthComponent = $HealthComponent
+@onready var arena_tilemap: TileMap = get_tree().get_first_node_in_group("arena_tilemap") as TileMap
 
 @onready var body_texture: Texture2D = body_template.texture
 @onready var body_region_rect: Rect2 = body_template.region_rect
@@ -42,6 +43,9 @@ var hurtbox_shapes: Array[CollisionShape2D] = []
 var segment_tints: Array = []
 var time_alive := 0.0
 var is_dying := false
+var walkable_source_id := -1
+var walkable_atlas_coords := Vector2i(-1, -1)
+var walkable_alternative := 0
 
 
 func _ready() -> void:
@@ -57,6 +61,7 @@ func _finish_spawn() -> void:
 	build_segments()
 	cache_segments()
 	global_position = snap_to_grid(global_position)
+	cache_walkable_tile()
 	initialize_direction()
 	initialize_segments()
 	apply_segment_tints()
@@ -194,6 +199,7 @@ func advance_segments() -> void:
 	segment_positions.insert(0, new_head)
 	segment_positions.pop_back()
 	global_position = new_head
+	eat_tile_at_position(new_head)
 
 
 func update_segments() -> void:
@@ -306,7 +312,47 @@ func is_position_blocked(candidate_position: Vector2) -> bool:
 		if snap_to_grid(player_node.global_position) == candidate_position:
 			return true
 
+	if is_outside_arena(candidate_position):
+		return true
+
 	return false
+
+
+func cache_walkable_tile() -> void:
+	if arena_tilemap == null:
+		return
+	var used_cells = arena_tilemap.get_used_cells(0)
+	for cell in used_cells:
+		var tile_data = arena_tilemap.get_cell_tile_data(0, cell)
+		if tile_data == null:
+			continue
+		if tile_data.get_collision_polygons_count(0) > 0:
+			continue
+		walkable_source_id = arena_tilemap.get_cell_source_id(0, cell)
+		walkable_atlas_coords = arena_tilemap.get_cell_atlas_coords(0, cell)
+		walkable_alternative = arena_tilemap.get_cell_alternative_tile(0, cell)
+		return
+
+
+func eat_tile_at_position(position: Vector2) -> void:
+	if arena_tilemap == null:
+		return
+	if walkable_source_id < 0:
+		return
+	var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(position))
+	var tile_data = arena_tilemap.get_cell_tile_data(0, cell)
+	if tile_data == null:
+		return
+	if tile_data.get_collision_polygons_count(0) == 0:
+		return
+	arena_tilemap.set_cell(0, cell, walkable_source_id, walkable_atlas_coords, walkable_alternative)
+
+
+func is_outside_arena(position: Vector2) -> bool:
+	if arena_tilemap == null:
+		return false
+	var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(position))
+	return arena_tilemap.get_cell_tile_data(0, cell) == null
 
 
 func is_position_adjacent_to_body(candidate_position: Vector2) -> bool:
