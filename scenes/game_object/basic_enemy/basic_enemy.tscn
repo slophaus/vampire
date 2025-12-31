@@ -239,7 +239,7 @@ offset_bottom = 20.0
 
 [node name="mouse_sprite" type="AnimatedSprite2D" parent="Visuals"]
 clip_children = 2
-position = Vector2(2, -15)
+position = Vector2(3, -7)
 sprite_frames = SubResource("SpriteFrames_sdy2s")
 autoplay = "default"
 frame_progress = 0.963654
@@ -267,5 +267,4 @@ offset_right = 20.0
 offset_bottom = 30.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -10)
 shape = SubResource("CircleShape2D_5o3ap")

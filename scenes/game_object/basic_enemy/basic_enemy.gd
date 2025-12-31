@@ -29,8 +29,8 @@ const SEPARATION_PUSH_STRENGTH := 5.0
 const MOUSE_EATABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt"]
 
 @export var enemy_index := 0
-@export var mouse_eat_radius := 12.0
-@export var mouse_eat_cooldown := 0.6
+@export var mouse_eat_radius := 7.0
+@export var mouse_eat_cooldown := 2.0
 @export var dig_poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
 
 @onready var visuals := $Visuals
