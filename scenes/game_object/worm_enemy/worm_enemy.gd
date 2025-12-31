@@ -202,8 +202,9 @@ func update_segments() -> void:
 			sprite.rotation = get_turn_rotation(index)
 		else:
 			sprite.texture = body_texture
-			sprite.region_enabled = true
-			sprite.region_rect = body_region_rect
+			sprite.region_enabled = body_template.region_enabled
+			if body_template.region_enabled:
+				sprite.region_rect = body_region_rect
 			sprite.rotation = get_segment_rotation(index)
 		segment_shapes[index].position = local_position
 		if index == 0 and not hurtbox_shapes.is_empty():
