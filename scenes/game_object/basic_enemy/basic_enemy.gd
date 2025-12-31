@@ -26,6 +26,10 @@ const ENEMY_TYPES = {
 
 const SEPARATION_RADIUS := 15.0
 const SEPARATION_PUSH_STRENGTH := 5.0
+const DIRT_ATLAS_X := 0
+const DIRT_ATLAS_Y_RANGE := 2
+const WALL_ATLAS_X_RANGE := Vector2i(1, 3)
+const WALL_ATLAS_Y_RANGE := 2
 
 @export var enemy_index := 0
 
@@ -42,22 +46,29 @@ const SEPARATION_PUSH_STRENGTH := 5.0
 @onready var wizard_color: ColorRect = $Visuals/wizard_sprite/enemy_color
 @onready var rat_color: ColorRect = $Visuals/RatSprite/enemy_color
 @onready var rat_texture: Texture2D = rat_sprite.texture
+@onready var arena_tilemap := _find_arena_tilemap()
 
 var facing_multiplier := -1
 var enemy_tint := Color.WHITE
 var contact_damage := 1.0
+var walkable_tile_source_id := -1
+var walkable_tile_atlas := Vector2i.ZERO
+var walkable_tile_alternative := 0
 
 
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
 	apply_enemy_type(enemy_index)
 	apply_random_tint()
+	cache_walkable_tile()
 
 
 func _physics_process(delta):
 	velocity_component.accelerate_to_player()
 	apply_enemy_separation()
 	velocity_component.move(self)
+	if enemy_index == 0:
+		convert_dirt_at_position(global_position)
 
 	var move_sign = sign(velocity.x)
 	if move_sign != 0:
@@ -131,3 +142,64 @@ func apply_enemy_tint() -> void:
 			continue
 		tint_rect.color = enemy_tint
 		tint_rect.visible = true
+
+
+func _find_arena_tilemap() -> TileMap:
+	for node in get_tree().get_nodes_in_group("arena_tilemap"):
+		var tilemap := node as TileMap
+		if tilemap != null:
+			return tilemap
+	return null
+
+
+func cache_walkable_tile() -> void:
+	if arena_tilemap == null:
+		return
+	var sample_position := global_position
+	for player in get_tree().get_nodes_in_group("player"):
+		var player_node := player as Node2D
+		if player_node != null:
+			sample_position = player_node.global_position
+			break
+	var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(sample_position))
+	var source_id = arena_tilemap.get_cell_source_id(0, cell)
+	if source_id == -1:
+		return
+	walkable_tile_source_id = source_id
+	walkable_tile_atlas = arena_tilemap.get_cell_atlas_coords(0, cell)
+	walkable_tile_alternative = arena_tilemap.get_cell_alternative_tile(0, cell)
+
+
+func convert_dirt_at_position(position: Vector2) -> void:
+	if arena_tilemap == null:
+		return
+	if walkable_tile_source_id == -1:
+		return
+	var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(position))
+	var source_id = arena_tilemap.get_cell_source_id(0, cell)
+	if source_id == -1:
+		return
+	if source_id == walkable_tile_source_id:
+		if arena_tilemap.get_cell_atlas_coords(0, cell) == walkable_tile_atlas \
+				and arena_tilemap.get_cell_alternative_tile(0, cell) == walkable_tile_alternative:
+			return
+	var atlas_coords := arena_tilemap.get_cell_atlas_coords(0, cell)
+	if not _is_dirt_tile(atlas_coords):
+		return
+	if _is_wall_tile(atlas_coords):
+		return
+	var tile_data := arena_tilemap.get_cell_tile_data(0, cell)
+	if tile_data == null:
+		return
+	if tile_data.get_collision_polygons_count(0) <= 0:
+		return
+	arena_tilemap.set_cell(0, cell, walkable_tile_source_id, walkable_tile_atlas, walkable_tile_alternative)
+
+
+func _is_dirt_tile(atlas_coords: Vector2i) -> bool:
+	return atlas_coords.x == DIRT_ATLAS_X and atlas_coords.y >= 0 and atlas_coords.y <= DIRT_ATLAS_Y_RANGE
+
+
+func _is_wall_tile(atlas_coords: Vector2i) -> bool:
+	return atlas_coords.x >= WALL_ATLAS_X_RANGE.x and atlas_coords.x <= WALL_ATLAS_X_RANGE.y \
+		and atlas_coords.y >= 0 and atlas_coords.y <= WALL_ATLAS_Y_RANGE

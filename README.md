@@ -1,5 +1,11 @@
 # Vampire
 
+## Tilemap notes
+
+* Filled dirt tiles: atlas coordinates (0,0) through (0,2).
+* Wall tiles: atlas coordinates (1,0) through (3,2).
+* Walkable ground tiles: atlas coordinates (0,4), (1,4), and (6,3).
+
 ## Upgrades
 
 ### Ability unlocks and level upgrades
