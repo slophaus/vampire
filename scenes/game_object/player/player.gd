@@ -24,7 +24,7 @@ const NEAR_DEATH_RED = Color(1.0, 0.1, 0.1)
 
 @export var player_number := 1
 @export var regen_rate := 0.67
-@export var near_death_threshold := 0.2
+@export var near_death_hit_points := 2.0
 @export var near_death_flash_speed := 6.0
 
 signal regenerate_started
@@ -342,7 +342,7 @@ func _update_near_death_flash(delta: float) -> void:
 	if health_component.current_health <= 0:
 		stop_near_death_flash()
 		return
-	if health_component.get_health_percent() > near_death_threshold:
+	if health_component.current_health > near_death_hit_points:
 		stop_near_death_flash()
 		return
 	near_death_flash.visible = true
