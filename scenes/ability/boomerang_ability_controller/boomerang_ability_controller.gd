@@ -1,6 +1,6 @@
 extends Node
 
-const BASE_RANGE = 150
+const BASE_RANGE = 120
 const RANGE_PER_LEVEL = 25
 const BASE_PENETRATION = 10
 const PENETRATION_PER_LEVEL = 3

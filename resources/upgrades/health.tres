@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AbilityUpgrade" load_steps=2 format=3 uid="uid://bf0s6w8apq0dr"]
+
+[ext_resource type="Script" uid="uid://bo62cjqkynv4i" path="res://resources/upgrades/ability_upgrade.gd" id="1_wd7rq"]
+
+[resource]
+script = ExtResource("1_wd7rq")
+id = "player_health"
+max_quantity = 5
+name = "Vitality"
+description = "Increase max health by 8 and heal 8."

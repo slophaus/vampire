@@ -34,6 +34,7 @@ var floating_text_scene = preload("res://scenes/ui/floating_text.tscn")
 
 var colliding_enemies: Dictionary = {}
 var base_speed := 0
+var base_max_health := 0.0
 var is_regenerating := false
 var normal_visuals_modulate := Color.WHITE
 var last_health := 0.0
@@ -46,6 +47,7 @@ const UPGRADE_DOT_RADIUS := 2
 
 func _ready():
 	base_speed = velocity_component.max_speed
+	base_max_health = health_component.max_health
 	player_color.color = get_player_tint()
 	player_color.visible = true
 	if near_death_flash != null:
@@ -273,6 +275,9 @@ func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades:
 		abilities.add_child(ability_controller)
 	elif ability_upgrade.id == "player_speed":
 		velocity_component.max_speed = base_speed + (base_speed * current_upgrades["player_speed"]["quantity"] * 0.2)
+	elif ability_upgrade.id == "player_health":
+		health_component.max_health = base_max_health + (current_upgrades["player_health"]["quantity"] * 8.0)
+		health_component.heal(8.0)
 	update_upgrade_dots(current_upgrades)
 
 
