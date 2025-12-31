@@ -3,6 +3,8 @@ class_name TileEater
 
 const CUSTOM_DATA_KEY := "tile_type"
 
+signal tile_converted(world_position: Vector2)
+
 var owner: Node2D
 var arena_tilemap: TileMap
 var walkable_tile_source_id := -1
@@ -78,6 +80,9 @@ func _try_convert_tile_cell(cell: Vector2i, allowed_types: Array[String]) -> voi
 	if tile_data.get_collision_polygons_count(0) <= 0:
 		return
 	arena_tilemap.set_cell(0, cell, walkable_tile_source_id, walkable_tile_atlas, walkable_tile_alternative)
+	var local_position = arena_tilemap.map_to_local(cell)
+	var world_position = arena_tilemap.to_global(local_position)
+	tile_converted.emit(world_position)
 
 
 func _find_arena_tilemap() -> TileMap:

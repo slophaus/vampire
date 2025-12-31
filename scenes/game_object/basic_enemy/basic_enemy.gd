@@ -30,6 +30,7 @@ const MOUSE_EATABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt"]
 
 @export var enemy_index := 0
 @export var mouse_eat_radius := 12.0
+@export var dig_poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
 
 @onready var visuals := $Visuals
 @onready var velocity_component: VelocityComponent = $VelocityComponent
@@ -55,6 +56,7 @@ func _ready():
 	apply_random_tint()
 	tile_eater = TileEater.new(self)
 	tile_eater.cache_walkable_tile()
+	tile_eater.tile_converted.connect(_on_tile_converted)
 
 
 func _physics_process(delta):
@@ -136,3 +138,18 @@ func apply_enemy_tint() -> void:
 			continue
 		tint_rect.color = enemy_tint
 		tint_rect.visible = true
+
+
+func _on_tile_converted(world_position: Vector2) -> void:
+	if enemy_index != 0:
+		return
+	if dig_poof_scene == null:
+		return
+	var poof_instance = dig_poof_scene.instantiate() as GPUParticles2D
+	if poof_instance == null:
+		return
+	get_tree().current_scene.add_child(poof_instance)
+	poof_instance.global_position = world_position
+	poof_instance.emitting = true
+	poof_instance.restart()
+	poof_instance.finished.connect(poof_instance.queue_free)
