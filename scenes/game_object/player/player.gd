@@ -36,6 +36,7 @@ var colliding_enemies: Dictionary = {}
 var base_speed := 0
 var base_max_health := 0.0
 var base_health_bar_width := 0.0
+var base_health_bar_left := 0.0
 var is_regenerating := false
 var normal_visuals_modulate := Color.WHITE
 var last_health := 0.0
@@ -50,6 +51,7 @@ func _ready():
 	base_speed = velocity_component.max_speed
 	base_max_health = health_component.max_health
 	base_health_bar_width = health_bar.custom_minimum_size.x
+	base_health_bar_left = health_bar.offset_left
 	player_color.color = get_player_tint()
 	player_color.visible = true
 	if near_death_flash != null:
@@ -192,8 +194,8 @@ func update_health_bar_size() -> void:
 	var health_ratio: float = float(health_component.max_health) / base_max_health
 	var width: float = max(base_health_bar_width, base_health_bar_width * health_ratio)
 	health_bar.custom_minimum_size.x = width
-	health_bar.offset_left = -width * 0.5
-	health_bar.offset_right = width * 0.5
+	health_bar.offset_left = base_health_bar_left
+	health_bar.offset_right = base_health_bar_left + width
 	health_bar.pivot_offset = Vector2(width * 0.5, health_bar.pivot_offset.y)
 
 #---------------------------------------------
