@@ -15,6 +15,8 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 
 @export var turn_delay := 4.0
 @export_range(1, 64, 1) var segment_count := 15
+@export_range(1, 128, 1) var max_segment_count := 25
+@export_range(0.5, 30.0, 0.5) var growth_interval := 6.0
 @export var head_tint := Color(0.85, 0.35, 0.55, 1.0)
 @export var body_tint := Color(1.0, 0.65, 0.8, 1.0)
 @export var poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
@@ -44,6 +46,7 @@ var hurtbox_shapes: Array[CollisionShape2D] = []
 var segment_tints: Array = []
 var time_alive := 0.0
 var is_dying := false
+var growth_timer := 0.0
 
 func _ready() -> void:
 	randomize()
@@ -71,6 +74,7 @@ func _physics_process(delta: float) -> void:
 	if is_dying:
 		return
 	time_alive += delta
+	_update_growth(delta)
 	move_timer += delta
 	if move_timer < MOVE_INTERVAL:
 		return
@@ -82,6 +86,46 @@ func _physics_process(delta: float) -> void:
 		_handle_collision_death()
 		return
 	advance_segments()
+	update_segments()
+
+
+func _update_growth(delta: float) -> void:
+	if growth_interval <= 0.0:
+		return
+	if segment_count >= max_segment_count:
+		return
+	growth_timer += delta
+	if growth_timer < growth_interval:
+		return
+	growth_timer -= growth_interval
+	_grow_segment()
+
+
+func _grow_segment() -> void:
+	if segment_count >= max_segment_count:
+		return
+	var tail_position = global_position
+	if not segment_positions.is_empty():
+		tail_position = segment_positions[segment_positions.size() - 1]
+	segment_positions.append(tail_position)
+
+	if body_template != null and not body_template.visible:
+		body_template.show()
+		segment_sprites.append(body_template)
+		segment_tints.append(body_template.get_node_or_null("segment_color"))
+	else:
+		var sprite = body_template.duplicate()
+		sprite.name = "BodySegment%s" % segment_count
+		segment_container.add_child(sprite)
+		segment_sprites.append(sprite)
+		segment_tints.append(sprite.get_node_or_null("segment_color"))
+
+	var shape = collision_template.duplicate()
+	shape.name = "Segment%s" % segment_count
+	collision_container.add_child(shape)
+	segment_shapes.append(shape)
+	segment_count += 1
+	_apply_segment_tint(segment_tints.size() - 1)
 	update_segments()
 
 
@@ -237,14 +281,20 @@ func apply_hit_flash() -> void:
 
 func apply_segment_tints() -> void:
 	for index in range(segment_tints.size()):
-		var tint_rect: ColorRect = segment_tints[index]
-		if tint_rect == null:
-			continue
-		if index == 0:
-			tint_rect.color = head_tint
-		else:
-			tint_rect.color = body_tint
-		tint_rect.visible = true
+		_apply_segment_tint(index)
+
+
+func _apply_segment_tint(index: int) -> void:
+	if index < 0 or index >= segment_tints.size():
+		return
+	var tint_rect: ColorRect = segment_tints[index]
+	if tint_rect == null:
+		return
+	if index == 0:
+		tint_rect.color = head_tint
+	else:
+		tint_rect.color = body_tint
+	tint_rect.visible = true
 
 
 func get_segment_rotation(index: int) -> float:
