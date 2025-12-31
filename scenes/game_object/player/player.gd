@@ -26,6 +26,7 @@ const NEAR_DEATH_RED = Color(1.0, 0.1, 0.1)
 @export var regen_rate := 0.67
 @export var near_death_hit_points := 2.0
 @export var near_death_flash_speed := 6.0
+@export var explosion_scene: PackedScene = preload("res://scenes/vfx/explosion.tscn")
 
 signal regenerate_started
 signal regenerate_finished
@@ -258,6 +259,7 @@ func on_died():
 	if is_regenerating:
 		return
 	is_regenerating = true
+	spawn_explosion()
 	stop_flash()
 	stop_near_death_flash()
 	visuals.modulate = Color.BLACK
@@ -276,6 +278,18 @@ func end_regeneration():
 	health_component.health_changed.emit()
 	last_health = health_component.current_health
 	regenerate_finished.emit()
+
+
+func spawn_explosion() -> void:
+	if explosion_scene == null:
+		return
+	var explosion_instance = explosion_scene.instantiate() as GPUParticles2D
+	if explosion_instance == null:
+		return
+	explosion_instance.global_position = global_position
+	explosion_instance.emitting = true
+	explosion_instance.finished.connect(explosion_instance.queue_free)
+	get_tree().current_scene.add_child(explosion_instance)
 
 
 func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):

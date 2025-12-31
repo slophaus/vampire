@@ -7,6 +7,7 @@ var paused_menu_scene = preload("res://scenes/ui/pause_menu.tscn")
 var player_scene = preload("res://scenes/game_object/player/player.tscn")
 var player_regenerating := {}
 var game_over := false
+const DEFEAT_MENU_DELAY := 0.6
 
 
 func _ready():
@@ -80,6 +81,7 @@ func are_all_players_regenerating() -> bool:
 
 func trigger_defeat():
 	game_over = true
+	await get_tree().create_timer(DEFEAT_MENU_DELAY).timeout
 	var end_screen_instance = end_screen_scene.instantiate() as EndScreen
 	add_child(end_screen_instance)
 	end_screen_instance.set_defeat()
