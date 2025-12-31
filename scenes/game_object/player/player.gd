@@ -335,7 +335,7 @@ func _update_near_death_flash(delta: float) -> void:
 	near_death_time += delta * near_death_flash_speed
 	var pulse = (sin(near_death_time * TAU) + 1.0) * 0.5
 	var flash_color = NEAR_DEATH_RED.lerp(Color.WHITE, pulse)
-	flash_color.a = 1.0
+	flash_color.a = 0.5
 	var flash_material := near_death_flash.material as ShaderMaterial
 	if flash_material != null:
 		flash_material.set_shader_parameter("flash_color", flash_color)
