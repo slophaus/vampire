@@ -77,10 +77,11 @@ func _physics_process(delta: float) -> void:
 	move_timer -= MOVE_INTERVAL
 
 	direction = choose_direction()
-	advance_segments()
-	if did_collide_with_worm():
+	var next_head = snap_to_grid(segment_positions[0] + (direction * TILE_SIZE))
+	if did_collide_with_worm_at(next_head):
 		_handle_collision_death()
 		return
+	advance_segments()
 	update_segments()
 
 
@@ -341,10 +342,15 @@ func is_adjacent(a: Vector2, b: Vector2) -> bool:
 
 
 func did_collide_with_worm() -> bool:
+	if segment_positions.is_empty():
+		return false
+	return did_collide_with_worm_at(segment_positions[0])
+
+
+func did_collide_with_worm_at(head_position: Vector2) -> bool:
 	if segment_positions.size() < 2:
 		return false
-	var head_position = segment_positions[0]
-	for index in range(1, segment_positions.size()):
+	for index in range(1, segment_positions.size() - 1):
 		if segment_positions[index] == head_position:
 			return true
 	for worm in get_tree().get_nodes_in_group("worm"):
