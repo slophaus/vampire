@@ -6,9 +6,12 @@ const NAVIGATION_TAP_DELAY := 0.12
 
 var last_navigation_time := {}
 var navigation_hold := {}
+var last_navigation_frame := -1
 
 
 func should_navigate(action: StringName, event: InputEvent) -> bool:
+	if Engine.get_process_frames() == last_navigation_frame:
+		return false
 	if not navigation_hold.has(action):
 		navigation_hold[action] = false
 	if not last_navigation_time.has(action):
@@ -24,9 +27,13 @@ func should_navigate(action: StringName, event: InputEvent) -> bool:
 		if now - last_navigation_time[action] < NAVIGATION_TAP_DELAY:
 			return false
 		last_navigation_time[action] = now
+		last_navigation_frame = Engine.get_process_frames()
+		get_viewport().set_input_as_handled()
 		return true
 	if now - last_navigation_time[action] >= NAVIGATION_REPEAT_DELAY:
 		last_navigation_time[action] = now
+		last_navigation_frame = Engine.get_process_frames()
+		get_viewport().set_input_as_handled()
 		return true
 	return false
 

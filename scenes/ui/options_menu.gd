@@ -26,7 +26,7 @@ func _ready():
 		selected_index = focus_item(0, focus_controls)
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if focus_controls.is_empty():
 		return
 

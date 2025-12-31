@@ -34,7 +34,7 @@ func _ready():
 		selected_index = focus_item(0, menu_buttons)
 
 
-func _unhandled_input(event):
+func _input(event):
 	if event.is_action_pressed("pause"):
 		close()
 		get_tree().root.set_input_as_handled()

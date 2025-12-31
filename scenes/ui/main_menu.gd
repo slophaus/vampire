@@ -41,7 +41,7 @@ func _ready():
 		selected_index = focus_item(0, menu_buttons)
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if menu_buttons.is_empty():
 		return
 
