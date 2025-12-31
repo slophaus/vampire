@@ -22,6 +22,7 @@ var upgrade_fireball_level := preload("res://resources/upgrades/fireball_level.t
 var upgrade_player_speed := preload("res://resources/upgrades/player_speed.tres")
 var upgrade_player_health := preload("res://resources/upgrades/health.tres")
 var upgrade_dig := preload("res://resources/upgrades/dig.tres")
+var upgrade_dig_level := preload("res://resources/upgrades/dig_level.tres")
 
 var rng := RandomNumberGenerator.new()
 
@@ -78,6 +79,8 @@ func update_upgrade_pool(chosen_upgrade: AbilityUpgrade, upgrade_pool: WeightedT
 		upgrade_pool.add_item(upgrade_axe_level, 10)
 	if chosen_upgrade.id == upgrade_fireball.id:
 		upgrade_pool.add_item(upgrade_fireball_level, 10)
+	if chosen_upgrade.id == upgrade_dig.id:
+		upgrade_pool.add_item(upgrade_dig_level, 10)
 
 
 func pick_upgrades(player_number: int) -> Array[AbilityUpgrade]:

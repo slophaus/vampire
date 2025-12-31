@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AbilityUpgrade" load_steps=2 format=3 uid="uid://c2x5u0wt7nyaf"]
+
+[ext_resource type="Script" uid="uid://bo62cjqkynv4i" path="res://resources/upgrades/ability_upgrade.gd" id="1_4s7sj"]
+
+[resource]
+script = ExtResource("1_4s7sj")
+id = "dig_level"
+max_quantity = 1
+name = "Dig Level"
+description = "Dig through walls to open new paths."

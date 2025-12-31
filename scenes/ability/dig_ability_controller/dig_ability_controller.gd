@@ -1,6 +1,7 @@
 extends Node2D
 
 const DIGGABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt"]
+const WALL_DIGGABLE_TILE_TYPES: Array[String] = ["wall"]
 
 @export var dig_radius := 7.0
 @export var dig_cooldown := 2.0
@@ -9,6 +10,7 @@ const DIGGABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt"]
 
 var tile_eater: TileEater
 var player_number := 1
+var dig_level := 1
 
 
 func _ready() -> void:
@@ -19,6 +21,7 @@ func _ready() -> void:
 	$Timer.wait_time = max(dig_cooldown, 0.0)
 	$Timer.timeout.connect(_on_timer_timeout)
 	$Timer.start()
+	GameEvents.ability_upgrade_added.connect(_on_ability_upgrade_added)
 
 
 func _on_timer_timeout() -> void:
@@ -31,7 +34,7 @@ func _on_timer_timeout() -> void:
 		return
 	if tile_eater == null:
 		return
-	tile_eater.try_convert_tiles_in_radius(owner_actor.global_position, dig_radius, DIGGABLE_TILE_TYPES)
+	tile_eater.try_convert_tiles_in_radius(owner_actor.global_position, dig_radius, _get_diggable_tile_types())
 
 
 func _on_tile_converted(world_position: Vector2) -> void:
@@ -68,3 +71,17 @@ func resolve_player_number() -> int:
 
 func set_player_number(new_player_number: int) -> void:
 	player_number = new_player_number
+
+
+func _on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int) -> void:
+	if upgrade_player_number != player_number:
+		return
+	if upgrade.id == "dig_level":
+		dig_level = 1 + current_upgrades["dig_level"]["quantity"]
+
+
+func _get_diggable_tile_types() -> Array[String]:
+	var tile_types := DIGGABLE_TILE_TYPES.duplicate()
+	if dig_level >= 2:
+		tile_types.append_array(WALL_DIGGABLE_TILE_TYPES)
+	return tile_types
