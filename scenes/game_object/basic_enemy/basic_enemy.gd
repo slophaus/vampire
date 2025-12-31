@@ -27,7 +27,6 @@ const ENEMY_TYPES = {
 const SEPARATION_RADIUS := 15.0
 const SEPARATION_PUSH_STRENGTH := 5.0
 const MOUSE_EATABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt"]
-const MOUSE_DIG_INTERVAL := 0.2
 
 @export var enemy_index := 0
 @export var mouse_eat_radius := 12.0
@@ -50,7 +49,6 @@ var tile_eater: TileEater
 var facing_multiplier := -1
 var enemy_tint := Color.WHITE
 var contact_damage := 1.0
-var mouse_dig_timer := 0.0
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
 	apply_enemy_type(enemy_index)
@@ -64,10 +62,7 @@ func _physics_process(delta):
 	apply_enemy_separation()
 	velocity_component.move(self)
 	if enemy_index == 0 and tile_eater != null:
-		mouse_dig_timer += delta
-		if mouse_dig_timer >= MOUSE_DIG_INTERVAL:
-			mouse_dig_timer = 0.0
-			tile_eater.try_convert_tiles_in_radius(global_position, mouse_eat_radius, MOUSE_EATABLE_TILE_TYPES)
+		tile_eater.try_convert_tiles_in_radius(global_position, mouse_eat_radius, MOUSE_EATABLE_TILE_TYPES)
 
 	var move_sign = sign(velocity.x)
 	if move_sign != 0:
