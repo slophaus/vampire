@@ -26,6 +26,7 @@ const ENEMY_TYPES = {
 
 const SEPARATION_RADIUS := 15.0
 const SEPARATION_PUSH_STRENGTH := 5.0
+const MOUSE_DIG_LEVEL_TWO_TINT := Color(0.3, 0.3, 0.3)
 @export var enemy_index := 0
 
 @onready var visuals := $Visuals
@@ -127,7 +128,7 @@ func apply_random_tint():
 
 func apply_enemy_tint_for_type() -> void:
 	if enemy_index == 0 and mouse_has_dig_level_two:
-		enemy_tint = Color.BLACK
+		enemy_tint = MOUSE_DIG_LEVEL_TWO_TINT
 		apply_enemy_tint()
 		return
 	apply_random_tint()
