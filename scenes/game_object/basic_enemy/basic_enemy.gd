@@ -25,7 +25,7 @@ const ENEMY_TYPES = {
 }
 
 const SEPARATION_RADIUS := 10.0
-const SEPARATION_PUSH_STRENGTH := 20.0
+const SEPARATION_PUSH_STRENGTH := 35.0
 
 @export var enemy_index := 0
 
