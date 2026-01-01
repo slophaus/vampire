@@ -61,6 +61,8 @@ func on_timer_timeout() -> void:
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
+	if owner_group != "player":
+		return
 	if upgrade_player_number != player_number:
 		return
 	match upgrade.id:
