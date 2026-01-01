@@ -4,7 +4,7 @@ class_name Well
 @export var experience_vial_scene: PackedScene = preload("res://scenes/game_object/experience_vial/experience_vial.tscn")
 @export var explosion_scene: PackedScene = preload("res://scenes/vfx/explosion.tscn")
 @export_range(0.05, 10.0, 0.05) var emission_interval := 1.0
-@export_range(1, 999, 1) var max_vials := 5
+@export_range(1, 999, 1) var capacity := 5
 @export_range(0.0, 512.0, 1.0) var experience_vial_drop_radius := 32.0
 
 @onready var emission_timer: Timer = $EmissionTimer
@@ -27,7 +27,7 @@ func _on_body_entered(body: Node) -> void:
 		return
 	_started = true
 	_emit_vial()
-	if _emitted_count < max_vials:
+	if _emitted_count < capacity:
 		emission_timer.start(emission_interval)
 	else:
 		_explode_and_despawn()
@@ -35,12 +35,14 @@ func _on_body_entered(body: Node) -> void:
 
 func _on_emission_timeout() -> void:
 	_emit_vial()
-	if _emitted_count >= max_vials:
+	if _emitted_count >= capacity:
 		emission_timer.stop()
 		_explode_and_despawn()
 
 
 func _emit_vial() -> void:
+	if _emitted_count >= capacity:
+		return
 	if experience_vial_scene == null:
 		return
 	var vial_instance = experience_vial_scene.instantiate() as Node2D
