@@ -4,6 +4,8 @@ class_name SwordAbility
 const SPEED := 450.0
 const BASE_PENETRATION := 3
 const WORM_COLLISION_LAYER := 1
+const PLAYER_HITBOX_LAYER := 4
+const ENEMY_HITBOX_LAYER := 8
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
@@ -15,16 +17,18 @@ var direction := Vector2.ZERO
 var max_distance := 0.0
 var distance_traveled := 0.0
 var hit_count := 0
+var owner_actor: Node2D
 
 
 func _ready():
 	animation_player.stop()
 	sprite.scale = Vector2.ONE
 	collision_shape.disabled = false
-	hitbox_component.collision_mask = WORM_COLLISION_LAYER
+	hitbox_component.collision_mask = WORM_COLLISION_LAYER | PLAYER_HITBOX_LAYER | ENEMY_HITBOX_LAYER
 	if hitbox_component.penetration <= 0:
 		hitbox_component.penetration = BASE_PENETRATION
 	hitbox_component.hit_landed.connect(on_hit_landed)
+	hitbox_component.area_entered.connect(on_area_entered)
 	hitbox_component.body_entered.connect(on_body_entered)
 
 
@@ -57,6 +61,17 @@ func on_hit_landed(current_hits: int) -> void:
 func on_body_entered(body: Node) -> void:
 	if body != null and body.is_in_group("worm"):
 		despawn()
+
+
+func on_area_entered(area: Area2D) -> void:
+	if not area is HitboxComponent:
+		return
+	var fireball = area.get_parent() as FireballAbility
+	if fireball == null:
+		return
+	if fireball.owner_actor != null and fireball.owner_actor == owner_actor:
+		return
+	fireball.explode()
 
 
 func despawn() -> void:

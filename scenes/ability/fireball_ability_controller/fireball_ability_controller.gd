@@ -90,6 +90,7 @@ func spawn_fireball(start_position: Vector2, target_position: Vector2) -> void:
 	var fireball_instance = fireball_ability.instantiate() as FireballAbility
 	var foreground_layer = get_tree().get_first_node_in_group("foreground_layer")
 	foreground_layer.add_child(fireball_instance)
+	fireball_instance.owner_actor = get_owner_actor()
 	var level_damage = base_damage + (damage_per_level * (fireball_level - 1))
 	fireball_instance.hitbox_component.damage = level_damage * additional_damage_percent
 	fireball_instance.hitbox_component.knockback = 250.0
