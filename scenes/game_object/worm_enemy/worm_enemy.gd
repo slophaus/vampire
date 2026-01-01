@@ -314,7 +314,6 @@ func is_turn_segment(index: int) -> bool:
 	if index <= 0 or index >= segment_positions.size() - 1:
 		return false
 	var previous = segment_positions[index - 1]
-	var current = segment_positions[index]
 	var next = segment_positions[index + 1]
 	return previous.x != next.x and previous.y != next.y
 
@@ -344,9 +343,9 @@ func get_scene_center() -> Vector2:
 	return Vector2.ZERO
 
 
-func snap_to_grid(position: Vector2) -> Vector2:
+func snap_to_grid(world_position: Vector2) -> Vector2:
 	var offset := Vector2(TILE_SIZE / 2.0, TILE_SIZE / 2.0)
-	return (position - offset).snapped(Vector2(TILE_SIZE, TILE_SIZE)) + offset
+	return (world_position - offset).snapped(Vector2(TILE_SIZE, TILE_SIZE)) + offset
 
 
 func is_position_blocked(candidate_position: Vector2) -> bool:
@@ -464,7 +463,7 @@ func _explode_segment(index: int) -> void:
 	_play_explosion_sound(segment_position)
 
 
-func _spawn_poof(position: Vector2) -> void:
+func _spawn_poof(spawn_position: Vector2) -> void:
 	if poof_scene == null:
 		return
 	var poof_instance = poof_scene.instantiate() as GPUParticles2D
@@ -475,12 +474,12 @@ func _spawn_poof(position: Vector2) -> void:
 		entities_layer.add_child(poof_instance)
 	else:
 		add_child(poof_instance)
-	poof_instance.global_position = position
+	poof_instance.global_position = spawn_position
 	poof_instance.emitting = true
 	poof_instance.restart()
 
 
-func _play_explosion_sound(position: Vector2) -> void:
+func _play_explosion_sound(spawn_position: Vector2) -> void:
 	if EXPLOSION_STREAMS.is_empty():
 		return
 	var audio_player := RandomAudioStreamPlayer2DComponent.new()
@@ -491,6 +490,6 @@ func _play_explosion_sound(position: Vector2) -> void:
 		entities_layer.add_child(audio_player)
 	else:
 		add_child(audio_player)
-	audio_player.global_position = position
+	audio_player.global_position = spawn_position
 	audio_player.finished.connect(audio_player.queue_free)
 	audio_player.play_random()
