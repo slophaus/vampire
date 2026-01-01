@@ -5,6 +5,7 @@ class_name Well
 @export var explosion_scene: PackedScene = preload("res://scenes/vfx/explosion.tscn")
 @export_range(0.05, 10.0, 0.05) var emission_interval := 1.0
 @export_range(1, 999, 1) var max_vials := 5
+@export_range(0.0, 512.0, 1.0) var experience_vial_drop_radius := 32.0
 
 @onready var emission_timer: Timer = $EmissionTimer
 
@@ -51,7 +52,10 @@ func _emit_vial() -> void:
 	if entities_layer == null:
 		return
 	entities_layer.add_child(vial_instance)
-	vial_instance.global_position = global_position
+	var angle = randf() * TAU
+	var offset = Vector2(cos(angle), sin(angle)) * sqrt(randf()) * experience_vial_drop_radius
+	vial_instance.global_position = global_position + offset
+	vial_instance.z_index = z_index + 1
 	_emitted_count += 1
 
 
