@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://c2h1a5q3qj6s0"]
 
-[ext_resource type="Script" uid="uid://b2kttm3bx2vly" path="res://scenes/game_object/down_door/down_door.gd" id="1_l0qie"]
+[ext_resource type="Script" path="res://scenes/game_object/down_door/down_door.gd" id="1_l0qie"]
 [ext_resource type="Texture2D" uid="uid://crrxkfeyeohmh" path="res://sprites/metroid_can.png" id="2_odx7s"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_r6m4g"]

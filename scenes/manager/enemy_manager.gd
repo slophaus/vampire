@@ -17,6 +17,9 @@ var enemy_table = WeightedTable.new()
 
 
 func _ready():
+	# Enemy spawn table uses weighted entries by enemy_index.
+	# Index 0 (basic mouse) is always available, with additional entries added
+	# as arena difficulty increases in on_arena_difficulty_increased().
 	enemy_table.add_item(0, 15)
 	base_spawn_time = timer.wait_time
 	timer.wait_time = base_spawn_time
@@ -27,6 +30,10 @@ func _ready():
 
 
 func get_spawn_position() -> Vector2:
+	# Spawn positions are chosen from walkable tiles that are:
+	# - Outside the current camera view (offscreen_rect)
+	# - Within a maximum radius from the camera center
+	# This keeps enemies close enough to reach players while preventing pop-in.
 	var view_rect = get_camera_view_rect()
 	if view_rect == Rect2():
 		return Vector2.ZERO
@@ -70,6 +77,12 @@ func get_offscreen_walkable_cells(offscreen_rect: Rect2, view_center: Vector2, m
 
 
 func on_timer_timeout():
+	# Timer ticks drive the spawn cadence. Each timeout:
+	# 1. Restarts the timer so spawning continues.
+	# 2. Aborts if we hit the enemy cap or there is no player.
+	# 3. Picks a weighted enemy_index and instantiates the matching scene.
+	# 4. Applies the enemy_index (except worms), attaches to entities_layer,
+	#    and places it at a valid offscreen position.
 	timer.start()
 
 	if get_tree().get_nodes_in_group("enemy").size() >= MAX_ENEMIES:
@@ -103,6 +116,10 @@ func get_enemy_scene(enemy_index: int) -> PackedScene:
 
 
 func on_arena_difficulty_increased(arena_difficulty: int):
+	# Difficulty reduces spawn interval and expands the weighted table:
+	# - Difficulty 6 adds worms (index 3).
+	# - Difficulty 8 adds dragon enemies (index 1).
+	# - Difficulty 12 adds rats (index 2).
 	var time_off = (0.1 / 12) * arena_difficulty
 	time_off = min(time_off, 0.7)
 	timer.wait_time = base_spawn_time - time_off
