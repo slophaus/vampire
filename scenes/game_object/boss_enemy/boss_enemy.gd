@@ -34,7 +34,7 @@ func _ready():
 	apply_enemy_stats()
 	fireball_ability_controller.fireball_level = 3
 	fireball_ability_controller.set_active(true)
-	sword_ability_controller.sword_level = 2
+	sword_ability_controller.sword_level = 1
 	sword_ability_controller.set_active(true)
 	apply_random_tint()
 	health_component.health_changed.connect(update_health_display)
