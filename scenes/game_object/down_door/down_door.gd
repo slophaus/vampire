@@ -3,7 +3,7 @@ extends Area2D
 
 @export var boss_arena_scene: PackedScene = preload("res://scenes/main/boss_arena.tscn")
 var is_transitioning := false
-const DOOR_EXIT_OFFSET := Vector2(0, 32)
+const DOOR_EXIT_OFFSET := Vector2(0, 64)
 const PLAYER_FORMATION_OFFSETS := {
 	1: Vector2.ZERO,
 	2: Vector2(32, 0),
