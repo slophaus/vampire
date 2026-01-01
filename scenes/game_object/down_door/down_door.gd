@@ -43,15 +43,17 @@ func _on_body_entered(body: Node) -> void:
 	var boss_instance = boss_arena_scene.instantiate()
 	tree.root.add_child(boss_instance)
 	tree.current_scene = boss_instance
-	_position_players_at_exit(boss_instance)
+	_position_players_at_exit(boss_instance, tree)
 
 
-func _position_players_at_exit(scene_root: Node) -> void:
+func _position_players_at_exit(scene_root: Node, tree: SceneTree) -> void:
+	if tree == null:
+		return
 	var exit_door = scene_root.find_child("UpDoor", true, false)
 	if exit_door == null:
 		return
 	var base_position = exit_door.global_position + DOOR_EXIT_OFFSET
-	for player in get_tree().get_nodes_in_group("player"):
+	for player in tree.get_nodes_in_group("player"):
 		var player_number = player.get("player_number")
 		if typeof(player_number) != TYPE_INT:
 			continue
