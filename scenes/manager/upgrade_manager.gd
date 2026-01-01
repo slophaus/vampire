@@ -33,7 +33,8 @@ func _ready():
 	call_deferred("refresh_players")
 	call_deferred("_reapply_current_upgrades")
 
-	experience_manager.level_up.connect(on_level_up)
+	if experience_manager != null and not experience_manager.level_up.is_connected(on_level_up):
+		experience_manager.level_up.connect(on_level_up)
 
 
 func restore_persisted_state() -> void:
