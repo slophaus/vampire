@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://mapie6ivpd7j"]
+[gd_scene load_steps=16 format=3 uid="uid://mapie6ivpd7j"]
 
 [ext_resource type="PackedScene" uid="uid://5jwlcn6cm23o" path="res://scenes/game_object/game_camera/game_camera.tscn" id="1_4i4ay"]
 [ext_resource type="PackedScene" uid="uid://bpgwbwa1p3m6i" path="res://scenes/game_object/player/player.tscn" id="1_55gsj"]
@@ -14,11 +14,7 @@
 [ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="13_th5th"]
 [ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="14_7smn1"]
 [ext_resource type="PackedScene" uid="uid://c8j2qneyiwkhy" path="res://scenes/game_object/experience_vial/experience_vial.tscn" id="14_raeie"]
-[ext_resource type="Script" uid="uid://ctyl0ls3bg663" path="res://scenes/game_object/door/door.gd" id="15_2m03v"]
-[ext_resource type="Texture2D" uid="uid://crrxkfeyeohmh" path="res://sprites/metroid_can.png" id="16_3a4ag"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_lg3gl"]
-size = Vector2(16, 16)
+[ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="15_raeie"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_v8wic")
@@ -57,18 +53,6 @@ y_sort_enabled = true
 unique_name_in_owner = true
 position = Vector2(381, 374)
 
-[node name="Door" type="Area2D" parent="Entities"]
-position = Vector2(275, 315)
-collision_layer = 0
-collision_mask = 2
-script = ExtResource("15_2m03v")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Entities/Door"]
-shape = SubResource("RectangleShape2D_lg3gl")
-
-[node name="Sprite2D" type="Sprite2D" parent="Entities/Door"]
-texture = ExtResource("16_3a4ag")
-
 [node name="Enemy" parent="Entities" instance=ExtResource("13_th5th")]
 position = Vector2(528, 259)
 enemy_index = 2
@@ -80,3 +64,6 @@ position = Vector2(716, 350)
 
 [node name="ExperienceVial" parent="." instance=ExtResource("14_raeie")]
 position = Vector2(428, 411)
+
+[node name="Door" parent="." instance=ExtResource("15_raeie")]
+position = Vector2(246, 298)

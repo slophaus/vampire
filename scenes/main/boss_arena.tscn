@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://b0m6ruj3m4qxy"]
+[gd_scene load_steps=11 format=3 uid="uid://b0m6ruj3m4qxy"]
 
 [ext_resource type="PackedScene" uid="uid://5jwlcn6cm23o" path="res://scenes/game_object/game_camera/game_camera.tscn" id="1_4i4ay"]
 [ext_resource type="PackedScene" uid="uid://bpgwbwa1p3m6i" path="res://scenes/game_object/player/player.tscn" id="1_55gsj"]
@@ -8,12 +8,8 @@
 [ext_resource type="PackedScene" uid="uid://vqjgdqb3t2ju" path="res://scenes/ui/end_screen.tscn" id="2_8tx6c"]
 [ext_resource type="PackedScene" uid="uid://c5kgkd7ly41sq" path="res://scenes/manager/experience_manager.tscn" id="4_ak51j"]
 [ext_resource type="PackedScene" uid="uid://c5b76ailnfref" path="res://scenes/manager/upgrade_manager.tscn" id="6_08ukk"]
+[ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="10_t70je"]
 [ext_resource type="PackedScene" uid="uid://c1y0b6v3m7kqj" path="res://scenes/game_object/boss_enemy/boss_enemy.tscn" id="13_th5th"]
-[ext_resource type="Script" uid="uid://ctyl0ls3bg663" path="res://scenes/game_object/door/door.gd" id="14_mqa3o"]
-[ext_resource type="Texture2D" uid="uid://crrxkfeyeohmh" path="res://sprites/metroid_can.png" id="15_3a4ag"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_lg3gl"]
-size = Vector2(16, 16)
 
 [node name="Main2" type="Node"]
 script = ExtResource("1_v8wic")
@@ -42,19 +38,6 @@ y_sort_enabled = true
 unique_name_in_owner = true
 position = Vector2(381, 374)
 
-[node name="Door" type="Area2D" parent="Entities"]
-door_mode = 1
-position = Vector2(266, 373)
-collision_layer = 0
-collision_mask = 2
-script = ExtResource("14_mqa3o")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Entities/Door"]
-shape = SubResource("RectangleShape2D_lg3gl")
-
-[node name="Sprite2D" type="Sprite2D" parent="Entities/Door"]
-texture = ExtResource("15_3a4ag")
-
 [node name="DragonBoss" parent="Entities" instance=ExtResource("13_th5th")]
 position = Vector2(492, 188)
 
@@ -73,3 +56,7 @@ offset_right = 330.0
 offset_bottom = 415.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="Door" parent="." instance=ExtResource("10_t70je")]
+position = Vector2(255, 378)
+door_mode = 1
