@@ -51,17 +51,7 @@ func cycle_player_color(player_number: int) -> void:
 	if player_index < 0 or player_index >= player_color_indices.size():
 		return
 	var current_index = player_color_indices[player_index]
-	var max_players = min(player_count, player_color_indices.size())
-	var taken_color_indices: Array[int] = []
-	for index in range(max_players):
-		if index == player_index:
-			continue
-		taken_color_indices.append(player_color_indices[index])
-	for offset in range(1, PLAYER_COLOR_OPTIONS.size() + 1):
-		var candidate = (current_index + offset) % PLAYER_COLOR_OPTIONS.size()
-		if not taken_color_indices.has(candidate):
-			player_color_indices[player_index] = candidate
-			return
+	player_color_indices[player_index] = (current_index + 1) % PLAYER_COLOR_OPTIONS.size()
 
 
 func store_player_state(player_number: int, state: Dictionary) -> void:
