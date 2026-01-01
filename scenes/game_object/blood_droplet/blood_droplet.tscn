@@ -3,5 +3,5 @@
 [ext_resource type="Script" uid="uid://n0lnezohqnvzg" path="res://scenes/game_object/blood_droplet/blood_droplet.gd" id="1_vdn0x"]
 
 [node name="BloodDroplet" type="Node2D"]
-z_index = -1
+z_index = 0
 script = ExtResource("1_vdn0x")
