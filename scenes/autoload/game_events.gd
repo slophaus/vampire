@@ -54,6 +54,20 @@ func cycle_player_color(player_number: int) -> void:
 	player_color_indices[player_index] = (current_index + 1) % PLAYER_COLOR_OPTIONS.size()
 
 
+func get_player_color_index(player_number: int) -> int:
+	var player_index = player_number - 1
+	if player_index < 0 or player_index >= player_color_indices.size():
+		return 0
+	return player_color_indices[player_index]
+
+
+func set_player_color_index(player_number: int, color_index: int) -> void:
+	var player_index = player_number - 1
+	if player_index < 0 or player_index >= player_color_indices.size():
+		return
+	player_color_indices[player_index] = clampi(color_index, 0, PLAYER_COLOR_OPTIONS.size() - 1)
+
+
 func store_player_state(player_number: int, state: Dictionary) -> void:
 	if player_number <= 0:
 		return

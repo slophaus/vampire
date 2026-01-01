@@ -54,8 +54,7 @@ func _ready():
 	base_max_health = health_component.max_health
 	base_health_bar_width = health_bar.custom_minimum_size.x
 	base_health_bar_left = health_bar.offset_left
-	player_color.color = get_player_tint()
-	player_color.visible = true
+	_apply_player_color()
 	if near_death_flash != null:
 		near_death_flash.visible = false
 	aim_laser.visible = false
@@ -161,6 +160,7 @@ func get_persisted_state() -> Dictionary:
 	return {
 		"current_health": health_component.current_health,
 		"max_health": health_component.max_health,
+		"color_index": GameEvents.get_player_color_index(player_number),
 	}
 
 
@@ -175,6 +175,15 @@ func _restore_persisted_state() -> void:
 		health_component.current_health = min(float(persisted_state["current_health"]), health_component.max_health)
 		health_component.health_changed.emit()
 		last_health = health_component.current_health
+	if persisted_state.has("color_index"):
+		GameEvents.set_player_color_index(player_number, int(persisted_state["color_index"]))
+		_apply_player_color()
+
+
+func _apply_player_color() -> void:
+	player_color.color = get_player_tint()
+	player_color.visible = true
+	_update_aim_laser_color()
 
 
 func can_attack() -> bool:
