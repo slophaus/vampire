@@ -95,3 +95,11 @@ func take_paused_scene() -> Node:
 	var stored_scene = paused_main_scene
 	paused_main_scene = null
 	return stored_scene
+
+
+func reset_persisted_state() -> void:
+	persisted_upgrades_by_player.clear()
+	persisted_upgrade_pools_by_player.clear()
+	persisted_player_states.clear()
+	persisted_turn_player_number = 1
+	paused_main_scene = null
