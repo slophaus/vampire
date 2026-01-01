@@ -52,6 +52,7 @@ func create_upgrade_pool() -> WeightedTable:
 
 
 func apply_upgrade(upgrade: AbilityUpgrade, player_number: int):
+	_ensure_player_state(player_number)
 	var current_upgrades = current_upgrades_by_player[player_number]
 	var upgrade_pool = upgrade_pools_by_player[player_number]
 	var has_upgrade = current_upgrades.has(upgrade.id)
@@ -129,6 +130,7 @@ func on_level_up(current_level: int):
 	var upgrade_player_number = get_upgrade_player_number()
 	if upgrade_player_number == 0:
 		return
+	_ensure_player_state(upgrade_player_number)
 	var upgrade_screen_instance = upgrade_screen_scene.instantiate()
 	add_child(upgrade_screen_instance)
 	upgrade_screen_instance.set_controlling_player(upgrade_player_number)
@@ -199,6 +201,22 @@ func refresh_players() -> void:
 	if not player_numbers.has(current_turn_player_number):
 		current_turn_player_number = player_numbers[0]
 	GameEvents.persisted_turn_player_number = current_turn_player_number
+
+
+func _ensure_player_state(player_number: int) -> void:
+	if player_number <= 0:
+		return
+	if not current_upgrades_by_player.has(player_number):
+		if GameEvents.persisted_upgrades_by_player.has(player_number):
+			current_upgrades_by_player[player_number] = GameEvents.persisted_upgrades_by_player[player_number].duplicate(true)
+		else:
+			current_upgrades_by_player[player_number] = {}
+	if not upgrade_pools_by_player.has(player_number):
+		if GameEvents.persisted_upgrade_pools_by_player.has(player_number):
+			upgrade_pools_by_player[player_number] = GameEvents.persisted_upgrade_pools_by_player[player_number]
+		else:
+			upgrade_pools_by_player[player_number] = create_upgrade_pool()
+	_store_persistent_state(player_number)
 
 
 func _store_persistent_state(player_number: int) -> void:
