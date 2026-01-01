@@ -125,6 +125,7 @@ func spawn_sword(start_position: Vector2, target_position: Vector2) -> void:
 	var sword_instance = sword_ability.instantiate() as SwordAbility
 	var foreground_layer = get_tree().get_first_node_in_group("foreground_layer")
 	foreground_layer.add_child(sword_instance)
+	sword_instance.owner_actor = get_owner_actor()
 	sword_instance.hitbox_component.damage = base_damage * additional_damage_percent
 	sword_instance.hitbox_component.knockback = 250.0
 	sword_instance.hitbox_component.penetration = base_penetration
