@@ -46,11 +46,14 @@ func _on_body_entered(body: Node) -> void:
 
 
 func _position_players_at_exit(scene_root: Node) -> void:
+	var tree = scene_root.get_tree()
+	if tree == null:
+		return
 	var exit_door = scene_root.find_child("DownDoor", true, false)
 	if exit_door == null:
 		return
 	var base_position = exit_door.global_position + DOOR_EXIT_OFFSET
-	for player in get_tree().get_nodes_in_group("player"):
+	for player in tree.get_nodes_in_group("player"):
 		var player_number = player.get("player_number")
 		if typeof(player_number) != TYPE_INT:
 			continue
