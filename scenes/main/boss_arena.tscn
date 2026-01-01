@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://c5kgkd7ly41sq" path="res://scenes/manager/experience_manager.tscn" id="4_ak51j"]
 [ext_resource type="PackedScene" uid="uid://c5b76ailnfref" path="res://scenes/manager/upgrade_manager.tscn" id="6_08ukk"]
 [ext_resource type="PackedScene" uid="uid://c1y0b6v3m7kqj" path="res://scenes/game_object/boss_enemy/boss_enemy.tscn" id="13_th5th"]
-[ext_resource type="PackedScene" uid="uid://b2wkgxac7uu3v" path="res://scenes/game_object/up_door/up_door.tscn" id="14_mqa3o"]
+[ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="14_mqa3o"]
 
 [node name="Main2" type="Node"]
 script = ExtResource("1_v8wic")
@@ -38,7 +38,8 @@ y_sort_enabled = true
 unique_name_in_owner = true
 position = Vector2(381, 374)
 
-[node name="UpDoor" parent="Entities" instance=ExtResource("14_mqa3o")]
+[node name="Door" parent="Entities" instance=ExtResource("14_mqa3o")]
+door_mode = 1
 position = Vector2(266, 373)
 
 [node name="DragonBoss" parent="Entities" instance=ExtResource("13_th5th")]
