@@ -9,6 +9,10 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 
 
+func reset_transition_state() -> void:
+	is_transitioning = false
+
+
 func _on_body_entered(body: Node) -> void:
 	if is_transitioning:
 		return

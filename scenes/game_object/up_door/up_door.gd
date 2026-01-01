@@ -30,5 +30,8 @@ func _on_body_entered(body: Node) -> void:
 	if restored_scene == null:
 		restored_scene = main_scene.instantiate()
 	restored_scene.process_mode = Node.PROCESS_MODE_INHERIT
+	for door in restored_scene.find_children("DownDoor", "", true, false):
+		if door.has_method("reset_transition_state"):
+			door.reset_transition_state()
 	tree.root.add_child(restored_scene)
 	tree.current_scene = restored_scene
