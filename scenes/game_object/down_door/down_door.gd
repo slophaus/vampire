@@ -20,6 +20,19 @@ func reset_transition_state() -> void:
 	is_transitioning = false
 
 
+func start_return_cooldown(duration := 0.35) -> void:
+	if not is_inside_tree():
+		return
+	is_transitioning = true
+	set_deferred("monitoring", false)
+	var timer = get_tree().create_timer(duration)
+	timer.timeout.connect(func() -> void:
+		if is_inside_tree():
+			monitoring = true
+		is_transitioning = false
+	)
+
+
 func _on_body_entered(body: Node) -> void:
 	if is_transitioning:
 		return
