@@ -34,8 +34,6 @@ func pick_item(exclude: Array = []):
 				continue
 			adjusted_items.append(it)
 			adjusted_weight_sum += it["weight"]
-	if adjusted_items.is_empty() or adjusted_weight_sum <= 0:
-		return null
 	
 	var chosen_weight = randi_range(1, adjusted_weight_sum)
 	var iteration_sum = 0
