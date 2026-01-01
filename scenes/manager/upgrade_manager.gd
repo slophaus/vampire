@@ -36,6 +36,15 @@ func _ready():
 	experience_manager.level_up.connect(on_level_up)
 
 
+func restore_persisted_state() -> void:
+	current_turn_player_number = GameEvents.persisted_turn_player_number
+	for player_number in GameEvents.persisted_upgrades_by_player.keys():
+		current_upgrades_by_player[player_number] = GameEvents.persisted_upgrades_by_player[player_number].duplicate(true)
+	for player_number in GameEvents.persisted_upgrade_pools_by_player.keys():
+		upgrade_pools_by_player[player_number] = GameEvents.persisted_upgrade_pools_by_player[player_number]
+	_reapply_current_upgrades()
+
+
 func create_upgrade_pool() -> WeightedTable:
 	var upgrade_pool: WeightedTable = WeightedTable.new()
 	# axe damage는 axe 얻을 때 풀에 추가

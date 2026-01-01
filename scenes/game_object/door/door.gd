@@ -95,6 +95,7 @@ func _transition_to_scene(destination_scene: Node, keep_current_scene: bool) -> 
 	tree.root.add_child(destination_scene)
 	tree.current_scene = destination_scene
 	_reset_door_states(destination_scene)
+	_sync_persisted_states(destination_scene)
 	_position_players_at_exit(destination_scene)
 
 
@@ -113,6 +114,15 @@ func _reset_door_states(scene_root: Node) -> void:
 			door.reset_transition_state()
 		if door.has_method("defer_reenable"):
 			door.defer_reenable()
+
+
+func _sync_persisted_states(scene_root: Node) -> void:
+	var experience_manager = scene_root.find_child("ExperienceManager", true, false)
+	if experience_manager != null and experience_manager.has_method("restore_persisted_state"):
+		experience_manager.restore_persisted_state()
+	var upgrade_manager = scene_root.find_child("UpgradeManager", true, false)
+	if upgrade_manager != null and upgrade_manager.has_method("restore_persisted_state"):
+		upgrade_manager.restore_persisted_state()
 
 
 func _position_players_at_exit(scene_root: Node) -> void:

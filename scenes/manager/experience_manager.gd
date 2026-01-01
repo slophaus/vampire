@@ -13,6 +13,7 @@ var target_experience = 1  # just for debug
 
 func _ready():
 	GameEvents.experience_vial_collected.connect(on_experience_vial_collected)
+	restore_persisted_state()
 
 
 func increment_experience(number: float):
@@ -24,7 +25,30 @@ func increment_experience(number: float):
 		target_experience += TARGET_EXPERIENCE_GROWTH
 		experience_updated.emit(current_experience, target_experience)
 		level_up.emit(current_level)
+	_store_persisted_state()
 
 
 func on_experience_vial_collected(number: float):
 	increment_experience(number)
+
+
+func restore_persisted_state() -> void:
+	var persisted_state = GameEvents.get_experience_state()
+	if persisted_state.is_empty():
+		_store_persisted_state()
+		return
+	if persisted_state.has("current_experience"):
+		current_experience = float(persisted_state["current_experience"])
+	if persisted_state.has("target_experience"):
+		target_experience = float(persisted_state["target_experience"])
+	if persisted_state.has("current_level"):
+		current_level = int(persisted_state["current_level"])
+	experience_updated.emit(current_experience, target_experience)
+
+
+func _store_persisted_state() -> void:
+	GameEvents.store_experience_state({
+		"current_experience": current_experience,
+		"target_experience": target_experience,
+		"current_level": current_level,
+	})
