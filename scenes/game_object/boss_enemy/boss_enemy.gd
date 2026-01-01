@@ -1,8 +1,8 @@
 extends CharacterBody2D
 
 const MAX_HEALTH := 150.0
-const MAX_SPEED := 70.0
-const ACCELERATION := 2.5
+const MAX_SPEED := 50.0
+const ACCELERATION := 4.0
 const FACING_MULTIPLIER := 1
 const CONTACT_DAMAGE := 5.0
 

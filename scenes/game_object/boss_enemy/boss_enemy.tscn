@@ -74,6 +74,7 @@ collision_layer = 8
 collision_mask = 9
 motion_mode = 1
 script = ExtResource("1_gpcli")
+minion_spawn_interval_range = Vector2(2, 6)
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_en8ir")]
 
@@ -128,7 +129,6 @@ owner_group = "enemy"
 target_group = "player"
 
 [node name="MinionSpawnTimer" type="Timer" parent="."]
-one_shot = true
 
 [node name="Visuals" type="Node2D" parent="."]
 

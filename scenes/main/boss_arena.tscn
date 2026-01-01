@@ -38,6 +38,6 @@ unique_name_in_owner = true
 position = Vector2(381, 374)
 
 [node name="DragonBoss" parent="Entities" instance=ExtResource("13_th5th")]
-position = Vector2(480, 320)
+position = Vector2(492, 188)
 
 [node name="Foreground" type="Node2D" parent="." groups=["foreground_layer"]]
