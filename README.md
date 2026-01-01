@@ -32,8 +32,23 @@
 
 ## Enemies
 
-Enemies spawn just outside the current camera view, but only within a limited radius from the
-center of the screen to avoid distant spawns.
+Enemies spawn on a timer that accelerates with arena difficulty, and they appear on walkable
+tiles just outside the camera view. Spawns are also capped at 500 active enemies to prevent
+runaway counts.
+
+### Enemy spawn flow
+
+* The spawn timer starts at its scene `Timer.wait_time` value (`EnemyManager.base_spawn_time`).
+  Each time arena difficulty increases, `on_arena_difficulty_increased` shortens the timer by
+  `(0.1 / 12) * arena_difficulty` seconds (up to 0.7 seconds), raising the spawn rate over time.
+* `EnemyManager` builds a weighted table of enemy types: it starts with Mouse entries (weight 15),
+  adds Worms at difficulty 6 (weight 1), Wizards at difficulty 8 (weight 5), and Rats at
+  difficulty 12 (weight 4).
+* For each spawn, it looks for walkable tilemap cells (no collision polygons) that are outside the
+  camera view rectangle (`OFFSCREEN_MARGIN` pixels beyond the view), but still within
+  `MAX_SPAWN_RADIUS_MULTIPLIER` (75%) of the view size. A random eligible cell is chosen and
+  converted from tilemap local coordinates into a global spawn position.
+* If there is no camera, no player, or no eligible spawn cell, the spawn attempt is skipped.
 
 ### Basic enemy types
 
