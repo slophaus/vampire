@@ -40,6 +40,7 @@ position = Vector2(381, 374)
 
 [node name="DragonBoss" parent="Entities" instance=ExtResource("13_th5th")]
 position = Vector2(492, 188)
+experience_vial_drop_radius = 60.0
 
 [node name="Foreground" type="Node2D" parent="." groups=["foreground_layer"]]
 
