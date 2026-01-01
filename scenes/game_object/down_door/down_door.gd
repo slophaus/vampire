@@ -3,6 +3,13 @@ extends Area2D
 
 @export var boss_arena_scene: PackedScene = preload("res://scenes/main/boss_arena.tscn")
 var is_transitioning := false
+const DOOR_EXIT_OFFSET := Vector2(0, 32)
+const PLAYER_FORMATION_OFFSETS := {
+	1: Vector2.ZERO,
+	2: Vector2(32, 0),
+	3: Vector2(-32, 0),
+	4: Vector2(0, 32),
+}
 
 
 func _ready() -> void:
@@ -36,3 +43,16 @@ func _on_body_entered(body: Node) -> void:
 	var boss_instance = boss_arena_scene.instantiate()
 	tree.root.add_child(boss_instance)
 	tree.current_scene = boss_instance
+	_position_players_at_exit(boss_instance)
+
+
+func _position_players_at_exit(scene_root: Node) -> void:
+	var exit_door = scene_root.find_child("UpDoor", true, false)
+	if exit_door == null:
+		return
+	var base_position = exit_door.global_position + DOOR_EXIT_OFFSET
+	for player in get_tree().get_nodes_in_group("player"):
+		var player_number = player.get("player_number")
+		if typeof(player_number) != TYPE_INT:
+			continue
+		player.global_position = base_position + PLAYER_FORMATION_OFFSETS.get(player_number, Vector2.ZERO)
