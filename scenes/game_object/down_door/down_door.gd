@@ -2,6 +2,7 @@ extends Area2D
 
 
 @export var boss_arena_scene: PackedScene = preload("res://scenes/main/boss_arena.tscn")
+var is_transitioning := false
 
 
 func _ready() -> void:
@@ -9,8 +10,11 @@ func _ready() -> void:
 
 
 func _on_body_entered(body: Node) -> void:
+	if is_transitioning:
+		return
 	if not body.is_in_group("player"):
 		return
 	if boss_arena_scene == null:
 		return
-	get_tree().change_scene_to_packed(boss_arena_scene)
+	is_transitioning = true
+	ScreenTransition.transition_to_scene(boss_arena_scene.resource_path)

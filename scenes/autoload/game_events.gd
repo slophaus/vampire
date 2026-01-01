@@ -6,6 +6,9 @@ signal player_damaged
 
 var player_count := 1
 var player_color_indices := [0, 1, 2, 3]
+var persisted_upgrades_by_player: Dictionary = {}
+var persisted_upgrade_pools_by_player: Dictionary = {}
+var persisted_turn_player_number := 1
 
 const PLAYER_COLOR_OPTIONS := [
 	Color(1, 0, 0),
