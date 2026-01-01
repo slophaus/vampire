@@ -90,6 +90,7 @@ func _transition_to_scene(destination_scene: Node, keep_current_scene: bool) -> 
 		current_scene.set_deferred("process_mode", Node.PROCESS_MODE_DISABLED)
 	ScreenTransition.transition()
 	await ScreenTransition.transitioned_halfway
+	_transfer_scene_managers(current_scene, destination_scene)
 	_remove_current_scene(current_scene, keep_current_scene)
 	destination_scene.process_mode = Node.PROCESS_MODE_INHERIT
 	tree.root.add_child(destination_scene)
@@ -106,6 +107,31 @@ func _remove_current_scene(current_scene: Node, keep_current_scene: bool) -> voi
 		current_scene.get_parent().remove_child(current_scene)
 	if not keep_current_scene:
 		current_scene.queue_free()
+
+
+func _transfer_scene_managers(current_scene: Node, destination_scene: Node) -> void:
+	if current_scene == null or destination_scene == null:
+		return
+	var source_experience = current_scene.find_child("ExperienceManager", true, false)
+	var source_upgrade = current_scene.find_child("UpgradeManager", true, false)
+	if source_experience != null:
+		_remove_destination_manager(destination_scene, "ExperienceManager", source_experience)
+	if source_upgrade != null:
+		_remove_destination_manager(destination_scene, "UpgradeManager", source_upgrade)
+	if source_experience != null:
+		source_experience.get_parent().remove_child(source_experience)
+		destination_scene.add_child(source_experience)
+	if source_upgrade != null:
+		source_upgrade.get_parent().remove_child(source_upgrade)
+		destination_scene.add_child(source_upgrade)
+		if source_experience != null:
+			source_upgrade.experience_manager = source_experience
+
+
+func _remove_destination_manager(destination_scene: Node, name: String, source_manager: Node) -> void:
+	var destination_manager = destination_scene.find_child(name, true, false)
+	if destination_manager != null and destination_manager != source_manager:
+		destination_manager.queue_free()
 
 
 func _reset_door_states(scene_root: Node) -> void:
