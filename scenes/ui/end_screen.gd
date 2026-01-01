@@ -58,6 +58,7 @@ func play_jingle(defeat: bool = false):
 
 
 func on_quit_button_pressed():
+	GameEvents.reset_persisted_state()
 	ScreenTransition.transition_to_scene("res://scenes/ui/main_menu.tscn")
 	get_tree().paused = false
 	await ScreenTransition.transitioned_halfway
