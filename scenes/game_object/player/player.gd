@@ -338,10 +338,11 @@ func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades:
 		return
 	if ability_upgrade is Ability:
 		var ability = ability_upgrade as Ability
-		var ability_controller = ability.ability_controller_scene.instantiate()
-		if ability_controller.has_method("set_player_number"):
-			ability_controller.set_player_number(player_number)
-		abilities.add_child(ability_controller)
+		if not _has_ability_controller(ability.ability_controller_scene):
+			var ability_controller = ability.ability_controller_scene.instantiate()
+			if ability_controller.has_method("set_player_number"):
+				ability_controller.set_player_number(player_number)
+			abilities.add_child(ability_controller)
 	elif ability_upgrade.id == "player_speed":
 		velocity_component.max_speed = base_speed + (base_speed * current_upgrades["player_speed"]["quantity"] * 0.2)
 	elif ability_upgrade.id == "player_health":
@@ -349,6 +350,18 @@ func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades:
 		health_component.heal(8.0)
 		update_health_bar_size()
 	update_upgrade_dots(current_upgrades)
+
+
+func _has_ability_controller(ability_scene: PackedScene) -> bool:
+	if ability_scene == null:
+		return false
+	var scene_path = ability_scene.resource_path
+	if scene_path.is_empty():
+		return false
+	for child in abilities.get_children():
+		if child.scene_file_path == scene_path:
+			return true
+	return false
 
 
 func update_upgrade_dots(current_upgrades: Dictionary) -> void:
