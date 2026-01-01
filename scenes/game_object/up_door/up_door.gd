@@ -20,7 +20,7 @@ func _on_body_entered(body: Node) -> void:
 	var tree = get_tree()
 	var current_scene = tree.current_scene
 	if current_scene != null:
-		current_scene.process_mode = Node.PROCESS_MODE_DISABLED
+		current_scene.set_deferred("process_mode", Node.PROCESS_MODE_DISABLED)
 	ScreenTransition.transition()
 	await ScreenTransition.transitioned_halfway
 	if current_scene != null:

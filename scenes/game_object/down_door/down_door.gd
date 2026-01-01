@@ -23,7 +23,7 @@ func _on_body_entered(body: Node) -> void:
 	var current_scene = tree.current_scene
 	if current_scene != null and not GameEvents.has_paused_scene():
 		GameEvents.store_paused_scene(current_scene)
-		current_scene.process_mode = Node.PROCESS_MODE_DISABLED
+		current_scene.set_deferred("process_mode", Node.PROCESS_MODE_DISABLED)
 	is_transitioning = true
 	ScreenTransition.transition()
 	await ScreenTransition.transitioned_halfway

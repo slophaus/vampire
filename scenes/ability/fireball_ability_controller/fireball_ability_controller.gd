@@ -51,7 +51,7 @@ func on_timer_timeout() -> void:
 		return
 
 	var selected_target = targets.pick_random()
-	await fire_fireballs(owner_actor.global_position, selected_target.global_position)
+	fire_fireballs(owner_actor.global_position, selected_target.global_position)
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
