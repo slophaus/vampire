@@ -10,6 +10,7 @@ var persisted_upgrades_by_player: Dictionary = {}
 var persisted_upgrade_pools_by_player: Dictionary = {}
 var persisted_turn_player_number := 1
 var persisted_player_states: Dictionary = {}
+var paused_main_scene: Node = null
 
 const PLAYER_COLOR_OPTIONS := [
 	Color(1, 0, 0),
@@ -80,3 +81,17 @@ func store_player_state(player_number: int, state: Dictionary) -> void:
 
 func get_player_state(player_number: int) -> Dictionary:
 	return persisted_player_states.get(player_number, {})
+
+
+func store_paused_scene(scene: Node) -> void:
+	paused_main_scene = scene
+
+
+func has_paused_scene() -> bool:
+	return paused_main_scene != null
+
+
+func take_paused_scene() -> Node:
+	var stored_scene = paused_main_scene
+	paused_main_scene = null
+	return stored_scene

@@ -19,5 +19,16 @@ func _on_body_entered(body: Node) -> void:
 	for player in get_tree().get_nodes_in_group("player"):
 		if player.has_method("get_persisted_state"):
 			GameEvents.store_player_state(player.player_number, player.get_persisted_state())
+	var tree = get_tree()
+	var current_scene = tree.current_scene
+	if current_scene != null and not GameEvents.has_paused_scene():
+		GameEvents.store_paused_scene(current_scene)
+		current_scene.process_mode = Node.PROCESS_MODE_DISABLED
 	is_transitioning = true
-	ScreenTransition.transition_to_scene(boss_arena_scene.resource_path)
+	ScreenTransition.transition()
+	await ScreenTransition.transitioned_halfway
+	if current_scene != null and current_scene.get_parent() != null:
+		tree.root.remove_child(current_scene)
+	var boss_instance = boss_arena_scene.instantiate()
+	tree.root.add_child(boss_instance)
+	tree.current_scene = boss_instance
