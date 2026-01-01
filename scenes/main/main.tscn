@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://mapie6ivpd7j"]
+[gd_scene load_steps=17 format=3 uid="uid://mapie6ivpd7j"]
 
 [ext_resource type="PackedScene" uid="uid://5jwlcn6cm23o" path="res://scenes/game_object/game_camera/game_camera.tscn" id="1_4i4ay"]
 [ext_resource type="PackedScene" uid="uid://bpgwbwa1p3m6i" path="res://scenes/game_object/player/player.tscn" id="1_55gsj"]
@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="14_7smn1"]
 [ext_resource type="PackedScene" uid="uid://c8j2qneyiwkhy" path="res://scenes/game_object/experience_vial/experience_vial.tscn" id="14_raeie"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="15_raeie"]
+[ext_resource type="PackedScene" uid="uid://b6f3xj5k6h6vl" path="res://scenes/game_object/well/well.tscn" id="16_hxu8e"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_v8wic")
@@ -67,3 +68,8 @@ position = Vector2(428, 411)
 
 [node name="Door" parent="." instance=ExtResource("15_raeie")]
 position = Vector2(246, 298)
+
+[node name="Well" parent="." instance=ExtResource("16_hxu8e")]
+position = Vector2(209, 393)
+emission_interval = 0.25
+capacity = 50
