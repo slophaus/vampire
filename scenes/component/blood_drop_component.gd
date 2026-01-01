@@ -29,7 +29,7 @@ func on_died() -> void:
 	var droplet_count = randi_range(min_count, max_count)
 	var base_position = (owner as Node2D).global_position
 
-	for index in droplet_count:
+	for index in range(droplet_count):
 		var droplet = blood_droplet_scene.instantiate() as Node2D
 		if droplet == null:
 			continue
