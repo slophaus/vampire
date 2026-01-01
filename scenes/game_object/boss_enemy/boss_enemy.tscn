@@ -95,10 +95,10 @@ sprite = NodePath("../Visuals/dragon_sprite")
 
 [node name="HealthBar" type="ProgressBar" parent="."]
 custom_minimum_size = Vector2(48, 6)
-offset_left = -24.0
-offset_top = -60.0
-offset_right = 24.0
-offset_bottom = -54.0
+offset_left = -23.75
+offset_top = -26.25
+offset_right = 24.25
+offset_bottom = -20.25
 scale = Vector2(0.625, 0.625)
 pivot_offset = Vector2(24, 3)
 max_value = 1.0
@@ -133,7 +133,6 @@ target_group = "player"
 [node name="Visuals" type="Node2D" parent="."]
 
 [node name="dragon_sprite" type="AnimatedSprite2D" parent="Visuals"]
-visible = false
 clip_children = 2
 sprite_frames = SubResource("SpriteFrames_iguem")
 autoplay = "default"
