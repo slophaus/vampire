@@ -13,7 +13,6 @@ const SPLASH_VISUAL_DURATION := 0.15
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape: CollisionShape2D = $HitboxComponent/CollisionShape2D
 @export var explosion_scene: PackedScene = preload("res://scenes/vfx/explosion.tscn")
-@export var dust_poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
 
 var direction := Vector2.ZERO
 var max_distance := 0.0
@@ -47,7 +46,6 @@ func _physics_process(delta: float) -> void:
 	distance_traveled += movement.length()
 
 	if distance_traveled >= max_distance:
-		spawn_dust()
 		queue_free()
 
 
@@ -133,18 +131,6 @@ func spawn_explosion() -> void:
 	explosion_instance.emitting = true
 	explosion_instance.finished.connect(explosion_instance.queue_free)
 	get_tree().current_scene.add_child(explosion_instance)
-
-
-func spawn_dust() -> void:
-	if dust_poof_scene == null:
-		return
-	var dust_instance = dust_poof_scene.instantiate() as GPUParticles2D
-	if dust_instance == null:
-		return
-	dust_instance.global_position = global_position
-	dust_instance.emitting = true
-	dust_instance.finished.connect(dust_instance.queue_free)
-	get_tree().current_scene.add_child(dust_instance)
 
 
 func apply_splash_damage(target: Node2D) -> void:

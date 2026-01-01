@@ -1,15 +1,35 @@
 extends CharacterBody2D
 
-const MAX_HEALTH := 150.0
-const MAX_SPEED := 70.0
-const ACCELERATION := 2.5
-const FACING_MULTIPLIER := 1
-const CONTACT_DAMAGE := 5.0
+const ENEMY_TYPES = {
+	0: {
+		"max_health": 150.0,
+		"max_speed": 70,
+		"acceleration": 2.5,
+		"facing_multiplier": 1,
+		"contact_damage": 4
+	},
+	1: {
+		"max_health": 150.0,
+		"max_speed": 70,
+		"acceleration": 2.5,
+		"facing_multiplier": 1,
+		"contact_damage": 5
+	},
+	2: {
+		"max_health": 150.0,
+		"max_speed": 70,
+		"acceleration": 2.5,
+		"facing_multiplier": 1,
+		"contact_damage": 4
+	}
+}
 
 const SEPARATION_RADIUS := 15.0
 const SEPARATION_PUSH_STRENGTH := 5.0
+const MOUSE_DIG_LEVEL_TWO_TINT := Color(0.25, 0.25, 1)
 const MINION_SPAWN_COUNT := 4
 const MINION_SPAWN_RADIUS := 32.0
+@export var enemy_index := 1
 @export var minion_scene: PackedScene = preload("res://scenes/game_object/basic_enemy/basic_enemy.tscn")
 @export var minion_spawn_interval_range := Vector2(6.0, 10.0)
 
@@ -20,20 +40,28 @@ const MINION_SPAWN_RADIUS := 32.0
 @onready var hit_flash_component = $HitFlashComponent
 @onready var death_component = $DeathComponent
 @onready var fireball_ability_controller = $Abilities/FireballAbilityController
+@onready var dig_ability_controller = $Abilities/DigAbilityController
+@onready var sword_ability_controller = $Abilities/SwordAbilityController
 @onready var minion_spawn_timer: Timer = $MinionSpawnTimer
+@onready var mouse_sprite: AnimatedSprite2D = $Visuals/mouse_sprite
 @onready var dragon_sprite: AnimatedSprite2D = $Visuals/dragon_sprite
+@onready var rat_sprite: Sprite2D = $Visuals/RatSprite
+@onready var mouse_color: ColorRect = $Visuals/mouse_sprite/enemy_color
 @onready var dragon_color: ColorRect = $Visuals/dragon_sprite/enemy_color
+@onready var rat_color: ColorRect = $Visuals/RatSprite/enemy_color
+@onready var rat_texture: Texture2D = rat_sprite.texture
 
 var facing_multiplier := -1
 var enemy_tint := Color.WHITE
-var contact_damage := CONTACT_DAMAGE
-
+var contact_damage := 1.0
+var mouse_has_dig_level_two := false
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
-	apply_enemy_stats()
+	apply_enemy_type(enemy_index)
 	fireball_ability_controller.fireball_level = 3
-	fireball_ability_controller.set_active(true)
-	apply_random_tint()
+	sword_ability_controller.sword_level = 2
+	assign_mouse_dig_level()
+	apply_enemy_tint_for_type()
 	health_component.health_changed.connect(update_health_display)
 	update_health_display()
 	minion_spawn_timer.timeout.connect(on_minion_spawn_timer_timeout)
@@ -71,18 +99,39 @@ func apply_enemy_separation() -> void:
 		velocity_component.velocity += separation_force.normalized() * SEPARATION_PUSH_STRENGTH
 
 
-func apply_enemy_stats() -> void:
-	facing_multiplier = FACING_MULTIPLIER
-	velocity_component.max_speed = MAX_SPEED
-	velocity_component.acceleration = ACCELERATION
+func apply_enemy_type(index: int) -> void:
+	enemy_index = index
+	var enemy_data = ENEMY_TYPES.get(enemy_index, ENEMY_TYPES[0])
 
-	health_component.max_health = MAX_HEALTH
-	health_component.current_health = MAX_HEALTH
-	contact_damage = CONTACT_DAMAGE
+	facing_multiplier = enemy_data["facing_multiplier"]
+	velocity_component.max_speed = enemy_data["max_speed"]
+	velocity_component.acceleration = enemy_data["acceleration"]
 
-	dragon_sprite.visible = true
-	hit_flash_component.set_sprite(dragon_sprite)
-	death_component.sprite = dragon_sprite
+	health_component.max_health = enemy_data["max_health"]
+	health_component.current_health = enemy_data["max_health"]
+	contact_damage = enemy_data["contact_damage"]
+
+	mouse_sprite.visible = enemy_index == 0
+	dragon_sprite.visible = enemy_index == 1
+	rat_sprite.visible = enemy_index == 2
+	fireball_ability_controller.set_active(enemy_index == 1)
+	dig_ability_controller.set_active(enemy_index == 0)
+	sword_ability_controller.set_active(enemy_index == 1)
+	if enemy_index == 1:
+		schedule_next_minion_spawn()
+	else:
+		minion_spawn_timer.stop()
+
+	rat_sprite.texture = rat_texture
+
+	var active_sprite: CanvasItem = mouse_sprite
+	if enemy_index == 1:
+		active_sprite = dragon_sprite
+	elif enemy_index == 2:
+		active_sprite = rat_sprite
+
+	hit_flash_component.set_sprite(active_sprite)
+	death_component.sprite = active_sprite
 
 
 func on_hit():
@@ -95,12 +144,31 @@ func apply_random_tint():
 	enemy_tint = Color.from_hsv(rng.randf(), .25, 1.0, 1.0)
 	apply_enemy_tint()
 
+func apply_enemy_tint_for_type() -> void:
+	if enemy_index == 0 and mouse_has_dig_level_two:
+		enemy_tint = MOUSE_DIG_LEVEL_TWO_TINT
+		apply_enemy_tint()
+		return
+	apply_random_tint()
+
 
 func apply_enemy_tint() -> void:
-	if dragon_color == null:
+	for tint_rect in [mouse_color, dragon_color, rat_color]:
+		if tint_rect == null:
+			continue
+		tint_rect.color = enemy_tint
+		tint_rect.visible = true
+
+
+func assign_mouse_dig_level() -> void:
+	if enemy_index != 0:
+		mouse_has_dig_level_two = false
+		dig_ability_controller.set_dig_level(1)
 		return
-	dragon_color.color = enemy_tint
-	dragon_color.visible = true
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	mouse_has_dig_level_two = rng.randf() < 0.1
+	dig_ability_controller.set_dig_level(2 if mouse_has_dig_level_two else 1)
 
 
 func update_health_display() -> void:
@@ -110,12 +178,14 @@ func update_health_display() -> void:
 
 
 func on_minion_spawn_timer_timeout() -> void:
+	if enemy_index != 1:
+		return
 	spawn_minions()
 	schedule_next_minion_spawn()
 
 
 func schedule_next_minion_spawn() -> void:
-	if minion_spawn_timer == null:
+	if minion_spawn_timer == null or enemy_index != 1:
 		return
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
