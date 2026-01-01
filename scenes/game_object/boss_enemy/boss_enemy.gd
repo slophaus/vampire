@@ -20,6 +20,7 @@ const MINION_SPAWN_RADIUS := 32.0
 @onready var hit_flash_component = $HitFlashComponent
 @onready var death_component = $DeathComponent
 @onready var fireball_ability_controller = $Abilities/FireballAbilityController
+@onready var sword_ability_controller = $Abilities/SwordAbilityController
 @onready var minion_spawn_timer: Timer = $MinionSpawnTimer
 @onready var dragon_sprite: AnimatedSprite2D = $Visuals/dragon_sprite
 @onready var dragon_color: ColorRect = $Visuals/dragon_sprite/enemy_color
@@ -33,6 +34,8 @@ func _ready():
 	apply_enemy_stats()
 	fireball_ability_controller.fireball_level = 3
 	fireball_ability_controller.set_active(true)
+	sword_ability_controller.sword_level = 2
+	sword_ability_controller.set_active(true)
 	apply_random_tint()
 	health_component.health_changed.connect(update_health_display)
 	update_health_display()
