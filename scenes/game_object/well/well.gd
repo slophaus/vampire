@@ -1,0 +1,66 @@
+extends Area2D
+class_name Well
+
+@export var experience_vial_scene: PackedScene = preload("res://scenes/game_object/experience_vial/experience_vial.tscn")
+@export var explosion_scene: PackedScene = preload("res://scenes/vfx/explosion.tscn")
+@export_range(0.05, 10.0, 0.05) var emission_interval := 1.0
+@export_range(1, 999, 1) var max_vials := 5
+
+@onready var emission_timer: Timer = $EmissionTimer
+
+var _started := false
+var _emitted_count := 0
+
+
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)
+	emission_timer.timeout.connect(_on_emission_timeout)
+	emission_timer.wait_time = emission_interval
+	emission_timer.stop()
+
+
+func _on_body_entered(body: Node) -> void:
+	if _started:
+		return
+	if body == null or not body.is_in_group("player"):
+		return
+	_started = true
+	_emit_vial()
+	if _emitted_count < max_vials:
+		emission_timer.start(emission_interval)
+	else:
+		_explode_and_despawn()
+
+
+func _on_emission_timeout() -> void:
+	_emit_vial()
+	if _emitted_count >= max_vials:
+		emission_timer.stop()
+		_explode_and_despawn()
+
+
+func _emit_vial() -> void:
+	if experience_vial_scene == null:
+		return
+	var vial_instance = experience_vial_scene.instantiate() as Node2D
+	if vial_instance == null:
+		return
+	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
+	if entities_layer == null:
+		entities_layer = get_tree().current_scene
+	if entities_layer == null:
+		return
+	entities_layer.add_child(vial_instance)
+	vial_instance.global_position = global_position
+	_emitted_count += 1
+
+
+func _explode_and_despawn() -> void:
+	if explosion_scene != null:
+		var explosion_instance = explosion_scene.instantiate() as GPUParticles2D
+		if explosion_instance != null:
+			explosion_instance.global_position = global_position
+			explosion_instance.emitting = true
+			explosion_instance.finished.connect(explosion_instance.queue_free)
+			get_tree().current_scene.add_child(explosion_instance)
+	queue_free()

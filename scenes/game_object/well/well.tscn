@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3 uid="uid://b6f3xj5k6h6vl"]
+
+[ext_resource type="Texture2D" uid="uid://crrxkfeyeohmh" path="res://sprites/metroid_can.png" id="1_a6xho"]
+[ext_resource type="Script" uid="uid://b0j4gqkb5r8p1" path="res://scenes/game_object/well/well.gd" id="2_5xq1h"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5q0k4"]
+radius = 24.0
+
+[node name="Well" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("2_5xq1h")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_5q0k4")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_a6xho")
+modulate = Color(0.25, 0.55, 1, 1)
+
+[node name="EmissionTimer" type="Timer" parent="."]
