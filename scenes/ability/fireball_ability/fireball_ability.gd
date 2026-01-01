@@ -99,10 +99,7 @@ func explode(excluded_target: Node2D = null) -> void:
 
 	var splash_radius = (BASE_SPLASH_RADIUS * scale.x) + splash_radius_bonus
 	var splash_radius_squared = pow(splash_radius, 2)
-	var splash_targets: Array[Node] = []
-	splash_targets.append_array(get_tree().get_nodes_in_group("player"))
-	splash_targets.append_array(get_tree().get_nodes_in_group("enemy"))
-	for target in splash_targets:
+	for target in get_tree().get_nodes_in_group(target_group):
 		if target == null or not is_instance_valid(target):
 			continue
 		if target == excluded_target:
