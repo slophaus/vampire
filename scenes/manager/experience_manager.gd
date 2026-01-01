@@ -11,9 +11,18 @@ var current_level = 1
 #var target_experience = 5
 var target_experience = 1  # just for debug
 
+func _enter_tree() -> void:
+	if not GameEvents.experience_vial_collected.is_connected(on_experience_vial_collected):
+		GameEvents.experience_vial_collected.connect(on_experience_vial_collected)
+
+
 func _ready():
-	GameEvents.experience_vial_collected.connect(on_experience_vial_collected)
 	restore_persisted_state()
+
+
+func _exit_tree() -> void:
+	if GameEvents.experience_vial_collected.is_connected(on_experience_vial_collected):
+		GameEvents.experience_vial_collected.disconnect(on_experience_vial_collected)
 
 
 func increment_experience(number: float):
