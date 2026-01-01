@@ -8,8 +8,8 @@ enum DoorMode {
 
 
 @export var door_mode := DoorMode.TO_BOSS
-@export var boss_arena_scene: PackedScene = preload("res://scenes/main/boss_arena.tscn")
-@export var main_scene: PackedScene = preload("res://scenes/main/main.tscn")
+@export var boss_arena_scene: PackedScene
+@export var main_scene: PackedScene
 @export var exit_door_name: StringName = &"Door"
 
 var is_transitioning := false
@@ -21,6 +21,8 @@ const PLAYER_FORMATION_OFFSETS := {
 	4: Vector2(0, 32),
 }
 const REENABLE_DELAY_FRAMES := 2
+const BOSS_ARENA_SCENE_PATH := "res://scenes/main/boss_arena.tscn"
+const MAIN_SCENE_PATH := "res://scenes/main/main.tscn"
 
 
 func _ready() -> void:
@@ -53,6 +55,8 @@ func _on_body_entered(body: Node) -> void:
 
 func _transition_to_boss_arena() -> void:
 	if boss_arena_scene == null:
+		boss_arena_scene = load(BOSS_ARENA_SCENE_PATH)
+	if boss_arena_scene == null:
 		return
 	for player in get_tree().get_nodes_in_group("player"):
 		if player.has_method("get_persisted_state"):
@@ -69,7 +73,9 @@ func _transition_to_boss_arena() -> void:
 
 func _transition_to_main_scene() -> void:
 	if main_scene == null and not GameEvents.has_paused_scene():
-		return
+		main_scene = load(MAIN_SCENE_PATH)
+		if main_scene == null:
+			return
 	var destination_scene = GameEvents.take_paused_scene()
 	if destination_scene == null:
 		destination_scene = main_scene.instantiate()
