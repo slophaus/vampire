@@ -2,7 +2,7 @@ extends Node
 
 const MAX_RANGE = 450
 const PLAYER_HITBOX_LAYER = 4
-const ENEMY_HITBOX_LAYER = 2
+const ENEMY_HITBOX_LAYER = 8
 
 @export var sword_ability: PackedScene
 @export var owner_group := "player"
