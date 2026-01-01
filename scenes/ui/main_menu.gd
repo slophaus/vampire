@@ -33,7 +33,9 @@ func _ready():
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("cycle_player_color") and event.device == 0:
-		_cycle_active_player_color()
+		_cycle_active_player_color(1)
+	if event.is_action_pressed("cycle_player_color_reverse") and event.device == 0:
+		_cycle_active_player_color(-1)
 
 
 func on_play_pressed():
@@ -68,14 +70,14 @@ func _get_player_count_button(player_count: int) -> Button:
 	return null
 
 
-func _cycle_active_player_color() -> void:
+func _cycle_active_player_color(direction: int) -> void:
 	var focused = get_viewport().gui_get_focus_owner()
 	if focused == null or focused not in player_color_buttons:
 		return
 	var player_index = player_color_buttons.find(focused) + 1
 	if player_index <= 0:
 		return
-	GameEvents.cycle_player_color(player_index)
+	GameEvents.cycle_player_color(player_index, direction)
 	_refresh_player_count_button_colors()
 
 func _configure_focus_navigation() -> void:
