@@ -185,6 +185,8 @@ func get_player_numbers() -> Array:
 
 
 func refresh_players() -> void:
+	if not is_inside_tree():
+		return
 	for player in get_tree().get_nodes_in_group("player"):
 		if not player.has_method("get_player_action_suffix"):
 			continue
