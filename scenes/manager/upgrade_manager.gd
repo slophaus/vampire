@@ -28,8 +28,10 @@ var rng := RandomNumberGenerator.new()
 
 
 func _ready():
+	current_turn_player_number = GameEvents.persisted_turn_player_number
 	refresh_players()
 	call_deferred("refresh_players")
+	call_deferred("_reapply_current_upgrades")
 
 	experience_manager.level_up.connect(on_level_up)
 
@@ -68,6 +70,7 @@ func apply_upgrade(upgrade: AbilityUpgrade, player_number: int):
 			upgrade_pool.remove_item(upgrade)
 
 	update_upgrade_pool(upgrade, upgrade_pool)
+	_store_persistent_state(player_number)
 	GameEvents.emit_ability_upgrade_added(upgrade, current_upgrades, player_number)
 
 
@@ -180,11 +183,36 @@ func refresh_players() -> void:
 		if players_by_number.has(player_number):
 			continue
 		players_by_number[player_number] = player
-		current_upgrades_by_player[player_number] = {}
-		upgrade_pools_by_player[player_number] = create_upgrade_pool()
+		if GameEvents.persisted_upgrades_by_player.has(player_number):
+			current_upgrades_by_player[player_number] = GameEvents.persisted_upgrades_by_player[player_number].duplicate(true)
+		else:
+			current_upgrades_by_player[player_number] = {}
+		if GameEvents.persisted_upgrade_pools_by_player.has(player_number):
+			upgrade_pools_by_player[player_number] = GameEvents.persisted_upgrade_pools_by_player[player_number]
+		else:
+			upgrade_pools_by_player[player_number] = create_upgrade_pool()
+		_store_persistent_state(player_number)
 
 	var player_numbers = get_player_numbers()
 	if player_numbers.is_empty():
 		return
 	if not player_numbers.has(current_turn_player_number):
 		current_turn_player_number = player_numbers[0]
+	GameEvents.persisted_turn_player_number = current_turn_player_number
+
+
+func _store_persistent_state(player_number: int) -> void:
+	GameEvents.persisted_upgrades_by_player[player_number] = current_upgrades_by_player[player_number].duplicate(true)
+	GameEvents.persisted_upgrade_pools_by_player[player_number] = upgrade_pools_by_player[player_number]
+	GameEvents.persisted_turn_player_number = current_turn_player_number
+
+
+func _reapply_current_upgrades() -> void:
+	for player_number in current_upgrades_by_player.keys():
+		var current_upgrades = current_upgrades_by_player[player_number]
+		for upgrade_data in current_upgrades.values():
+			if typeof(upgrade_data) != TYPE_DICTIONARY:
+				continue
+			if not upgrade_data.has("resource"):
+				continue
+			GameEvents.emit_ability_upgrade_added(upgrade_data["resource"], current_upgrades, player_number)
