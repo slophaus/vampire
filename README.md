@@ -32,6 +32,9 @@
 
 ## Enemies
 
+Enemies spawn just outside the current camera view, but only within a limited radius from the
+center of the screen to avoid distant spawns.
+
 ### Basic enemy types
 
 | Enemy | Spawn behavior | Stats | Notes |

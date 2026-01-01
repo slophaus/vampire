@@ -2,6 +2,7 @@ extends Node
 class_name EnemyManager
 
 const OFFSCREEN_MARGIN = 10
+const MAX_SPAWN_RADIUS_MULTIPLIER = 0.75
 const MAX_ENEMIES = 500
 
 @export var enemy_scene: PackedScene
@@ -30,8 +31,9 @@ func get_spawn_position() -> Vector2:
 	if view_rect == Rect2():
 		return Vector2.ZERO
 
+	var max_spawn_radius = max(view_rect.size.x, view_rect.size.y) * MAX_SPAWN_RADIUS_MULTIPLIER
 	var offscreen_rect = view_rect.grow(OFFSCREEN_MARGIN)
-	var offscreen_cells = get_offscreen_walkable_cells(offscreen_rect)
+	var offscreen_cells = get_offscreen_walkable_cells(offscreen_rect, view_rect.get_center(), max_spawn_radius)
 	if offscreen_cells.is_empty():
 		return Vector2.ZERO
 	var spawn_cell = offscreen_cells[randi_range(0, offscreen_cells.size() - 1)]
@@ -48,7 +50,7 @@ func get_camera_view_rect() -> Rect2:
 	return Rect2(center - (viewport_size * 0.5), viewport_size)
 
 
-func get_offscreen_walkable_cells(offscreen_rect: Rect2) -> Array[Vector2i]:
+func get_offscreen_walkable_cells(offscreen_rect: Rect2, view_center: Vector2, max_spawn_radius: float) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
 	if arena_tilemap == null:
 		return cells
@@ -60,6 +62,8 @@ func get_offscreen_walkable_cells(offscreen_rect: Rect2) -> Array[Vector2i]:
 			continue
 		var world_position = arena_tilemap.to_global(arena_tilemap.map_to_local(cell))
 		if offscreen_rect.has_point(world_position):
+			continue
+		if world_position.distance_to(view_center) > max_spawn_radius:
 			continue
 		cells.append(cell)
 	return cells
