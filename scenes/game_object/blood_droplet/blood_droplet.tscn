@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://4wtg5ejzsfrai"]
+[gd_scene load_steps=2 format=3 uid="uid://t9fswlt1fotff"]
 
-[ext_resource type="Script" uid="uid://rtws1u950zlmu" path="res://scenes/game_object/blood_droplet/blood_droplet.gd" id="1_vdn0x"]
+[ext_resource type="Script" uid="uid://n0lnezohqnvzg" path="res://scenes/game_object/blood_droplet/blood_droplet.gd" id="1_vdn0x"]
 
 [node name="BloodDroplet" type="Node2D"]
 z_index = -1

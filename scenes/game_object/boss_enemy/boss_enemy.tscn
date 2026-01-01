@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bye5hmlwe8gub" path="res://scenes/game_object/boss_enemy/boss_enemy.gd" id="1_gpcli"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_en8ir"]
-[ext_resource type="PackedScene" uid="uid://xgoe5nwtxtmsy" path="res://scenes/component/blood_drop_component.tscn" id="3_q7nm4"]
+[ext_resource type="PackedScene" uid="uid://6kroo8paddhur" path="res://scenes/component/blood_drop_component.tscn" id="3_q7nm4"]
 [ext_resource type="PackedScene" uid="uid://cn4jjvvblm8lp" path="res://scenes/component/velocity_component.tscn" id="4_7n42o"]
 [ext_resource type="PackedScene" uid="uid://gsyk0iqo1m50" path="res://scenes/component/hurtbox_component.tscn" id="4_e2gan"]
 [ext_resource type="PackedScene" uid="uid://cjxiijis5jocn" path="res://scenes/component/death_component.tscn" id="4_j8jii"]
