@@ -9,6 +9,7 @@ var player_color_indices := [0, 1, 2, 3]
 var persisted_upgrades_by_player: Dictionary = {}
 var persisted_upgrade_pools_by_player: Dictionary = {}
 var persisted_turn_player_number := 1
+var persisted_player_states: Dictionary = {}
 
 const PLAYER_COLOR_OPTIONS := [
 	Color(1, 0, 0),
@@ -51,3 +52,13 @@ func cycle_player_color(player_number: int) -> void:
 		return
 	var current_index = player_color_indices[player_index]
 	player_color_indices[player_index] = (current_index + 1) % PLAYER_COLOR_OPTIONS.size()
+
+
+func store_player_state(player_number: int, state: Dictionary) -> void:
+	if player_number <= 0:
+		return
+	persisted_player_states[player_number] = state.duplicate(true)
+
+
+func get_player_state(player_number: int) -> Dictionary:
+	return persisted_player_states.get(player_number, {})

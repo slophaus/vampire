@@ -16,5 +16,8 @@ func _on_body_entered(body: Node) -> void:
 		return
 	if boss_arena_scene == null:
 		return
+	for player in get_tree().get_nodes_in_group("player"):
+		if player.has_method("get_persisted_state"):
+			GameEvents.store_player_state(player.player_number, player.get_persisted_state())
 	is_transitioning = true
 	ScreenTransition.transition_to_scene(boss_arena_scene.resource_path)
