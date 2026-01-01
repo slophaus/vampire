@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://vqjgdqb3t2ju" path="res://scenes/ui/end_screen.tscn" id="2_8tx6c"]
 [ext_resource type="PackedScene" uid="uid://c5kgkd7ly41sq" path="res://scenes/manager/experience_manager.tscn" id="4_ak51j"]
 [ext_resource type="PackedScene" uid="uid://c5b76ailnfref" path="res://scenes/manager/upgrade_manager.tscn" id="6_08ukk"]
-[ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/boss_enemy/boss_enemy.tscn" id="13_th5th"]
+[ext_resource type="PackedScene" path="res://scenes/game_object/boss_enemy/boss_enemy.tscn" id="13_th5th"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_v8wic")
