@@ -94,6 +94,8 @@ func pick_upgrades(player_number: int) -> Array[AbilityUpgrade]:
 			break
 
 		var upgr = upgrade_pool.pick_item(chosen_upgrades)
+		if upgr == null:
+			break
 		chosen_upgrades.append(upgr)
 
 	return chosen_upgrades
