@@ -12,8 +12,7 @@ var current_level = 1
 var target_experience = 1  # just for debug
 
 func _ready():
-	if not GameEvents.experience_vial_collected.is_connected(on_experience_vial_collected):
-		GameEvents.experience_vial_collected.connect(on_experience_vial_collected)
+	GameEvents.experience_vial_collected.connect(on_experience_vial_collected)
 	restore_persisted_state()
 
 
