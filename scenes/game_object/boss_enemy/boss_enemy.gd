@@ -12,6 +12,7 @@ const MINION_SPAWN_COUNT := 4
 const MINION_SPAWN_RADIUS := 32.0
 @export var minion_scene: PackedScene = preload("res://scenes/game_object/basic_enemy/basic_enemy.tscn")
 @export var minion_spawn_interval_range := Vector2(6.0, 10.0)
+@export var explosion_scene: PackedScene = preload("res://scenes/vfx/explosion.tscn")
 
 @onready var visuals := $Visuals
 @onready var velocity_component: VelocityComponent = $VelocityComponent
@@ -23,10 +24,8 @@ const MINION_SPAWN_RADIUS := 32.0
 @onready var sword_ability_controller = $Abilities/SwordAbilityController
 @onready var minion_spawn_timer: Timer = $MinionSpawnTimer
 @onready var dragon_sprite: AnimatedSprite2D = $Visuals/dragon_sprite
-@onready var dragon_color: ColorRect = $Visuals/dragon_sprite/enemy_color
 
 var facing_multiplier := -1
-var enemy_tint := Color.WHITE
 var contact_damage := CONTACT_DAMAGE
 
 func _ready():
@@ -36,8 +35,8 @@ func _ready():
 	fireball_ability_controller.set_active(true)
 	sword_ability_controller.sword_level = 1
 	sword_ability_controller.set_active(true)
-	apply_random_tint()
 	health_component.health_changed.connect(update_health_display)
+	health_component.died.connect(on_died)
 	update_health_display()
 	minion_spawn_timer.timeout.connect(on_minion_spawn_timer_timeout)
 	schedule_next_minion_spawn()
@@ -92,24 +91,26 @@ func on_hit():
 	$HitRandomAudioPlayerComponent.play_random()
 
 
-func apply_random_tint():
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
-	enemy_tint = Color.from_hsv(rng.randf(), .25, 1.0, 1.0)
-	apply_enemy_tint()
-
-
-func apply_enemy_tint() -> void:
-	if dragon_color == null:
-		return
-	dragon_color.color = enemy_tint
-	dragon_color.visible = true
-
-
 func update_health_display() -> void:
 	if health_bar == null:
 		return
 	health_bar.value = health_component.get_health_percent()
+
+
+func on_died() -> void:
+	spawn_explosion()
+
+
+func spawn_explosion() -> void:
+	if explosion_scene == null:
+		return
+	var explosion_instance = explosion_scene.instantiate() as GPUParticles2D
+	if explosion_instance == null:
+		return
+	explosion_instance.global_position = global_position
+	explosion_instance.emitting = true
+	explosion_instance.finished.connect(explosion_instance.queue_free)
+	get_tree().current_scene.add_child(explosion_instance)
 
 
 func on_minion_spawn_timer_timeout() -> void:
