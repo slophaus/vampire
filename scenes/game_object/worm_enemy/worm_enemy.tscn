@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=3 uid="uid://cwl7f4qnc4l8g"]
+[gd_scene load_steps=12 format=3 uid="uid://cwl7f4qnc4l8g"]
 
 [ext_resource type="Script" uid="uid://baaesj1y55fv4" path="res://scenes/game_object/worm_enemy/worm_enemy.gd" id="1_0r4sg"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_8h4ly"]
+[ext_resource type="PackedScene" uid="uid://xgoe5nwtxtmsy" path="res://scenes/component/blood_drop_component.tscn" id="3_3j4l4"]
 [ext_resource type="PackedScene" uid="uid://gsyk0iqo1m50" path="res://scenes/component/hurtbox_component.tscn" id="3_yy0i2"]
 [ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="5_owowv"]
 [ext_resource type="Texture2D" uid="uid://crrxkfeyeohmh" path="res://sprites/metroid_can.png" id="6_dcn7l"]
@@ -26,6 +27,9 @@ script = ExtResource("1_0r4sg")
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_8h4ly")]
 max_health = 20.0
+
+[node name="BloodDropComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_3j4l4")]
+health_component = NodePath("../HealthComponent")
 
 [node name="HitFlashComponent" parent="." node_paths=PackedStringArray("health_component", "sprite") instance=ExtResource("6_h7r1w")]
 health_component = NodePath("../HealthComponent")

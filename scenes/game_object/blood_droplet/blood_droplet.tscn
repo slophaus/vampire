@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://4wtg5ejzsfrai"]
+
+[ext_resource type="Script" uid="uid://rtws1u950zlmu" path="res://scenes/game_object/blood_droplet/blood_droplet.gd" id="1_vdn0x"]
+
+[node name="BloodDroplet" type="Node2D"]
+z_index = -1
+script = ExtResource("1_vdn0x")
