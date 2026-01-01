@@ -5,10 +5,10 @@ extends Area2D
 var is_transitioning := false
 const DOOR_EXIT_OFFSET := Vector2(0, 32)
 const PLAYER_FORMATION_OFFSETS := {
-	1: Vector2.ZERO,
-	2: Vector2(32, 0),
-	3: Vector2(-32, 0),
-	4: Vector2(0, 32),
+	1: Vector2(0, 32),
+	2: Vector2(32, 32),
+	3: Vector2(-32, 32),
+	4: Vector2(0, 64),
 }
 
 
