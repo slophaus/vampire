@@ -1,11 +1,17 @@
-[gd_scene load_steps=6 format=3 uid="uid://cdaelw5lh4xey"]
+[gd_scene load_steps=9 format=3 uid="uid://cdaelw5lh4xey"]
 
 [ext_resource type="Script" uid="uid://c1n23ojig5ww8" path="res://scenes/ui/main_menu.gd" id="1_vrpen"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="1_y67uk"]
 [ext_resource type="PackedScene" uid="uid://dumjej53vmw4d" path="res://scenes/ui/sound_button.tscn" id="2_8jljl"]
 [ext_resource type="PackedScene" uid="uid://gisddfn8bqx" path="res://scenes/ui/vignette.tscn" id="2_swaud"]
 
-[sub_resource type="ButtonGroup" id="ButtonGroup_kq7yu"]
+[sub_resource type="ButtonGroup" id="ButtonGroup_m1kxf"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_x2yvf"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_uhagc"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_btxxm"]
 
 [node name="MainMenu" type="CanvasLayer"]
 script = ExtResource("1_vrpen")
@@ -52,28 +58,28 @@ alignment = 1
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
-button_group = SubResource("ButtonGroup_kq7yu")
+button_group = SubResource("ButtonGroup_m1kxf")
 text = "1 Player"
 
 [node name="TwoPlayerButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/PlayerCountContainer" instance=ExtResource("2_8jljl")]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
-button_group = SubResource("ButtonGroup_kq7yu")
+button_group = SubResource("ButtonGroup_x2yvf")
 text = "2 Player"
 
 [node name="ThreePlayerButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/PlayerCountContainer" instance=ExtResource("2_8jljl")]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
-button_group = SubResource("ButtonGroup_kq7yu")
+button_group = SubResource("ButtonGroup_uhagc")
 text = "3 Player"
 
 [node name="FourPlayerButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/PlayerCountContainer" instance=ExtResource("2_8jljl")]
 unique_name_in_owner = true
 layout_mode = 2
 toggle_mode = true
-button_group = SubResource("ButtonGroup_kq7yu")
+button_group = SubResource("ButtonGroup_btxxm")
 text = "4 Player"
 
 [node name="PlayButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" instance=ExtResource("2_8jljl")]
