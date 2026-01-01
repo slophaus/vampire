@@ -13,6 +13,11 @@ const MINION_SPAWN_RADIUS := 32.0
 @export var minion_scene: PackedScene = preload("res://scenes/game_object/basic_enemy/basic_enemy.tscn")
 @export var minion_spawn_interval_range := Vector2(6.0, 10.0)
 @export var explosion_scene: PackedScene = preload("res://scenes/vfx/explosion.tscn")
+@export var boss_explosion_duration_multiplier := 5.0
+@export var experience_vial_scene: PackedScene = preload("res://scenes/game_object/experience_vial/experience_vial.tscn")
+@export var health_pickup_scene: PackedScene = preload("res://scenes/game_object/health_pickup/health_pickup.tscn")
+@export var experience_vial_count := 5
+@export var experience_vial_drop_radius := 24.0
 
 @onready var visuals := $Visuals
 @onready var velocity_component: VelocityComponent = $VelocityComponent
@@ -99,6 +104,7 @@ func update_health_display() -> void:
 
 func on_died() -> void:
 	spawn_explosion()
+	spawn_boss_drops()
 
 
 func spawn_explosion() -> void:
@@ -107,10 +113,33 @@ func spawn_explosion() -> void:
 	var explosion_instance = explosion_scene.instantiate() as GPUParticles2D
 	if explosion_instance == null:
 		return
+	explosion_instance.lifetime *= boss_explosion_duration_multiplier
 	explosion_instance.global_position = global_position
 	explosion_instance.emitting = true
 	explosion_instance.finished.connect(explosion_instance.queue_free)
 	get_tree().current_scene.add_child(explosion_instance)
+
+
+func spawn_boss_drops() -> void:
+	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
+	var spawn_parent: Node = entities_layer if entities_layer != null else get_parent()
+	if spawn_parent == null:
+		return
+	if health_pickup_scene != null:
+		var health_pickup = health_pickup_scene.instantiate() as Node2D
+		if health_pickup != null:
+			spawn_parent.add_child(health_pickup)
+			health_pickup.global_position = global_position
+	if experience_vial_scene == null or experience_vial_count <= 0:
+		return
+	for i in range(experience_vial_count):
+		var vial = experience_vial_scene.instantiate() as Node2D
+		if vial == null:
+			continue
+		spawn_parent.add_child(vial)
+		var angle = TAU * float(i) / float(experience_vial_count)
+		var offset = Vector2(cos(angle), sin(angle)) * experience_vial_drop_radius
+		vial.global_position = global_position + offset
 
 
 func on_minion_spawn_timer_timeout() -> void:
