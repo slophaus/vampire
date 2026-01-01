@@ -176,12 +176,7 @@ func get_player_numbers() -> Array:
 
 
 func refresh_players() -> void:
-	if not is_inside_tree():
-		return
-	var scene_tree = get_tree()
-	if scene_tree == null:
-		return
-	for player in scene_tree.get_nodes_in_group("player"):
+	for player in get_tree().get_nodes_in_group("player"):
 		if not player.has_method("get_player_action_suffix"):
 			continue
 		var player_number = player.player_number
