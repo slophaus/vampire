@@ -368,7 +368,6 @@ z_index = 1
 
 [node name="Door" parent="LayerProps" instance=ExtResource("15_raeie")]
 position = Vector2(236, 214)
-exit_door_name = &"PlayerSpawn"
 
 [node name="Well" parent="LayerProps" instance=ExtResource("16_hxu8e")]
 position = Vector2(123, 214)
