@@ -14,14 +14,17 @@ const FLOOR_TILE_TYPE := "dirt"
 @onready var arena_tilemap: TileMap = $BG/TileMap
 @onready var dirt_border: TileMapLayer = $BG/dirt_border
 
+var _pending_dirt_border_sync := false
+var _cached_floor_cells := {}
+
 
 func _ready():
 	_apply_player_count()
 	if arena_tilemap != null:
-		arena_tilemap.changed.connect(_sync_dirt_border)
+		arena_tilemap.changed.connect(_queue_dirt_border_sync)
 	if not GameEvents.arena_tilemap_changed.is_connected(_sync_dirt_border):
-		GameEvents.arena_tilemap_changed.connect(_sync_dirt_border)
-	_sync_dirt_border()
+		GameEvents.arena_tilemap_changed.connect(_queue_dirt_border_sync)
+	_queue_dirt_border_sync()
 	for player in get_tree().get_nodes_in_group("player"):
 		player.regenerate_started.connect(on_player_regenerate_started.bind(player))
 		player.regenerate_finished.connect(on_player_regenerate_finished.bind(player))
@@ -99,11 +102,19 @@ func trigger_defeat():
 	add_child(end_screen_instance)
 	end_screen_instance.set_defeat()
 
+func _queue_dirt_border_sync() -> void:
+	if _pending_dirt_border_sync:
+		return
+	_pending_dirt_border_sync = true
+	call_deferred("_sync_dirt_border")
+
 
 func _sync_dirt_border() -> void:
+	_pending_dirt_border_sync = false
 	if arena_tilemap == null or dirt_border == null:
 		return
 	var floor_cells: Array[Vector2i] = []
+	var floor_cell_set := {}
 	for cell in arena_tilemap.get_used_cells(0):
 		var tile_data = arena_tilemap.get_cell_tile_data(0, cell)
 		if tile_data == null:
@@ -111,6 +122,16 @@ func _sync_dirt_border() -> void:
 		var tile_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
 		if tile_type == FLOOR_TILE_TYPE:
 			floor_cells.append(cell)
+			floor_cell_set[cell] = true
+	if _cached_floor_cells.size() == floor_cell_set.size():
+		var unchanged := true
+		for cell in floor_cell_set.keys():
+			if not _cached_floor_cells.has(cell):
+				unchanged = false
+				break
+		if unchanged:
+			return
+	_cached_floor_cells = floor_cell_set
 	dirt_border.clear()
 	if floor_cells.is_empty():
 		return
