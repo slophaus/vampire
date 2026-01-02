@@ -26,6 +26,7 @@ const PLAYER_FORMATION_OFFSETS := {
 @onready var enemy_manager: EnemyManager = $EnemyManager
 
 var current_level: LevelRoot
+var current_level_root: Node
 
 
 func _ready():
@@ -59,10 +60,20 @@ func _load_level(level_scene: PackedScene, exit_door_name: StringName) -> void:
 	if level_scene == null:
 		return
 	_detach_players_from_level()
-	if current_level != null:
-		current_level.queue_free()
-	current_level = level_scene.instantiate() as LevelRoot
-	level_container.add_child(current_level)
+	if current_level_root != null:
+		current_level_root.queue_free()
+	current_level_root = level_scene.instantiate()
+	if current_level_root == null:
+		return
+	current_level = current_level_root as LevelRoot
+	if current_level == null:
+		current_level = current_level_root.find_child("", "LevelRoot", true, false) as LevelRoot
+	if current_level == null:
+		push_error("GameSession: Level scene is missing a LevelRoot.")
+		current_level_root.queue_free()
+		current_level_root = null
+		return
+	level_container.add_child(current_level_root)
 	_attach_players_to_level(current_level)
 	_initialize_dirt_border(current_level)
 	_apply_level_settings(current_level)
