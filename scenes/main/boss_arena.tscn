@@ -370,6 +370,7 @@ experience_manager = NodePath("../ExperienceManager")
 position = Vector2(2, 1)
 
 [node name="LayerTilemaps" type="Node2D" parent="."]
+z_index = 0
 
 [node name="TileMap" type="TileMap" parent="LayerTilemaps" groups=["arena_tilemap"]]
 tile_set = ExtResource("1_hxoa7")
@@ -380,12 +381,16 @@ layer_0/tile_data = PackedInt32Array(1638448, 0, 0, 1572912, 0, 0, 1507376, 0, 0
 tile_set = SubResource("TileSet_ab1yv")
 
 [node name="LayerProps" type="Node2D" parent="."]
+z_index = 1
 
 [node name="LayerBlood" type="Node2D" parent="." groups=["blood_layer"]]
+z_index = 2
 
 [node name="LayerVials" type="Node2D" parent="." groups=["vials_layer"]]
+z_index = 3
 
 [node name="LayerEntities" type="Node2D" parent="." groups=["entities_layer"]]
+z_index = 5
 y_sort_enabled = true
 
 [node name="Player" parent="LayerEntities" instance=ExtResource("1_55gsj")]
@@ -397,6 +402,7 @@ position = Vector2(492, 188)
 experience_vial_drop_radius = 60.0
 
 [node name="LayerEffects" type="Node2D" parent="." groups=["foreground_layer", "effects_layer"]]
+z_index = 6
 
 [node name="ColorRect" type="ColorRect" parent="."]
 visible = false
