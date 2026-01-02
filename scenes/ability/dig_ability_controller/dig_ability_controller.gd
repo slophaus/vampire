@@ -43,7 +43,11 @@ func _on_tile_converted(world_position: Vector2) -> void:
 	var poof_instance = dig_poof_scene.instantiate() as GPUParticles2D
 	if poof_instance == null:
 		return
-	get_tree().current_scene.add_child(poof_instance)
+	var effects_layer = get_tree().get_first_node_in_group("effects_layer")
+	var spawn_parent = effects_layer if effects_layer != null else get_tree().current_scene
+	if spawn_parent == null:
+		return
+	spawn_parent.add_child(poof_instance)
 	poof_instance.global_position = world_position
 	poof_instance.emitting = true
 	poof_instance.restart()

@@ -18,7 +18,11 @@ func on_died():
 
 	var spawn_position = owner.global_position
 
-	var entities = get_tree().get_first_node_in_group("entities_layer")
+	var entities = get_tree().get_first_node_in_group("effects_layer")
+	if entities == null:
+		entities = get_tree().current_scene
+	if entities == null:
+		return
 	get_parent().remove_child(self)
 	entities.add_child(self)
 

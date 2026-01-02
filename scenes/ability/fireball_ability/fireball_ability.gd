@@ -134,7 +134,11 @@ func spawn_explosion() -> void:
 	explosion_instance.global_position = global_position
 	explosion_instance.emitting = true
 	explosion_instance.finished.connect(explosion_instance.queue_free)
-	get_tree().current_scene.add_child(explosion_instance)
+	var effects_layer = get_tree().get_first_node_in_group("effects_layer")
+	var spawn_parent = effects_layer if effects_layer != null else get_tree().current_scene
+	if spawn_parent == null:
+		return
+	spawn_parent.add_child(explosion_instance)
 
 
 func spawn_dust() -> void:
@@ -146,7 +150,11 @@ func spawn_dust() -> void:
 	dust_instance.global_position = global_position
 	dust_instance.emitting = true
 	dust_instance.finished.connect(dust_instance.queue_free)
-	get_tree().current_scene.add_child(dust_instance)
+	var effects_layer = get_tree().get_first_node_in_group("effects_layer")
+	var spawn_parent = effects_layer if effects_layer != null else get_tree().current_scene
+	if spawn_parent == null:
+		return
+	spawn_parent.add_child(dust_instance)
 
 
 func apply_splash_damage(target: Node2D) -> void:
