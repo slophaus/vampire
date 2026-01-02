@@ -11,6 +11,7 @@ const DEFEAT_MENU_DELAY := 0.6
 
 
 func _ready():
+	_initialize_dirt_border()
 	_apply_player_count()
 	for player in get_tree().get_nodes_in_group("player"):
 		player.regenerate_started.connect(on_player_regenerate_started.bind(player))
@@ -22,6 +23,13 @@ func _unhandled_input(event):
 	if event.is_action_pressed("pause"):
 		add_child(paused_menu_scene.instantiate())
 		get_tree().root.set_input_as_handled()
+
+
+func _initialize_dirt_border() -> void:
+	for node in get_tree().get_nodes_in_group("arena_tilemap"):
+		var tilemap := node as TileMap
+		if tilemap != null:
+			TileEater.initialize_dirt_border_for_tilemap(tilemap)
 
 
 func _apply_player_count() -> void:
