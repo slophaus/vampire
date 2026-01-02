@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://d1kl4a22pfo0u"]
+
+[ext_resource type="Script" path="res://scenes/ability/whip_ability_controller/whip_ability_controller.gd" id="1_2leyp"]
+
+[node name="WhipAbilityController" type="Node2D"]
+script = ExtResource("1_2leyp")
+z_index = 4
