@@ -74,6 +74,7 @@ func _load_level(level_scene: PackedScene, exit_door_name: StringName, preserve_
 		current_level = level_scene.instantiate() as LevelRoot
 	level_container.add_child(current_level)
 	current_level.process_mode = Node.PROCESS_MODE_INHERIT
+	_reset_level_doors(current_level)
 	_attach_players_to_level(current_level)
 	if not restored_from_cache:
 		_initialize_dirt_border(current_level)
@@ -86,6 +87,12 @@ func _apply_level_settings(level: LevelRoot) -> void:
 	enemy_manager.arena_tilemap = tilemap
 	var should_run_timers = not level.is_timeless
 	_set_timed_systems_active(should_run_timers)
+
+
+func _reset_level_doors(level: LevelRoot) -> void:
+	for door in get_tree().get_nodes_in_group("doors"):
+		if level.is_ancestor_of(door):
+			door.reset_transition_state()
 
 
 func _set_timed_systems_active(active: bool) -> void:
