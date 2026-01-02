@@ -9,6 +9,7 @@ var player_scene = preload("res://scenes/game_object/player/player.tscn")
 var player_regenerating := {}
 var game_over := false
 var is_transitioning := false
+var cached_levels: Dictionary = {}
 
 const DEFEAT_MENU_DELAY := 0.6
 const DOOR_EXIT_OFFSET := Vector2(0, 64)
@@ -43,7 +44,7 @@ func _unhandled_input(event):
 		get_tree().root.set_input_as_handled()
 
 
-func transition_to_level(level_scene: PackedScene, exit_door_name: StringName = &"Door") -> void:
+func transition_to_level(level_scene: PackedScene, exit_door_name: StringName = &"Door", preserve_current_level: bool = false) -> void:
 	if is_transitioning:
 		return
 	if level_scene == null:
@@ -51,20 +52,31 @@ func transition_to_level(level_scene: PackedScene, exit_door_name: StringName = 
 	is_transitioning = true
 	ScreenTransition.transition()
 	await ScreenTransition.transitioned_halfway
-	_load_level(level_scene, exit_door_name)
+	_load_level(level_scene, exit_door_name, preserve_current_level)
 	is_transitioning = false
 
 
-func _load_level(level_scene: PackedScene, exit_door_name: StringName) -> void:
+func _load_level(level_scene: PackedScene, exit_door_name: StringName, preserve_current_level: bool) -> void:
 	if level_scene == null:
 		return
 	_detach_players_from_level()
 	if current_level != null:
-		current_level.queue_free()
-	current_level = level_scene.instantiate() as LevelRoot
+		if preserve_current_level:
+			_cache_current_level()
+		else:
+			current_level.queue_free()
+	var restored_from_cache := false
+	var cached_level = _take_cached_level(level_scene)
+	if cached_level != null:
+		current_level = cached_level
+		restored_from_cache = true
+	else:
+		current_level = level_scene.instantiate() as LevelRoot
 	level_container.add_child(current_level)
+	current_level.process_mode = Node.PROCESS_MODE_INHERIT
 	_attach_players_to_level(current_level)
-	_initialize_dirt_border(current_level)
+	if not restored_from_cache:
+		_initialize_dirt_border(current_level)
 	_apply_level_settings(current_level)
 	_position_players(current_level, exit_door_name)
 
@@ -167,6 +179,30 @@ func _detach_players_from_level() -> void:
 	for player in get_tree().get_nodes_in_group("player"):
 		if player.get_parent() != players_container:
 			player.reparent(players_container)
+
+
+func _cache_current_level() -> void:
+	if current_level == null:
+		return
+	var scene_path = current_level.scene_file_path
+	if scene_path.is_empty():
+		return
+	level_container.remove_child(current_level)
+	current_level.process_mode = Node.PROCESS_MODE_DISABLED
+	cached_levels[scene_path] = current_level
+
+
+func _take_cached_level(level_scene: PackedScene) -> LevelRoot:
+	if level_scene == null:
+		return null
+	var scene_path = level_scene.resource_path
+	if scene_path.is_empty():
+		return null
+	if not cached_levels.has(scene_path):
+		return null
+	var cached_level = cached_levels[scene_path] as LevelRoot
+	cached_levels.erase(scene_path)
+	return cached_level
 
 
 func _position_players(level: LevelRoot, exit_door_name: StringName) -> void:

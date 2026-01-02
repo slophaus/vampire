@@ -57,7 +57,7 @@ func _transition_to_boss_arena() -> void:
 			GameEvents.store_player_state(player.player_number, player.get_persisted_state())
 	var session = _get_game_session()
 	if session != null:
-		session.transition_to_level(boss_arena_scene, exit_door_name)
+		session.transition_to_level(boss_arena_scene, exit_door_name, true)
 
 
 func _transition_to_main_scene() -> void:
