@@ -54,7 +54,9 @@ func _apply_player_count() -> void:
 		3: Vector2(-80, 40),
 		4: Vector2(0, -80),
 	}
-	var entities_layer = get_node("Entities")
+	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
+	if entities_layer == null:
+		return
 	for player_number in range(2, desired_count + 1):
 		if players_by_number.has(player_number):
 			continue

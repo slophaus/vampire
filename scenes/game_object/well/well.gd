@@ -48,12 +48,12 @@ func _emit_vial() -> void:
 	var vial_instance = experience_vial_scene.instantiate() as Node2D
 	if vial_instance == null:
 		return
-	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
-	if entities_layer == null:
-		entities_layer = get_tree().current_scene
-	if entities_layer == null:
+	var vials_layer = get_tree().get_first_node_in_group("vials_layer")
+	if vials_layer == null:
+		vials_layer = get_tree().current_scene
+	if vials_layer == null:
 		return
-	entities_layer.add_child(vial_instance)
+	vials_layer.add_child(vial_instance)
 	var angle = randf() * TAU
 	var offset = Vector2(cos(angle), sin(angle)) * sqrt(randf()) * experience_vial_drop_radius
 	vial_instance.global_position = global_position + offset
@@ -68,5 +68,9 @@ func _explode_and_despawn() -> void:
 			explosion_instance.global_position = global_position
 			explosion_instance.emitting = true
 			explosion_instance.finished.connect(explosion_instance.queue_free)
-			get_tree().current_scene.add_child(explosion_instance)
+			var effects_layer = get_tree().get_first_node_in_group("effects_layer")
+			var spawn_parent = effects_layer if effects_layer != null else get_tree().current_scene
+			if spawn_parent == null:
+				return
+			spawn_parent.add_child(explosion_instance)
 	queue_free()

@@ -117,12 +117,16 @@ func spawn_explosion() -> void:
 	explosion_instance.global_position = global_position
 	explosion_instance.emitting = true
 	explosion_instance.finished.connect(explosion_instance.queue_free)
-	get_tree().current_scene.add_child(explosion_instance)
+	var effects_layer = get_tree().get_first_node_in_group("effects_layer")
+	var spawn_parent = effects_layer if effects_layer != null else get_tree().current_scene
+	if spawn_parent == null:
+		return
+	spawn_parent.add_child(explosion_instance)
 
 
 func spawn_boss_drops() -> void:
-	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
-	var spawn_parent: Node = entities_layer if entities_layer != null else get_parent()
+	var vials_layer = get_tree().get_first_node_in_group("vials_layer")
+	var spawn_parent: Node = vials_layer if vials_layer != null else get_parent()
 	if spawn_parent == null:
 		return
 	if health_pickup_scene != null:

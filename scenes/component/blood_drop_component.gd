@@ -18,7 +18,7 @@ func on_died() -> void:
 	if not owner is Node2D:
 		return
 
-	var spawn_parent: Node = get_tree().get_first_node_in_group("entities_layer")
+	var spawn_parent: Node = get_tree().get_first_node_in_group("blood_layer")
 	if spawn_parent == null:
 		spawn_parent = owner.get_parent()
 	if spawn_parent == null:

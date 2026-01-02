@@ -469,9 +469,9 @@ func _spawn_poof(spawn_position: Vector2) -> void:
 	var poof_instance = poof_scene.instantiate() as GPUParticles2D
 	if poof_instance == null:
 		return
-	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
-	if entities_layer != null:
-		entities_layer.add_child(poof_instance)
+	var effects_layer = get_tree().get_first_node_in_group("effects_layer")
+	if effects_layer != null:
+		effects_layer.add_child(poof_instance)
 	else:
 		add_child(poof_instance)
 	poof_instance.global_position = spawn_position
@@ -485,9 +485,9 @@ func _play_explosion_sound(spawn_position: Vector2) -> void:
 	var audio_player := RandomAudioStreamPlayer2DComponent.new()
 	audio_player.streams = EXPLOSION_STREAMS
 	audio_player.bus = &"sfx"
-	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
-	if entities_layer != null:
-		entities_layer.add_child(audio_player)
+	var effects_layer = get_tree().get_first_node_in_group("effects_layer")
+	if effects_layer != null:
+		effects_layer.add_child(audio_player)
 	else:
 		add_child(audio_player)
 	audio_player.global_position = spawn_position
