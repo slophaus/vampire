@@ -96,3 +96,12 @@ func trigger_defeat():
 	var end_screen_instance = end_screen_scene.instantiate() as EndScreen
 	add_child(end_screen_instance)
 	end_screen_instance.set_defeat()
+
+
+func continue_from_defeat() -> void:
+	game_over = false
+	player_regenerating.clear()
+	for player in get_tree().get_nodes_in_group("player"):
+		player_regenerating[player] = false
+		if player.has_method("continue_from_defeat"):
+			player.continue_from_defeat()
