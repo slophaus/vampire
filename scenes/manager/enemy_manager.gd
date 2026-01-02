@@ -9,6 +9,7 @@ const MAX_ENEMIES = 500
 @export var worm_scene: PackedScene
 @export var arena_time_manager: ArenaTimeManager
 @export var arena_tilemap: TileMap
+@export var spawn_rate_keyframes: Array[Vector2] = [Vector2(1, 1.0), Vector2(16, 2.0)]
 
 @onready var timer = $Timer
 
@@ -19,7 +20,6 @@ var enemy_table = WeightedTable.new()
 func _ready():
 	enemy_table.add_item(0, 15)
 	base_spawn_time = timer.wait_time
-	timer.wait_time = base_spawn_time
 	timer.timeout.connect(on_timer_timeout)
 	arena_time_manager.arena_difficulty_increased.connect(on_arena_difficulty_increased)
 	if arena_time_manager != null and arena_time_manager.get_arena_difficulty() > 0:
@@ -96,6 +96,35 @@ func get_spawn_rate() -> float:
 	return 1.0 / timer.wait_time
 
 
+func get_spawn_rate_for_difficulty(arena_difficulty: int) -> float:
+	if spawn_rate_keyframes.is_empty():
+		if base_spawn_time <= 0.0:
+			return 0.0
+		return 1.0 / base_spawn_time
+
+	var keyframes = spawn_rate_keyframes.duplicate()
+	keyframes.sort_custom(func(a, b): return a.x < b.x)
+
+	if arena_difficulty <= int(keyframes[0].x):
+		return keyframes[0].y
+
+	var last = keyframes[keyframes.size() - 1]
+	if arena_difficulty >= int(last.x):
+		return last.y
+
+	for index in range(keyframes.size() - 1):
+		var start = keyframes[index]
+		var end = keyframes[index + 1]
+		if arena_difficulty <= int(end.x):
+			var span = end.x - start.x
+			var t = 0.0
+			if span != 0.0:
+				t = (float(arena_difficulty) - start.x) / span
+			return lerp(start.y, end.y, clamp(t, 0.0, 1.0))
+
+	return last.y
+
+
 func get_enemy_scene(enemy_index: int) -> PackedScene:
 	if enemy_index == 3 and worm_scene != null:
 		return worm_scene
@@ -103,9 +132,9 @@ func get_enemy_scene(enemy_index: int) -> PackedScene:
 
 
 func on_arena_difficulty_increased(arena_difficulty: int):
-	var time_off = (0.1 / 12) * arena_difficulty
-	time_off = min(time_off, 0.7)
-	timer.wait_time = base_spawn_time - time_off
+	var spawn_rate = get_spawn_rate_for_difficulty(arena_difficulty)
+	if spawn_rate > 0.0:
+		timer.wait_time = 1.0 / spawn_rate
 	
 	if arena_difficulty == 2:
 		enemy_table.add_item(3, 1)
