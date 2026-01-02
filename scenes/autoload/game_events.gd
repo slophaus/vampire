@@ -4,6 +4,7 @@ signal experience_vial_collected(number: float)
 signal ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, player_number: int)
 signal player_damaged
 signal arena_tilemap_changed
+signal arena_tilemap_cells_changed(cells: Array[Vector2i])
 
 var player_count := 1
 var player_color_indices := [0, 1, 2, 3]
@@ -44,6 +45,10 @@ func emit_player_damaged():
 
 func emit_arena_tilemap_changed() -> void:
 	arena_tilemap_changed.emit()
+
+
+func emit_arena_tilemap_cells_changed(cells: Array[Vector2i]) -> void:
+	arena_tilemap_cells_changed.emit(cells)
 
 
 func get_player_color(player_number: int) -> Color:

@@ -41,7 +41,11 @@ func try_convert_tile(position: Vector2, allowed_types: Array[String]) -> void:
 	if walkable_tile_source_id == -1:
 		return
 	var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(position))
-	_try_convert_tile_cell(cell, allowed_types)
+	if _try_convert_tile_cell(cell, allowed_types):
+		GameEvents.emit_arena_tilemap_cells_changed([cell])
+		var local_position = arena_tilemap.map_to_local(cell)
+		var world_position = arena_tilemap.to_global(local_position)
+		tile_converted.emit(world_position)
 
 
 func try_convert_tiles_in_radius(position: Vector2, radius: float, allowed_types: Array[String]) -> void:
@@ -57,33 +61,37 @@ func try_convert_tiles_in_radius(position: Vector2, radius: float, allowed_types
 	var center_cell = arena_tilemap.local_to_map(arena_tilemap.to_local(position))
 	var radius_x = int(ceil(radius / float(tile_size.x)))
 	var radius_y = int(ceil(radius / float(tile_size.y)))
+	var converted_cells: Array[Vector2i] = []
 	for offset_y in range(-radius_y, radius_y + 1):
 		for offset_x in range(-radius_x, radius_x + 1):
 			var cell = center_cell + Vector2i(offset_x, offset_y)
-			_try_convert_tile_cell(cell, allowed_types)
+			if _try_convert_tile_cell(cell, allowed_types):
+				converted_cells.append(cell)
+				var local_position = arena_tilemap.map_to_local(cell)
+				var world_position = arena_tilemap.to_global(local_position)
+				tile_converted.emit(world_position)
+	if not converted_cells.is_empty():
+		GameEvents.emit_arena_tilemap_cells_changed(converted_cells)
 
 
-func _try_convert_tile_cell(cell: Vector2i, allowed_types: Array[String]) -> void:
+func _try_convert_tile_cell(cell: Vector2i, allowed_types: Array[String]) -> bool:
 	var source_id = arena_tilemap.get_cell_source_id(0, cell)
 	if source_id == -1:
-		return
+		return false
 	if source_id == walkable_tile_source_id:
 		if arena_tilemap.get_cell_atlas_coords(0, cell) == walkable_tile_atlas \
 				and arena_tilemap.get_cell_alternative_tile(0, cell) == walkable_tile_alternative:
-			return
+			return false
 	var tile_data := arena_tilemap.get_cell_tile_data(0, cell)
 	if tile_data == null:
-		return
+		return false
 	var tile_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
 	if tile_type == null or not allowed_types.has(tile_type):
-		return
+		return false
 	if tile_data.get_collision_polygons_count(0) <= 0:
-		return
+		return false
 	arena_tilemap.set_cell(0, cell, walkable_tile_source_id, walkable_tile_atlas, walkable_tile_alternative)
-	GameEvents.emit_arena_tilemap_changed()
-	var local_position = arena_tilemap.map_to_local(cell)
-	var world_position = arena_tilemap.to_global(local_position)
-	tile_converted.emit(world_position)
+	return true
 
 
 func _find_arena_tilemap() -> TileMap:
