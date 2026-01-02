@@ -41,7 +41,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func on_play_pressed():
 	ScreenTransition.transition()
 	await ScreenTransition.transitioned_halfway
-	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
+	get_tree().change_scene_to_file("res://scenes/main/game_session.tscn")
 
 func on_player_count_selected(player_count: int) -> void:
 	GameEvents.player_count = player_count
