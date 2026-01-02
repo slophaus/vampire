@@ -33,7 +33,8 @@ func get_spawn_position() -> Vector2:
 
 	var max_spawn_radius = max(view_rect.size.x, view_rect.size.y) * MAX_SPAWN_RADIUS_MULTIPLIER
 	var offscreen_rect = view_rect.grow(OFFSCREEN_MARGIN)
-	var offscreen_cells = get_offscreen_walkable_cells(offscreen_rect, view_rect.get_center(), max_spawn_radius)
+	var blocked_cells = get_worm_occupied_cells()
+	var offscreen_cells = get_offscreen_walkable_cells(offscreen_rect, view_rect.get_center(), max_spawn_radius, blocked_cells)
 	if offscreen_cells.is_empty():
 		return Vector2.ZERO
 	var spawn_cell = offscreen_cells[randi_range(0, offscreen_cells.size() - 1)]
@@ -50,7 +51,7 @@ func get_camera_view_rect() -> Rect2:
 	return Rect2(center - (viewport_size * 0.5), viewport_size)
 
 
-func get_offscreen_walkable_cells(offscreen_rect: Rect2, view_center: Vector2, max_spawn_radius: float) -> Array[Vector2i]:
+func get_offscreen_walkable_cells(offscreen_rect: Rect2, view_center: Vector2, max_spawn_radius: float, blocked_cells: Dictionary) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
 	if arena_tilemap == null:
 		return cells
@@ -60,6 +61,8 @@ func get_offscreen_walkable_cells(offscreen_rect: Rect2, view_center: Vector2, m
 			continue
 		if tile_data.get_collision_polygons_count(0) > 0:
 			continue
+		if blocked_cells.has(cell):
+			continue
 		var world_position = arena_tilemap.to_global(arena_tilemap.map_to_local(cell))
 		if offscreen_rect.has_point(world_position):
 			continue
@@ -67,6 +70,20 @@ func get_offscreen_walkable_cells(offscreen_rect: Rect2, view_center: Vector2, m
 			continue
 		cells.append(cell)
 	return cells
+
+
+func get_worm_occupied_cells() -> Dictionary:
+	var occupied: Dictionary = {}
+	if arena_tilemap == null:
+		return occupied
+	for worm in get_tree().get_nodes_in_group("worm"):
+		if not worm.has_method("get_occupied_positions"):
+			continue
+		for position in worm.get_occupied_positions():
+			var local_position = arena_tilemap.to_local(position)
+			var cell = arena_tilemap.local_to_map(local_position)
+			occupied[cell] = true
+	return occupied
 
 
 func on_timer_timeout():
