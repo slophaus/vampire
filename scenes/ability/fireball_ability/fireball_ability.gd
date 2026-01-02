@@ -108,6 +108,8 @@ func explode(excluded_target: Node2D = null) -> void:
 	for target in splash_targets:
 		if target == null or not is_instance_valid(target):
 			continue
+		if owner_actor != null and owner_actor.is_in_group("player") and target == owner_actor:
+			continue
 		if target == excluded_target:
 			continue
 		if target.get("is_regenerating") == true:
