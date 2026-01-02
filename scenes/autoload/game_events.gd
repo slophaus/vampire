@@ -3,6 +3,7 @@ extends Node
 signal experience_vial_collected(number: float)
 signal ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, player_number: int)
 signal player_damaged
+signal arena_tilemap_changed
 
 var player_count := 1
 var player_color_indices := [0, 1, 2, 3]
@@ -39,6 +40,10 @@ func emit_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dicti
 
 func emit_player_damaged():
 	player_damaged.emit()
+
+
+func emit_arena_tilemap_changed() -> void:
+	arena_tilemap_changed.emit()
 
 
 func get_player_color(player_number: int) -> Color:
