@@ -16,7 +16,6 @@ var player_number := 1
 var points: Array[Vector2] = []
 var previous_points: Array[Vector2] = []
 var last_direction := Vector2.RIGHT
-var base_segment_target := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -49,12 +48,8 @@ func _physics_process(delta: float) -> void:
 	var anchor_delta = anchor_position - points[0]
 	points[0] = anchor_position
 	previous_points[0] = anchor_position
-	if segment_count > 1:
-		base_segment_target = anchor_position + (base_direction * segment_length)
-		points[1] = base_segment_target
-		previous_points[1] = base_segment_target
 
-	for index in range(2, segment_count):
+	for index in range(1, segment_count):
 		var current_position = points[index]
 		var velocity = (points[index] - previous_points[index]) * (1.0 - damping)
 		points[index] += velocity
@@ -84,8 +79,6 @@ func _apply_distance_constraints() -> void:
 			continue
 		var difference = (distance - segment_length) / distance
 		if index == 0:
-			points[index + 1] = base_segment_target
-		elif index == 1:
 			points[index + 1] -= delta * difference
 		else:
 			points[index] += delta * difference * 0.5
@@ -109,7 +102,7 @@ func _initialize_points() -> void:
 		anchor_position = owner_actor.global_position
 	var direction = last_direction
 	for index in range(segment_count):
-		var position = anchor_position + (direction * segment_length * index)
+		var position = anchor_position - (direction * segment_length * index)
 		points.append(position)
 		previous_points.append(position)
 
