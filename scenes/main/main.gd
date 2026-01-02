@@ -10,9 +10,22 @@ var game_over := false
 const DEFEAT_MENU_DELAY := 0.6
 const CUSTOM_DATA_KEY := "tile_type"
 const FLOOR_TILE_TYPE := "dirt"
+const NEIGHBOR_OFFSETS := [
+	Vector2i.ZERO,
+	Vector2i.LEFT,
+	Vector2i.RIGHT,
+	Vector2i.UP,
+	Vector2i.DOWN,
+	Vector2i(-1, -1),
+	Vector2i(1, -1),
+	Vector2i(-1, 1),
+	Vector2i(1, 1),
+]
 
 @onready var arena_tilemap: TileMap = $BG/TileMap
 @onready var dirt_border: TileMapLayer = $BG/dirt_border
+
+var cached_floor_cells: Dictionary = {}
 
 
 func _ready():
@@ -103,15 +116,41 @@ func trigger_defeat():
 func _sync_dirt_border() -> void:
 	if arena_tilemap == null or dirt_border == null:
 		return
-	var floor_cells: Array[Vector2i] = []
+	var current_floor_cells: Dictionary = {}
 	for cell in arena_tilemap.get_used_cells(0):
 		var tile_data = arena_tilemap.get_cell_tile_data(0, cell)
 		if tile_data == null:
 			continue
 		var tile_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
 		if tile_type == FLOOR_TILE_TYPE:
-			floor_cells.append(cell)
-	dirt_border.clear()
-	if floor_cells.is_empty():
+			current_floor_cells[cell] = true
+	if cached_floor_cells.is_empty():
+		dirt_border.clear()
+		if current_floor_cells.is_empty():
+			cached_floor_cells = current_floor_cells
+			return
+		dirt_border.set_cells_terrain_connect(current_floor_cells.keys(), 0, 0)
+		cached_floor_cells = current_floor_cells
 		return
-	dirt_border.set_cells_terrain_connect(floor_cells, 0, 0)
+	var dirty_cells: Dictionary = {}
+	for cell in current_floor_cells.keys():
+		if not cached_floor_cells.has(cell):
+			dirty_cells[cell] = true
+	for cell in cached_floor_cells.keys():
+		if not current_floor_cells.has(cell):
+			dirty_cells[cell] = true
+	if dirty_cells.is_empty():
+		return
+	var affected_cells: Dictionary = {}
+	for cell in dirty_cells.keys():
+		for offset in NEIGHBOR_OFFSETS:
+			affected_cells[cell + offset] = true
+	for cell in affected_cells.keys():
+		dirt_border.erase_cell(cell)
+	var affected_floor_cells: Array[Vector2i] = []
+	for cell in affected_cells.keys():
+		if current_floor_cells.has(cell):
+			affected_floor_cells.append(cell)
+	if not affected_floor_cells.is_empty():
+		dirt_border.set_cells_terrain_connect(affected_floor_cells, 0, 0)
+	cached_floor_cells = current_floor_cells
