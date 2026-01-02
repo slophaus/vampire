@@ -10,7 +10,8 @@ extends Node2D
 @export var anchor_follow_strength := 0.6
 @export var angle_constraint_strength := 0.35
 @export var parent_angle_alignment_strength := 0.6
-@export var point_oval_scale := Vector2.ONE
+@export var segment_scale := 1.0
+@export var tip_damage_speed_multiplier := 0.05
 @export var point_color := Color(0.95, 0.9, 1.0, 0.9)
 @export var segment_scene: PackedScene = preload("res://scenes/ability/whip_ability_controller/whip_segment.tscn")
 
@@ -21,6 +22,7 @@ var point_angles: Array[float] = []
 var segment_nodes: Array[Node2D] = []
 var last_direction := Vector2.RIGHT
 var base_alignment_direction := Vector2.RIGHT
+var tip_hitbox: HitboxComponent
 
 
 func _ready() -> void:
@@ -72,6 +74,7 @@ func _physics_process(delta: float) -> void:
 
 	_update_point_angles()
 	_sync_segments()
+	_update_tip_damage(delta)
 
 
 func _apply_distance_constraints() -> void:
@@ -130,6 +133,7 @@ func _initialize_segments() -> void:
 		if segment != null:
 			segment.queue_free()
 	segment_nodes.clear()
+	tip_hitbox = null
 	if segment_scene == null:
 		return
 	for index in range(segment_count):
@@ -140,6 +144,7 @@ func _initialize_segments() -> void:
 		segment_nodes.append(segment)
 		if segment is CanvasItem:
 			(segment as CanvasItem).modulate = point_color
+		_configure_segment_hitbox(segment, index)
 
 
 func _update_point_angles() -> void:
@@ -167,7 +172,33 @@ func _sync_segments() -> void:
 			continue
 		segment.global_position = points[index]
 		segment.rotation = point_angles[index] - (PI * 0.5)
-		segment.scale = point_oval_scale
+		segment.scale = Vector2.ONE * segment_scale
+
+
+func _configure_segment_hitbox(segment: Node2D, index: int) -> void:
+	var hitbox = segment.get_node_or_null("HitboxComponent") as HitboxComponent
+	if hitbox == null:
+		return
+	var collision_shape = hitbox.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	var is_tip = index == segment_count - 1
+	hitbox.monitoring = is_tip
+	hitbox.monitorable = is_tip
+	if collision_shape != null:
+		collision_shape.disabled = not is_tip
+	if is_tip:
+		tip_hitbox = hitbox
+
+
+func _update_tip_damage(delta: float) -> void:
+	if tip_hitbox == null:
+		return
+	var tip_index = points.size() - 1
+	if tip_index < 0:
+		return
+	var tip_velocity = points[tip_index] - previous_points[tip_index]
+	var tip_speed = tip_velocity.length() / max(delta, 0.0001)
+	var scaled_damage = tip_speed * tip_damage_speed_multiplier
+	tip_hitbox.damage = int(round(scaled_damage))
 
 
 func get_owner_actor() -> Node2D:

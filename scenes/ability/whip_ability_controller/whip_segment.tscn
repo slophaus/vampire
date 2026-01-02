@@ -1,7 +1,18 @@
-[gd_scene format=3 uid="uid://i9d2zi04d3ko7"]
+[gd_scene load_steps=3 format=3 uid="uid://i9d2zi04d3ko7"]
+
+[ext_resource type="PackedScene" uid="uid://b07jrrt845lfp" path="res://scenes/component/hitbox_component.tscn" id="1_hitbox"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_0b15m"]
+radius = 4.0
 
 [node name="WhipSegment" type="Node2D"]
 
 [node name="Oval" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(0, -10, 4, -8, 6, -4, 7, 0, 6, 4, 4, 8, 0, 10, -4, 8, -6, 4, -7, 0, -6, -4, -4, -8)
+polygon = PackedVector2Array(0, -5, 3, -5, 4, -3, 4, 3, 3, 5, 0, 5, -3, 5, -4, 3, -4, -3, -3, -5)
 color = Color(1, 1, 1, 1)
+
+[node name="HitboxComponent" parent="." instance=ExtResource("1_hitbox")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
+shape = SubResource("CircleShape2D_0b15m")
+disabled = true
