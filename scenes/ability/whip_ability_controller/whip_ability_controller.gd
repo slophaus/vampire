@@ -77,10 +77,9 @@ func _draw() -> void:
 				direction = (local_point - to_local(points[index - 1])).normalized()
 			if direction.length_squared() <= 0.0001:
 				direction = Vector2.RIGHT
-		var point_transform = Transform2D(direction.angle(), local_point).scaled(point_oval_scale)
-		draw_set_transform_matrix(point_transform)
+		draw_set_transform(local_point, direction.angle(), point_oval_scale)
 		draw_circle(Vector2.ZERO, point_radius, point_color)
-		draw_set_transform_matrix(Transform2D.IDENTITY)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 func _apply_distance_constraints() -> void:
