@@ -8,10 +8,18 @@ var player_scene = preload("res://scenes/game_object/player/player.tscn")
 var player_regenerating := {}
 var game_over := false
 const DEFEAT_MENU_DELAY := 0.6
+const CUSTOM_DATA_KEY := "tile_type"
+const FLOOR_TILE_TYPE := "dirt"
+
+@onready var arena_tilemap: TileMap = $BG/TileMap
+@onready var dirt_border: TileMapLayer = $BG/dirt_border
 
 
 func _ready():
 	_apply_player_count()
+	if arena_tilemap != null:
+		arena_tilemap.changed.connect(_sync_dirt_border)
+	_sync_dirt_border()
 	for player in get_tree().get_nodes_in_group("player"):
 		player.regenerate_started.connect(on_player_regenerate_started.bind(player))
 		player.regenerate_finished.connect(on_player_regenerate_finished.bind(player))
@@ -88,3 +96,20 @@ func trigger_defeat():
 	var end_screen_instance = end_screen_scene.instantiate() as EndScreen
 	add_child(end_screen_instance)
 	end_screen_instance.set_defeat()
+
+
+func _sync_dirt_border() -> void:
+	if arena_tilemap == null or dirt_border == null:
+		return
+	var floor_cells: Array[Vector2i] = []
+	for cell in arena_tilemap.get_used_cells(0):
+		var tile_data = arena_tilemap.get_cell_tile_data(0, cell)
+		if tile_data == null:
+			continue
+		var tile_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
+		if tile_type == FLOOR_TILE_TYPE:
+			floor_cells.append(cell)
+	dirt_border.clear()
+	if floor_cells.is_empty():
+		return
+	dirt_border.set_cells_terrain_connect(0, 0, floor_cells)
