@@ -38,10 +38,10 @@ runaway counts.
 
 ### Enemy spawn flow
 
-* The spawn timer starts at its scene `Timer.wait_time` value (`EnemyManager.base_spawn_time`), with
-  arena difficulty starting at 1.
-  Each time arena difficulty increases, `on_arena_difficulty_increased` shortens the timer by
-  `(0.1 / 12) * arena_difficulty` seconds (up to 0.7 seconds), raising the spawn rate over time.
+* Spawn rate uses difficulty keyframes from `EnemyManager.spawn_rate_keyframes`. The keyframes map
+  arena difficulty to a spawn rate (spawns per second). When difficulty lands between keyframes,
+  the spawn rate is linearly interpolated; outside the range it clamps to the nearest keyframe.
+  The default keyframes set difficulty 1 to 1 spawn/sec and difficulty 16 to 2 spawns/sec.
 * `EnemyManager` builds a weighted table of enemy types: it starts with Mouse entries (weight 15),
   adds Worms at difficulty 2 (weight 1), Wizards at difficulty 8 (weight 5), and Rats at
   difficulty 12 (weight 4).
