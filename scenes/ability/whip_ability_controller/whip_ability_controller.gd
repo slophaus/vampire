@@ -5,12 +5,12 @@ extends Node2D
 @export var constraint_iterations := 6
 @export var damping := 0.2
 @export var base_offset := 20.0
-@export var loose_base_offset := 5.0
+@export var base_offset_return_speed := 6.0
 @export var anchor_follow_strength := 0.3
 @export var loose_anchor_follow_strength := 0.02
-@export var angle_strength := 0.1
+@export var angle_strength := 0.05
 @export var loose_angle_strength := 0.0
-@export var parent_alignment_strength := 0.2
+@export var parent_alignment_strength := 0.15
 @export var loose_parent_alignment_strength := 0.005
 @export var segment_scale := 1.0
 @export var tip_damage_speed_multiplier := 0.005
@@ -64,7 +64,14 @@ func _physics_process(delta: float) -> void:
 		last_direction = desired_direction
 	base_alignment_direction = desired_direction
 
-	current_base_offset = base_offset if has_aim_input else loose_base_offset
+	if has_aim_input:
+		current_base_offset = base_offset
+	else:
+		current_base_offset = lerp(
+			current_base_offset,
+			0.0,
+			clamp(base_offset_return_speed * delta, 0.0, 1.0)
+		)
 	current_anchor_follow_strength = anchor_follow_strength if has_aim_input else loose_anchor_follow_strength
 	current_angle_strength = angle_strength if has_aim_input else loose_angle_strength
 	current_parent_alignment_strength = parent_alignment_strength if has_aim_input else loose_parent_alignment_strength
