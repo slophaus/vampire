@@ -322,6 +322,23 @@ func trigger_defeat_visuals() -> void:
 	aim_laser.visible = false
 
 
+func continue_from_defeat() -> void:
+	has_defeat_visuals = false
+	is_regenerating = false
+	stop_flash()
+	stop_near_death_flash()
+	visuals.modulate = normal_visuals_modulate
+	visuals.visible = true
+	health_bar.visible = true
+	upgrade_dots.visible = true
+	aim_laser.visible = false
+	velocity = Vector2.ZERO
+	velocity_component.velocity = Vector2.ZERO
+	health_component.current_health = health_component.max_health
+	health_component.health_changed.emit()
+	last_health = health_component.current_health
+
+
 func spawn_explosion() -> void:
 	if explosion_scene == null:
 		return
