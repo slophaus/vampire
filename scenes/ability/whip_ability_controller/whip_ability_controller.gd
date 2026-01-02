@@ -3,13 +3,11 @@ extends Node2D
 @export var segment_count := 14
 @export var segment_length := 12.0
 @export var constraint_iterations := 6
-@export var damping := 0.12
+@export var damping := 0.2
 @export var base_offset := 20.0
-@export var aim_influence := 1.0
-@export var movement_influence := 0.6
-@export var anchor_follow_strength := 0.6
-@export var angle_constraint_strength := 0.35
-@export var parent_angle_alignment_strength := 0.6
+@export var anchor_follow_strength := 0.3
+@export var angle_strength := 0.1
+@export var parent_alignment_strength := 0.2
 @export var segment_scale := 1.0
 @export var tip_damage_speed_multiplier := 0.05
 @export var point_color := Color(0.95, 0.9, 1.0, 0.9)
@@ -23,6 +21,8 @@ var segment_nodes: Array[Node2D] = []
 var last_direction := Vector2.RIGHT
 var base_alignment_direction := Vector2.RIGHT
 var tip_hitbox: HitboxComponent
+const AIM_INFLUENCE := 1.0
+const MOVEMENT_INFLUENCE := 0.0
 
 
 func _ready() -> void:
@@ -47,7 +47,7 @@ func _physics_process(delta: float) -> void:
 
 	var aim_direction = get_aim_direction(owner_actor)
 	var movement_direction = _get_movement_direction(owner_actor)
-	var desired_direction = (aim_direction * aim_influence) + (movement_direction * movement_influence)
+	var desired_direction = (aim_direction * AIM_INFLUENCE) + (movement_direction * MOVEMENT_INFLUENCE)
 	if desired_direction.length_squared() <= 0.0001:
 		desired_direction = last_direction
 	else:
@@ -96,20 +96,20 @@ func _apply_distance_constraints() -> void:
 func _apply_angle_constraints() -> void:
 	if segment_count < 2:
 		return
-	if parent_angle_alignment_strength > 0.0:
+	if parent_alignment_strength > 0.0:
 		var desired_base = points[0] + (base_alignment_direction * segment_length)
-		points[1] = points[1].lerp(desired_base, parent_angle_alignment_strength)
+		points[1] = points[1].lerp(desired_base, parent_alignment_strength)
 	if segment_count < 3:
 		return
 	for index in range(1, segment_count - 1):
 		var target = (points[index - 1] + points[index + 1]) * 0.5
-		points[index] = points[index].lerp(target, angle_constraint_strength)
-		if parent_angle_alignment_strength > 0.0:
+		points[index] = points[index].lerp(target, angle_strength)
+		if parent_alignment_strength > 0.0:
 			var parent_delta = points[index] - points[index - 1]
 			if parent_delta.length_squared() > 0.0001:
 				var parent_direction = parent_delta.normalized()
 				var desired_child = points[index] + (parent_direction * segment_length)
-				points[index + 1] = points[index + 1].lerp(desired_child, parent_angle_alignment_strength)
+				points[index + 1] = points[index + 1].lerp(desired_child, parent_alignment_strength)
 
 
 func _initialize_points() -> void:
