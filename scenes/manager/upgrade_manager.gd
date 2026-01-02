@@ -210,8 +210,6 @@ func refresh_players() -> void:
 			upgrade_pools_by_player[player_number] = GameEvents.persisted_upgrade_pools_by_player[player_number]
 		else:
 			upgrade_pools_by_player[player_number] = create_upgrade_pool()
-		if not current_upgrades_by_player[player_number].has(upgrade_whip.id):
-			apply_upgrade(upgrade_whip, player_number)
 		_store_persistent_state(player_number)
 
 	var player_numbers = get_player_numbers()
