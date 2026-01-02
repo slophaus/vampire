@@ -5,11 +5,15 @@ extends Node2D
 @export var constraint_iterations := 6
 @export var damping := 0.2
 @export var base_offset := 20.0
+@export var loose_base_offset := 5.0
 @export var anchor_follow_strength := 0.3
+@export var loose_anchor_follow_strength := 0.02
 @export var angle_strength := 0.1
+@export var loose_angle_strength := 0.0
 @export var parent_alignment_strength := 0.2
+@export var loose_parent_alignment_strength := 0.005
 @export var segment_scale := 1.0
-@export var tip_damage_speed_multiplier := 0.05
+@export var tip_damage_speed_multiplier := 0.005
 @export var point_color := Color(0.95, 0.9, 1.0, 0.9)
 @export var segment_scene: PackedScene = preload("res://scenes/ability/whip_ability_controller/whip_segment.tscn")
 
@@ -21,6 +25,10 @@ var segment_nodes: Array[Node2D] = []
 var last_direction := Vector2.RIGHT
 var base_alignment_direction := Vector2.RIGHT
 var tip_hitbox: HitboxComponent
+var current_base_offset := 0.0
+var current_anchor_follow_strength := 0.0
+var current_angle_strength := 0.0
+var current_parent_alignment_strength := 0.0
 const AIM_INFLUENCE := 1.0
 const MOVEMENT_INFLUENCE := 0.0
 
@@ -46,6 +54,7 @@ func _physics_process(delta: float) -> void:
 		_initialize_segments()
 
 	var aim_direction = get_aim_direction(owner_actor)
+	var has_aim_input = aim_direction.length_squared() > 0.0001
 	var movement_direction = _get_movement_direction(owner_actor)
 	var desired_direction = (aim_direction * AIM_INFLUENCE) + (movement_direction * MOVEMENT_INFLUENCE)
 	if desired_direction.length_squared() <= 0.0001:
@@ -55,7 +64,12 @@ func _physics_process(delta: float) -> void:
 		last_direction = desired_direction
 	base_alignment_direction = desired_direction
 
-	var anchor_position = owner_actor.global_position + (desired_direction * base_offset)
+	current_base_offset = base_offset if has_aim_input else loose_base_offset
+	current_anchor_follow_strength = anchor_follow_strength if has_aim_input else loose_anchor_follow_strength
+	current_angle_strength = angle_strength if has_aim_input else loose_angle_strength
+	current_parent_alignment_strength = parent_alignment_strength if has_aim_input else loose_parent_alignment_strength
+
+	var anchor_position = owner_actor.global_position + (desired_direction * current_base_offset)
 	var anchor_delta = anchor_position - points[0]
 	points[0] = anchor_position
 	previous_points[0] = anchor_position
@@ -64,7 +78,7 @@ func _physics_process(delta: float) -> void:
 		var current_position = points[index]
 		var velocity = (points[index] - previous_points[index]) * (1.0 - damping)
 		points[index] += velocity
-		points[index] += anchor_delta * anchor_follow_strength * (1.0 - float(index) / float(segment_count))
+		points[index] += anchor_delta * current_anchor_follow_strength * (1.0 - float(index) / float(segment_count))
 		previous_points[index] = current_position
 
 	for iteration in range(constraint_iterations):
@@ -96,20 +110,20 @@ func _apply_distance_constraints() -> void:
 func _apply_angle_constraints() -> void:
 	if segment_count < 2:
 		return
-	if parent_alignment_strength > 0.0:
+	if current_parent_alignment_strength > 0.0:
 		var desired_base = points[0] + (base_alignment_direction * segment_length)
-		points[1] = points[1].lerp(desired_base, parent_alignment_strength)
+		points[1] = points[1].lerp(desired_base, current_parent_alignment_strength)
 	if segment_count < 3:
 		return
 	for index in range(1, segment_count - 1):
 		var target = (points[index - 1] + points[index + 1]) * 0.5
-		points[index] = points[index].lerp(target, angle_strength)
-		if parent_alignment_strength > 0.0:
+		points[index] = points[index].lerp(target, current_angle_strength)
+		if current_parent_alignment_strength > 0.0:
 			var parent_delta = points[index] - points[index - 1]
 			if parent_delta.length_squared() > 0.0001:
 				var parent_direction = parent_delta.normalized()
 				var desired_child = points[index] + (parent_direction * segment_length)
-				points[index + 1] = points[index + 1].lerp(desired_child, parent_alignment_strength)
+				points[index + 1] = points[index + 1].lerp(desired_child, current_parent_alignment_strength)
 
 
 func _initialize_points() -> void:
