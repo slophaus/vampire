@@ -35,7 +35,8 @@ var current_power := 0.0
 var last_aim_direction := Vector2.ZERO
 const AIM_INFLUENCE := 1.0
 const MOVEMENT_INFLUENCE := 0.0
-const STEADY_AIM_ANGLE_THRESHOLD := 0.02
+const AIM_MIN_DIRECTION_STRENGTH := 0.02
+const AIM_POWER_CURVE := 2.0
 
 
 func _ready() -> void:
@@ -58,13 +59,16 @@ func _physics_process(delta: float) -> void:
 		_initialize_points()
 		_initialize_segments()
 
-	var aim_direction = get_aim_direction(owner_actor)
-	var has_aim_input = aim_direction.length_squared() > 0.0001
-	var steady_aim = false
+	var aim_vector = get_aim_vector(owner_actor)
+	var aim_strength = clamp(aim_vector.length(), 0.0, 1.0)
+	var has_aim_input = aim_strength > AIM_MIN_DIRECTION_STRENGTH
+	var aim_direction = last_aim_direction
 	if has_aim_input:
-		if last_aim_direction.length_squared() > 0.0001:
-			var angle_delta = abs(aim_direction.angle_to(last_aim_direction))
-			steady_aim = angle_delta <= STEADY_AIM_ANGLE_THRESHOLD
+		aim_direction = aim_vector.normalized()
+	var angle_delta := 0.0
+	if has_aim_input and last_aim_direction.length_squared() > 0.0001:
+		angle_delta = abs(aim_direction.angle_to(last_aim_direction))
+	if has_aim_input:
 		last_aim_direction = aim_direction
 	var movement_direction = _get_movement_direction(owner_actor)
 	var desired_direction = (aim_direction * AIM_INFLUENCE) + (movement_direction * MOVEMENT_INFLUENCE)
@@ -77,12 +81,11 @@ func _physics_process(delta: float) -> void:
 
 	var target_power := 0.0
 	var power_speed := power_loose_falloff_speed
-	if has_aim_input and not steady_aim:
-		target_power = 1.0
-		power_speed = power_build_speed
-	elif has_aim_input and steady_aim:
-		target_power = 0.0
-		power_speed = power_steady_falloff_speed
+	if has_aim_input:
+		var direction_change = clamp(angle_delta / PI, 0.0, 1.0)
+		var curved_strength = pow(aim_strength, AIM_POWER_CURVE)
+		target_power = direction_change * curved_strength
+		power_speed = power_build_speed if target_power > current_power else power_steady_falloff_speed
 	current_power = lerp(current_power, target_power, clamp(power_speed * delta, 0.0, 1.0))
 
 	current_base_offset = lerp(0.0, base_offset, current_power)
@@ -271,14 +274,11 @@ func get_player_action_suffix(player: Node) -> String:
 	return ""
 
 
-func get_aim_direction(player: Node2D) -> Vector2:
+func get_aim_vector(player: Node2D) -> Vector2:
 	var suffix = get_player_action_suffix(player)
 	var x_aim = Input.get_action_strength("aim_right" + suffix) - Input.get_action_strength("aim_left" + suffix)
 	var y_aim = Input.get_action_strength("aim_down" + suffix) - Input.get_action_strength("aim_up" + suffix)
-	var aim_vector = Vector2(x_aim, y_aim)
-	if aim_vector.length() < 0.1:
-		return Vector2.ZERO
-	return aim_vector.normalized()
+	return Vector2(x_aim, y_aim)
 
 
 func _get_movement_direction(player: Node2D) -> Vector2:
