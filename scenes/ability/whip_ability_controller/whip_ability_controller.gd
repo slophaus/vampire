@@ -9,7 +9,7 @@ extends Node2D
 @export var movement_influence := 0.6
 @export var anchor_follow_strength := 0.6
 @export var angle_constraint_strength := 0.35
-@export var parent_angle_alignment_strength := 0.2
+@export var parent_angle_alignment_strength := 0.6
 @export var point_oval_scale := Vector2.ONE
 @export var point_color := Color(0.95, 0.9, 1.0, 0.9)
 @export var segment_scene: PackedScene = preload("res://scenes/ability/whip_ability_controller/whip_segment.tscn")
@@ -20,6 +20,7 @@ var previous_points: Array[Vector2] = []
 var point_angles: Array[float] = []
 var segment_nodes: Array[Node2D] = []
 var last_direction := Vector2.RIGHT
+var base_alignment_direction := Vector2.RIGHT
 
 
 func _ready() -> void:
@@ -50,6 +51,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		desired_direction = desired_direction.normalized()
 		last_direction = desired_direction
+	base_alignment_direction = desired_direction
 
 	var anchor_position = owner_actor.global_position + (desired_direction * base_offset)
 	var anchor_delta = anchor_position - points[0]
@@ -89,6 +91,11 @@ func _apply_distance_constraints() -> void:
 
 
 func _apply_angle_constraints() -> void:
+	if segment_count < 2:
+		return
+	if parent_angle_alignment_strength > 0.0:
+		var desired_base = points[0] + (base_alignment_direction * segment_length)
+		points[1] = points[1].lerp(desired_base, parent_angle_alignment_strength)
 	if segment_count < 3:
 		return
 	for index in range(1, segment_count - 1):
