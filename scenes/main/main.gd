@@ -19,6 +19,8 @@ func _ready():
 	_apply_player_count()
 	if arena_tilemap != null:
 		arena_tilemap.changed.connect(_sync_dirt_border)
+	if not GameEvents.arena_tilemap_changed.is_connected(_sync_dirt_border):
+		GameEvents.arena_tilemap_changed.connect(_sync_dirt_border)
 	_sync_dirt_border()
 	for player in get_tree().get_nodes_in_group("player"):
 		player.regenerate_started.connect(on_player_regenerate_started.bind(player))
