@@ -1,8 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://6kroo8paddhur"]
+[gd_scene load_steps=3 format=3 uid="uid://nipysc8tqhsn"]
 
-[ext_resource type="Script" uid="uid://u0jvxowlbbmwe" path="res://scenes/component/blood_drop_component.gd" id="1_2xpf3"]
-[ext_resource type="PackedScene" uid="uid://t9fswlt1fotff" path="res://scenes/game_object/blood_droplet/blood_droplet.tscn" id="2_7yvbs"]
+[ext_resource type="Script" uid="uid://boij0fccha84k" path="res://scenes/component/blood_drop_component.gd" id="1_2xpf3"]
+[ext_resource type="PackedScene" uid="uid://xegyb8rlogml" path="res://scenes/game_object/blood_droplet/blood_droplet.tscn" id="2_7yvbs"]
 
 [node name="BloodDropComponent" type="Node"]
 script = ExtResource("1_2xpf3")
 blood_droplet_scene = ExtResource("2_7yvbs")
+droplet_count_range = Vector2i(3, 5)
+spawn_radius = 15.0
