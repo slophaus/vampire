@@ -10,13 +10,15 @@ extends Node2D
 @export var anchor_follow_strength := 0.6
 @export var angle_constraint_strength := 0.35
 @export var parent_angle_alignment_strength := 0.2
-@export var point_radius := 4.0
-@export var point_oval_scale := Vector2(1.5, 0.7)
+@export var point_oval_scale := Vector2.ONE
 @export var point_color := Color(0.95, 0.9, 1.0, 0.9)
+@export var segment_scene: PackedScene = preload("res://scenes/ability/whip_ability_controller/whip_segment.tscn")
 
 var player_number := 1
 var points: Array[Vector2] = []
 var previous_points: Array[Vector2] = []
+var point_angles: Array[float] = []
+var segment_nodes: Array[Node2D] = []
 var last_direction := Vector2.RIGHT
 
 
@@ -28,6 +30,7 @@ func _ready() -> void:
 		point_color = owner_actor.get_player_tint()
 		point_color.a = 0.9
 	_initialize_points()
+	_initialize_segments()
 	set_physics_process(true)
 
 
@@ -35,6 +38,9 @@ func _physics_process(delta: float) -> void:
 	var owner_actor = get_owner_actor()
 	if owner_actor == null:
 		return
+	if segment_nodes.size() != segment_count:
+		_initialize_points()
+		_initialize_segments()
 
 	var aim_direction = get_aim_direction(owner_actor)
 	var movement_direction = _get_movement_direction(owner_actor)
@@ -62,24 +68,8 @@ func _physics_process(delta: float) -> void:
 		_apply_distance_constraints()
 		_apply_angle_constraints()
 
-	queue_redraw()
-
-
-func _draw() -> void:
-	for index in range(points.size()):
-		var point = points[index]
-		var local_point = to_local(point)
-		var direction = Vector2.RIGHT
-		if points.size() > 1:
-			if index < points.size() - 1:
-				direction = (points[index + 1] - point).normalized()
-			else:
-				direction = (point - points[index - 1]).normalized()
-			if direction.length_squared() <= 0.0001:
-				direction = Vector2.RIGHT
-		draw_set_transform(local_point, direction.angle(), point_oval_scale)
-		draw_circle(Vector2.ZERO, point_radius, point_color)
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	_update_point_angles()
+	_sync_segments()
 
 
 func _apply_distance_constraints() -> void:
@@ -115,6 +105,7 @@ func _apply_angle_constraints() -> void:
 func _initialize_points() -> void:
 	points.clear()
 	previous_points.clear()
+	point_angles.clear()
 	var owner_actor = get_owner_actor()
 	var anchor_position = Vector2.ZERO
 	if owner_actor != null:
@@ -124,6 +115,52 @@ func _initialize_points() -> void:
 		var position = anchor_position - (direction * segment_length * index)
 		points.append(position)
 		previous_points.append(position)
+		point_angles.append(direction.angle())
+
+
+func _initialize_segments() -> void:
+	for segment in segment_nodes:
+		if segment != null:
+			segment.queue_free()
+	segment_nodes.clear()
+	if segment_scene == null:
+		return
+	for index in range(segment_count):
+		var segment = segment_scene.instantiate() as Node2D
+		if segment == null:
+			continue
+		add_child(segment)
+		segment_nodes.append(segment)
+		if segment is CanvasItem:
+			(segment as CanvasItem).modulate = point_color
+
+
+func _update_point_angles() -> void:
+	point_angles.resize(points.size())
+	for index in range(points.size()):
+		var direction = Vector2.RIGHT
+		if points.size() > 1:
+			if index < points.size() - 1:
+				direction = points[index + 1] - points[index]
+			else:
+				direction = points[index] - points[index - 1]
+			if direction.length_squared() > 0.0001:
+				direction = direction.normalized()
+			else:
+				direction = Vector2.RIGHT
+		point_angles[index] = direction.angle()
+
+
+func _sync_segments() -> void:
+	if segment_nodes.size() != points.size():
+		return
+	for index in range(points.size()):
+		var segment = segment_nodes[index]
+		if segment == null:
+			continue
+		segment.global_position = points[index]
+		segment.rotation = point_angles[index] - (PI * 0.5)
+		segment.scale = point_oval_scale
 
 
 func get_owner_actor() -> Node2D:
