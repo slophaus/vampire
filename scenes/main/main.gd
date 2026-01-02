@@ -112,4 +112,4 @@ func _sync_dirt_border() -> void:
 	dirt_border.clear()
 	if floor_cells.is_empty():
 		return
-	dirt_border.set_cells_terrain_connect(0, 0, floor_cells)
+	dirt_border.set_cells_terrain_connect(floor_cells, 0, 0)
