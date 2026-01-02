@@ -103,6 +103,13 @@ func _initialize_dirt_border(level: Node) -> void:
 				TileEater.initialize_dirt_border_for_tilemap(tilemap)
 
 
+func _get_entities_layer(level: Node) -> Node:
+	for node in level.get_tree().get_nodes_in_group("entities_layer"):
+		if level.is_ancestor_of(node):
+			return node
+	return null
+
+
 func _apply_player_count() -> void:
 	var desired_count = clampi(GameEvents.player_count, 1, 4)
 	var players_by_number := {}
@@ -148,7 +155,7 @@ func _connect_player_signals() -> void:
 
 
 func _attach_players_to_level(level: Node) -> void:
-	var entities_layer = level.get_tree().get_first_node_in_group("entities_layer")
+	var entities_layer = _get_entities_layer(level)
 	if entities_layer == null:
 		return
 	for player in get_tree().get_nodes_in_group("player"):
