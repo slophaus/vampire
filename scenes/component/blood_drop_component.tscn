@@ -7,4 +7,3 @@
 script = ExtResource("1_2xpf3")
 blood_droplet_scene = ExtResource("2_7yvbs")
 droplet_count_range = Vector2i(3, 5)
-spawn_radius = 15.0

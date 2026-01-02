@@ -4,5 +4,8 @@
 
 [node name="BloodDroplet" type="Node2D"]
 script = ExtResource("1_vdn0x")
-radius = 1.5
+min_radius = 0.5
+max_radius = 2.0
+min_color = Color(0.67, 0.0201, 0.0201, 1)
+max_color = Color(0.93, 0.0558, 0.0558, 1)
 dry_up_seconds = 5.0
