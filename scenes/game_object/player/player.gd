@@ -173,8 +173,9 @@ func _restore_persisted_state() -> void:
 		health_component.max_health = float(persisted_state["max_health"])
 	if persisted_state.has("current_health"):
 		health_component.current_health = min(float(persisted_state["current_health"]), health_component.max_health)
-		health_component.health_changed.emit()
-		last_health = health_component.current_health
+	update_health_bar_size()
+	last_health = health_component.current_health
+	health_component.health_changed.emit()
 
 
 func can_attack() -> bool:
