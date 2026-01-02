@@ -8,8 +8,8 @@ enum DoorMode {
 
 
 @export var door_mode := DoorMode.TO_BOSS
-@export var boss_arena_scene: PackedScene
-@export var main_scene: PackedScene
+@export var boss_arena_scene: PackedScene[LevelRoot]
+@export var main_scene: PackedScene[LevelRoot]
 @export var exit_door_name: StringName = &"Door"
 
 var is_transitioning := false
@@ -48,7 +48,7 @@ func _on_body_entered(body: Node) -> void:
 
 func _transition_to_boss_arena() -> void:
 	if boss_arena_scene == null:
-		boss_arena_scene = load(BOSS_ARENA_SCENE_PATH)
+		boss_arena_scene = load(BOSS_ARENA_SCENE_PATH) as PackedScene[LevelRoot]
 	if boss_arena_scene == null:
 		return
 	is_transitioning = true
@@ -62,7 +62,7 @@ func _transition_to_boss_arena() -> void:
 
 func _transition_to_main_scene() -> void:
 	if main_scene == null:
-		main_scene = load(MAIN_SCENE_PATH)
+		main_scene = load(MAIN_SCENE_PATH) as PackedScene[LevelRoot]
 		if main_scene == null:
 			return
 	is_transitioning = true

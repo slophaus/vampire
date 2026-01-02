@@ -1,8 +1,8 @@
 extends Node
 class_name GameSession
 
-@export var starting_level_scene: PackedScene
-@export var end_screen_scene: PackedScene
+@export var starting_level_scene: PackedScene[LevelRoot]
+@export var end_screen_scene: PackedScene[EndScreen]
 
 var paused_menu_scene = preload("res://scenes/ui/pause_menu.tscn")
 var player_scene = preload("res://scenes/game_object/player/player.tscn")
@@ -43,7 +43,7 @@ func _unhandled_input(event):
 		get_tree().root.set_input_as_handled()
 
 
-func transition_to_level(level_scene: PackedScene, exit_door_name: StringName = &"Door") -> void:
+func transition_to_level(level_scene: PackedScene[LevelRoot], exit_door_name: StringName = &"Door") -> void:
 	if is_transitioning:
 		return
 	if level_scene == null:
@@ -55,13 +55,13 @@ func transition_to_level(level_scene: PackedScene, exit_door_name: StringName = 
 	is_transitioning = false
 
 
-func _load_level(level_scene: PackedScene, exit_door_name: StringName) -> void:
+func _load_level(level_scene: PackedScene[LevelRoot], exit_door_name: StringName) -> void:
 	if level_scene == null:
 		return
 	_detach_players_from_level()
 	if current_level != null:
 		current_level.queue_free()
-	current_level = level_scene.instantiate() as LevelRoot
+	current_level = level_scene.instantiate()
 	level_container.add_child(current_level)
 	_attach_players_to_level(current_level)
 	_initialize_dirt_border(current_level)
