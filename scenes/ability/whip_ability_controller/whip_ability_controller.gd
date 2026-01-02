@@ -6,8 +6,9 @@ extends Node2D
 @export var damping := 0.2
 @export var base_offset := 20.0
 @export var power_build_speed := 40.0
-@export var power_loose_falloff_speed := 6.0
+@export var power_released_falloff_speed := 6.0
 @export var power_steady_falloff_speed := 2.0
+@export var power_direction_change_strength := 1.0
 @export var anchor_follow_strength := 0.3
 @export var loose_anchor_follow_strength := 0.02
 @export var angle_strength := 0.05
@@ -80,11 +81,11 @@ func _physics_process(delta: float) -> void:
 	base_alignment_direction = desired_direction
 
 	var target_power := 0.0
-	var power_speed := power_loose_falloff_speed
+	var power_speed := power_released_falloff_speed
 	if has_aim_input:
 		var direction_change = clamp(angle_delta / PI, 0.0, 1.0)
 		var curved_strength = pow(aim_strength, AIM_POWER_CURVE)
-		target_power = direction_change * curved_strength
+		target_power = clamp(direction_change * curved_strength * power_direction_change_strength, 0.0, 1.0)
 		power_speed = power_build_speed if target_power > current_power else power_steady_falloff_speed
 	current_power = lerp(current_power, target_power, clamp(power_speed * delta, 0.0, 1.0))
 
