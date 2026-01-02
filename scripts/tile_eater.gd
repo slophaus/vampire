@@ -26,6 +26,10 @@ func _init(owner_node: Node2D) -> void:
 
 
 func cache_walkable_tile() -> void:
+	_cache_walkable_tile()
+
+
+func _cache_walkable_tile() -> void:
 	if arena_tilemap == null or owner == null:
 		return
 	var sample_position := owner.global_position
@@ -45,6 +49,7 @@ func cache_walkable_tile() -> void:
 
 
 func try_convert_tile(position: Vector2, allowed_types: Array[String]) -> void:
+	_ensure_arena_tilemap()
 	if arena_tilemap == null:
 		return
 	if walkable_tile_source_id == -1:
@@ -54,6 +59,7 @@ func try_convert_tile(position: Vector2, allowed_types: Array[String]) -> void:
 
 
 func try_convert_tiles_in_radius(position: Vector2, radius: float, allowed_types: Array[String]) -> void:
+	_ensure_arena_tilemap()
 	if arena_tilemap == null:
 		return
 	if walkable_tile_source_id == -1:
@@ -103,6 +109,22 @@ func _find_arena_tilemap() -> TileMap:
 		if tilemap != null:
 			return tilemap
 	return null
+
+
+func _ensure_arena_tilemap() -> void:
+	if owner == null:
+		return
+	if arena_tilemap != null and arena_tilemap.is_inside_tree():
+		return
+	var next_tilemap = _find_arena_tilemap()
+	if next_tilemap == null:
+		return
+	arena_tilemap = next_tilemap
+	dirt_border_layer = arena_tilemap.get_node_or_null(DIRT_BORDER_LAYER_NAME) as TileMapLayer
+	walkable_tile_source_id = -1
+	walkable_tile_atlas = Vector2i.ZERO
+	walkable_tile_alternative = 0
+	_cache_walkable_tile()
 
 
 func _initialize_dirt_border() -> void:
