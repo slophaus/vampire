@@ -43,8 +43,7 @@ func _physics_process(delta: float) -> void:
 		desired_direction = desired_direction.normalized()
 		last_direction = desired_direction
 
-	var base_direction = aim_direction if aim_direction != Vector2.ZERO else desired_direction
-	var anchor_position = owner_actor.global_position + (base_direction * base_offset)
+	var anchor_position = owner_actor.global_position + (desired_direction * base_offset)
 	var anchor_delta = anchor_position - points[0]
 	points[0] = anchor_position
 	previous_points[0] = anchor_position
