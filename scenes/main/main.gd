@@ -140,10 +140,9 @@ func _sync_dirt_border() -> void:
 			pending_border_lookup.clear()
 			return
 		latest_floor_cells = current_floor_cells
-		pending_border_cells.clear()
+		pending_border_cells = current_floor_cells.keys()
 		pending_border_lookup.clear()
-		for cell in current_floor_cells.keys():
-			pending_border_cells.append(cell)
+		for cell in pending_border_cells:
 			pending_border_lookup[cell] = true
 		cached_floor_cells = current_floor_cells
 		return
