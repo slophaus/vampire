@@ -9,7 +9,7 @@ extends Node2D
 @export var movement_influence := 0.6
 @export var anchor_follow_strength := 0.6
 @export var angle_constraint_strength := 0.35
-@export var parent_angle_alignment_strength := 0.6
+@export var parent_angle_alignment_strength := 0.2
 @export var point_radius := 4.0
 @export var point_oval_scale := Vector2(1.5, 0.7)
 @export var point_color := Color(0.95, 0.9, 1.0, 0.9)
@@ -72,9 +72,9 @@ func _draw() -> void:
 		var direction = Vector2.RIGHT
 		if points.size() > 1:
 			if index < points.size() - 1:
-				direction = (to_local(points[index + 1]) - local_point).normalized()
+				direction = (points[index + 1] - point).normalized()
 			else:
-				direction = (local_point - to_local(points[index - 1])).normalized()
+				direction = (point - points[index - 1]).normalized()
 			if direction.length_squared() <= 0.0001:
 				direction = Vector2.RIGHT
 		draw_set_transform(local_point, direction.angle(), point_oval_scale)
