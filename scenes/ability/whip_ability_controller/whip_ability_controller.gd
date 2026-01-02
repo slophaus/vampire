@@ -72,9 +72,9 @@ func _draw() -> void:
 		var direction = Vector2.RIGHT
 		if points.size() > 1:
 			if index < points.size() - 1:
-				direction = (to_local(points[index + 1]) - local_point).normalized()
+				direction = (points[index + 1] - point).normalized()
 			else:
-				direction = (local_point - to_local(points[index - 1])).normalized()
+				direction = (point - points[index - 1]).normalized()
 			if direction.length_squared() <= 0.0001:
 				direction = Vector2.RIGHT
 		draw_set_transform(local_point, direction.angle(), point_oval_scale)
