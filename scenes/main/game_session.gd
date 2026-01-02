@@ -35,7 +35,7 @@ func _ready():
 	_apply_player_count()
 	_connect_player_signals()
 	if starting_level_scene != null:
-		_load_level(starting_level_scene, &"")
+		_load_level(starting_level_scene, &"", false)
 
 
 func _unhandled_input(event):
