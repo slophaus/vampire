@@ -2,7 +2,6 @@ extends RefCounted
 class_name TileEater
 
 const CUSTOM_DATA_KEY := "tile_type"
-const WALKABLE_CUSTOM_DATA_KEY := "walkable"
 const WALKABLE_TILE_TYPES := ["walkable", "floor"]
 const DIRT_BORDER_LAYER_NAME := "dirt_border"
 const DIRT_BORDER_META_KEY := "_dirt_border_initialized"
@@ -150,9 +149,6 @@ func _is_walkable_cell(cell: Vector2i) -> bool:
 	var tile_data := arena_tilemap.get_cell_tile_data(0, cell)
 	if tile_data == null:
 		return false
-	var walkable_tag = tile_data.get_custom_data(WALKABLE_CUSTOM_DATA_KEY)
-	if walkable_tag != null:
-		return bool(walkable_tag)
 	var tile_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
 	if tile_type != null and WALKABLE_TILE_TYPES.has(tile_type):
 		return true
