@@ -26,9 +26,6 @@ const NEIGHBOR_OFFSETS := [
 @onready var dirt_border: TileMapLayer = $BG/dirt_border
 
 var cached_floor_cells: Dictionary = {}
-var latest_floor_cells: Dictionary = {}
-var pending_border_cells: Array[Vector2i] = []
-var pending_border_lookup: Dictionary = {}
 
 
 func _ready():
@@ -41,10 +38,6 @@ func _ready():
 	for player in get_tree().get_nodes_in_group("player"):
 		player.regenerate_started.connect(on_player_regenerate_started.bind(player))
 		player.regenerate_finished.connect(on_player_regenerate_finished.bind(player))
-
-
-func _process(_delta):
-	_update_next_dirt_border_cell()
 
 
 
@@ -135,15 +128,8 @@ func _sync_dirt_border() -> void:
 		dirt_border.clear()
 		if current_floor_cells.is_empty():
 			cached_floor_cells = current_floor_cells
-			latest_floor_cells = current_floor_cells
-			pending_border_cells.clear()
-			pending_border_lookup.clear()
 			return
-		latest_floor_cells = current_floor_cells
-		pending_border_cells = current_floor_cells.keys()
-		pending_border_lookup.clear()
-		for cell in pending_border_cells:
-			pending_border_lookup[cell] = true
+		dirt_border.set_cells_terrain_connect(current_floor_cells.keys(), 0, 0)
 		cached_floor_cells = current_floor_cells
 		return
 	var dirty_cells: Dictionary = {}
@@ -160,23 +146,11 @@ func _sync_dirt_border() -> void:
 		for offset in NEIGHBOR_OFFSETS:
 			affected_cells[cell + offset] = true
 	for cell in affected_cells.keys():
-		_queue_border_cell(cell)
-	latest_floor_cells = current_floor_cells
+		dirt_border.erase_cell(cell)
+	var affected_floor_cells: Array[Vector2i] = []
+	for cell in affected_cells.keys():
+		if current_floor_cells.has(cell):
+			affected_floor_cells.append(cell)
+	if not affected_floor_cells.is_empty():
+		dirt_border.set_cells_terrain_connect(affected_floor_cells, 0, 0)
 	cached_floor_cells = current_floor_cells
-
-
-func _queue_border_cell(cell: Vector2i) -> void:
-	if pending_border_lookup.has(cell):
-		return
-	pending_border_lookup[cell] = true
-	pending_border_cells.append(cell)
-
-
-func _update_next_dirt_border_cell() -> void:
-	if dirt_border == null or pending_border_cells.is_empty():
-		return
-	var cell = pending_border_cells.pop_front()
-	pending_border_lookup.erase(cell)
-	dirt_border.erase_cell(cell)
-	if latest_floor_cells.has(cell):
-		dirt_border.set_cells_terrain_connect([cell], 0, 0)
