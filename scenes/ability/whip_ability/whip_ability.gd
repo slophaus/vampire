@@ -107,15 +107,6 @@ func _apply_distance_constraints() -> void:
 		var delta = p2 - p1
 		var distance = delta.length()
 		if distance == 0.0:
-			var fallback = previous_points[i + 1] - previous_points[i]
-			if fallback == Vector2.ZERO:
-				fallback = Vector2.RIGHT
-			delta = fallback.normalized() * segment_length
-			if i == 0:
-				points[i + 1] = points[i] + delta
-			else:
-				points[i] -= delta * 0.5
-				points[i + 1] += delta * 0.5
 			continue
 		var diff = (distance - segment_length) / distance
 		if i == 0:
