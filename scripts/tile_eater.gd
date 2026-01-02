@@ -2,6 +2,8 @@ extends RefCounted
 class_name TileEater
 
 const CUSTOM_DATA_KEY := "tile_type"
+const WALKABLE_CUSTOM_DATA_KEY := "walkable"
+const WALKABLE_TILE_TYPES := ["walkable", "floor"]
 const DIRT_BORDER_LAYER_NAME := "dirt_border"
 const DIRT_BORDER_META_KEY := "_dirt_border_initialized"
 const DIRT_BORDER_TERRAIN_SET := 0
@@ -145,10 +147,13 @@ func _update_dirt_border(center_cell: Vector2i) -> void:
 func _is_walkable_cell(cell: Vector2i) -> bool:
 	if arena_tilemap == null:
 		return false
-	if walkable_tile_source_id == -1:
+	var tile_data := arena_tilemap.get_cell_tile_data(0, cell)
+	if tile_data == null:
 		return false
-	if arena_tilemap.get_cell_source_id(0, cell) != walkable_tile_source_id:
-		return false
-	if arena_tilemap.get_cell_atlas_coords(0, cell) != walkable_tile_atlas:
-		return false
-	return arena_tilemap.get_cell_alternative_tile(0, cell) == walkable_tile_alternative
+	var walkable_tag = tile_data.get_custom_data(WALKABLE_CUSTOM_DATA_KEY)
+	if walkable_tag != null:
+		return bool(walkable_tag)
+	var tile_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
+	if tile_type != null and WALKABLE_TILE_TYPES.has(tile_type):
+		return true
+	return tile_data.get_collision_polygons_count(0) <= 0
