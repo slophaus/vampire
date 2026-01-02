@@ -61,7 +61,13 @@ func _load_level(level_scene: PackedScene, exit_door_name: StringName) -> void:
 	_detach_players_from_level()
 	if current_level != null:
 		current_level.queue_free()
-	current_level = level_scene.instantiate() as LevelRoot
+	var level_instance = level_scene.instantiate()
+	if not (level_instance is LevelRoot):
+		push_error("Level scene is missing a LevelRoot root node: %s" % level_scene.resource_path)
+		if level_instance != null:
+			level_instance.queue_free()
+		return
+	current_level = level_instance
 	level_container.add_child(current_level)
 	_attach_players_to_level(current_level)
 	_initialize_dirt_border(current_level)
