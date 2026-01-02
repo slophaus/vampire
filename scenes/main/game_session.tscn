@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://c5kgkd7ly41sq" path="res://scenes/manager/experience_manager.tscn" id="6_6pu87"]
 [ext_resource type="PackedScene" uid="uid://c5b76ailnfref" path="res://scenes/manager/upgrade_manager.tscn" id="7_5gi0q"]
 [ext_resource type="PackedScene" uid="uid://5jwlcn6cm23o" path="res://scenes/game_object/game_camera/game_camera.tscn" id="8_7k9hd"]
-[ext_resource type="PackedScene" uid="uid://ct3bt3o3o1yqf" path="res://scenes/level/main_level.tscn" id="9_8r20x"]
+[ext_resource type="PackedScene" uid="uid://mapie6ivpd7j" path="res://scenes/level/main_level.tscn" id="9_8r20x"]
 [ext_resource type="PackedScene" uid="uid://vqjgdqb3t2ju" path="res://scenes/ui/end_screen.tscn" id="10_qj0g7"]
 
 [node name="GameSession" type="Node"]
