@@ -9,7 +9,9 @@ extends Node2D
 @export var movement_influence := 0.6
 @export var anchor_follow_strength := 0.6
 @export var angle_constraint_strength := 0.35
+@export var parent_angle_alignment_strength := 0.2
 @export var point_radius := 4.0
+@export var point_oval_scale := Vector2(1.5, 0.7)
 @export var point_color := Color(0.95, 0.9, 1.0, 0.9)
 
 var player_number := 1
@@ -64,8 +66,20 @@ func _physics_process(delta: float) -> void:
 
 
 func _draw() -> void:
-	for point in points:
-		draw_circle(to_local(point), point_radius, point_color)
+	for index in range(points.size()):
+		var point = points[index]
+		var local_point = to_local(point)
+		var direction = Vector2.RIGHT
+		if points.size() > 1:
+			if index < points.size() - 1:
+				direction = (points[index + 1] - point).normalized()
+			else:
+				direction = (point - points[index - 1]).normalized()
+			if direction.length_squared() <= 0.0001:
+				direction = Vector2.RIGHT
+		draw_set_transform(local_point, direction.angle(), point_oval_scale)
+		draw_circle(Vector2.ZERO, point_radius, point_color)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 func _apply_distance_constraints() -> void:
@@ -90,6 +104,12 @@ func _apply_angle_constraints() -> void:
 	for index in range(1, segment_count - 1):
 		var target = (points[index - 1] + points[index + 1]) * 0.5
 		points[index] = points[index].lerp(target, angle_constraint_strength)
+		if parent_angle_alignment_strength > 0.0:
+			var parent_delta = points[index] - points[index - 1]
+			if parent_delta.length_squared() > 0.0001:
+				var parent_direction = parent_delta.normalized()
+				var desired_child = points[index] + (parent_direction * segment_length)
+				points[index + 1] = points[index + 1].lerp(desired_child, parent_angle_alignment_strength)
 
 
 func _initialize_points() -> void:
