@@ -38,11 +38,12 @@ runaway counts.
 
 ### Enemy spawn flow
 
-* The spawn timer starts at its scene `Timer.wait_time` value (`EnemyManager.base_spawn_time`).
+* The spawn timer starts at its scene `Timer.wait_time` value (`EnemyManager.base_spawn_time`), with
+  arena difficulty starting at 1.
   Each time arena difficulty increases, `on_arena_difficulty_increased` shortens the timer by
   `(0.1 / 12) * arena_difficulty` seconds (up to 0.7 seconds), raising the spawn rate over time.
 * `EnemyManager` builds a weighted table of enemy types: it starts with Mouse entries (weight 15),
-  adds Worms at difficulty 6 (weight 1), Wizards at difficulty 8 (weight 5), and Rats at
+  adds Worms at difficulty 2 (weight 1), Wizards at difficulty 8 (weight 5), and Rats at
   difficulty 12 (weight 4).
 * For each spawn, it looks for walkable tilemap cells (no collision polygons) that are outside the
   camera view rectangle (`OFFSCREEN_MARGIN` pixels beyond the view), but still within
@@ -62,4 +63,4 @@ runaway counts.
 
 | Enemy | Spawn behavior | Stats | Notes |
 | --- | --- | --- | --- |
-| Worm | Added at arena difficulty 6 | 20 HP, 15 segments, moves every 0.8s | Grid-based mover that avoids overlapping bodies, digs through blocked tiles, and explodes segments on death. |
+| Worm | Added at arena difficulty 2 | 20 HP, 15 segments, moves every 0.8s | Grid-based mover that avoids overlapping bodies, digs through blocked tiles, and explodes segments on death. |
