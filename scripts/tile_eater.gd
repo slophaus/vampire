@@ -106,22 +106,7 @@ func _find_arena_tilemap() -> TileMap:
 
 
 func _initialize_dirt_border() -> void:
-	if arena_tilemap == null or dirt_border_layer == null:
-		return
-	if arena_tilemap.has_meta(DIRT_BORDER_META_KEY):
-		return
-	var floor_cells: Array[Vector2i] = []
-	for cell in arena_tilemap.get_used_cells(0):
-		if _is_walkable_cell(cell):
-			floor_cells.append(cell)
-	if not floor_cells.is_empty():
-		dirt_border_layer.set_cells_terrain_connect(
-			floor_cells,
-			DIRT_BORDER_TERRAIN_SET,
-			DIRT_BORDER_TERRAIN,
-			false
-		)
-	arena_tilemap.set_meta(DIRT_BORDER_META_KEY, true)
+	initialize_dirt_border_for_tilemap(arena_tilemap)
 
 
 func _update_dirt_border(center_cell: Vector2i) -> void:
@@ -144,6 +129,32 @@ func _update_dirt_border(center_cell: Vector2i) -> void:
 
 
 func _is_walkable_cell(cell: Vector2i) -> bool:
+	return _is_walkable_cell_in_tilemap(arena_tilemap, cell)
+
+
+static func initialize_dirt_border_for_tilemap(arena_tilemap: TileMap) -> void:
+	if arena_tilemap == null:
+		return
+	if arena_tilemap.has_meta(DIRT_BORDER_META_KEY):
+		return
+	var dirt_border_layer = arena_tilemap.get_node_or_null(DIRT_BORDER_LAYER_NAME) as TileMapLayer
+	if dirt_border_layer == null:
+		return
+	var floor_cells: Array[Vector2i] = []
+	for cell in arena_tilemap.get_used_cells(0):
+		if _is_walkable_cell_in_tilemap(arena_tilemap, cell):
+			floor_cells.append(cell)
+	if not floor_cells.is_empty():
+		dirt_border_layer.set_cells_terrain_connect(
+			floor_cells,
+			DIRT_BORDER_TERRAIN_SET,
+			DIRT_BORDER_TERRAIN,
+			false
+		)
+	arena_tilemap.set_meta(DIRT_BORDER_META_KEY, true)
+
+
+static func _is_walkable_cell_in_tilemap(arena_tilemap: TileMap, cell: Vector2i) -> bool:
 	if arena_tilemap == null:
 		return false
 	var tile_data := arena_tilemap.get_cell_tile_data(0, cell)
