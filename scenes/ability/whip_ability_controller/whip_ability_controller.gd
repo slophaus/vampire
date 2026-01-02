@@ -5,9 +5,9 @@ extends Node2D
 @export var constraint_iterations := 6
 @export var damping := 0.2
 @export var base_offset := 20.0
-@export var power_build_speed := 8.0
-@export var power_falloff_speed := 6.0
-@export var power_steady_falloff_speed := 4.0
+@export var power_build_speed := 40.0
+@export var power_loose_falloff_speed := 6.0
+@export var power_steady_falloff_speed := 2.0
 @export var anchor_follow_strength := 0.3
 @export var loose_anchor_follow_strength := 0.02
 @export var angle_strength := 0.05
@@ -15,7 +15,7 @@ extends Node2D
 @export var parent_alignment_strength := 0.15
 @export var loose_parent_alignment_strength := 0.005
 @export var segment_scale := 1.0
-@export var tip_damage_speed_multiplier := 0.005
+@export var tip_speed_damage := 0.007
 @export var point_color := Color(0.95, 0.9, 1.0, 0.9)
 @export var segment_scene: PackedScene = preload("res://scenes/ability/whip_ability_controller/whip_segment.tscn")
 
@@ -76,7 +76,7 @@ func _physics_process(delta: float) -> void:
 	base_alignment_direction = desired_direction
 
 	var target_power := 0.0
-	var power_speed := power_falloff_speed
+	var power_speed := power_loose_falloff_speed
 	if has_aim_input and not steady_aim:
 		target_power = 1.0
 		power_speed = power_build_speed
@@ -236,7 +236,7 @@ func _update_tip_damage(delta: float) -> void:
 		return
 	var tip_velocity = points[tip_index] - previous_points[tip_index]
 	var tip_speed = tip_velocity.length() / max(delta, 0.0001)
-	var scaled_damage = tip_speed * tip_damage_speed_multiplier
+	var scaled_damage = tip_speed * tip_speed_damage
 	tip_hitbox.damage = int(round(scaled_damage))
 
 
