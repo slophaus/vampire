@@ -1,8 +1,0 @@
-[gd_scene load_steps=3 format=3]
-
-[ext_resource type="Script" path="res://scenes/ability/whip_ability_controller/whip_ability_controller.gd" id="1_07p6l"]
-[ext_resource type="PackedScene" path="res://scenes/ability/whip_ability/whip_ability.tscn" id="2_k4t8u"]
-
-[node name="WhipAbilityController" type="Node"]
-script = ExtResource("1_07p6l")
-whip_ability_scene = ExtResource("2_k4t8u")
