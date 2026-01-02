@@ -5,7 +5,8 @@ extends Node2D
 @export var constraint_iterations := 6
 @export var damping := 0.2
 @export var base_offset := 20.0
-@export var base_offset_return_speed := 6.0
+@export var power_build_speed := 8.0
+@export var power_falloff_speed := 6.0
 @export var anchor_follow_strength := 0.3
 @export var loose_anchor_follow_strength := 0.02
 @export var angle_strength := 0.05
@@ -29,6 +30,7 @@ var current_base_offset := 0.0
 var current_anchor_follow_strength := 0.0
 var current_angle_strength := 0.0
 var current_parent_alignment_strength := 0.0
+var current_power := 0.0
 const AIM_INFLUENCE := 1.0
 const MOVEMENT_INFLUENCE := 0.0
 
@@ -64,17 +66,14 @@ func _physics_process(delta: float) -> void:
 		last_direction = desired_direction
 	base_alignment_direction = desired_direction
 
-	if has_aim_input:
-		current_base_offset = base_offset
-	else:
-		current_base_offset = lerp(
-			current_base_offset,
-			0.0,
-			clamp(base_offset_return_speed * delta, 0.0, 1.0)
-		)
-	current_anchor_follow_strength = anchor_follow_strength if has_aim_input else loose_anchor_follow_strength
-	current_angle_strength = angle_strength if has_aim_input else loose_angle_strength
-	current_parent_alignment_strength = parent_alignment_strength if has_aim_input else loose_parent_alignment_strength
+	var target_power := 1.0 if has_aim_input else 0.0
+	var power_speed := power_build_speed if has_aim_input else power_falloff_speed
+	current_power = lerp(current_power, target_power, clamp(power_speed * delta, 0.0, 1.0))
+
+	current_base_offset = lerp(0.0, base_offset, current_power)
+	current_anchor_follow_strength = lerp(loose_anchor_follow_strength, anchor_follow_strength, current_power)
+	current_angle_strength = lerp(loose_angle_strength, angle_strength, current_power)
+	current_parent_alignment_strength = lerp(loose_parent_alignment_strength, parent_alignment_strength, current_power)
 
 	var anchor_position = owner_actor.global_position + (desired_direction * current_base_offset)
 	var anchor_delta = anchor_position - points[0]
@@ -194,6 +193,10 @@ func _sync_segments() -> void:
 		segment.global_position = points[index]
 		segment.rotation = point_angles[index] - (PI * 0.5)
 		segment.scale = Vector2.ONE * segment_scale
+		if segment is CanvasItem:
+			var power_color = point_color.lerp(Color.WHITE, current_power)
+			power_color.a = point_color.a
+			(segment as CanvasItem).modulate = power_color
 
 
 func _configure_segment_hitbox(segment: Node2D, index: int) -> void:
