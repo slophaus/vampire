@@ -39,6 +39,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func on_play_pressed():
+	GameEvents.reset_persisted_state()
 	ScreenTransition.transition()
 	await ScreenTransition.transitioned_halfway
 	get_tree().change_scene_to_file("res://scenes/main/game_session.tscn")

@@ -92,6 +92,7 @@ func on_options_closed(options_instance: OptionsMenu):
 func on_quit_pressed():
 	ScreenTransition.transition()
 	await ScreenTransition.transitioned_halfway
+	GameEvents.reset_persisted_state()
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
