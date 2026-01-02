@@ -1,20 +1,8 @@
-[gd_scene load_steps=20 format=3 uid="uid://mapie6ivpd7j"]
+[gd_scene load_steps=7 format=3 uid="uid://ct3bt3o3o1yqf"]
 
-[ext_resource type="PackedScene" uid="uid://5jwlcn6cm23o" path="res://scenes/game_object/game_camera/game_camera.tscn" id="1_4i4ay"]
-[ext_resource type="PackedScene" uid="uid://bpgwbwa1p3m6i" path="res://scenes/game_object/player/player.tscn" id="1_55gsj"]
-[ext_resource type="PackedScene" uid="uid://eadorq7tpodo" path="res://scenes/manager/enemy_manager.tscn" id="1_ae56y"]
+[ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_0tq7x"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="1_hxoa7"]
-[ext_resource type="PackedScene" uid="uid://b7qp4yxql7fd3" path="res://scenes/manager/arena_time_manager.tscn" id="1_ojovw"]
-[ext_resource type="PackedScene" uid="uid://i3j5tfdya4cy" path="res://scenes/ui/arena_time_ui.tscn" id="1_sfy4a"]
-[ext_resource type="Script" uid="uid://dv0vtlfy6j56i" path="res://scenes/main/main.gd" id="1_v8wic"]
-[ext_resource type="PackedScene" uid="uid://bnu7ngqdh3vvq" path="res://scenes/ui/experience_bar.tscn" id="2_7max8"]
-[ext_resource type="PackedScene" uid="uid://vqjgdqb3t2ju" path="res://scenes/ui/end_screen.tscn" id="2_8tx6c"]
-[ext_resource type="PackedScene" uid="uid://c5kgkd7ly41sq" path="res://scenes/manager/experience_manager.tscn" id="4_ak51j"]
-[ext_resource type="PackedScene" uid="uid://c5b76ailnfref" path="res://scenes/manager/upgrade_manager.tscn" id="6_08ukk"]
 [ext_resource type="Texture2D" uid="uid://dej1p0au5qgos" path="res://sprites/blob_dirt_border_6.png" id="11_nvumn"]
-[ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="13_th5th"]
-[ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="14_7smn1"]
-[ext_resource type="PackedScene" uid="uid://c8j2qneyiwkhy" path="res://scenes/game_object/experience_vial/experience_vial.tscn" id="14_raeie"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="15_raeie"]
 [ext_resource type="PackedScene" uid="uid://b6f3xj5k6h6vl" path="res://scenes/game_object/well/well.tscn" id="16_hxu8e"]
 
@@ -360,32 +348,12 @@ terrain_set_0/terrain_0/name = "Terrain 0"
 terrain_set_0/terrain_0/color = Color(0.5, 0.34375, 0.25, 1)
 sources/0 = SubResource("TileSetAtlasSource_nvumn")
 
-[node name="Main" type="Node"]
-script = ExtResource("1_v8wic")
-end_screen_scene = ExtResource("2_8tx6c")
-
-[node name="ArenaTimeUI" parent="." node_paths=PackedStringArray("arena_time_manager", "enemy_manager") instance=ExtResource("1_sfy4a")]
-arena_time_manager = NodePath("../ArenaTimeManager")
-enemy_manager = NodePath("../EnemyManager")
-
-[node name="ExperienceBar" parent="." node_paths=PackedStringArray("experience_manager") instance=ExtResource("2_7max8")]
-experience_manager = NodePath("../ExperienceManager")
-
-[node name="ArenaTimeManager" parent="." instance=ExtResource("1_ojovw")]
-
-[node name="EnemyManager" parent="." node_paths=PackedStringArray("arena_time_manager", "arena_tilemap") instance=ExtResource("1_ae56y")]
-arena_time_manager = NodePath("../ArenaTimeManager")
-arena_tilemap = NodePath("../LayerTilemaps/TileMap")
-
-[node name="ExperienceManager" parent="." instance=ExtResource("4_ak51j")]
-
-[node name="UpgradeManager" parent="." node_paths=PackedStringArray("experience_manager") instance=ExtResource("6_08ukk")]
-experience_manager = NodePath("../ExperienceManager")
-
-[node name="GameCamera" parent="." instance=ExtResource("1_4i4ay")]
-position = Vector2(2, 1)
+[node name="MainLevel" type="Node"]
+script = ExtResource("1_0tq7x")
+level_id = &"main"
 
 [node name="LayerTilemaps" type="Node2D" parent="."]
+z_index = 0
 
 [node name="TileMap" type="TileMap" parent="LayerTilemaps" groups=["arena_tilemap"]]
 tile_set = ExtResource("1_hxoa7")
@@ -397,6 +365,9 @@ tile_set = SubResource("TileSet_ou6is")
 
 [node name="LayerProps" type="Node2D" parent="."]
 z_index = 1
+
+[node name="PlayerSpawn" type="Node2D" parent="."]
+position = Vector2(381, 374)
 
 [node name="Door" parent="LayerProps" instance=ExtResource("15_raeie")]
 position = Vector2(375, -334)
@@ -412,23 +383,12 @@ z_index = 2
 [node name="LayerVials" type="Node2D" parent="." groups=["vials_layer"]]
 z_index = 3
 
-[node name="ExperienceVial" parent="LayerVials" instance=ExtResource("14_raeie")]
-position = Vector2(428, 411)
-
 [node name="LayerEntities" type="Node2D" parent="." groups=["entities_layer"]]
 z_index = 5
 y_sort_enabled = true
 
-[node name="Player" parent="LayerEntities" instance=ExtResource("1_55gsj")]
-unique_name_in_owner = true
-position = Vector2(381, 374)
-
-[node name="Enemy" parent="LayerEntities" instance=ExtResource("13_th5th")]
-position = Vector2(528, 259)
-enemy_index = 2
-
-[node name="WormEnemy" parent="LayerEntities" instance=ExtResource("14_7smn1")]
-position = Vector2(716, 350)
-
-[node name="LayerEffects" type="Node2D" parent="." groups=["effects_layer", "foreground_layer"]]
+[node name="LayerEffects" type="Node2D" parent="." groups=["foreground_layer", "effects_layer"]]
 z_index = 6
+
+[node name="ExperienceVial" parent="LayerVials" instance=ExtResource("14_raeie")]
+position = Vector2(428, 411)
