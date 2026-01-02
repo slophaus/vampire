@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://duh2b1yq4d5bq"]
+
+[ext_resource type="Script" path="res://scenes/ability/whip_ability_controller/whip_ability_controller.gd" id="1_7vj8w"]
+[ext_resource type="PackedScene" path="res://scenes/ability/whip_ability/whip_ability.tscn" id="2_wpo1a"]
+
+[node name="WhipAbilityController" type="Node"]
+script = ExtResource("1_7vj8w")
+whip_scene = ExtResource("2_wpo1a")
