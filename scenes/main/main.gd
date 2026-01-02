@@ -13,6 +13,17 @@ const FLOOR_TILE_TYPE := "dirt"
 
 @onready var arena_tilemap: TileMap = $BG/TileMap
 @onready var dirt_border: TileMapLayer = $BG/dirt_border
+var cached_floor_cells := {}
+const NEIGHBOR_OFFSETS := [
+	Vector2i(-1, -1),
+	Vector2i(0, -1),
+	Vector2i(1, -1),
+	Vector2i(-1, 0),
+	Vector2i(1, 0),
+	Vector2i(-1, 1),
+	Vector2i(0, 1),
+	Vector2i(1, 1),
+]
 
 
 func _ready():
@@ -103,15 +114,56 @@ func trigger_defeat():
 func _sync_dirt_border() -> void:
 	if arena_tilemap == null or dirt_border == null:
 		return
-	var floor_cells: Array[Vector2i] = []
+	var floor_cells_set := {}
 	for cell in arena_tilemap.get_used_cells(0):
 		var tile_data = arena_tilemap.get_cell_tile_data(0, cell)
 		if tile_data == null:
 			continue
 		var tile_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
 		if tile_type == FLOOR_TILE_TYPE:
-			floor_cells.append(cell)
-	dirt_border.clear()
-	if floor_cells.is_empty():
+			floor_cells_set[cell] = true
+
+	if cached_floor_cells.is_empty():
+		dirt_border.clear()
+		if floor_cells_set.is_empty():
+			cached_floor_cells = floor_cells_set
+			return
+		dirt_border.set_cells_terrain_connect(floor_cells_set.keys(), 0, 0)
+		cached_floor_cells = floor_cells_set
 		return
-	dirt_border.set_cells_terrain_connect(floor_cells, 0, 0)
+
+	var added_cells: Array[Vector2i] = []
+	for cell in floor_cells_set.keys():
+		if not cached_floor_cells.has(cell):
+			added_cells.append(cell)
+
+	var removed_cells: Array[Vector2i] = []
+	for cell in cached_floor_cells.keys():
+		if not floor_cells_set.has(cell):
+			removed_cells.append(cell)
+
+	if added_cells.is_empty() and removed_cells.is_empty():
+		return
+
+	for cell in removed_cells:
+		dirt_border.erase_cell(cell)
+
+	var affected_cells := {}
+	for cell in added_cells:
+		affected_cells[cell] = true
+		for offset in NEIGHBOR_OFFSETS:
+			affected_cells[cell + offset] = true
+	for cell in removed_cells:
+		affected_cells[cell] = true
+		for offset in NEIGHBOR_OFFSETS:
+			affected_cells[cell + offset] = true
+
+	var affected_floor_cells: Array[Vector2i] = []
+	for cell in affected_cells.keys():
+		if floor_cells_set.has(cell):
+			affected_floor_cells.append(cell)
+
+	if not affected_floor_cells.is_empty():
+		dirt_border.set_cells_terrain_connect(affected_floor_cells, 0, 0)
+
+	cached_floor_cells = floor_cells_set
