@@ -18,7 +18,7 @@ func _ready() -> void:
 	tile_eater = TileEater.new(self)
 	tile_eater.cache_walkable_tile()
 	tile_eater.tile_converted.connect(_on_tile_converted)
-	$Timer.wait_time = max(dig_cooldown, 0.0)
+	_refresh_timer_wait_time()
 	$Timer.timeout.connect(_on_timer_timeout)
 	$Timer.start()
 	GameEvents.ability_upgrade_added.connect(_on_ability_upgrade_added)
@@ -84,6 +84,20 @@ func _on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictio
 		return
 	if upgrade.id == "dig_level":
 		dig_level = 1 + current_upgrades["dig_level"]["quantity"]
+		_refresh_timer_wait_time()
+
+
+func _refresh_timer_wait_time() -> void:
+	if $Timer == null:
+		return
+	$Timer.wait_time = max(_get_dig_cooldown(), 0.0)
+
+
+func _get_dig_cooldown() -> float:
+	var cooldown := dig_cooldown
+	if dig_level > 1:
+		cooldown *= pow(0.8, dig_level - 1)
+	return max(cooldown, 0.1)
 
 
 func _get_diggable_tile_types() -> Array[String]:
@@ -105,3 +119,4 @@ func set_active(active: bool) -> void:
 
 func set_dig_level(new_level: int) -> void:
 	dig_level = max(new_level, 1)
+	_refresh_timer_wait_time()
