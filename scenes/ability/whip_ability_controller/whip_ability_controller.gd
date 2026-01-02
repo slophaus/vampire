@@ -7,6 +7,7 @@ extends Node2D
 @export var base_offset := 20.0
 @export var power_build_speed := 8.0
 @export var power_falloff_speed := 6.0
+@export var power_steady_falloff_speed := 4.0
 @export var anchor_follow_strength := 0.3
 @export var loose_anchor_follow_strength := 0.02
 @export var angle_strength := 0.05
@@ -31,8 +32,10 @@ var current_anchor_follow_strength := 0.0
 var current_angle_strength := 0.0
 var current_parent_alignment_strength := 0.0
 var current_power := 0.0
+var last_aim_direction := Vector2.ZERO
 const AIM_INFLUENCE := 1.0
 const MOVEMENT_INFLUENCE := 0.0
+const STEADY_AIM_ANGLE_THRESHOLD := 0.02
 
 
 func _ready() -> void:
@@ -57,6 +60,12 @@ func _physics_process(delta: float) -> void:
 
 	var aim_direction = get_aim_direction(owner_actor)
 	var has_aim_input = aim_direction.length_squared() > 0.0001
+	var steady_aim = false
+	if has_aim_input:
+		if last_aim_direction.length_squared() > 0.0001:
+			var angle_delta = abs(aim_direction.angle_to(last_aim_direction))
+			steady_aim = angle_delta <= STEADY_AIM_ANGLE_THRESHOLD
+		last_aim_direction = aim_direction
 	var movement_direction = _get_movement_direction(owner_actor)
 	var desired_direction = (aim_direction * AIM_INFLUENCE) + (movement_direction * MOVEMENT_INFLUENCE)
 	if desired_direction.length_squared() <= 0.0001:
@@ -66,8 +75,14 @@ func _physics_process(delta: float) -> void:
 		last_direction = desired_direction
 	base_alignment_direction = desired_direction
 
-	var target_power := 1.0 if has_aim_input else 0.0
-	var power_speed := power_build_speed if has_aim_input else power_falloff_speed
+	var target_power := 0.0
+	var power_speed := power_falloff_speed
+	if has_aim_input and not steady_aim:
+		target_power = 1.0
+		power_speed = power_build_speed
+	elif has_aim_input and steady_aim:
+		target_power = 0.0
+		power_speed = power_steady_falloff_speed
 	current_power = lerp(current_power, target_power, clamp(power_speed * delta, 0.0, 1.0))
 
 	current_base_offset = lerp(0.0, base_offset, current_power)
