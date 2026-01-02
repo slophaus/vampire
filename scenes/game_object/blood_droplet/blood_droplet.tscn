@@ -1,7 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://t9fswlt1fotff"]
+[gd_scene load_steps=2 format=3 uid="uid://xegyb8rlogml"]
 
-[ext_resource type="Script" uid="uid://n0lnezohqnvzg" path="res://scenes/game_object/blood_droplet/blood_droplet.gd" id="1_vdn0x"]
+[ext_resource type="Script" uid="uid://cfd1mtwp12ap5" path="res://scenes/game_object/blood_droplet/blood_droplet.gd" id="1_vdn0x"]
 
 [node name="BloodDroplet" type="Node2D"]
-z_index = 0
 script = ExtResource("1_vdn0x")
+radius = 1.5
+dry_up_seconds = 5.0
