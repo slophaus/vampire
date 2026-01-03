@@ -4,7 +4,7 @@ const TILE_SIZE := 16.0
 const MOVE_INTERVAL := 0.8
 const TURN_CHANCE := 0.3
 const SEGMENT_EXPLOSION_DELAY := 0.08
-const WORM_EATABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt", "wall"]
+const WORM_EATABLE_TILE_TYPES: Array[String] = ["dirt", "wall"]
 const EXPLOSION_STREAMS: Array[AudioStream] = [
 	preload("res://assets/audio/impactMining_000.ogg"),
 	preload("res://assets/audio/impactMining_001.ogg"),
@@ -65,6 +65,7 @@ func _finish_spawn() -> void:
 	initialize_segments()
 	tile_eater = TileEater.new(self)
 	tile_eater.cache_walkable_tile()
+	_update_occupied_tiles()
 	apply_segment_tints()
 	apply_hit_flash()
 	visible = true
@@ -269,6 +270,13 @@ func update_segments() -> void:
 		segment_shapes[index].position = local_position
 		if index == 0 and not hurtbox_shapes.is_empty():
 			hurtbox_shapes[0].position = local_position
+	_update_occupied_tiles()
+
+
+func _update_occupied_tiles() -> void:
+	if tile_eater == null:
+		return
+	tile_eater.update_occupied_tiles(segment_positions)
 
 
 func apply_hit_flash() -> void:
@@ -436,6 +444,8 @@ func _on_died() -> void:
 		return
 	is_dying = true
 	set_physics_process(false)
+	if tile_eater != null:
+		tile_eater.clear_occupied_tiles()
 	_start_segment_explosions()
 
 

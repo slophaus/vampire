@@ -1,6 +1,6 @@
 extends Node2D
 
-const DIGGABLE_TILE_TYPES: Array[String] = ["dirt", "filled_dirt"]
+const DIGGABLE_TILE_TYPES: Array[String] = ["dirt"]
 const WALL_DIGGABLE_TILE_TYPES: Array[String] = ["wall"]
 
 @export var dig_radius := 7.0
