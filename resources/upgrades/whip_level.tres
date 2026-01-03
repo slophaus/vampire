@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AbilityUpgrade" load_steps=2 format=3 uid="uid://dvrqj7t4v8y1c"]
+
+[ext_resource type="Script" uid="uid://bo62cjqkynv4i" path="res://resources/upgrades/ability_upgrade.gd" id="1_6fl7d"]
+
+[resource]
+script = ExtResource("1_6fl7d")
+id = "whip_level"
+max_quantity = 2
+name = "Whip Level"
+description = "Longer whip."
