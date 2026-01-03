@@ -55,6 +55,7 @@ func _ready():
 	apply_enemy_type(enemy_index)
 	assign_mouse_dig_level()
 	apply_enemy_tint_for_type()
+	enable_navigation_debug()
 
 
 func _physics_process(delta):
@@ -86,6 +87,13 @@ func accelerate_to_player_with_pathfinding() -> void:
 	if direction.length_squared() <= 0.001:
 		return
 	velocity_component.accelerate_in_direction(direction.normalized())
+
+
+func enable_navigation_debug() -> void:
+	if not OS.is_debug_build():
+		return
+	navigation_agent.debug_enabled = true
+	navigation_agent.debug_path_color = Color(0.991942, 0, 0.258832, 0.8)
 
 
 func apply_enemy_separation() -> void:
