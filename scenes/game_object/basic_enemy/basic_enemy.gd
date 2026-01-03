@@ -59,10 +59,6 @@ var enemy_tint := Color.WHITE
 var contact_damage := 1.0
 var is_elite := false
 var size_multiplier := 1.0
-var arena_tilemap: TileMap = null
-var path_grid: AStarGrid2D = null
-var path_grid_walkable: Dictionary = {}
-var worm_blocked_cells: Dictionary = {}
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
 	assign_elite_status()
@@ -70,9 +66,6 @@ func _ready():
 	apply_elite_stats()
 	apply_random_tint()
 	visuals.scale = Vector2(facing_multiplier * size_multiplier, size_multiplier)
-	arena_tilemap = get_tree().get_first_node_in_group("arena_tilemap") as TileMap
-	if arena_tilemap != null:
-		_build_path_grid(arena_tilemap)
 
 
 func _physics_process(delta):
@@ -96,7 +89,8 @@ func accelerate_to_player_with_pathfinding() -> void:
 	if target_player == null:
 		return
 
-	var next_path_position = _get_next_path_position(target_player.global_position)
+	navigation_agent.target_position = target_player.global_position
+	var next_path_position = navigation_agent.get_next_path_position()
 	var direction = next_path_position - global_position
 	if direction.length_squared() <= 0.001:
 		direction = target_player.global_position - global_position
@@ -124,68 +118,6 @@ func apply_enemy_separation() -> void:
 
 	if separation_force != Vector2.ZERO:
 		velocity_component.velocity += separation_force.normalized() * SEPARATION_PUSH_STRENGTH
-
-
-func _get_next_path_position(target_position: Vector2) -> Vector2:
-	if path_grid == null or arena_tilemap == null:
-		navigation_agent.target_position = target_position
-		return navigation_agent.get_next_path_position()
-
-	var start_cell = arena_tilemap.local_to_map(arena_tilemap.to_local(global_position))
-	var target_cell = arena_tilemap.local_to_map(arena_tilemap.to_local(target_position))
-	if not path_grid.is_in_boundsv(start_cell) or not path_grid.is_in_boundsv(target_cell):
-		navigation_agent.target_position = target_position
-		return navigation_agent.get_next_path_position()
-
-	_update_worm_obstacles()
-	var path: Array[Vector2i] = path_grid.get_id_path(start_cell, target_cell)
-	if path.is_empty():
-		navigation_agent.target_position = target_position
-		return navigation_agent.get_next_path_position()
-
-	var next_cell = path[min(1, path.size() - 1)]
-	return arena_tilemap.to_global(arena_tilemap.map_to_local(next_cell))
-
-
-func _build_path_grid(tilemap: TileMap) -> void:
-	path_grid = AStarGrid2D.new()
-	path_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
-	path_grid.region = tilemap.get_used_rect()
-	path_grid.cell_size = tilemap.tile_set.tile_size
-	path_grid.update()
-
-	path_grid_walkable.clear()
-	var region = path_grid.region
-	for x in range(region.position.x, region.position.x + region.size.x):
-		for y in range(region.position.y, region.position.y + region.size.y):
-			path_grid.set_point_solid(Vector2i(x, y), true)
-
-	for cell in tilemap.get_used_cells(0):
-		var tile_data = tilemap.get_cell_tile_data(0, cell)
-		if tile_data == null:
-			continue
-		if tile_data.get_collision_polygons_count(0) > 0:
-			continue
-		path_grid.set_point_solid(cell, false)
-		path_grid_walkable[cell] = true
-
-
-func _update_worm_obstacles() -> void:
-	for cell in worm_blocked_cells.keys():
-		if path_grid_walkable.has(cell):
-			path_grid.set_point_solid(cell, false)
-	worm_blocked_cells.clear()
-
-	for worm in get_tree().get_nodes_in_group("worm"):
-		if not worm.has_method("get_occupied_positions"):
-			continue
-		for position in worm.get_occupied_positions():
-			var local_position = arena_tilemap.to_local(position)
-			var cell = arena_tilemap.local_to_map(local_position)
-			if not path_grid_walkable.has(cell):
-				continue
-			path_grid.set_point_solid(cell, true)
-			worm_blocked_cells[cell] = true
 
 
 func apply_enemy_type(index: int) -> void:
