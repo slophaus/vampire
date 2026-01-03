@@ -5,6 +5,7 @@ extends Node2D
 @export var constraint_iterations := 6
 @export var damping := 0.2
 @export var base_offset := 20.0
+@export var power_build_speed := 40.0
 @export var power_released_falloff_speed := 6.0
 @export var power_steady_falloff_speed := 1.0
 @export var power_direction_change_strength := 15.0
@@ -80,15 +81,17 @@ func _physics_process(delta: float) -> void:
 	base_alignment_direction = desired_direction
 
 	var target_power := 0.0
+	var power_speed := power_released_falloff_speed
 	if has_aim_input and not is_owner_regenerating:
 		var direction_change = clamp(angle_delta / PI, 0.0, 1.0)
 		var direction_change_speed = angle_delta / max(delta, 0.0001)
 		var quick_turn_factor = clamp(direction_change_speed / max(power_direction_change_speed, 0.0001), 0.0, 1.0)
 		var curved_strength = pow(aim_strength, AIM_POWER_CURVE)
 		target_power = clamp(direction_change * quick_turn_factor * curved_strength * power_direction_change_strength, 0.0, 1.0)
+		power_speed = power_build_speed if target_power > current_power else power_steady_falloff_speed
 	if is_owner_regenerating:
 		target_power = 0.0
-	current_power = target_power
+	current_power = lerp(current_power, target_power, clamp(power_speed * delta, 0.0, 1.0))
 
 	current_base_offset = lerp(0.0, base_offset, current_power)
 	current_anchor_follow_strength = lerp(loose_anchor_follow_strength, anchor_follow_strength, current_power)
@@ -285,3 +288,4 @@ func get_aim_vector(player: Node2D) -> Vector2:
 	var x_aim = Input.get_action_strength("aim_right" + suffix) - Input.get_action_strength("aim_left" + suffix)
 	var y_aim = Input.get_action_strength("aim_down" + suffix) - Input.get_action_strength("aim_up" + suffix)
 	return Vector2(x_aim, y_aim)
+
