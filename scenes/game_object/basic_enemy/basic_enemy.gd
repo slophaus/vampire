@@ -81,7 +81,7 @@ func accelerate_to_player_with_pathfinding() -> void:
 	navigation_agent.target_position = target_player.global_position
 	var next_path_position = navigation_agent.get_next_path_position()
 	var direction = next_path_position - global_position
-	if direction.length_squared() <= 0.001:
+	if not navigation_agent.is_target_reachable() or direction.length_squared() <= 0.001:
 		direction = target_player.global_position - global_position
 	if direction.length_squared() <= 0.001:
 		return
