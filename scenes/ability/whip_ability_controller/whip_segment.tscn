@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://i9d2zi04d3ko7"]
+[gd_scene load_steps=3 format=3 uid="uid://bjkcte6l8os6o"]
 
 [ext_resource type="PackedScene" uid="uid://b07jrrt845lfp" path="res://scenes/component/hitbox_component.tscn" id="1_hitbox"]
 
@@ -9,7 +9,6 @@ radius = 4.0
 
 [node name="Oval" type="Polygon2D" parent="."]
 polygon = PackedVector2Array(0, -5, 3, -5, 4, -3, 4, 3, 3, 5, 0, 5, -3, 5, -4, 3, -4, -3, -3, -5)
-color = Color(1, 1, 1, 1)
 
 [node name="HitboxComponent" parent="." instance=ExtResource("1_hitbox")]
 
