@@ -63,10 +63,6 @@ offset_top = -8.0
 offset_right = 8.0
 offset_bottom = 8.0
 
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Visuals/Segments/HeadPrototype"]
-position = Vector2(-8, -8)
-vertices = PackedVector2Array(8, -8, 8, 8, -8, 8, -8, -8)
-
 [node name="BodyPrototype" type="Sprite2D" parent="Visuals/Segments"]
 clip_children = 2
 texture = ExtResource("6_dcn7l")
@@ -79,9 +75,6 @@ offset_top = -8.0
 offset_right = 8.0
 offset_bottom = 8.0
 
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Visuals/Segments/BodyPrototype"]
-vertices = PackedVector2Array(8, -8, 8, 8, -8, 8, -8, -8)
-
 [node name="TurnPrototype" type="Sprite2D" parent="Visuals/Segments"]
 visible = false
 clip_children = 2
@@ -93,6 +86,3 @@ offset_left = -8.0
 offset_top = -8.0
 offset_right = 8.0
 offset_bottom = 8.0
-
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Visuals/Segments/TurnPrototype"]
-vertices = PackedVector2Array(8, -8, 8, 8, -8, 8, -8, -8)

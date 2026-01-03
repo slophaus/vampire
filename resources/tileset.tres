@@ -123,8 +123,6 @@ texture = ExtResource("1_xxu0d")
 2:1/0 = 0
 2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 2:1/0/custom_data_0 = "wall"
-3:6/0 = 0
-3:6/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 2:0/0 = 0
 2:0/0/terrain_set = 0
 2:0/0/terrain = 0
@@ -168,6 +166,8 @@ texture = ExtResource("1_xxu0d")
 0:2/0 = 0
 0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 0:2/0/custom_data_0 = "dirt"
+1:5/0 = 0
+1:5/0/custom_data_0 = "occupied"
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_did67"]
 vertices = PackedVector2Array(8, 8, -8, 8, -8, -8, 8, -8)
