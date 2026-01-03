@@ -28,6 +28,7 @@ var base_alignment_direction := Vector2.RIGHT
 var tip_hitbox: HitboxComponent
 var current_base_offset := 0.0
 var current_anchor_follow_strength := 0.0
+var current_base_alignment_strength := 0.0
 var current_parent_alignment_strength := 0.0
 var current_power := 0.0
 var last_aim_direction := Vector2.ZERO
@@ -94,6 +95,7 @@ func _physics_process(delta: float) -> void:
 
 	current_base_offset = lerp(0.0, base_offset, current_power)
 	current_anchor_follow_strength = lerp(loose_anchor_follow_strength, anchor_follow_strength, current_power)
+	current_base_alignment_strength = lerp(0.0, parent_alignment_strength, current_power)
 	current_parent_alignment_strength = lerp(loose_parent_alignment_strength, parent_alignment_strength, current_power)
 
 	var anchor_position = owner_actor.global_position + (desired_direction * current_base_offset)
@@ -137,10 +139,10 @@ func _apply_distance_constraints() -> void:
 func _apply_angle_constraints() -> void:
 	if segment_count < 2:
 		return
-	if current_parent_alignment_strength <= 0.0:
+	if current_parent_alignment_strength <= 0.0 and current_base_alignment_strength <= 0.0:
 		return
 	var desired_base = points[0] + (base_alignment_direction * segment_length)
-	points[1] = points[1].lerp(desired_base, current_parent_alignment_strength)
+	points[1] = points[1].lerp(desired_base, current_base_alignment_strength)
 	if segment_count < 3:
 		return
 	for index in range(1, segment_count - 1):
