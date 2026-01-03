@@ -48,7 +48,7 @@ runaway counts.
   the spawn rate is linearly interpolated; outside the range it clamps to the nearest keyframe.
   The default keyframes set difficulty 1 to 1 spawn/sec and difficulty 16 to 2 spawns/sec.
 * `EnemyManager` builds a weighted table of enemy types: it starts with Mouse entries (weight 15),
-  adds Worms at difficulty 2 (weight 1), Wizards at difficulty 8 (weight 5), and Rats at
+  adds Worms at difficulty 2 (weight 1), Dragons at difficulty 8 (weight 5), and Rats at
   difficulty 12 (weight 4).
 * For each spawn, it looks for walkable tilemap cells (no collision polygons) that are outside the
   camera view rectangle (`OFFSCREEN_MARGIN` pixels beyond the view), but still within
@@ -61,7 +61,7 @@ runaway counts.
 | Enemy | Spawn behavior | Stats | Notes |
 | --- | --- | --- | --- |
 | Mouse | Always in pool | 10 HP, 30 max speed, 5.0 acceleration, 1 contact damage | Small melee chaser. |
-| Wizard | Added at arena difficulty 8 | 10 HP, 45 max speed, 2.0 acceleration, 1 contact damage | Ranged caster that fires fireballs. |
+| Dragon | Added at arena difficulty 8 | 10 HP, 45 max speed, 2.0 acceleration, 1 contact damage | Ranged caster that fires fireballs. |
 | Rat | Added at arena difficulty 12 | 37.5 HP, 105 max speed, 1.5 acceleration, 2 contact damage | Fast bruiser with higher contact damage. |
 
 ### Worm enemy

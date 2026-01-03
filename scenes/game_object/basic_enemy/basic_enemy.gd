@@ -27,6 +27,7 @@ const ENEMY_TYPES = {
 const SEPARATION_RADIUS := 15.0
 const SEPARATION_PUSH_STRENGTH := 5.0
 const MOUSE_DIG_LEVEL_TWO_TINT := Color(0.25, 0.25, 1)
+const DRAGON_ENEMY_INDEX := 1
 const RAT_ENEMY_INDEX := 2
 @export var enemy_index := 0
 
@@ -58,7 +59,7 @@ func _ready():
 
 
 func _physics_process(delta):
-	if enemy_index == RAT_ENEMY_INDEX:
+	if enemy_index == RAT_ENEMY_INDEX or enemy_index == DRAGON_ENEMY_INDEX:
 		accelerate_to_player_with_pathfinding()
 	else:
 		velocity_component.accelerate_to_player()
