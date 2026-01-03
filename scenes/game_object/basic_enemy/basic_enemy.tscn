@@ -198,6 +198,8 @@ health_component = NodePath("../HealthComponent")
 
 [node name="VelocityComponent" parent="." instance=ExtResource("4_7n42o")]
 
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+
 [node name="HitFlashComponent" parent="." node_paths=PackedStringArray("health_component", "sprite") instance=ExtResource("7_4kqgf")]
 health_component = NodePath("../HealthComponent")
 sprite = NodePath("../Visuals/mouse_sprite")

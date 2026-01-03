@@ -27,10 +27,12 @@ const ENEMY_TYPES = {
 const SEPARATION_RADIUS := 15.0
 const SEPARATION_PUSH_STRENGTH := 5.0
 const MOUSE_DIG_LEVEL_TWO_TINT := Color(0.25, 0.25, 1)
+const RAT_ENEMY_INDEX := 2
 @export var enemy_index := 0
 
 @onready var visuals := $Visuals
 @onready var velocity_component: VelocityComponent = $VelocityComponent
+@onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
 @onready var health_component: HealthComponent = $HealthComponent
 @onready var hit_flash_component = $HitFlashComponent
 @onready var death_component = $DeathComponent
@@ -56,13 +58,34 @@ func _ready():
 
 
 func _physics_process(delta):
-	velocity_component.accelerate_to_player()
+	if enemy_index == RAT_ENEMY_INDEX:
+		accelerate_to_player_with_pathfinding()
+	else:
+		velocity_component.accelerate_to_player()
 	apply_enemy_separation()
 	velocity_component.move(self)
 
 	var move_sign = sign(velocity.x)
 	if move_sign != 0:
 		visuals.scale = Vector2(move_sign * facing_multiplier, 1)
+
+
+func accelerate_to_player_with_pathfinding() -> void:
+	var target_player := velocity_component.cached_player
+	if target_player == null:
+		velocity_component.refresh_target_player(global_position)
+		target_player = velocity_component.cached_player
+	if target_player == null:
+		return
+
+	navigation_agent.target_position = target_player.global_position
+	var next_path_position = navigation_agent.get_next_path_position()
+	var direction = next_path_position - global_position
+	if direction.length_squared() <= 0.001:
+		direction = target_player.global_position - global_position
+	if direction.length_squared() <= 0.001:
+		return
+	velocity_component.accelerate_in_direction(direction.normalized())
 
 
 func apply_enemy_separation() -> void:
@@ -93,6 +116,7 @@ func apply_enemy_type(index: int) -> void:
 	facing_multiplier = enemy_data["facing_multiplier"]
 	velocity_component.max_speed = enemy_data["max_speed"]
 	velocity_component.acceleration = enemy_data["acceleration"]
+	navigation_agent.max_speed = velocity_component.max_speed
 
 	health_component.max_health = enemy_data["max_health"]
 	health_component.current_health = enemy_data["max_health"]
