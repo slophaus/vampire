@@ -7,9 +7,9 @@ extends Node2D
 @export var base_offset := 20.0
 @export var power_build_speed := 40.0
 @export var power_released_falloff_speed := 6.0
-@export var power_steady_falloff_speed := 2.0
-@export var power_direction_change_strength := 1.0
-@export var power_direction_change_speed := 12.0
+@export var power_steady_falloff_speed := 1.0
+@export var power_direction_change_strength := 15.0
+@export var power_direction_change_speed := 2.0
 @export var anchor_follow_strength := 0.3
 @export var loose_anchor_follow_strength := 0.02
 @export var angle_strength := 0.05
@@ -35,8 +35,7 @@ var current_angle_strength := 0.0
 var current_parent_alignment_strength := 0.0
 var current_power := 0.0
 var last_aim_direction := Vector2.ZERO
-const AIM_INFLUENCE := 1.0
-const MOVEMENT_INFLUENCE := 0.0
+var is_owner_regenerating := false
 const AIM_MIN_DIRECTION_STRENGTH := 0.02
 const AIM_POWER_CURVE := 2.0
 
@@ -61,7 +60,8 @@ func _physics_process(delta: float) -> void:
 		_initialize_points()
 		_initialize_segments()
 
-	var aim_vector = get_aim_vector(owner_actor)
+	is_owner_regenerating = owner_actor.get("is_regenerating") == true
+	var aim_vector = Vector2.ZERO if is_owner_regenerating else get_aim_vector(owner_actor)
 	var aim_strength = clamp(aim_vector.length(), 0.0, 1.0)
 	var has_aim_input = aim_strength > AIM_MIN_DIRECTION_STRENGTH
 	var aim_direction = last_aim_direction
@@ -72,8 +72,7 @@ func _physics_process(delta: float) -> void:
 		angle_delta = abs(aim_direction.angle_to(last_aim_direction))
 	if has_aim_input:
 		last_aim_direction = aim_direction
-	var movement_direction = _get_movement_direction(owner_actor)
-	var desired_direction = (aim_direction * AIM_INFLUENCE) + (movement_direction * MOVEMENT_INFLUENCE)
+	var desired_direction = aim_direction
 	if desired_direction.length_squared() <= 0.0001:
 		desired_direction = last_direction
 	else:
@@ -83,13 +82,15 @@ func _physics_process(delta: float) -> void:
 
 	var target_power := 0.0
 	var power_speed := power_released_falloff_speed
-	if has_aim_input:
+	if has_aim_input and not is_owner_regenerating:
 		var direction_change = clamp(angle_delta / PI, 0.0, 1.0)
 		var direction_change_speed = angle_delta / max(delta, 0.0001)
 		var quick_turn_factor = clamp(direction_change_speed / max(power_direction_change_speed, 0.0001), 0.0, 1.0)
 		var curved_strength = pow(aim_strength, AIM_POWER_CURVE)
 		target_power = clamp(direction_change * quick_turn_factor * curved_strength * power_direction_change_strength, 0.0, 1.0)
 		power_speed = power_build_speed if target_power > current_power else power_steady_falloff_speed
+	if is_owner_regenerating:
+		target_power = 0.0
 	current_power = lerp(current_power, target_power, clamp(power_speed * delta, 0.0, 1.0))
 
 	current_base_offset = lerp(0.0, base_offset, current_power)
@@ -216,8 +217,12 @@ func _sync_segments() -> void:
 		segment.rotation = point_angles[index] - (PI * 0.5)
 		segment.scale = Vector2.ONE * segment_scale
 		if segment is CanvasItem:
-			var power_color = point_color.lerp(Color.WHITE, current_power)
-			power_color.a = point_color.a
+			var base_color = point_color
+			if is_owner_regenerating:
+				base_color = Color.BLACK
+				base_color.a = point_color.a
+			var power_color = base_color.lerp(Color.WHITE, current_power)
+			power_color.a = base_color.a
 			(segment as CanvasItem).modulate = power_color
 
 
@@ -284,13 +289,3 @@ func get_aim_vector(player: Node2D) -> Vector2:
 	var y_aim = Input.get_action_strength("aim_down" + suffix) - Input.get_action_strength("aim_up" + suffix)
 	return Vector2(x_aim, y_aim)
 
-
-func _get_movement_direction(player: Node2D) -> Vector2:
-	if player == null:
-		return Vector2.ZERO
-	if player is CharacterBody2D:
-		var velocity = (player as CharacterBody2D).velocity
-		if velocity.length() <= 0.1:
-			return Vector2.ZERO
-		return velocity.normalized()
-	return Vector2.ZERO
