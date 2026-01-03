@@ -26,7 +26,7 @@ func _ready():
 		on_arena_difficulty_increased(arena_time_manager.get_arena_difficulty())
 
 
-func get_spawn_position() -> Vector2:
+func get_spawn_position(player_position: Vector2) -> Vector2:
 	var view_rect = get_camera_view_rect()
 	if view_rect == Rect2():
 		return Vector2.ZERO
@@ -37,9 +37,27 @@ func get_spawn_position() -> Vector2:
 	var offscreen_cells = get_offscreen_walkable_cells(offscreen_rect, view_rect.get_center(), max_spawn_radius, blocked_cells)
 	if offscreen_cells.is_empty():
 		return Vector2.ZERO
-	var spawn_cell = offscreen_cells[randi_range(0, offscreen_cells.size() - 1)]
-	var local_position = arena_tilemap.map_to_local(spawn_cell)
-	return arena_tilemap.to_global(local_position)
+	offscreen_cells.shuffle()
+	for spawn_cell in offscreen_cells:
+		if not is_spawn_cell_navigable_to_player(spawn_cell, player_position):
+			continue
+		var local_position = arena_tilemap.map_to_local(spawn_cell)
+		return arena_tilemap.to_global(local_position)
+	return Vector2.ZERO
+
+
+func is_spawn_cell_navigable_to_player(spawn_cell: Vector2i, player_position: Vector2) -> bool:
+	if arena_tilemap == null:
+		return false
+	var navigation_map := arena_tilemap.get_navigation_map(0)
+	if not navigation_map.is_valid():
+		return true
+	var spawn_position = arena_tilemap.to_global(arena_tilemap.map_to_local(spawn_cell))
+	var path = NavigationServer2D.map_get_path(navigation_map, spawn_position, player_position, false)
+	if path.is_empty():
+		return false
+	var last_point = path[path.size() - 1]
+	return last_point.distance_to(player_position) <= 1.0
 
 
 func get_camera_view_rect() -> Rect2:
@@ -103,7 +121,10 @@ func on_timer_timeout():
 	
 	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
 	entities_layer.add_child(enemy)
-	enemy.global_position = get_spawn_position()
+	var spawn_position = get_spawn_position(player.global_position)
+	if spawn_position == Vector2.ZERO:
+		return
+	enemy.global_position = spawn_position
 
 
 func get_spawn_rate() -> float:
