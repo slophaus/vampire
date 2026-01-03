@@ -37,19 +37,12 @@ func cache_walkable_tile() -> void:
 func _cache_walkable_tile() -> void:
 	if arena_tilemap == null or owner == null:
 		return
-	var sample_position := owner.global_position
-	for player in owner.get_tree().get_nodes_in_group("player"):
-		var player_node := player as Node2D
-		if player_node != null:
-			sample_position = player_node.global_position
-			break
-	var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(sample_position))
-	var source_id = arena_tilemap.get_cell_source_id(0, cell)
-	if source_id == -1:
+	var tile_info = _find_tile_by_type(WALKABLE_TILE_TYPES[0])
+	if tile_info.is_empty():
 		return
-	walkable_tile_source_id = source_id
-	walkable_tile_atlas = arena_tilemap.get_cell_atlas_coords(0, cell)
-	walkable_tile_alternative = arena_tilemap.get_cell_alternative_tile(0, cell)
+	walkable_tile_source_id = tile_info.source_id
+	walkable_tile_atlas = tile_info.atlas_coords
+	walkable_tile_alternative = tile_info.alternative
 	_cache_occupied_tile()
 	_initialize_dirt_border()
 
@@ -124,8 +117,6 @@ func _try_convert_tile_cell(cell: Vector2i, allowed_types: Array[String]) -> voi
 		return
 	var tile_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
 	if tile_type == null or not allowed_types.has(tile_type):
-		return
-	if tile_data.get_collision_polygons_count(0) <= 0:
 		return
 	arena_tilemap.set_cell(0, cell, walkable_tile_source_id, walkable_tile_atlas, walkable_tile_alternative)
 	_update_dirt_border(cell)
