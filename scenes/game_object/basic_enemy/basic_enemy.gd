@@ -26,7 +26,14 @@ const ENEMY_TYPES = {
 
 const SEPARATION_RADIUS := 15.0
 const SEPARATION_PUSH_STRENGTH := 5.0
-const MOUSE_DIG_LEVEL_TWO_TINT := Color(0.25, 0.25, 1)
+const ELITE_CHANCE := 0.1
+const ELITE_SCALE := 1.25
+const ELITE_SPEED_MULTIPLIER := 1.25
+const ELITE_ACCELERATION_MULTIPLIER := 1.2
+const ELITE_HEALTH_MULTIPLIER := 1.5
+const ELITE_DAMAGE_MULTIPLIER := 1.5
+const ELITE_TINT_VALUE := 0.6
+const STANDARD_TINT_VALUE := 1.0
 const DRAGON_ENEMY_INDEX := 1
 const RAT_ENEMY_INDEX := 2
 @export var enemy_index := 0
@@ -50,12 +57,15 @@ const RAT_ENEMY_INDEX := 2
 var facing_multiplier := -1
 var enemy_tint := Color.WHITE
 var contact_damage := 1.0
-var mouse_has_dig_level_two := false
+var is_elite := false
+var size_multiplier := 1.0
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
+	assign_elite_status()
 	apply_enemy_type(enemy_index)
-	assign_mouse_dig_level()
-	apply_enemy_tint_for_type()
+	apply_elite_stats()
+	apply_random_tint()
+	visuals.scale = Vector2(facing_multiplier * size_multiplier, size_multiplier)
 
 
 func _physics_process(delta):
@@ -68,7 +78,7 @@ func _physics_process(delta):
 
 	var move_sign = sign(velocity.x)
 	if move_sign != 0:
-		visuals.scale = Vector2(move_sign * facing_multiplier, 1)
+		visuals.scale = Vector2(move_sign * facing_multiplier * size_multiplier, size_multiplier)
 
 
 func accelerate_to_player_with_pathfinding() -> void:
@@ -128,6 +138,7 @@ func apply_enemy_type(index: int) -> void:
 	rat_sprite.visible = enemy_index == 2
 	fireball_ability_controller.set_active(enemy_index == 1)
 	dig_ability_controller.set_active(enemy_index == 0)
+	apply_dig_level()
 
 	rat_sprite.texture = rat_texture
 
@@ -148,15 +159,9 @@ func on_hit():
 func apply_random_tint():
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	enemy_tint = Color.from_hsv(rng.randf(), .25, 1.0, 1.0)
+	var tint_value := ELITE_TINT_VALUE if is_elite else STANDARD_TINT_VALUE
+	enemy_tint = Color.from_hsv(rng.randf(), 0.25, tint_value, 1.0)
 	apply_enemy_tint()
-
-func apply_enemy_tint_for_type() -> void:
-	if enemy_index == 0 and mouse_has_dig_level_two:
-		enemy_tint = MOUSE_DIG_LEVEL_TWO_TINT
-		apply_enemy_tint()
-		return
-	apply_random_tint()
 
 
 func apply_enemy_tint() -> void:
@@ -167,12 +172,26 @@ func apply_enemy_tint() -> void:
 		tint_rect.visible = true
 
 
-func assign_mouse_dig_level() -> void:
-	if enemy_index != 0:
-		mouse_has_dig_level_two = false
-		dig_ability_controller.set_dig_level(1)
-		return
+func assign_elite_status() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	mouse_has_dig_level_two = rng.randf() < 0.1
-	dig_ability_controller.set_dig_level(2 if mouse_has_dig_level_two else 1)
+	is_elite = rng.randf() < ELITE_CHANCE
+	size_multiplier = ELITE_SCALE if is_elite else 1.0
+
+
+func apply_elite_stats() -> void:
+	if not is_elite:
+		return
+	velocity_component.max_speed *= ELITE_SPEED_MULTIPLIER
+	velocity_component.acceleration *= ELITE_ACCELERATION_MULTIPLIER
+	navigation_agent.max_speed = velocity_component.max_speed
+	health_component.max_health *= ELITE_HEALTH_MULTIPLIER
+	health_component.current_health = health_component.max_health
+	contact_damage *= ELITE_DAMAGE_MULTIPLIER
+
+
+func apply_dig_level() -> void:
+	if enemy_index == 0 and is_elite:
+		dig_ability_controller.set_dig_level(2)
+	else:
+		dig_ability_controller.set_dig_level(1)
