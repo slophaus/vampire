@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://ct3bt3o3o1yqf"]
+[gd_scene load_steps=11 format=3 uid="uid://ct3bt3o3o1yqf"]
 
 [ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_0tq7x"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="1_hxoa7"]
 [ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="7_sd876"]
+[ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="8_ms8vg"]
 [ext_resource type="Texture2D" uid="uid://dej1p0au5qgos" path="res://sprites/blob_dirt_border_6.png" id="11_nvumn"]
 [ext_resource type="PackedScene" uid="uid://c8j2qneyiwkhy" path="res://scenes/game_object/experience_vial/experience_vial.tscn" id="14_raeie"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="15_raeie"]
@@ -397,3 +398,6 @@ z_index = 6
 [node name="BasicEnemy" parent="." instance=ExtResource("7_sd876")]
 position = Vector2(528, 345)
 enemy_index = 2
+
+[node name="WormEnemy" parent="." instance=ExtResource("8_ms8vg")]
+position = Vector2(512, 527)

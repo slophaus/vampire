@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://baaesj1y55fv4" path="res://scenes/game_object/worm_enemy/worm_enemy.gd" id="1_0r4sg"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_8h4ly"]
-[ext_resource type="PackedScene" uid="uid://6kroo8paddhur" path="res://scenes/component/blood_drop_component.tscn" id="3_3j4l4"]
+[ext_resource type="PackedScene" uid="uid://nipysc8tqhsn" path="res://scenes/component/blood_drop_component.tscn" id="3_3j4l4"]
 [ext_resource type="PackedScene" uid="uid://gsyk0iqo1m50" path="res://scenes/component/hurtbox_component.tscn" id="3_yy0i2"]
 [ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="5_owowv"]
 [ext_resource type="Texture2D" uid="uid://crrxkfeyeohmh" path="res://sprites/metroid_can.png" id="6_dcn7l"]
@@ -74,6 +74,10 @@ offset_left = -8.0
 offset_top = -8.0
 offset_right = 8.0
 offset_bottom = 8.0
+
+[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="Visuals/Segments/BodyPrototype"]
+vertices = PackedVector2Array(8, -8, 8, 8, -8, 8, -8, -8)
+affect_navigation_mesh = true
 
 [node name="TurnPrototype" type="Sprite2D" parent="Visuals/Segments"]
 visible = false
