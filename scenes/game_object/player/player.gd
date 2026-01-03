@@ -426,7 +426,7 @@ func flash_visuals(color: Color, duration: float = DAMAGE_FLASH_DURATION) -> voi
 	if flash_material == null:
 		return
 	var start_color = color
-	start_color.a = 0.6
+	start_color.a = 0.85
 	flash_material.set_shader_parameter("flash_color", start_color)
 	var end_color = start_color
 	end_color.a = 0.0
