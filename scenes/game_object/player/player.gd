@@ -18,6 +18,7 @@ const NEAR_DEATH_RED = Color(1.0, 0.1, 0.1)
 @onready var player_sprite: AnimatedSprite2D = $Visuals/player_sprite
 @onready var player_color = $Visuals/player_sprite/player_color
 @onready var near_death_flash = $Visuals/player_sprite/NearDeathFlash
+@onready var flash_overlay = $Visuals/player_sprite/FlashOverlay
 @onready var velocity_component = $VelocityComponent
 @onready var aim_laser: Line2D = $AimLaser
 @onready var player_collision_shape: CollisionShape2D = $CollisionShape2D
@@ -58,6 +59,8 @@ func _ready():
 	player_color.visible = true
 	if near_death_flash != null:
 		near_death_flash.visible = false
+	if flash_overlay != null:
+		flash_overlay.visible = false
 	aim_laser.visible = false
 	_update_aim_laser_color()
 	visuals.modulate = Color.WHITE
@@ -107,6 +110,7 @@ func _process(delta):
 		visuals.scale = Vector2(move_sign, 1)
 	_update_aim_laser()
 	_update_near_death_flash(delta)
+	_update_flash_overlay()
 
 
 func _clamp_to_camera_bounds() -> void:
@@ -414,9 +418,20 @@ func set_upgrade_dot_count(count: int) -> void:
 
 func flash_visuals(color: Color, duration: float = DAMAGE_FLASH_DURATION) -> void:
 	stop_flash()
-	visuals.modulate = color
+	if flash_overlay == null:
+		return
+	_sync_flash_sprite(flash_overlay)
+	flash_overlay.visible = true
+	var flash_material := flash_overlay.material as ShaderMaterial
+	if flash_material == null:
+		return
+	var start_color = color
+	start_color.a = 0.6
+	flash_material.set_shader_parameter("flash_color", start_color)
+	var end_color = start_color
+	end_color.a = 0.0
 	flash_tween = create_tween()
-	flash_tween.tween_property(visuals, "modulate", normal_visuals_modulate, duration) \
+	flash_tween.tween_property(flash_overlay.material, "shader_parameter/flash_color", end_color, duration) \
 		.set_trans(Tween.TRANS_QUAD) \
 		.set_ease(Tween.EASE_OUT)
 
@@ -424,6 +439,29 @@ func flash_visuals(color: Color, duration: float = DAMAGE_FLASH_DURATION) -> voi
 func stop_flash() -> void:
 	if flash_tween != null and flash_tween.is_running():
 		flash_tween.kill()
+	if flash_overlay == null:
+		return
+	flash_overlay.visible = false
+	var flash_material := flash_overlay.material as ShaderMaterial
+	if flash_material != null:
+		flash_material.set_shader_parameter("flash_color", Color(1, 1, 1, 0))
+
+
+func _update_flash_overlay() -> void:
+	if flash_overlay == null or not flash_overlay.visible:
+		return
+	_sync_flash_sprite(flash_overlay)
+
+
+func _sync_flash_sprite(flash_sprite: AnimatedSprite2D) -> void:
+	if flash_sprite == null or player_sprite == null:
+		return
+	if flash_sprite.sprite_frames != player_sprite.sprite_frames:
+		flash_sprite.sprite_frames = player_sprite.sprite_frames
+	if flash_sprite.animation != player_sprite.animation:
+		flash_sprite.play(player_sprite.animation)
+	flash_sprite.frame = player_sprite.frame
+	flash_sprite.frame_progress = player_sprite.frame_progress
 
 
 func _update_near_death_flash(delta: float) -> void:
@@ -436,12 +474,7 @@ func _update_near_death_flash(delta: float) -> void:
 		stop_near_death_flash()
 		return
 	near_death_flash.visible = true
-	if near_death_flash.sprite_frames != player_sprite.sprite_frames:
-		near_death_flash.sprite_frames = player_sprite.sprite_frames
-	if near_death_flash.animation != player_sprite.animation:
-		near_death_flash.play(player_sprite.animation)
-	near_death_flash.frame = player_sprite.frame
-	near_death_flash.frame_progress = player_sprite.frame_progress
+	_sync_flash_sprite(near_death_flash)
 	near_death_time += delta * near_death_flash_speed
 	var pulse = (sin(near_death_time * TAU) + 1.0) * 0.5
 	var flash_color = NEAR_DEATH_RED.lerp(Color.WHITE, pulse)

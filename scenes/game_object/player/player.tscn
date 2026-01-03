@@ -74,6 +74,10 @@ blend_mode = 3
 shader = ExtResource("13_2bnhf")
 shader_parameter/flash_color = Color(1, 1, 1, 1)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5jk2f"]
+shader = ExtResource("13_2bnhf")
+shader_parameter/flash_color = Color(1, 1, 1, 0)
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_wmo3f"]
 radius = 7.0
 
@@ -162,6 +166,11 @@ offset_bottom = 25.1893
 [node name="NearDeathFlash" type="AnimatedSprite2D" parent="Visuals/player_sprite"]
 visible = false
 material = SubResource("ShaderMaterial_2bnhf")
+sprite_frames = SubResource("SpriteFrames_gme53")
+
+[node name="FlashOverlay" type="AnimatedSprite2D" parent="Visuals/player_sprite"]
+visible = false
+material = SubResource("ShaderMaterial_5jk2f")
 sprite_frames = SubResource("SpriteFrames_gme53")
 
 [node name="hurtbox" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_8chf6")]
