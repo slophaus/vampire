@@ -1,11 +1,5 @@
 # Vampire
 
-## Tilemap notes
-
-* Filled dirt tiles: atlas coordinates (0,0) through (0,2).
-* Wall tiles: atlas coordinates (1,0) through (3,2).
-* Walkable ground tiles: atlas coordinates (0,4), (1,4), and (6,3).
-
 ## Upgrades
 
 ### Ability unlocks and level upgrades
@@ -16,9 +10,13 @@
 | Axe Level (`axe_level`) | Level | Added after unlocking Axe | Adds +1 axe per attack per level. |
 | Boomerang (`boomerang`) | Unlock | Always in pool | Grants the Boomerang ability controller (throws a returning boomerang). |
 | Boomerang Level (`boomerang_level`) | Level | Added after unlocking Boomerang | +2 damage per level, +25 range per level, +3 penetration per level, +0.2 size scale per level. |
+| Dig (`dig`) | Unlock | Always in pool | Grants the Dig ability controller (burrow through dirt). |
+| Dig Level (`dig_level`) | Level | Added after unlocking Dig | Shortens dig cooldowns and allows digging walls at level 2. |
 | Fireball (`fireball`) | Unlock | Always in pool | Grants the Fireball ability controller (launches a fireball at a random enemy). |
 | Fireball Level (`fireball_level`) | Level | Added after unlocking Fireball | +3 damage per level, +3 splash radius per level, and +0.15 scale per level. |
 | Sword Level (`sword_level`) | Level | Always in pool | Adds +1 sword per attack per level. |
+| Whip (`whip`) | Unlock | Always in pool | Grants the Whip ability controller (aimed whip strike). |
+| Whip Level (`whip_level`) | Level | Added after unlocking Whip | Longer whip per level. |
 
 ### Damage, rate, and speed upgrades
 
@@ -29,6 +27,13 @@
 | Sword Rate (`sword_rate`) | Always in pool | +20% sword attack rate per level. |
 | Move Speed (`player_speed`) | Always in pool | +20% player movement speed per level. |
 | Health (`player_health`) | Always in pool | +8 max health per level and heals 8 on pickup. |
+
+## Whip settings
+
+* The whip uses 14 segments.
+* Level 1: segment length 8 with a 0.67 segment scale.
+* Level 2: segment length 12 with a 1.0 segment scale.
+* Level 3: segment length 16 with a 1.33 segment scale.
 
 ## Enemies
 

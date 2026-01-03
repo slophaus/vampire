@@ -1,7 +1,7 @@
 extends Node2D
 
 @export var segment_count := 14
-@export var segment_length := 12.0
+@export var segment_length := 8.0
 @export var constraint_iterations := 6
 @export var damping := 0.2
 @export var base_offset := 20.0
@@ -13,12 +13,13 @@ extends Node2D
 @export var loose_anchor_follow_strength := 0.02
 @export var parent_alignment_strength := 0.15
 @export var loose_parent_alignment_strength := 0.005
-@export var segment_scale := 1.0
+@export var segment_scale := 0.6666667
 @export var tip_speed_damage := 0.007
 @export var point_color := Color(0.95, 0.9, 1.0, 0.9)
 @export var segment_scene: PackedScene = preload("res://scenes/ability/whip_ability_controller/whip_segment.tscn")
 
 var player_number := 1
+var whip_level := 1
 var points: Array[Vector2] = []
 var previous_points: Array[Vector2] = []
 var point_angles: Array[float] = []
@@ -35,6 +36,14 @@ var last_aim_direction := Vector2.ZERO
 var is_owner_regenerating := false
 const AIM_MIN_DIRECTION_STRENGTH := 0.02
 const AIM_POWER_CURVE := 2.0
+const BASE_SEGMENT_LENGTH := 12.0
+const BASE_SEGMENT_SCALE := 1.0
+const MAX_WHIP_LEVEL := 3
+const LEVEL_SEGMENT_LENGTHS := {
+	1: 8.0,
+	2: BASE_SEGMENT_LENGTH,
+	3: 16.0,
+}
 
 
 func _ready() -> void:
@@ -44,8 +53,9 @@ func _ready() -> void:
 	if owner_actor != null and owner_actor.has_method("get_player_tint"):
 		point_color = owner_actor.get_player_tint()
 		point_color.a = 0.9
-	_initialize_points()
+	_apply_whip_level(whip_level)
 	_initialize_segments()
+	GameEvents.ability_upgrade_added.connect(_on_ability_upgrade_added)
 	set_physics_process(true)
 
 
@@ -120,6 +130,14 @@ func _physics_process(delta: float) -> void:
 	_update_tip_damage(delta)
 
 
+func _on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int) -> void:
+	if upgrade_player_number != player_number:
+		return
+	if upgrade.id == "whip_level":
+		var next_level = 1 + current_upgrades["whip_level"]["quantity"]
+		_apply_whip_level(next_level)
+
+
 func _apply_distance_constraints() -> void:
 	for index in range(segment_count - 1):
 		var current = points[index]
@@ -167,6 +185,16 @@ func _initialize_points() -> void:
 		points.append(position)
 		previous_points.append(position)
 		point_angles.append(direction.angle())
+
+
+func _apply_whip_level(new_level: int) -> void:
+	whip_level = clampi(new_level, 1, MAX_WHIP_LEVEL)
+	var new_length = LEVEL_SEGMENT_LENGTHS.get(whip_level, BASE_SEGMENT_LENGTH)
+	segment_length = new_length
+	segment_scale = BASE_SEGMENT_SCALE * (segment_length / BASE_SEGMENT_LENGTH)
+	_initialize_points()
+	_update_point_angles()
+	_sync_segments()
 
 
 func _initialize_segments() -> void:

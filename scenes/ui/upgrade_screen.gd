@@ -46,7 +46,7 @@ func set_ability_upgrades(upgrades: Array[AbilityUpgrade], current_upgrades: Dic
 func get_display_name(upgrade: AbilityUpgrade, current_upgrades: Dictionary) -> String:
 	if upgrade.id == "fireball":
 		return "Fireball Level 1"
-	if upgrade.id in ["sword_level", "axe_level", "fireball_level", "boomerang_level", "dig_level"]:
+	if upgrade.id in ["sword_level", "axe_level", "fireball_level", "boomerang_level", "dig_level", "whip_level"]:
 		var base_name = upgrade.name.replace(" Level", "")
 		var current_quantity = 0
 		if current_upgrades.has(upgrade.id):
