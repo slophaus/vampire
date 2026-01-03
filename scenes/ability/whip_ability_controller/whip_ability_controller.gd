@@ -94,7 +94,9 @@ func _physics_process(delta: float) -> void:
 
 	current_base_offset = lerp(0.0, base_offset, current_power)
 	current_anchor_follow_strength = lerp(loose_anchor_follow_strength, anchor_follow_strength, current_power)
-	current_parent_alignment_strength = lerp(loose_parent_alignment_strength, parent_alignment_strength, current_power)
+	current_parent_alignment_strength = 0.0
+	if has_aim_input and not is_owner_regenerating:
+		current_parent_alignment_strength = lerp(loose_parent_alignment_strength, parent_alignment_strength, current_power)
 
 	var anchor_position = owner_actor.global_position + (desired_direction * current_base_offset)
 	var anchor_delta = anchor_position - points[0]
