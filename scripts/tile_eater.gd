@@ -3,6 +3,7 @@ class_name TileEater
 
 const CUSTOM_DATA_KEY := "tile_type"
 const WALKABLE_TILE_TYPES := ["floor"]
+const DIRT_TILE_TYPE := "dirt"
 const DIRT_BORDER_LAYER_NAME := "dirt_border"
 const DIRT_BORDER_META_KEY := "_dirt_border_initialized"
 const DIRT_BORDER_TERRAIN_SET := 0
@@ -16,6 +17,10 @@ var dirt_border_layer: TileMapLayer
 var walkable_tile_source_id := -1
 var walkable_tile_atlas := Vector2i.ZERO
 var walkable_tile_alternative := 0
+var dirt_tile_source_id := -1
+var dirt_tile_atlas := Vector2i.ZERO
+var dirt_tile_alternative := 0
+var occupied_cells: Dictionary = {}
 
 
 func _init(owner_node: Node2D) -> void:
@@ -45,6 +50,7 @@ func _cache_walkable_tile() -> void:
 	walkable_tile_source_id = source_id
 	walkable_tile_atlas = arena_tilemap.get_cell_atlas_coords(0, cell)
 	walkable_tile_alternative = arena_tilemap.get_cell_alternative_tile(0, cell)
+	_cache_dirt_tile()
 	_initialize_dirt_border()
 
 
@@ -78,6 +84,33 @@ func try_convert_tiles_in_radius(position: Vector2, radius: float, allowed_types
 			_try_convert_tile_cell(cell, allowed_types)
 
 
+func update_occupied_tiles(world_positions: Array[Vector2]) -> void:
+	_ensure_arena_tilemap()
+	if arena_tilemap == null:
+		return
+	if walkable_tile_source_id == -1:
+		return
+	if dirt_tile_source_id == -1:
+		_cache_dirt_tile()
+		if dirt_tile_source_id == -1:
+			return
+	var next_cells: Dictionary = {}
+	for position in world_positions:
+		var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(position))
+		next_cells[cell] = true
+	for cell in occupied_cells.keys():
+		if not next_cells.has(cell):
+			_set_walkable_cell(cell)
+	for cell in next_cells.keys():
+		if not occupied_cells.has(cell):
+			_set_dirt_cell(cell)
+	occupied_cells = next_cells
+
+
+func clear_occupied_tiles() -> void:
+	update_occupied_tiles([])
+
+
 func _try_convert_tile_cell(cell: Vector2i, allowed_types: Array[String]) -> void:
 	var source_id = arena_tilemap.get_cell_source_id(0, cell)
 	if source_id == -1:
@@ -99,6 +132,20 @@ func _try_convert_tile_cell(cell: Vector2i, allowed_types: Array[String]) -> voi
 	var local_position = arena_tilemap.map_to_local(cell)
 	var world_position = arena_tilemap.to_global(local_position)
 	tile_converted.emit(world_position)
+
+
+func _set_walkable_cell(cell: Vector2i) -> void:
+	if walkable_tile_source_id == -1:
+		return
+	arena_tilemap.set_cell(0, cell, walkable_tile_source_id, walkable_tile_atlas, walkable_tile_alternative)
+	_update_dirt_border(cell)
+
+
+func _set_dirt_cell(cell: Vector2i) -> void:
+	if dirt_tile_source_id == -1:
+		return
+	arena_tilemap.set_cell(0, cell, dirt_tile_source_id, dirt_tile_atlas, dirt_tile_alternative)
+	_update_dirt_border(cell)
 
 
 func _find_arena_tilemap() -> TileMap:
@@ -124,6 +171,9 @@ func _ensure_arena_tilemap() -> void:
 	walkable_tile_source_id = -1
 	walkable_tile_atlas = Vector2i.ZERO
 	walkable_tile_alternative = 0
+	dirt_tile_source_id = -1
+	dirt_tile_atlas = Vector2i.ZERO
+	dirt_tile_alternative = 0
 	_cache_walkable_tile()
 
 
@@ -184,3 +234,60 @@ static func _is_walkable_cell_in_tilemap(arena_tilemap: TileMap, cell: Vector2i)
 		return false
 	var tile_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
 	return tile_type != null and WALKABLE_TILE_TYPES.has(tile_type)
+
+
+func _cache_dirt_tile() -> void:
+	if arena_tilemap == null:
+		return
+	var tile_info = _find_tile_by_type(DIRT_TILE_TYPE)
+	if tile_info.is_empty():
+		return
+	dirt_tile_source_id = tile_info.source_id
+	dirt_tile_atlas = tile_info.atlas_coords
+	dirt_tile_alternative = tile_info.alternative
+
+
+func _find_tile_by_type(tile_type: String) -> Dictionary:
+	if arena_tilemap == null:
+		return {}
+	for cell in arena_tilemap.get_used_cells(0):
+		var tile_data := arena_tilemap.get_cell_tile_data(0, cell)
+		if _tile_data_has_type(tile_data, tile_type):
+			return {
+				"source_id": arena_tilemap.get_cell_source_id(0, cell),
+				"atlas_coords": arena_tilemap.get_cell_atlas_coords(0, cell),
+				"alternative": arena_tilemap.get_cell_alternative_tile(0, cell),
+			}
+	var tile_set = arena_tilemap.tile_set
+	if tile_set == null:
+		return {}
+	for source_index in range(tile_set.get_source_count()):
+		var source_id = tile_set.get_source_id(source_index)
+		var source = tile_set.get_source(source_id)
+		if source is TileSetAtlasSource:
+			var atlas := source as TileSetAtlasSource
+			for tile_index in range(atlas.get_tiles_count()):
+				var tile_id = atlas.get_tile_id(tile_index)
+				if _tile_data_has_type(atlas.get_tile_data(tile_id, 0), tile_type):
+					return {
+						"source_id": source_id,
+						"atlas_coords": tile_id,
+						"alternative": 0,
+					}
+				var alt_count = atlas.get_alternative_tiles_count(tile_id)
+				for alt_index in range(alt_count):
+					var alt_id = atlas.get_alternative_tile_id(tile_id, alt_index)
+					if _tile_data_has_type(atlas.get_tile_data(tile_id, alt_id), tile_type):
+						return {
+							"source_id": source_id,
+							"atlas_coords": tile_id,
+							"alternative": alt_id,
+						}
+	return {}
+
+
+func _tile_data_has_type(tile_data: TileData, tile_type: String) -> bool:
+	if tile_data == null:
+		return false
+	var custom_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
+	return custom_type != null and custom_type == tile_type
