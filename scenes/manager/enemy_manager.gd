@@ -4,6 +4,7 @@ class_name EnemyManager
 const OFFSCREEN_MARGIN = 10
 const MAX_SPAWN_RADIUS_MULTIPLIER = 0.75
 const MAX_ENEMIES = 500
+const MAX_SPAWN_ATTEMPTS = 5
 
 @export var enemy_scene: PackedScene
 @export var worm_scene: PackedScene
@@ -113,17 +114,22 @@ func on_timer_timeout():
 	var player = get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return
-	
+
+	var spawn_position := Vector2.ZERO
+	for attempt in range(MAX_SPAWN_ATTEMPTS):
+		spawn_position = get_spawn_position(player.global_position)
+		if spawn_position != Vector2.ZERO:
+			break
+	if spawn_position == Vector2.ZERO:
+		return
+
 	var enemy_index = enemy_table.pick_item()
 	var enemy = get_enemy_scene(enemy_index).instantiate() as Node2D
 	if enemy_index != 3:
 		enemy.set("enemy_index", enemy_index)
-	
+
 	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
 	entities_layer.add_child(enemy)
-	var spawn_position = get_spawn_position(player.global_position)
-	if spawn_position == Vector2.ZERO:
-		return
 	enemy.global_position = spawn_position
 
 
