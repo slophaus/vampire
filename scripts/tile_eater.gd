@@ -3,7 +3,7 @@ class_name TileEater
 
 const CUSTOM_DATA_KEY := "tile_type"
 const WALKABLE_TILE_TYPES := ["floor"]
-const DIRT_TILE_TYPE := "dirt"
+const OCCUPIED_TILE_TYPE := "occupied"
 const DIRT_BORDER_LAYER_NAME := "dirt_border"
 const DIRT_BORDER_META_KEY := "_dirt_border_initialized"
 const DIRT_BORDER_TERRAIN_SET := 0
@@ -17,9 +17,9 @@ var dirt_border_layer: TileMapLayer
 var walkable_tile_source_id := -1
 var walkable_tile_atlas := Vector2i.ZERO
 var walkable_tile_alternative := 0
-var dirt_tile_source_id := -1
-var dirt_tile_atlas := Vector2i.ZERO
-var dirt_tile_alternative := 0
+var occupied_tile_source_id := -1
+var occupied_tile_atlas := Vector2i.ZERO
+var occupied_tile_alternative := 0
 var occupied_cells: Dictionary = {}
 
 
@@ -50,7 +50,7 @@ func _cache_walkable_tile() -> void:
 	walkable_tile_source_id = source_id
 	walkable_tile_atlas = arena_tilemap.get_cell_atlas_coords(0, cell)
 	walkable_tile_alternative = arena_tilemap.get_cell_alternative_tile(0, cell)
-	_cache_dirt_tile()
+	_cache_occupied_tile()
 	_initialize_dirt_border()
 
 
@@ -90,9 +90,9 @@ func update_occupied_tiles(world_positions: Array[Vector2]) -> void:
 		return
 	if walkable_tile_source_id == -1:
 		return
-	if dirt_tile_source_id == -1:
-		_cache_dirt_tile()
-		if dirt_tile_source_id == -1:
+	if occupied_tile_source_id == -1:
+		_cache_occupied_tile()
+		if occupied_tile_source_id == -1:
 			return
 	var next_cells: Dictionary = {}
 	for position in world_positions:
@@ -103,7 +103,7 @@ func update_occupied_tiles(world_positions: Array[Vector2]) -> void:
 			_set_walkable_cell(cell)
 	for cell in next_cells.keys():
 		if not occupied_cells.has(cell):
-			_set_dirt_cell(cell)
+			_set_occupied_cell(cell)
 	occupied_cells = next_cells
 
 
@@ -141,10 +141,10 @@ func _set_walkable_cell(cell: Vector2i) -> void:
 	_update_dirt_border(cell)
 
 
-func _set_dirt_cell(cell: Vector2i) -> void:
-	if dirt_tile_source_id == -1:
+func _set_occupied_cell(cell: Vector2i) -> void:
+	if occupied_tile_source_id == -1:
 		return
-	arena_tilemap.set_cell(0, cell, dirt_tile_source_id, dirt_tile_atlas, dirt_tile_alternative)
+	arena_tilemap.set_cell(0, cell, occupied_tile_source_id, occupied_tile_atlas, occupied_tile_alternative)
 	_update_dirt_border(cell)
 
 
@@ -171,9 +171,9 @@ func _ensure_arena_tilemap() -> void:
 	walkable_tile_source_id = -1
 	walkable_tile_atlas = Vector2i.ZERO
 	walkable_tile_alternative = 0
-	dirt_tile_source_id = -1
-	dirt_tile_atlas = Vector2i.ZERO
-	dirt_tile_alternative = 0
+	occupied_tile_source_id = -1
+	occupied_tile_atlas = Vector2i.ZERO
+	occupied_tile_alternative = 0
 	_cache_walkable_tile()
 
 
@@ -236,15 +236,15 @@ static func _is_walkable_cell_in_tilemap(arena_tilemap: TileMap, cell: Vector2i)
 	return tile_type != null and WALKABLE_TILE_TYPES.has(tile_type)
 
 
-func _cache_dirt_tile() -> void:
+func _cache_occupied_tile() -> void:
 	if arena_tilemap == null:
 		return
-	var tile_info = _find_tile_by_type(DIRT_TILE_TYPE)
+	var tile_info = _find_tile_by_type(OCCUPIED_TILE_TYPE)
 	if tile_info.is_empty():
 		return
-	dirt_tile_source_id = tile_info.source_id
-	dirt_tile_atlas = tile_info.atlas_coords
-	dirt_tile_alternative = tile_info.alternative
+	occupied_tile_source_id = tile_info.source_id
+	occupied_tile_atlas = tile_info.atlas_coords
+	occupied_tile_alternative = tile_info.alternative
 
 
 func _find_tile_by_type(tile_type: String) -> Dictionary:
