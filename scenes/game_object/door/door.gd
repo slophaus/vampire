@@ -52,9 +52,6 @@ func _transition_to_boss_arena() -> void:
 	if boss_arena_scene == null:
 		return
 	is_transitioning = true
-	for player in get_tree().get_nodes_in_group("player"):
-		if player.has_method("get_persisted_state"):
-			GameEvents.store_player_state(player.player_number, player.get_persisted_state())
 	var session = _get_game_session()
 	if session != null:
 		session.transition_to_level(boss_arena_scene, exit_door_name, true)

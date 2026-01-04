@@ -9,7 +9,6 @@ var player_color_indices := [0, 1, 2, 3]
 var persisted_upgrades_by_player: Dictionary = {}
 var persisted_upgrade_pools_by_player: Dictionary = {}
 var persisted_turn_player_number := 1
-var persisted_player_states: Dictionary = {}
 var persisted_experience_state: Dictionary = {}
 var paused_main_scene: Node = null
 
@@ -74,16 +73,6 @@ func _is_player_color_taken(color_index: int, current_player_index: int) -> bool
 	return false
 
 
-func store_player_state(player_number: int, state: Dictionary) -> void:
-	if player_number <= 0:
-		return
-	persisted_player_states[player_number] = state.duplicate(true)
-
-
-func get_player_state(player_number: int) -> Dictionary:
-	return persisted_player_states.get(player_number, {})
-
-
 func store_experience_state(state: Dictionary) -> void:
 	persisted_experience_state = state.duplicate(true)
 
@@ -109,7 +98,6 @@ func take_paused_scene() -> Node:
 func reset_persisted_state() -> void:
 	persisted_upgrades_by_player.clear()
 	persisted_upgrade_pools_by_player.clear()
-	persisted_player_states.clear()
 	persisted_turn_player_number = 1
 	persisted_experience_state.clear()
 	paused_main_scene = null
