@@ -20,7 +20,7 @@
 [ext_resource type="AudioStream" uid="uid://bmnew52u2j6r5" path="res://assets/audio/footstep_carpet_004.ogg" id="15_yavv3"]
 [ext_resource type="Texture2D" uid="uid://b4k4vbwhs13on" path="res://sprites/mouse1.png" id="17_fcdwx"]
 [ext_resource type="Texture2D" uid="uid://grf1esxamv8l" path="res://sprites/dragon1_anim.png" id="18_ql8xh"]
-[ext_resource type="Texture2D" uid="uid://ce1joj2766087" path="res://sprites/gollum.png" id="19_1uv4c"]
+[ext_resource type="Texture2D" uid="uid://bhj2q30pr1e30" path="res://sprites/gollum.png" id="19_1uv4c"]
 [ext_resource type="PackedScene" uid="uid://b4d5h026u4tmt" path="res://scenes/component/poison_component.tscn" id="19_w8xtr"]
 
 [sub_resource type="Animation" id="Animation_lm0tv"]
@@ -284,17 +284,17 @@ offset_right = 20.0
 offset_bottom = 30.0
 
 [node name="SpiderSprite" type="Sprite2D" parent="Visuals"]
-visible = false
 clip_children = 2
-position = Vector2(0, -10)
+position = Vector2(2, -2)
+scale = Vector2(0.4, 0.4)
 texture = ExtResource("19_1uv4c")
 
 [node name="enemy_color" type="ColorRect" parent="Visuals/SpiderSprite"]
 material = SubResource("CanvasItemMaterial_nb0jk")
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
+offset_left = -32.0
+offset_top = -27.0
+offset_right = 30.0
+offset_bottom = 33.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_5o3ap")
