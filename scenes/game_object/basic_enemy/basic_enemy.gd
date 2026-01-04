@@ -63,6 +63,7 @@ const GHOST_WANDER_MIN_DURATION := 1.2
 const GHOST_WANDER_MAX_DURATION := 2.4
 const GHOST_FADE_SPEED := 1.0
 const GHOST_POSSESSION_RADIUS := 28.0
+const GHOST_POSSESSION_SEEK_RADIUS := 200.0
 const GHOST_POSSESSION_DURATION := 3.0
 const GHOST_POSSESSION_TINT := Color(0.55, 0.9, 0.85, 1.0)
 const GHOST_OFFSCREEN_RESPAWN_DELAY := 2.5
@@ -321,7 +322,7 @@ func update_ghost_state(delta: float) -> void:
 		return
 
 	update_ghost_offscreen(delta)
-	update_ghost_wander(delta)
+	update_ghost_seek(delta)
 	velocity_component.move(self)
 	update_visual_facing()
 
@@ -381,6 +382,15 @@ func update_ghost_wander(delta: float) -> void:
 		ghost_wander_time_left = rng.randf_range(GHOST_WANDER_MIN_DURATION, GHOST_WANDER_MAX_DURATION)
 	velocity_component.accelerate_in_direction(ghost_wander_direction)
 
+func update_ghost_seek(_delta: float) -> void:
+	var target = find_nearby_possession_target(GHOST_POSSESSION_SEEK_RADIUS)
+	if target != null:
+		var direction = target.global_position - global_position
+		if direction.length_squared() > 0.001:
+			velocity_component.accelerate_in_direction(direction.normalized())
+		return
+	update_ghost_wander(delta)
+
 
 func try_start_ghost_possession() -> bool:
 	var player = get_tree().get_first_node_in_group("player") as Node2D
@@ -416,6 +426,33 @@ func find_nearby_enemy_to_possess() -> Node2D:
 			closest_distance = distance
 			closest_enemy = enemy_node
 	return closest_enemy
+
+
+func find_nearby_possession_target(radius: float) -> Node2D:
+	var closest_target: Node2D
+	var closest_distance := radius
+	var player = get_tree().get_first_node_in_group("player") as Node2D
+	if player != null and player.has_method("start_ghost_possession"):
+		var distance = global_position.distance_to(player.global_position)
+		if distance <= closest_distance:
+			closest_distance = distance
+			closest_target = player
+
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if enemy == self:
+			continue
+		if enemy.is_in_group("ghost"):
+			continue
+		if enemy.has_method("can_be_possessed") and not enemy.call("can_be_possessed"):
+			continue
+		var enemy_node = enemy as Node2D
+		if enemy_node == null:
+			continue
+		var enemy_distance = global_position.distance_to(enemy_node.global_position)
+		if enemy_distance <= closest_distance:
+			closest_distance = enemy_distance
+			closest_target = enemy_node
+	return closest_target
 
 
 func start_ghost_possession(target: Node2D, duration: float) -> void:
