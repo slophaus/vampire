@@ -7,10 +7,8 @@ radius = 4.0
 
 [node name="WhipSegment" type="Node2D"]
 
-[node name="ChainLink" type="Line2D" parent="."]
-points = PackedVector2Array(0, -5, 3, -5, 4, -3, 4, 3, 3, 5, 0, 5, -3, 5, -4, 3, -4, -3, -3, -5, 0, -5)
-width = 2.0
-closed = true
+[node name="Oval" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(0, -5, 3, -5, 4, -3, 4, 3, 3, 5, 0, 5, -3, 5, -4, 3, -4, -3, -3, -5)
 
 [node name="HitboxComponent" parent="." instance=ExtResource("1_hitbox")]
 
