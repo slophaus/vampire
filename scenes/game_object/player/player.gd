@@ -54,6 +54,7 @@ var is_possessed := false
 var possession_time_left := 0.0
 var possession_target: Node2D
 var possession_damage_hits := 0
+var possessed_original_speed := 0.0
 
 const UPGRADE_DOT_SIZE := 4.0
 const UPGRADE_DOT_RADIUS := 2
@@ -181,11 +182,14 @@ func update_possession(delta: float) -> void:
 		end_ghost_possession()
 
 
-func start_ghost_possession(duration: float) -> void:
+func start_ghost_possession(duration: float, ghost_speed: float = -1.0) -> void:
 	is_possessed = true
 	possession_time_left = duration
 	possession_target = _find_possession_target()
 	possession_damage_hits = 0
+	possessed_original_speed = velocity_component.max_speed
+	if ghost_speed > 0.0:
+		velocity_component.max_speed = ghost_speed
 	_update_status_tint()
 
 
@@ -194,6 +198,9 @@ func end_ghost_possession() -> void:
 	possession_time_left = 0.0
 	possession_target = null
 	possession_damage_hits = 0
+	if possessed_original_speed > 0.0:
+		velocity_component.max_speed = possessed_original_speed
+	possessed_original_speed = 0.0
 	_update_status_tint()
 
 
