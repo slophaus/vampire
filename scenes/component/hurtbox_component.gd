@@ -22,8 +22,11 @@ func on_area_entered(other_area: Area2D):
 	var hitbox_component = other_area as HitboxComponent
 	if should_ignore_hit(hitbox_component):
 		return
+	var owner_node = get_parent()
+	if not hitbox_component.can_hit(owner_node):
+		return
 	health_component.damage(hitbox_component.damage)
-	hitbox_component.register_hit()
+	hitbox_component.register_hit(owner_node)
 	apply_knockback(hitbox_component)
 
 	var floating_text = floating_text_scene.instantiate() as FloatingText
@@ -36,7 +39,6 @@ func on_area_entered(other_area: Area2D):
 	if is_equal_approx(hitbox_component.damage, int(hitbox_component.damage)):
 		fmt_string = "%0.0f"
 	var damage_color := Color.WHITE
-	var owner_node = get_parent()
 	if owner_node != null and owner_node.is_in_group("player"):
 		damage_color = Color(1, 0.3, 0.3)
 	floating_text.start(fmt_string % hitbox_component.damage, damage_color)

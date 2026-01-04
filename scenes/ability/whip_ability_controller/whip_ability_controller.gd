@@ -39,6 +39,7 @@ const AIM_POWER_CURVE := 2.0
 const BASE_SEGMENT_LENGTH := 12.0
 const BASE_SEGMENT_SCALE := 1.0
 const MAX_WHIP_LEVEL := 3
+const TIP_HIT_COOLDOWN := 0.2
 const LEVEL_SEGMENT_LENGTHS := {
 	1: 8.0,
 	2: BASE_SEGMENT_LENGTH,
@@ -264,6 +265,7 @@ func _configure_segment_hitbox(segment: Node2D, index: int) -> void:
 		collision_shape.disabled = not is_tip
 	if is_tip:
 		tip_hitbox = hitbox
+		tip_hitbox.hit_cooldown = TIP_HIT_COOLDOWN
 
 
 func _update_tip_damage(delta: float) -> void:
