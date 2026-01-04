@@ -227,7 +227,7 @@ func get_player_tint() -> Color:
 
 
 func can_attack() -> bool:
-	return not is_regenerating
+	return not is_regenerating and not is_possessed
 
 
 func _update_aim_laser() -> void:
