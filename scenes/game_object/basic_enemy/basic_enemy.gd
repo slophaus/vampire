@@ -382,7 +382,7 @@ func update_ghost_wander(delta: float) -> void:
 		ghost_wander_time_left = rng.randf_range(GHOST_WANDER_MIN_DURATION, GHOST_WANDER_MAX_DURATION)
 	velocity_component.accelerate_in_direction(ghost_wander_direction)
 
-func update_ghost_seek(_delta: float) -> void:
+func update_ghost_seek(delta: float) -> void:
 	var target = find_nearby_possession_target(GHOST_POSSESSION_SEEK_RADIUS)
 	if target != null:
 		var direction = target.global_position - global_position
