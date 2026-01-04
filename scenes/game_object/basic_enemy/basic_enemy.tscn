@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://bses7vk27cfvt"]
+[gd_scene load_steps=46 format=3 uid="uid://bses7vk27cfvt"]
 
 [ext_resource type="Script" uid="uid://d01scidly6bca" path="res://scenes/game_object/basic_enemy/basic_enemy.gd" id="1_gpcli"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_en8ir"]
@@ -22,6 +22,7 @@
 [ext_resource type="Texture2D" uid="uid://bhj2q30pr1e30" path="res://sprites/gollum.png" id="19_1uv4c"]
 [ext_resource type="Texture2D" uid="uid://nnylxra1cfyn" path="res://sprites/rat2.png" id="19_vrngj"]
 [ext_resource type="PackedScene" uid="uid://b4d5h026u4tmt" path="res://scenes/component/poison_component.tscn" id="19_w8xtr"]
+[ext_resource type="Texture2D" uid="uid://vtcvj8l05fru" path="res://sprites/ghost2.png" id="23_lw8qt"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ollop"]
 resource_local_to_scene = true
@@ -134,6 +135,28 @@ animations = [{
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_nb0jk"]
 blend_mode = 3
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_hxpda"]
+atlas = ExtResource("23_lw8qt")
+region = Rect2(0, 0, 50, 70)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vx8tq"]
+atlas = ExtResource("23_lw8qt")
+region = Rect2(50, 0, 50, 70)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_yypiw"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hxpda")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vx8tq")
+}],
+"loop": true,
+"name": &"default",
+"speed": 2.0
+}]
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_5o3ap"]
 radius = 7.0
 
@@ -159,16 +182,14 @@ health_component = NodePath("../HealthComponent")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
 path_postprocessing = 1
-debug_enabled = true
 
 [node name="HitFlashComponent" parent="." node_paths=PackedStringArray("health_component", "sprite") instance=ExtResource("7_4kqgf")]
 health_component = NodePath("../HealthComponent")
 sprite = NodePath("../Visuals/mouse_sprite")
 hit_flash_material = SubResource("ShaderMaterial_ollop")
 
-[node name="DeathComponent" parent="." node_paths=PackedStringArray("health_component", "sprite") instance=ExtResource("4_j8jii")]
+[node name="DeathComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("4_j8jii")]
 health_component = NodePath("../HealthComponent")
-sprite = NodePath("")
 
 [node name="HitRandomAudioPlayerComponent" parent="." instance=ExtResource("10_74ju1")]
 max_distance = 300.0
@@ -195,8 +216,10 @@ owner_group = "enemy"
 [node name="Visuals" type="Node2D" parent="."]
 
 [node name="RatSprite" type="AnimatedSprite2D" parent="Visuals"]
-position = Vector2(3, -4)
-scale = Vector2(0.475, 0.475)
+visible = false
+clip_children = 2
+position = Vector2(3, -6)
+scale = Vector2(0.55, 0.55)
 sprite_frames = SubResource("SpriteFrames_hxpda")
 autoplay = "default"
 frame_progress = 0.711659
@@ -217,7 +240,6 @@ autoplay = "default"
 frame_progress = 0.963654
 
 [node name="enemy_color" type="ColorRect" parent="Visuals/mouse_sprite"]
-visible = false
 material = SubResource("CanvasItemMaterial_26myy")
 offset_left = -17.0
 offset_top = -17.0
@@ -251,6 +273,20 @@ offset_left = -32.0
 offset_top = -27.0
 offset_right = 30.0
 offset_bottom = 33.0
+
+[node name="GhostSprite" type="AnimatedSprite2D" parent="Visuals"]
+position = Vector2(-2, 1)
+scale = Vector2(0.705, 0.705)
+sprite_frames = SubResource("SpriteFrames_yypiw")
+autoplay = "default"
+frame_progress = 0.695401
+
+[node name="enemy_color" type="ColorRect" parent="Visuals/GhostSprite"]
+material = SubResource("CanvasItemMaterial_nb0jk")
+offset_left = -27.0
+offset_top = -34.0
+offset_right = 30.0
+offset_bottom = 30.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_5o3ap")

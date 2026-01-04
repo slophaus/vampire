@@ -397,7 +397,7 @@ z_index = 6
 
 [node name="BasicEnemy" parent="." instance=ExtResource("7_sd876")]
 position = Vector2(763, 300)
-enemy_index = 4
+enemy_index = 2
 
 [node name="WormEnemy" parent="." instance=ExtResource("8_ms8vg")]
 position = Vector2(512, 527)
