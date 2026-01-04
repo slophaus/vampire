@@ -46,6 +46,8 @@ var last_health := 0.0
 var flash_tween: Tween
 var near_death_time := 0.0
 var has_defeat_visuals := false
+var is_possessed := false
+var possession_time_left := 0.0
 
 const UPGRADE_DOT_SIZE := 4.0
 const UPGRADE_DOT_RADIUS := 2
@@ -91,10 +93,12 @@ func _process(delta):
 		aim_laser.visible = false
 		health_component.heal(regen_rate * delta)
 		if health_component.current_health >= health_component.max_health:
-			end_regeneration()
+		end_regeneration()
 		return
 
-	var movement_vector = get_movement_vector()
+	if is_possessed:
+		update_possession(delta)
+	var movement_vector = get_possession_movement_vector() if is_possessed else get_movement_vector()
 	var direction = movement_vector.normalized()
 	velocity_component.accelerate_in_direction(direction)
 	velocity_component.move(self)
@@ -108,7 +112,10 @@ func _process(delta):
 	var move_sign = sign(movement_vector.x)
 	if move_sign != 0:
 		visuals.scale = Vector2(move_sign, 1)
-	_update_aim_laser()
+	if is_possessed:
+		aim_laser.visible = false
+	else:
+		_update_aim_laser()
 	_update_near_death_flash(delta)
 	_update_flash_overlay()
 
@@ -142,6 +149,40 @@ func get_movement_vector():
 	var y_movement = Input.get_action_strength("move_down" + suffix) - Input.get_action_strength("move_up" + suffix)
 	
 	return Vector2(x_movement, y_movement)
+
+
+func get_possession_movement_vector() -> Vector2:
+	var closest_enemy: Node2D
+	var closest_distance := INF
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if enemy.is_in_group("ghost"):
+			continue
+		var enemy_node = enemy as Node2D
+		if enemy_node == null:
+			continue
+		var distance = global_position.distance_to(enemy_node.global_position)
+		if distance < closest_distance:
+			closest_distance = distance
+			closest_enemy = enemy_node
+	if closest_enemy == null:
+		return Vector2.ZERO
+	return (closest_enemy.global_position - global_position).normalized()
+
+
+func update_possession(delta: float) -> void:
+	possession_time_left = max(possession_time_left - delta, 0.0)
+	if possession_time_left <= 0.0:
+		end_ghost_possession()
+
+
+func start_ghost_possession(duration: float) -> void:
+	is_possessed = true
+	possession_time_left = duration
+
+
+func end_ghost_possession() -> void:
+	is_possessed = false
+	possession_time_left = 0.0
 
 func get_aim_direction() -> Vector2:
 	var suffix = get_player_action_suffix()

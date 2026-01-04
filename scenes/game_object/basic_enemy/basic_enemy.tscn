@@ -275,6 +275,7 @@ offset_right = 30.0
 offset_bottom = 33.0
 
 [node name="GhostSprite" type="AnimatedSprite2D" parent="Visuals"]
+visible = false
 position = Vector2(-2, 1)
 scale = Vector2(0.705, 0.705)
 sprite_frames = SubResource("SpriteFrames_yypiw")
