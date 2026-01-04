@@ -68,7 +68,6 @@ const GHOST_POSSESSION_DURATION := 8.0
 const GHOST_POSSESSION_TINT := Color(0.2, 1.0, 0.6, 1.0)
 const GHOST_OFFSCREEN_RESPAWN_DELAY := 2.5
 const GHOST_RESPAWN_FADE_SPEED := 1.5
-const GHOST_REPOSSESS_COOLDOWN := 1.0
 @export var enemy_index := 0
 
 @onready var visuals := $Visuals
@@ -106,7 +105,6 @@ var ghost_offscreen_time := 0.0
 var ghost_respawn_fade := 1.0
 var ghost_possession_target: Node2D
 var ghost_possession_time_left := 0.0
-var ghost_repossess_cooldown_left := 0.0
 var is_possessed := false
 var possessed_time_left := 0.0
 var possessed_original_stats: Dictionary = {}
@@ -323,14 +321,6 @@ func update_ghost_state(delta: float) -> void:
 			end_ghost_possession()
 		return
 
-	ghost_repossess_cooldown_left = max(ghost_repossess_cooldown_left - delta, 0.0)
-	if ghost_repossess_cooldown_left > 0.0:
-		update_ghost_offscreen(delta)
-		update_ghost_wander(delta)
-		velocity_component.move(self)
-		update_visual_facing()
-		return
-
 	if try_start_ghost_possession():
 		return
 
@@ -481,7 +471,6 @@ func end_ghost_possession(force_peak_visibility: bool = false) -> void:
 	respawn_ghost_on_screen(get_camera_view_rect())
 	ghost_offscreen_time = 0.0
 	if force_peak_visibility:
-		ghost_repossess_cooldown_left = GHOST_REPOSSESS_COOLDOWN
 		ghost_fade_time = PI * 0.5
 		ghost_respawn_fade = 1.0
 		update_ghost_fade(0.0)
