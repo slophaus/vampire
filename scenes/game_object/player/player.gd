@@ -199,6 +199,8 @@ func _find_possession_target() -> Node2D:
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy.is_in_group("ghost"):
 			continue
+		if enemy.has_method("can_be_possessed") and not enemy.call("can_be_possessed"):
+			continue
 		var enemy_node = enemy as Node2D
 		if enemy_node == null:
 			continue
