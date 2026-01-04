@@ -93,8 +93,8 @@ func _process(delta):
 		aim_laser.visible = false
 		health_component.heal(regen_rate * delta)
 		if health_component.current_health >= health_component.max_health:
-		end_regeneration()
-		return
+			end_regeneration()
+			return
 
 	if is_possessed:
 		update_possession(delta)
