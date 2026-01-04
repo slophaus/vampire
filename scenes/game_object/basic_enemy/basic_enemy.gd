@@ -312,6 +312,9 @@ func apply_dig_level() -> void:
 func update_ghost_state(delta: float) -> void:
 	update_ghost_fade(delta)
 	if ghost_possession_target != null:
+		if not is_instance_valid(ghost_possession_target):
+			end_ghost_possession(true)
+			return
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
 		global_position = ghost_possession_target.global_position
 		if ghost_possession_time_left <= 0.0:
@@ -396,7 +399,7 @@ func try_start_ghost_possession() -> bool:
 	var player = get_tree().get_first_node_in_group("player") as Node2D
 	if player != null and global_position.distance_to(player.global_position) <= GHOST_POSSESSION_RADIUS:
 		if player.has_method("start_ghost_possession"):
-			player.call("start_ghost_possession", GHOST_POSSESSION_DURATION)
+			player.call("start_ghost_possession", GHOST_POSSESSION_DURATION, velocity_component.max_speed)
 			start_ghost_possession(player, GHOST_POSSESSION_DURATION)
 			return true
 
@@ -462,11 +465,15 @@ func start_ghost_possession(target: Node2D, duration: float) -> void:
 	ghost_offscreen_time = 0.0
 
 
-func end_ghost_possession() -> void:
+func end_ghost_possession(force_peak_visibility: bool = false) -> void:
 	ghost_possession_target = null
 	ghost_possession_time_left = 0.0
 	respawn_ghost_on_screen(get_camera_view_rect())
 	ghost_offscreen_time = 0.0
+	if force_peak_visibility:
+		ghost_fade_time = PI * 0.5
+		ghost_respawn_fade = 1.0
+		update_ghost_fade(0.0)
 
 
 func update_ghost_flags() -> void:
