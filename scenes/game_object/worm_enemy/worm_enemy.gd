@@ -503,3 +503,7 @@ func _play_explosion_sound(spawn_position: Vector2) -> void:
 	audio_player.global_position = spawn_position
 	audio_player.finished.connect(audio_player.queue_free)
 	audio_player.play_random()
+
+
+func can_be_possessed() -> bool:
+	return false
