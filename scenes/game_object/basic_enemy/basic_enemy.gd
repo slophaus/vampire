@@ -63,7 +63,7 @@ const GHOST_WANDER_MIN_DURATION := 1.2
 const GHOST_WANDER_MAX_DURATION := 2.4
 const GHOST_FADE_SPEED := 2.2
 const GHOST_POSSESSION_RADIUS := 28.0
-const GHOST_POSSESSION_DURATION := 10.0
+const GHOST_POSSESSION_DURATION := 3.0
 const GHOST_POSSESSION_TINT := Color(0.55, 0.9, 0.85, 1.0)
 const GHOST_MAX_ALPHA := 0.85
 const GHOST_OFFSCREEN_RESPAWN_DELAY := 2.5
@@ -429,7 +429,8 @@ func start_ghost_possession(target: Node2D, duration: float) -> void:
 func end_ghost_possession() -> void:
 	ghost_possession_target = null
 	ghost_possession_time_left = 0.0
-	ghost_respawn_fade = 0.0
+	respawn_ghost_on_screen(get_camera_view_rect())
+	ghost_offscreen_time = 0.0
 
 
 func update_ghost_flags() -> void:
