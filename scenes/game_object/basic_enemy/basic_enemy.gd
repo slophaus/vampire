@@ -116,8 +116,6 @@ func update_spider_movement(delta: float) -> void:
 			Vector2.ZERO,
 			SPIDER_STOP_DECELERATION * delta
 		)
-		if spider_rest_time_left <= 0.1:
-			try_spider_jump()
 		return
 
 	if spider_burst_time_left > 0.0:
@@ -127,23 +125,29 @@ func update_spider_movement(delta: float) -> void:
 			spider_rest_time_left = SPIDER_REST_DURATION
 		return
 
-	spider_burst_time_left = SPIDER_BURST_DURATION
+	start_spider_burst()
 
-
-func try_spider_jump() -> void:
-	if spider_jump_cooldown > 0.0:
-		return
+func start_spider_burst() -> void:
 	var target_player := velocity_component.cached_player
 	if target_player == null:
 		velocity_component.refresh_target_player(global_position)
 		target_player = velocity_component.cached_player
 	if target_player == null:
+		spider_burst_time_left = SPIDER_BURST_DURATION
 		return
-	if global_position.distance_to(target_player.global_position) > SPIDER_JUMP_RANGE:
+	if can_spider_jump(target_player):
+		var direction = (target_player.global_position - global_position).normalized()
+		velocity_component.apply_knockback(direction, SPIDER_JUMP_FORCE)
+		spider_jump_cooldown = SPIDER_JUMP_COOLDOWN
+		spider_rest_time_left = SPIDER_REST_DURATION
 		return
-	var direction = (target_player.global_position - global_position).normalized()
-	velocity_component.apply_knockback(direction, SPIDER_JUMP_FORCE)
-	spider_jump_cooldown = SPIDER_JUMP_COOLDOWN
+	spider_burst_time_left = SPIDER_BURST_DURATION
+
+
+func can_spider_jump(target_player: Node2D) -> bool:
+	if spider_jump_cooldown > 0.0:
+		return false
+	return global_position.distance_to(target_player.global_position) <= SPIDER_JUMP_RANGE
 
 
 func accelerate_to_player_with_pathfinding() -> void:
