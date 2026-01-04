@@ -22,6 +22,7 @@ const NEAR_DEATH_RED = Color(1.0, 0.1, 0.1)
 @onready var velocity_component = $VelocityComponent
 @onready var aim_laser: Line2D = $AimLaser
 @onready var player_collision_shape: CollisionShape2D = $CollisionShape2D
+@onready var poison_component: PoisonComponent = $PoisonComponent
 
 @export var player_number := 1
 @export var regen_rate := 0.67
@@ -215,6 +216,9 @@ func on_body_entered(other_body: Node2D):
 	if typeof(contact_damage) in [TYPE_INT, TYPE_FLOAT]:
 		resolved_damage = float(contact_damage)
 	colliding_enemies[other_body] = resolved_damage
+	var poison_duration = other_body.get("poison_contact_duration")
+	if poison_component != null and typeof(poison_duration) in [TYPE_INT, TYPE_FLOAT] and poison_duration > 0.0:
+		poison_component.apply_poison(float(poison_duration))
 	check_deal_damage()
 
 

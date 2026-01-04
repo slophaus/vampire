@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://b4d5h026u4tmt"]
+
+[ext_resource type="Script" uid="uid://cknv1ktut0wn3" path="res://scenes/component/poison_component.gd" id="1_0gsv5"]
+
+[node name="PoisonComponent" type="Node"]
+script = ExtResource("1_0gsv5")
+
+[node name="TickTimer" type="Timer" parent="."]
+one_shot = true
