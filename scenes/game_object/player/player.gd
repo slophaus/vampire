@@ -79,7 +79,6 @@ func _ready():
 	update_health_bar_size()
 	update_health_display()
 	set_upgrade_dot_count(0)
-	call_deferred("_restore_persisted_state")
 
 
 func _process(delta):
@@ -159,27 +158,6 @@ func get_player_action_suffix() -> String:
 
 func get_player_tint() -> Color:
 	return GameEvents.get_player_color(player_number)
-
-
-func get_persisted_state() -> Dictionary:
-	return {
-		"current_health": health_component.current_health,
-		"max_health": health_component.max_health,
-	}
-
-
-func _restore_persisted_state() -> void:
-	await get_tree().process_frame
-	var persisted_state = GameEvents.get_player_state(player_number)
-	if persisted_state.is_empty():
-		return
-	if persisted_state.has("max_health"):
-		health_component.max_health = float(persisted_state["max_health"])
-	if persisted_state.has("current_health"):
-		health_component.current_health = min(float(persisted_state["current_health"]), health_component.max_health)
-	update_health_bar_size()
-	last_health = health_component.current_health
-	health_component.health_changed.emit()
 
 
 func can_attack() -> bool:
