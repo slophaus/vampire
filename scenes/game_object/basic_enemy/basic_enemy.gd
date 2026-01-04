@@ -112,6 +112,7 @@ func update_spider_movement(delta: float) -> void:
 	spider_jump_cooldown = max(spider_jump_cooldown - delta, 0.0)
 	if spider_rest_time_left > 0.0:
 		spider_rest_time_left = max(spider_rest_time_left - delta, 0.0)
+		try_spider_jump()
 		velocity_component.velocity = velocity_component.velocity.move_toward(
 			Vector2.ZERO,
 			SPIDER_STOP_DECELERATION * delta
@@ -121,7 +122,6 @@ func update_spider_movement(delta: float) -> void:
 	if spider_burst_time_left > 0.0:
 		spider_burst_time_left = max(spider_burst_time_left - delta, 0.0)
 		accelerate_to_player_with_pathfinding()
-		try_spider_jump()
 		if spider_burst_time_left <= 0.0:
 			spider_rest_time_left = SPIDER_REST_DURATION
 		return
@@ -143,6 +143,8 @@ func try_spider_jump() -> void:
 	var direction = (target_player.global_position - global_position).normalized()
 	velocity_component.apply_knockback(direction, SPIDER_JUMP_FORCE)
 	spider_jump_cooldown = SPIDER_JUMP_COOLDOWN
+	spider_rest_time_left = SPIDER_REST_DURATION
+	spider_burst_time_left = 0.0
 
 
 func accelerate_to_player_with_pathfinding() -> void:
