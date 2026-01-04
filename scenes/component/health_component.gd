@@ -15,7 +15,8 @@ func _ready():
 
 func damage(damage_amount: float):
 	# clamping
-	current_health = max(current_health - damage_amount, 0)
+	var resolved_damage = ceil(damage_amount)
+	current_health = max(current_health - resolved_damage, 0)
 	health_changed.emit()
 	Callable(check_death).call_deferred()
 

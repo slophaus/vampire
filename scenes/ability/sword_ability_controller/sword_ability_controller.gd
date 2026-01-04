@@ -9,7 +9,7 @@ const ENEMY_HITBOX_LAYER = 8
 @export var target_group := "enemy"
 
 var base_damage = 5
-var additional_damage_percent: float = 1.0
+var additional_damage_bonus: float = 0.0
 var base_penetration := 3
 var base_wait_time
 var sword_level := 1
@@ -71,7 +71,7 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 			$Timer.wait_time = base_wait_time * (1 - percent_reduction)
 			$Timer.start()
 		"sword_damage":
-			additional_damage_percent = 1 + (current_upgrades["sword_damage"]["quantity"] * 0.35)
+			additional_damage_bonus = current_upgrades["sword_damage"]["quantity"] * 5.0
 		"sword_level":
 			sword_level = 1 + current_upgrades["sword_level"]["quantity"]
 
@@ -128,7 +128,7 @@ func spawn_sword(start_position: Vector2, target_position: Vector2) -> void:
 	var foreground_layer = get_tree().get_first_node_in_group("foreground_layer")
 	foreground_layer.add_child(sword_instance)
 	sword_instance.owner_actor = get_owner_actor()
-	sword_instance.hitbox_component.damage = base_damage * additional_damage_percent
+	sword_instance.hitbox_component.damage = base_damage + additional_damage_bonus
 	sword_instance.hitbox_component.knockback = 250.0
 	sword_instance.hitbox_component.penetration = base_penetration
 	if owner_group == "player":
