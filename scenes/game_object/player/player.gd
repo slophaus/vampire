@@ -7,6 +7,9 @@ const EXPERIENCE_FLASH_DURATION = 0.1
 const AIM_DEADZONE = 0.1
 const AIM_LASER_LENGTH = 240.0
 const NEAR_DEATH_RED = Color(1.0, 0.1, 0.1)
+const POSSESSION_TINT = Color(0.55, 0.9, 0.85, 1.0)
+const POISON_TINT = Color(0.3, 1.0, 0.3, 1.0)
+const POSSESSION_TARGET_DEADZONE := 4.0
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
@@ -48,6 +51,7 @@ var near_death_time := 0.0
 var has_defeat_visuals := false
 var is_possessed := false
 var possession_time_left := 0.0
+var possession_target: Node2D
 
 const UPGRADE_DOT_SIZE := 4.0
 const UPGRADE_DOT_RADIUS := 2
@@ -69,12 +73,16 @@ func _ready():
 	visuals.modulate = Color.WHITE
 	normal_visuals_modulate = visuals.modulate
 	last_health = health_component.current_health
+	_update_status_tint()
 	
 	$hurtbox.body_entered.connect(on_body_entered)
 	$hurtbox.body_exited.connect(on_body_exited)
 	damage_interval_timer.timeout.connect(on_damage_interval_timer_timeout)
 	health_component.health_changed.connect(on_health_changed)
 	health_component.died.connect(on_died)
+	if poison_component != null:
+		poison_component.poison_started.connect(_on_poison_started)
+		poison_component.poison_ended.connect(_on_poison_ended)
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
 	for ability in abilities.get_children():
 		if ability.has_method("set_player_number"):
@@ -116,6 +124,7 @@ func _process(delta):
 		aim_laser.visible = false
 	else:
 		_update_aim_laser()
+	_update_status_tint()
 	_update_near_death_flash(delta)
 	_update_flash_overlay()
 
@@ -152,6 +161,39 @@ func get_movement_vector():
 
 
 func get_possession_movement_vector() -> Vector2:
+	if possession_target == null or not is_instance_valid(possession_target):
+		possession_target = _find_possession_target()
+	elif not possession_target.is_in_group("enemy") or possession_target.is_in_group("ghost"):
+		possession_target = _find_possession_target()
+	if possession_target == null:
+		return Vector2.ZERO
+	var offset = possession_target.global_position - global_position
+	if offset.length_squared() <= POSSESSION_TARGET_DEADZONE * POSSESSION_TARGET_DEADZONE:
+		return Vector2.ZERO
+	return offset.normalized()
+
+
+func update_possession(delta: float) -> void:
+	possession_time_left = max(possession_time_left - delta, 0.0)
+	if possession_time_left <= 0.0:
+		end_ghost_possession()
+
+
+func start_ghost_possession(duration: float) -> void:
+	is_possessed = true
+	possession_time_left = duration
+	possession_target = _find_possession_target()
+	_update_status_tint()
+
+
+func end_ghost_possession() -> void:
+	is_possessed = false
+	possession_time_left = 0.0
+	possession_target = null
+	_update_status_tint()
+
+
+func _find_possession_target() -> Node2D:
 	var closest_enemy: Node2D
 	var closest_distance := INF
 	for enemy in get_tree().get_nodes_in_group("enemy"):
@@ -164,25 +206,7 @@ func get_possession_movement_vector() -> Vector2:
 		if distance < closest_distance:
 			closest_distance = distance
 			closest_enemy = enemy_node
-	if closest_enemy == null:
-		return Vector2.ZERO
-	return (closest_enemy.global_position - global_position).normalized()
-
-
-func update_possession(delta: float) -> void:
-	possession_time_left = max(possession_time_left - delta, 0.0)
-	if possession_time_left <= 0.0:
-		end_ghost_possession()
-
-
-func start_ghost_possession(duration: float) -> void:
-	is_possessed = true
-	possession_time_left = duration
-
-
-func end_ghost_possession() -> void:
-	is_possessed = false
-	possession_time_left = 0.0
+	return closest_enemy
 
 func get_aim_direction() -> Vector2:
 	var suffix = get_player_action_suffix()
@@ -330,6 +354,7 @@ func end_regeneration():
 	stop_flash()
 	stop_near_death_flash()
 	visuals.modulate = normal_visuals_modulate
+	_update_status_tint()
 	visuals.visible = true
 	health_bar.visible = true
 	upgrade_dots.visible = true
@@ -516,6 +541,25 @@ func stop_near_death_flash() -> void:
 	near_death_flash.visible = false
 	near_death_flash.stop()
 	near_death_time = 0.0
+
+
+func _update_status_tint() -> void:
+	if player_color == null or is_regenerating:
+		return
+	var target_tint = get_player_tint()
+	if is_possessed:
+		target_tint = POSSESSION_TINT
+	elif poison_component != null and poison_component.is_poisoned:
+		target_tint = POISON_TINT
+	player_color.color = target_tint
+
+
+func _on_poison_started() -> void:
+	_update_status_tint()
+
+
+func _on_poison_ended() -> void:
+	_update_status_tint()
 
 
 func flash_experience_gain() -> void:
