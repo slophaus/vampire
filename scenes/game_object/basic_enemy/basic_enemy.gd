@@ -63,13 +63,12 @@ const SPIDER_JUMP_FORCE := 400.0
 @onready var dig_ability_controller = $Abilities/DigAbilityController
 @onready var mouse_sprite: AnimatedSprite2D = $Visuals/mouse_sprite
 @onready var dragon_sprite: AnimatedSprite2D = $Visuals/dragon_sprite
-@onready var rat_sprite: Sprite2D = $Visuals/RatSprite
+@onready var rat_sprite: AnimatedSprite2D = $Visuals/RatSprite
 @onready var spider_sprite: Sprite2D = $Visuals/SpiderSprite
 @onready var mouse_color: ColorRect = $Visuals/mouse_sprite/enemy_color
 @onready var dragon_color: ColorRect = $Visuals/dragon_sprite/enemy_color
 @onready var rat_color: ColorRect = $Visuals/RatSprite/enemy_color
 @onready var spider_color: ColorRect = $Visuals/SpiderSprite/enemy_color
-@onready var rat_texture: Texture2D = rat_sprite.texture
 
 var facing_multiplier := -1
 var enemy_tint := Color.WHITE
@@ -210,8 +209,6 @@ func apply_enemy_type(index: int) -> void:
 	fireball_ability_controller.set_active(enemy_index == 1)
 	dig_ability_controller.set_active(enemy_index == 0)
 	apply_dig_level()
-
-	rat_sprite.texture = rat_texture
 
 	var active_sprite: CanvasItem = mouse_sprite
 	if enemy_index == 1:
