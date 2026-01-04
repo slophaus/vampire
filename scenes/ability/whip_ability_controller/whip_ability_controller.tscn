@@ -5,3 +5,4 @@
 [node name="WhipAbilityController" type="Node2D"]
 z_index = 4
 script = ExtResource("1_2leyp")
+tip_hit_cooldown = 0.6
