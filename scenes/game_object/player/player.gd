@@ -10,6 +10,7 @@ const NEAR_DEATH_RED = Color(1.0, 0.1, 0.1)
 const POSSESSION_TINT = Color(0.55, 0.9, 0.85, 1.0)
 const POISON_TINT = Color(0.3, 1.0, 0.3, 1.0)
 const POSSESSION_TARGET_DEADZONE := 4.0
+const POSSESSION_BREAK_HITS := 3
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
@@ -52,6 +53,7 @@ var has_defeat_visuals := false
 var is_possessed := false
 var possession_time_left := 0.0
 var possession_target: Node2D
+var possession_damage_hits := 0
 
 const UPGRADE_DOT_SIZE := 4.0
 const UPGRADE_DOT_RADIUS := 2
@@ -183,6 +185,7 @@ func start_ghost_possession(duration: float) -> void:
 	is_possessed = true
 	possession_time_left = duration
 	possession_target = _find_possession_target()
+	possession_damage_hits = 0
 	_update_status_tint()
 
 
@@ -190,6 +193,7 @@ func end_ghost_possession() -> void:
 	is_possessed = false
 	possession_time_left = 0.0
 	possession_target = null
+	possession_damage_hits = 0
 	_update_status_tint()
 
 
@@ -311,10 +315,21 @@ func on_health_changed():
 		GameEvents.emit_player_damaged()
 		$HitRandomStreamPlayer.play_random()
 		flash_visuals(Color(1, 0.3, 0.3))
+		if is_possessed:
+			possession_damage_hits += 1
+			if possession_damage_hits >= POSSESSION_BREAK_HITS:
+				end_ghost_possession()
+				_force_ghost_respawn()
 	elif not is_regenerating and health_component.current_health > last_health:
 		flash_visuals(Color(0.3, 1, 0.3))
 	update_health_display()
 	last_health = health_component.current_health
+
+
+func _force_ghost_respawn() -> void:
+	for ghost in get_tree().get_nodes_in_group("ghost"):
+		if ghost.has_method("end_ghost_possession"):
+			ghost.call("end_ghost_possession")
 
 
 func spawn_damage_text(damage_amount: float) -> void:
