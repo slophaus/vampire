@@ -64,7 +64,10 @@ const GHOST_WANDER_MAX_DURATION := 2.4
 const GHOST_FADE_SPEED := 2.2
 const GHOST_POSSESSION_RADIUS := 28.0
 const GHOST_POSSESSION_DURATION := 10.0
-const GHOST_POSSESSION_TINT := Color(0.55, 0.85, 1.0, 1.0)
+const GHOST_POSSESSION_TINT := Color(0.55, 0.9, 0.85, 1.0)
+const GHOST_MAX_ALPHA := 0.85
+const GHOST_OFFSCREEN_RESPAWN_DELAY := 2.5
+const GHOST_RESPAWN_FADE_SPEED := 1.5
 @export var enemy_index := 0
 
 @onready var visuals := $Visuals
@@ -98,6 +101,8 @@ var spider_jump_cooldown := 0.0
 var ghost_wander_time_left := 0.0
 var ghost_wander_direction := Vector2.ZERO
 var ghost_fade_time := 0.0
+var ghost_offscreen_time := 0.0
+var ghost_respawn_fade := 1.0
 var ghost_possession_target: Node2D
 var ghost_possession_time_left := 0.0
 var is_possessed := false
@@ -316,6 +321,7 @@ func update_ghost_state(delta: float) -> void:
 	if try_start_ghost_possession():
 		return
 
+	update_ghost_offscreen(delta)
 	update_ghost_wander(delta)
 	velocity_component.move(self)
 	update_visual_facing()
@@ -329,7 +335,41 @@ func update_ghost_fade(delta: float) -> void:
 		return
 	ghost_fade_time += delta * GHOST_FADE_SPEED
 	var alpha = 0.35 + (sin(ghost_fade_time) * 0.35) + 0.3
-	visuals.modulate.a = clamp(alpha, 0.2, 1.0)
+	if ghost_respawn_fade < 1.0:
+		ghost_respawn_fade = min(ghost_respawn_fade + (delta * GHOST_RESPAWN_FADE_SPEED), 1.0)
+	visuals.modulate.a = clamp(alpha, 0.2, GHOST_MAX_ALPHA) * ghost_respawn_fade
+
+
+func update_ghost_offscreen(delta: float) -> void:
+	var view_rect := get_camera_view_rect()
+	if view_rect.has_point(global_position):
+		ghost_offscreen_time = 0.0
+		return
+	ghost_offscreen_time += delta
+	if ghost_offscreen_time < GHOST_OFFSCREEN_RESPAWN_DELAY:
+		return
+	respawn_ghost_on_screen(view_rect)
+	ghost_offscreen_time = 0.0
+
+
+func respawn_ghost_on_screen(view_rect: Rect2) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var spawn_x = rng.randf_range(view_rect.position.x, view_rect.position.x + view_rect.size.x)
+	var spawn_y = rng.randf_range(view_rect.position.y, view_rect.position.y + view_rect.size.y)
+	global_position = Vector2(spawn_x, spawn_y)
+	ghost_fade_time = 0.0
+	ghost_respawn_fade = 0.0
+
+
+func get_camera_view_rect() -> Rect2:
+	var camera := get_viewport().get_camera_2d()
+	var viewport_size := get_viewport_rect().size
+	if camera == null:
+		return Rect2(Vector2.ZERO, viewport_size)
+	var half_size := viewport_size * camera.zoom * 0.5
+	var min_position := camera.global_position - half_size
+	return Rect2(min_position, half_size * 2.0)
 
 
 func update_ghost_wander(delta: float) -> void:
@@ -383,11 +423,13 @@ func start_ghost_possession(target: Node2D, duration: float) -> void:
 	ghost_possession_target = target
 	ghost_possession_time_left = duration
 	visuals.modulate.a = 0.0
+	ghost_offscreen_time = 0.0
 
 
 func end_ghost_possession() -> void:
 	ghost_possession_target = null
 	ghost_possession_time_left = 0.0
+	ghost_respawn_fade = 0.0
 
 
 func update_ghost_flags() -> void:
@@ -410,6 +452,10 @@ func update_visual_scale() -> void:
 
 func can_be_possessed() -> bool:
 	return enemy_index != GHOST_ENEMY_INDEX and not is_possessed
+
+
+func is_invulnerable() -> bool:
+	return enemy_index == GHOST_ENEMY_INDEX and ghost_possession_target != null
 
 
 func start_enemy_possession(duration: float) -> void:

@@ -51,7 +51,11 @@ func should_ignore_hit(hitbox_component: HitboxComponent) -> bool:
 	if owner_node == null:
 		return false
 
-	return owner_node.get("is_regenerating") == true
+	if owner_node.get("is_regenerating") == true:
+		return true
+	if owner_node.has_method("is_invulnerable") and owner_node.is_invulnerable():
+		return true
+	return false
 
 
 func apply_knockback(hitbox_component: HitboxComponent) -> void:
