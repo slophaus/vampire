@@ -28,7 +28,7 @@ const ENEMY_TYPES = {
 		"acceleration": 10.0,
 		"facing_multiplier": -1,
 		"contact_damage": 1,
-		"poison_contact_duration": 3.0
+		"poison_contact_duration": 20.0
 	}
 }
 
@@ -46,11 +46,11 @@ const DRAGON_ENEMY_INDEX := 1
 const RAT_ENEMY_INDEX := 2
 const SPIDER_ENEMY_INDEX := 4
 const SPIDER_BURST_DURATION := 0.3
-const SPIDER_REST_DURATION := 0.9
-const SPIDER_STOP_DECELERATION := 500.0
-const SPIDER_JUMP_RANGE := 100.0
+const SPIDER_REST_DURATION := 1.2
+const SPIDER_STOP_DECELERATION := 600.0
+const SPIDER_JUMP_RANGE := 150.0
 const SPIDER_JUMP_COOLDOWN := 1.1
-const SPIDER_JUMP_FORCE := 300.0
+const SPIDER_JUMP_FORCE := 400.0
 @export var enemy_index := 0
 
 @onready var visuals := $Visuals
@@ -116,7 +116,7 @@ func update_spider_movement(delta: float) -> void:
 			Vector2.ZERO,
 			SPIDER_STOP_DECELERATION * delta
 		)
-		if spider_rest_time_left <= 0.0:
+		if spider_rest_time_left <= 0.1:
 			try_spider_jump()
 		return
 
