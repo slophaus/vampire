@@ -21,6 +21,14 @@ const ENEMY_TYPES = {
 		"acceleration": 1.5,
 		"facing_multiplier": -1,
 		"contact_damage": 2
+	},
+	4: {
+		"max_health": 6.0,
+		"max_speed": 160,
+		"acceleration": 10.0,
+		"facing_multiplier": -1,
+		"contact_damage": 1,
+		"poison_contact_duration": 3.0
 	}
 }
 
@@ -36,6 +44,13 @@ const ELITE_TINT_VALUE := 0.6
 const STANDARD_TINT_VALUE := 1.0
 const DRAGON_ENEMY_INDEX := 1
 const RAT_ENEMY_INDEX := 2
+const SPIDER_ENEMY_INDEX := 4
+const SPIDER_BURST_DURATION := 0.35
+const SPIDER_REST_DURATION := 0.25
+const SPIDER_STOP_DECELERATION := 320.0
+const SPIDER_JUMP_RANGE := 52.0
+const SPIDER_JUMP_COOLDOWN := 1.1
+const SPIDER_JUMP_FORCE := 160.0
 @export var enemy_index := 0
 
 @onready var visuals := $Visuals
@@ -49,16 +64,22 @@ const RAT_ENEMY_INDEX := 2
 @onready var mouse_sprite: AnimatedSprite2D = $Visuals/mouse_sprite
 @onready var dragon_sprite: AnimatedSprite2D = $Visuals/dragon_sprite
 @onready var rat_sprite: Sprite2D = $Visuals/RatSprite
+@onready var spider_sprite: Sprite2D = $Visuals/SpiderSprite
 @onready var mouse_color: ColorRect = $Visuals/mouse_sprite/enemy_color
 @onready var dragon_color: ColorRect = $Visuals/dragon_sprite/enemy_color
 @onready var rat_color: ColorRect = $Visuals/RatSprite/enemy_color
+@onready var spider_color: ColorRect = $Visuals/SpiderSprite/enemy_color
 @onready var rat_texture: Texture2D = rat_sprite.texture
 
 var facing_multiplier := -1
 var enemy_tint := Color.WHITE
 var contact_damage := 1.0
+var poison_contact_duration := 0.0
 var is_elite := false
 var size_multiplier := 1.0
+var spider_burst_time_left := 0.0
+var spider_rest_time_left := 0.0
+var spider_jump_cooldown := 0.0
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
 	assign_elite_status()
@@ -69,16 +90,59 @@ func _ready():
 
 
 func _physics_process(delta):
-	if enemy_index == RAT_ENEMY_INDEX or enemy_index == DRAGON_ENEMY_INDEX:
+	if enemy_index == SPIDER_ENEMY_INDEX:
+		update_spider_movement(delta)
+	elif enemy_index == RAT_ENEMY_INDEX or enemy_index == DRAGON_ENEMY_INDEX:
 		accelerate_to_player_with_pathfinding()
 	else:
 		velocity_component.accelerate_to_player()
 	apply_enemy_separation()
 	velocity_component.move(self)
 
+	update_visual_facing()
+
+
+func update_visual_facing() -> void:
 	var move_sign = sign(velocity.x)
 	if move_sign != 0:
 		visuals.scale = Vector2(move_sign * facing_multiplier * size_multiplier, size_multiplier)
+
+
+func update_spider_movement(delta: float) -> void:
+	spider_jump_cooldown = max(spider_jump_cooldown - delta, 0.0)
+	if spider_rest_time_left > 0.0:
+		spider_rest_time_left = max(spider_rest_time_left - delta, 0.0)
+		velocity_component.velocity = velocity_component.velocity.move_toward(
+			Vector2.ZERO,
+			SPIDER_STOP_DECELERATION * delta
+		)
+		return
+
+	if spider_burst_time_left > 0.0:
+		spider_burst_time_left = max(spider_burst_time_left - delta, 0.0)
+		accelerate_to_player_with_pathfinding()
+		try_spider_jump()
+		if spider_burst_time_left <= 0.0:
+			spider_rest_time_left = SPIDER_REST_DURATION
+		return
+
+	spider_burst_time_left = SPIDER_BURST_DURATION
+
+
+func try_spider_jump() -> void:
+	if spider_jump_cooldown > 0.0:
+		return
+	var target_player := velocity_component.cached_player
+	if target_player == null:
+		velocity_component.refresh_target_player(global_position)
+		target_player = velocity_component.cached_player
+	if target_player == null:
+		return
+	if global_position.distance_to(target_player.global_position) > SPIDER_JUMP_RANGE:
+		return
+	var direction = (target_player.global_position - global_position).normalized()
+	velocity_component.apply_knockback(direction, SPIDER_JUMP_FORCE)
+	spider_jump_cooldown = SPIDER_JUMP_COOLDOWN
 
 
 func accelerate_to_player_with_pathfinding() -> void:
@@ -132,10 +196,12 @@ func apply_enemy_type(index: int) -> void:
 	health_component.max_health = enemy_data["max_health"]
 	health_component.current_health = enemy_data["max_health"]
 	contact_damage = enemy_data["contact_damage"]
+	poison_contact_duration = enemy_data.get("poison_contact_duration", 0.0)
 
 	mouse_sprite.visible = enemy_index == 0
 	dragon_sprite.visible = enemy_index == 1
 	rat_sprite.visible = enemy_index == 2
+	spider_sprite.visible = enemy_index == SPIDER_ENEMY_INDEX
 	fireball_ability_controller.set_active(enemy_index == 1)
 	dig_ability_controller.set_active(enemy_index == 0)
 	apply_dig_level()
@@ -147,6 +213,8 @@ func apply_enemy_type(index: int) -> void:
 		active_sprite = dragon_sprite
 	elif enemy_index == 2:
 		active_sprite = rat_sprite
+	elif enemy_index == SPIDER_ENEMY_INDEX:
+		active_sprite = spider_sprite
 
 	hit_flash_component.set_sprite(active_sprite)
 	death_component.sprite = active_sprite
@@ -165,7 +233,7 @@ func apply_random_tint():
 
 
 func apply_enemy_tint() -> void:
-	for tint_rect in [mouse_color, dragon_color, rat_color]:
+	for tint_rect in [mouse_color, dragon_color, rat_color, spider_color]:
 		if tint_rect == null:
 			continue
 		tint_rect.color = enemy_tint

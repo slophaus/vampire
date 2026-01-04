@@ -182,6 +182,8 @@ func on_arena_difficulty_increased(arena_difficulty: int):
 	
 	if arena_difficulty == 2:
 		enemy_table.add_item(3, 1)
+	if arena_difficulty == 4:
+		enemy_table.add_item(4, 6)
 	if arena_difficulty == 8:
 		enemy_table.add_item(1, 5)
 	if arena_difficulty == 12:

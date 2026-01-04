@@ -1,10 +1,11 @@
-[gd_scene load_steps=27 format=3 uid="uid://c1y0b6v3m7kqj"]
+[gd_scene load_steps=28 format=3 uid="uid://c1y0b6v3m7kqj"]
 
 [ext_resource type="Script" uid="uid://bye5hmlwe8gub" path="res://scenes/game_object/boss_enemy/boss_enemy.gd" id="1_gpcli"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_en8ir"]
 [ext_resource type="PackedScene" uid="uid://6kroo8paddhur" path="res://scenes/component/blood_drop_component.tscn" id="3_q7nm4"]
 [ext_resource type="PackedScene" uid="uid://cn4jjvvblm8lp" path="res://scenes/component/velocity_component.tscn" id="4_7n42o"]
 [ext_resource type="PackedScene" uid="uid://gsyk0iqo1m50" path="res://scenes/component/hurtbox_component.tscn" id="4_e2gan"]
+[ext_resource type="PackedScene" uid="uid://b4d5h026u4tmt" path="res://scenes/component/poison_component.tscn" id="4_qmdh2"]
 [ext_resource type="PackedScene" uid="uid://cjxiijis5jocn" path="res://scenes/component/death_component.tscn" id="4_j8jii"]
 [ext_resource type="PackedScene" uid="uid://b1rgnu4v5t5yp" path="res://scenes/ability/fireball_ability_controller/fireball_ability_controller.tscn" id="5_m1ysn"]
 [ext_resource type="PackedScene" uid="uid://b20x14h768t03" path="res://scenes/ability/sword_ability_controller/sword_ability_controller.tscn" id="6_5p4sr"]
@@ -77,6 +78,9 @@ script = ExtResource("1_gpcli")
 minion_spawn_interval_range = Vector2(2, 6)
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_en8ir")]
+
+[node name="PoisonComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("4_qmdh2")]
+health_component = NodePath("../HealthComponent")
 
 [node name="BloodDropComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_q7nm4")]
 health_component = NodePath("../HealthComponent")
