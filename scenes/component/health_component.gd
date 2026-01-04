@@ -7,16 +7,18 @@ signal health_changed
 @export var max_health: float = 10
 @export var free_owner_on_death := true
 var current_health: float
+var last_damage_color: Color = Color(1, 0.3, 0.3)
 
 
 func _ready():
 	current_health = max_health
 
 
-func damage(damage_amount: float):
+func damage(damage_amount: float, damage_color: Color = Color(1, 0.3, 0.3)):
 	# clamping
 	var resolved_damage = ceil(damage_amount)
 	current_health = max(current_health - resolved_damage, 0)
+	last_damage_color = damage_color
 	health_changed.emit()
 	Callable(check_death).call_deferred()
 

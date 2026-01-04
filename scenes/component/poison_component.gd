@@ -44,7 +44,7 @@ func apply_poison(duration: float = 0.0) -> void:
 func _on_tick_timer_timeout() -> void:
 	if health_component == null or not is_poisoned:
 		return
-	health_component.damage(damage_per_tick)
+	health_component.damage(damage_per_tick, Color(0.3, 1, 0.3))
 	if tick_timer != null:
 		tick_timer.start()
 

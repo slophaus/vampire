@@ -261,7 +261,10 @@ func spawn_damage_text(damage_amount: float) -> void:
 	var fmt_string := "%0.1f"
 	if is_equal_approx(damage_amount, int(damage_amount)):
 		fmt_string = "%0.0f"
-	floating_text.start(fmt_string % damage_amount, Color(1, 0.3, 0.3))
+	var damage_color := Color(1, 0.3, 0.3)
+	if health_component != null:
+		damage_color = health_component.last_damage_color
+	floating_text.start(fmt_string % damage_amount, damage_color)
 
 
 func on_died():
