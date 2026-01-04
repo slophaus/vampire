@@ -61,11 +61,10 @@ const SPIDER_JUMP_COOLDOWN := 1.1
 const SPIDER_JUMP_FORCE := 400.0
 const GHOST_WANDER_MIN_DURATION := 1.2
 const GHOST_WANDER_MAX_DURATION := 2.4
-const GHOST_FADE_SPEED := 2.2
+const GHOST_FADE_SPEED := 1.0
 const GHOST_POSSESSION_RADIUS := 28.0
 const GHOST_POSSESSION_DURATION := 3.0
 const GHOST_POSSESSION_TINT := Color(0.55, 0.9, 0.85, 1.0)
-const GHOST_MAX_ALPHA := 0.85
 const GHOST_OFFSCREEN_RESPAWN_DELAY := 2.5
 const GHOST_RESPAWN_FADE_SPEED := 1.5
 @export var enemy_index := 0
@@ -334,10 +333,10 @@ func update_ghost_fade(delta: float) -> void:
 		visuals.modulate.a = 0.0
 		return
 	ghost_fade_time += delta * GHOST_FADE_SPEED
-	var alpha = 0.35 + (sin(ghost_fade_time) * 0.35) + 0.3
+	var alpha = 0.3 + (sin(ghost_fade_time) * 0.3)
 	if ghost_respawn_fade < 1.0:
 		ghost_respawn_fade = min(ghost_respawn_fade + (delta * GHOST_RESPAWN_FADE_SPEED), 1.0)
-	visuals.modulate.a = clamp(alpha, 0.2, GHOST_MAX_ALPHA) * ghost_respawn_fade
+	visuals.modulate.a = alpha * ghost_respawn_fade
 
 
 func update_ghost_offscreen(delta: float) -> void:
