@@ -5,6 +5,7 @@ const OFFSCREEN_MARGIN = 10
 const MAX_SPAWN_RADIUS_MULTIPLIER = 0.75
 const MAX_ENEMIES = 500
 const MAX_SPAWN_ATTEMPTS = 100
+const GHOST_ENEMY_INDEX := 5
 
 @export var enemy_scene: PackedScene
 @export var worm_scene: PackedScene
@@ -124,6 +125,8 @@ func on_timer_timeout():
 		return
 
 	var enemy_index = enemy_table.pick_item()
+	if enemy_index == GHOST_ENEMY_INDEX and not can_spawn_ghost():
+		enemy_index = pick_non_ghost_enemy()
 	var enemy = get_enemy_scene(enemy_index).instantiate() as Node2D
 	if enemy_index != 3:
 		enemy.set("enemy_index", enemy_index)
@@ -175,6 +178,18 @@ func get_enemy_scene(enemy_index: int) -> PackedScene:
 	return enemy_scene
 
 
+func can_spawn_ghost() -> bool:
+	return get_tree().get_nodes_in_group("ghost").is_empty()
+
+
+func pick_non_ghost_enemy() -> int:
+	for attempt in range(10):
+		var enemy_index = enemy_table.pick_item()
+		if enemy_index != GHOST_ENEMY_INDEX:
+			return enemy_index
+	return 0
+
+
 func on_arena_difficulty_increased(arena_difficulty: int):
 	var spawn_rate = get_spawn_rate_for_difficulty(arena_difficulty)
 	if spawn_rate > 0.0:
@@ -188,3 +203,5 @@ func on_arena_difficulty_increased(arena_difficulty: int):
 		enemy_table.add_item(1, 5)
 	if arena_difficulty == 12:
 		enemy_table.add_item(2, 4)
+	if arena_difficulty == 14:
+		enemy_table.add_item(GHOST_ENEMY_INDEX, 1)
