@@ -203,6 +203,7 @@ static func initialize_dirt_border_for_tilemap(arena_tilemap: TileMap) -> void:
 	var dirt_border_layer = arena_tilemap.get_node_or_null(DIRT_BORDER_LAYER_NAME) as TileMapLayer
 	if dirt_border_layer == null:
 		return
+	dirt_border_layer.clear()
 	var floor_cells: Array[Vector2i] = []
 	for cell in arena_tilemap.get_used_cells(0):
 		if _is_walkable_cell_in_tilemap(arena_tilemap, cell):
