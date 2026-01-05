@@ -104,26 +104,36 @@ func _run_wave_function_collapse(cells: Array[Vector2i], tile_count: int, freque
 	for cell in cells:
 		possibilities[cell] = _make_full_possibilities(tile_count)
 	var collapsed: Dictionary = {}
-	while collapsed.size() < cells.size():
-		var next_cell = _find_lowest_entropy_cell(cells, possibilities)
-		if next_cell == null:
-			break
-		var options = possibilities[next_cell] as Array
-		if options.is_empty():
-			return {}
-		var chosen = _choose_weighted_tile(options, frequencies)
-		possibilities[next_cell] = [chosen]
-		collapsed[next_cell] = chosen
-		if not _propagate_constraints(next_cell, possibilities, adjacency):
-			return {}
-	if collapsed.size() < cells.size():
+	return _collapse_with_backtracking(cells, possibilities, collapsed, frequencies, adjacency)
+
+
+func _collapse_with_backtracking(cells: Array[Vector2i], possibilities: Dictionary, collapsed: Dictionary, frequencies: Array, adjacency: Array) -> Dictionary:
+	var next_cell = _find_lowest_entropy_cell(cells, possibilities)
+	if next_cell == null:
 		for cell in cells:
 			if collapsed.has(cell):
 				continue
 			var options = possibilities[cell] as Array
 			if options.size() == 1:
 				collapsed[cell] = options[0]
-	return collapsed
+			else:
+				return {}
+		return collapsed
+	var options = possibilities[next_cell] as Array
+	if options.is_empty():
+		return {}
+	var ordered_options = _weighted_option_order(options, frequencies)
+	for option in ordered_options:
+		var possibilities_copy = _clone_possibilities(possibilities)
+		var collapsed_copy = collapsed.duplicate()
+		possibilities_copy[next_cell] = [option]
+		collapsed_copy[next_cell] = option
+		if not _propagate_constraints(next_cell, possibilities_copy, adjacency):
+			continue
+		var result = _collapse_with_backtracking(cells, possibilities_copy, collapsed_copy, frequencies, adjacency)
+		if not result.is_empty():
+			return result
+	return {}
 
 
 func _propagate_constraints(start_cell: Vector2i, possibilities: Dictionary, adjacency: Array) -> bool:
@@ -189,12 +199,29 @@ func _choose_weighted_tile(options: Array, frequencies: Array) -> int:
 	return options[options.size() - 1]
 
 
+func _weighted_option_order(options: Array, frequencies: Array) -> Array:
+	var remaining = options.duplicate()
+	var ordered: Array = []
+	while not remaining.is_empty():
+		var chosen = _choose_weighted_tile(remaining, frequencies)
+		ordered.append(chosen)
+		remaining.erase(chosen)
+	return ordered
+
+
 func _make_full_possibilities(tile_count: int) -> Array:
 	var options: Array = []
 	options.resize(tile_count)
 	for i in range(tile_count):
 		options[i] = i
 	return options
+
+
+func _clone_possibilities(possibilities: Dictionary) -> Dictionary:
+	var cloned: Dictionary = {}
+	for cell in possibilities.keys():
+		cloned[cell] = (possibilities[cell] as Array).duplicate()
+	return cloned
 
 
 func _apply_collapsed_tiles(tilemap: TileMap, collapsed: Dictionary, tile_patterns: Array, pattern_size: int) -> void:
