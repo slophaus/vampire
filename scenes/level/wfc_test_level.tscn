@@ -375,7 +375,21 @@ max_attempts = 10000
 random_seed = 8
 periodic_input = true
 
+[node name="LayerProps" type="Node2D" parent="."]
+z_index = 1
+
 [node name="PlayerSpawn" type="Node2D" parent="."]
 position = Vector2(381, 374)
 
-[node name="LayerEntities" type="Node2D" parent="." groups=["entities_layer"]]
+[node name="LayerBlood" type="Node2D" parent="." groups=["blood_layer"]]
+z_index = 2
+
+[node name="LayerVials" type="Node2D" parent="." groups=["vials_layer"]]
+z_index = 3
+
+[node name="LayerEntities2" type="Node2D" parent="." groups=["entities_layer"]]
+z_index = 5
+y_sort_enabled = true
+
+[node name="LayerEffects" type="Node2D" parent="." groups=["effects_layer", "foreground_layer"]]
+z_index = 6
