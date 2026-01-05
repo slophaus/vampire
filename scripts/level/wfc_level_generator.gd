@@ -9,6 +9,7 @@ const DIRECTIONS := [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 @export var max_attempts := 5
 @export var random_seed := 0
 @export_range(1, 4, 1) var overlap_size := 2
+@export var show_propagation := false
 
 var _rng := RandomNumberGenerator.new()
 
@@ -53,8 +54,18 @@ func generate_level() -> void:
 		_rng.seed = random_seed
 	else:
 		_rng.randomize()
+	if show_propagation:
+		tilemap.clear()
 	while attempt < max_attempts:
-		var collapsed = _run_wave_function_collapse(pattern_cells, tile_patterns.size(), tile_frequencies, adjacency)
+		var collapsed = _run_wave_function_collapse(
+			pattern_cells,
+			tile_patterns.size(),
+			tile_frequencies,
+			adjacency,
+			tilemap,
+			tile_patterns,
+			pattern_size
+		)
 		if not collapsed.is_empty():
 			print_debug("WFC: collapsed %d tiles" % collapsed.size())
 			_apply_collapsed_tiles(tilemap, collapsed, tile_patterns, pattern_size)
@@ -96,7 +107,15 @@ func _collect_sample_data(sample_tilemap: TileMap, sample_cells: Array[Vector2i]
 	}
 
 
-func _run_wave_function_collapse(cells: Array[Vector2i], tile_count: int, frequencies: Array, adjacency: Array) -> Dictionary:
+func _run_wave_function_collapse(
+	cells: Array[Vector2i],
+	tile_count: int,
+	frequencies: Array,
+	adjacency: Array,
+	tilemap: TileMap,
+	tile_patterns: Array,
+	pattern_size: int
+) -> Dictionary:
 	var possibilities: Dictionary = {}
 	for cell in cells:
 		possibilities[cell] = _make_full_possibilities(tile_count)
@@ -111,7 +130,9 @@ func _run_wave_function_collapse(cells: Array[Vector2i], tile_count: int, freque
 		var chosen = _choose_weighted_tile(options, frequencies)
 		possibilities[next_cell] = [chosen]
 		collapsed[next_cell] = chosen
-		if not _propagate_constraints(next_cell, possibilities, adjacency):
+		if show_propagation:
+			_apply_pattern_to_tilemap(tilemap, next_cell, tile_patterns[chosen], pattern_size)
+		if not _propagate_constraints(next_cell, possibilities, adjacency, tilemap, tile_patterns, pattern_size):
 			return {}
 	if collapsed.size() < cells.size():
 		for cell in cells:
@@ -123,7 +144,14 @@ func _run_wave_function_collapse(cells: Array[Vector2i], tile_count: int, freque
 	return collapsed
 
 
-func _propagate_constraints(start_cell: Vector2i, possibilities: Dictionary, adjacency: Array) -> bool:
+func _propagate_constraints(
+	start_cell: Vector2i,
+	possibilities: Dictionary,
+	adjacency: Array,
+	tilemap: TileMap,
+	tile_patterns: Array,
+	pattern_size: int
+) -> bool:
 	var stack: Array[Vector2i] = [start_cell]
 	while not stack.is_empty():
 		var current = stack.pop_back()
@@ -145,6 +173,8 @@ func _propagate_constraints(start_cell: Vector2i, possibilities: Dictionary, adj
 			if filtered.is_empty():
 				return false
 			possibilities[neighbor] = filtered
+			if show_propagation and filtered.size() == 1:
+				_apply_pattern_to_tilemap(tilemap, neighbor, tile_patterns[filtered[0]], pattern_size)
 			stack.append(neighbor)
 	return true
 
@@ -198,13 +228,17 @@ func _apply_collapsed_tiles(tilemap: TileMap, collapsed: Dictionary, tile_patter
 	tilemap.clear()
 	for cell in collapsed.keys():
 		var pattern = tile_patterns[collapsed[cell]]
-		for y in range(pattern_size):
-			for x in range(pattern_size):
-				var variant = pattern["variants"][y * pattern_size + x]
-				if variant.source_id == -1:
-					continue
-				var target_cell = cell + Vector2i(x, y)
-				tilemap.set_cell(0, target_cell, variant.source_id, variant.atlas_coords, variant.alternative)
+		_apply_pattern_to_tilemap(tilemap, cell, pattern, pattern_size)
+
+
+func _apply_pattern_to_tilemap(tilemap: TileMap, cell: Vector2i, pattern: Dictionary, pattern_size: int) -> void:
+	for y in range(pattern_size):
+		for x in range(pattern_size):
+			var variant = pattern["variants"][y * pattern_size + x]
+			if variant.source_id == -1:
+				continue
+			var target_cell = cell + Vector2i(x, y)
+			tilemap.set_cell(0, target_cell, variant.source_id, variant.atlas_coords, variant.alternative)
 
 
 func _tile_key(tilemap: TileMap, cell: Vector2i) -> String:
