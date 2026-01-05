@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://d2t5e1r1c1gby"]
+[gd_scene load_steps=9 format=3 uid="uid://d2t5e1r1c1gby"]
 
 [ext_resource type="Script" uid="uid://lvnr8d2n13ye" path="res://scenes/level/level_root.gd" id="1_0tq7x"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="1_hxoa7"]
 [ext_resource type="Texture2D" uid="uid://dej1p0au5qgos" path="res://sprites/blob_dirt_border_6.png" id="8_qdgwu"]
+[ext_resource type="PackedScene" uid="uid://ct3bt3o3o1yqf" path="res://scenes/level/main_level.tscn" id="9_0dsme"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="10_t70je"]
 [ext_resource type="PackedScene" uid="uid://c1y0b6v3m7kqj" path="res://scenes/game_object/boss_enemy/boss_enemy.tscn" id="13_th5th"]
 
@@ -366,9 +367,10 @@ tile_set = SubResource("TileSet_ab1yv")
 [node name="LayerProps" type="Node2D" parent="."]
 z_index = 1
 
-[node name="Door" parent="LayerProps" instance=ExtResource("10_t70je")]
+[node name="DoorToMain" parent="LayerProps" instance=ExtResource("10_t70je")]
 position = Vector2(255, 378)
-door_mode = 1
+target_scene = ExtResource("9_0dsme")
+exit_door_name = &"DoorToBoss"
 
 [node name="PlayerSpawn" type="Node2D" parent="."]
 position = Vector2(381, 374)
