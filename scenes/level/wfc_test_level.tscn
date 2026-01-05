@@ -362,14 +362,15 @@ layer_0/tile_data = PackedInt32Array(655373, 458754, 3, 0, 458754, 3, 65536, 458
 tile_set = SubResource("TileSet_ou6is")
 
 [node name="TileMapSample" type="TileMap" parent="LayerTilemaps"]
+visible = false
 tile_set = ExtResource("2_tileset")
 format = 2
 layer_0/tile_data = PackedInt32Array(0, 458754, 3, 65536, 458754, 4, 131072, 458754, 5, 196608, 458754, 6, 262144, 458754, 7, 327680, 458754, 8, 1, 524290, 3, 65537, 524290, 4, 131073, 524290, 5, 196609, 524290, 6, 262145, 524290, 7, 327681, 524290, 8, 2, 589826, 3, 65538, 589826, 4, 131074, 589826, 5, 196610, 589826, 6, 262146, 589826, 7, 327682, 589826, 8, 3, 655362, 3, 65539, 655362, 4, 131075, 655362, 5, 196611, 655362, 6, 262147, 655362, 7, 327683, 655362, 8, 4, 720898, 3, 65540, 720898, 4, 131076, 720898, 5, 196612, 720898, 6, 262148, 720898, 7, 327684, 720898, 8)
 
 [node name="WFCLevelGenerator" type="Node" parent="."]
 script = ExtResource("4_wfc")
-target_tilemap_path = NodePath("LayerTilemaps/TileMapTarget")
-sample_tilemap_path = NodePath("LayerTilemaps/TileMapSample")
+target_tilemap_path = NodePath("../LayerTilemaps/TileMapTarget")
+sample_tilemap_path = NodePath("../LayerTilemaps/TileMapSample")
 max_attempts = 100
 random_seed = 6
 
