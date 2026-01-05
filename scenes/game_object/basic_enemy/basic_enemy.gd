@@ -316,11 +316,11 @@ func apply_dig_level() -> void:
 func update_ghost_state(delta: float) -> void:
 	update_ghost_fade(delta)
 	if ghost_possession_target == null and ghost_possession_time_left > 0.0:
-		end_ghost_possession_with_options(true, true, false)
+		end_ghost_possession(true, true, false)
 		return
 	if ghost_possession_target != null:
 		if not is_instance_valid(ghost_possession_target):
-			end_ghost_possession_with_options(true, true, false)
+			end_ghost_possession(true, true, false)
 			return
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
 		global_position = ghost_possession_target.global_position
@@ -478,11 +478,7 @@ func start_ghost_possession(target: Node2D, duration: float) -> void:
 	ghost_offscreen_time = 0.0
 
 
-func end_ghost_possession(force_peak_visibility: bool = false) -> void:
-	end_ghost_possession_with_options(force_peak_visibility, false)
-
-
-func end_ghost_possession_with_options(force_peak_visibility: bool, start_cooldown: bool, respawn: bool = true) -> void:
+func end_ghost_possession(force_peak_visibility: bool = false, start_cooldown: bool = false, respawn: bool = true) -> void:
 	ghost_possession_target = null
 	ghost_possession_time_left = 0.0
 	if respawn:
