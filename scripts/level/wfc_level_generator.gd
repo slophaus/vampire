@@ -48,13 +48,12 @@ func generate_level() -> void:
 	else:
 		_rng.randomize()
 	while attempt < max_attempts:
-		print_debug("WFC: attempt %d/%d" % [attempt + 1, max_attempts])
 		var collapsed = _run_wave_function_collapse(target_cells, tile_variants.size(), tile_frequencies, adjacency)
 		if not collapsed.is_empty():
 			print_debug("WFC: collapsed %d tiles" % collapsed.size())
 			_apply_collapsed_tiles(tilemap, collapsed, tile_variants)
 			TileEater.initialize_dirt_border_for_tilemap(tilemap)
-			print_debug("WFC: generation complete")
+			print_debug("WFC: generation complete after %d attempts" % [attempt + 1])
 			return
 		attempt += 1
 	print_debug("WFC: failed to generate after %d attempts" % max_attempts)
