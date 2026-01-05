@@ -71,9 +71,9 @@ func _collect_sample_data(sample_tilemap: TileMap, pattern_size: int, sample_rec
 	var pattern_index_by_key: Dictionary = {}
 	var tile_patterns: Array = []
 	var tile_frequencies: Array = []
-	var pattern_cells = _collect_pattern_cells(pattern_size, sample_rect)
+	var pattern_cells = _collect_pattern_cells_full_rect(sample_rect)
 	for cell in pattern_cells:
-		var pattern = _pattern_from_cell(sample_tilemap, cell, pattern_size)
+		var pattern = _pattern_from_cell_wrapped(sample_tilemap, cell, pattern_size, sample_rect)
 		var pattern_key = _pattern_key(pattern)
 		if not pattern_index_by_key.has(pattern_key):
 			pattern_index_by_key[pattern_key] = tile_patterns.size()
@@ -247,6 +247,24 @@ func _pattern_from_cell(tilemap: TileMap, cell: Vector2i, pattern_size: int) -> 
 	}
 
 
+func _pattern_from_cell_wrapped(tilemap: TileMap, cell: Vector2i, pattern_size: int, wrap_rect: Rect2i) -> Dictionary:
+	var keys: Array = []
+	var variants: Array = []
+	keys.resize(pattern_size * pattern_size)
+	variants.resize(pattern_size * pattern_size)
+	for y in range(pattern_size):
+		for x in range(pattern_size):
+			var offset = Vector2i(x, y)
+			var index = y * pattern_size + x
+			var wrapped_cell = _wrap_cell(cell + offset, wrap_rect)
+			keys[index] = _tile_key(tilemap, wrapped_cell)
+			variants[index] = _tile_variant_from_cell(tilemap, wrapped_cell)
+	return {
+		"keys": keys,
+		"variants": variants,
+	}
+
+
 func _pattern_key(pattern: Dictionary) -> String:
 	return "|".join(pattern["keys"])
 
@@ -274,6 +292,26 @@ func _collect_pattern_cells(pattern_size: int, used_rect: Rect2i) -> Array[Vecto
 		for x in range(min_pos.x, max_pos.x + 1):
 			pattern_cells.append(Vector2i(x, y))
 	return pattern_cells
+
+
+func _collect_pattern_cells_full_rect(used_rect: Rect2i) -> Array[Vector2i]:
+	var pattern_cells: Array[Vector2i] = []
+	var min_pos = used_rect.position
+	var max_pos = used_rect.position + used_rect.size - Vector2i.ONE
+	if max_pos.x < min_pos.x or max_pos.y < min_pos.y:
+		return pattern_cells
+	for y in range(min_pos.y, max_pos.y + 1):
+		for x in range(min_pos.x, max_pos.x + 1):
+			pattern_cells.append(Vector2i(x, y))
+	return pattern_cells
+
+
+func _wrap_cell(cell: Vector2i, rect: Rect2i) -> Vector2i:
+	if rect.size.x <= 0 or rect.size.y <= 0:
+		return cell
+	var offset = cell - rect.position
+	var wrapped = Vector2i(posmod(offset.x, rect.size.x), posmod(offset.y, rect.size.y))
+	return rect.position + wrapped
 
 
 func _get_tilemap(path: NodePath) -> TileMap:
