@@ -505,7 +505,6 @@ func update_ghost_flags() -> void:
 		collision_layer = 8
 		collision_mask = 9
 	visuals.modulate = Color(1, 1, 1, 1)
-	apply_ghost_cooldown_tint()
 
 
 func update_visual_scale() -> void:
@@ -514,24 +513,13 @@ func update_visual_scale() -> void:
 
 func start_ghost_possession_cooldown() -> void:
 	ghost_possession_cooldown_left = GHOST_POSSESSION_COOLDOWN
-	apply_ghost_cooldown_tint()
 
 
 func update_ghost_possession_cooldown(delta: float) -> bool:
 	if ghost_possession_cooldown_left <= 0.0:
 		return false
 	ghost_possession_cooldown_left = max(ghost_possession_cooldown_left - delta, 0.0)
-	apply_ghost_cooldown_tint()
 	return ghost_possession_cooldown_left > 0.0
-
-
-func apply_ghost_cooldown_tint() -> void:
-	if enemy_index != GHOST_ENEMY_INDEX or ghost_color == null:
-		return
-	if ghost_possession_cooldown_left > 0.0:
-		ghost_color.color = Color(1, 0.0, 0.0, 1.0)
-	else:
-		ghost_color.color = enemy_tint
 
 
 func can_be_possessed() -> bool:
