@@ -376,6 +376,7 @@ func respawn_ghost_on_screen(view_rect: Rect2) -> void:
 	global_position = Vector2(spawn_x, spawn_y)
 	ghost_fade_time = 0.0
 	ghost_respawn_fade = 0.0
+	start_ghost_possession_cooldown()
 
 
 func get_camera_view_rect() -> Rect2:
