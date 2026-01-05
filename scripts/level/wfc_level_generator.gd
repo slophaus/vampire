@@ -107,6 +107,10 @@ func generate_level(use_new_seed: bool = false) -> void:
 			tile.alternative_tile
 		)
 
+	if target_tilemap.has_meta(TileEater.DIRT_BORDER_META_KEY):
+		target_tilemap.remove_meta(TileEater.DIRT_BORDER_META_KEY)
+	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
+
 	print_debug("WFC: generation complete.")
 
 
