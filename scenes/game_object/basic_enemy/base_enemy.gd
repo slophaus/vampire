@@ -13,7 +13,12 @@ const ELITE_TINT_VALUE := 0.6
 const STANDARD_TINT_VALUE := 1.0
 const GHOST_POSSESSION_TINT := Color(0.2, 1.0, 0.6, 1.0)
 
-@export var enemy_stats: EnemyStats
+@export var base_max_health := 10.0
+@export var base_max_speed := 30.0
+@export var base_acceleration := 5.0
+@export var base_facing_multiplier := -1.0
+@export var base_contact_damage := 1.0
+@export var base_poison_contact_duration := 0.0
 
 @onready var visuals := $Visuals
 @onready var velocity_component: VelocityComponent = $VelocityComponent
@@ -58,17 +63,15 @@ func on_hit():
 
 
 func apply_enemy_stats() -> void:
-	if enemy_stats == null:
-		return
-	facing_multiplier = enemy_stats.facing_multiplier
-	velocity_component.max_speed = enemy_stats.max_speed
-	velocity_component.acceleration = enemy_stats.acceleration
+	facing_multiplier = base_facing_multiplier
+	velocity_component.max_speed = base_max_speed
+	velocity_component.acceleration = base_acceleration
 	navigation_agent.max_speed = velocity_component.max_speed
 
-	health_component.max_health = enemy_stats.max_health
-	health_component.current_health = enemy_stats.max_health
-	contact_damage = enemy_stats.contact_damage
-	poison_contact_duration = enemy_stats.poison_contact_duration
+	health_component.max_health = base_max_health
+	health_component.current_health = base_max_health
+	contact_damage = base_contact_damage
+	poison_contact_duration = base_poison_contact_duration
 
 
 func set_active_sprite(active_sprite: CanvasItem) -> void:

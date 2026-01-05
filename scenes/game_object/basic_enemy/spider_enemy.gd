@@ -12,6 +12,12 @@ var spider_rest_time_left := 0.0
 var spider_jump_cooldown := 0.0
 
 func _ready():
+	base_max_health = 10.0
+	base_max_speed = 30.0
+	base_acceleration = 5.0
+	base_facing_multiplier = -1.0
+	base_contact_damage = 1.0
+	base_poison_contact_duration = 0.0
 	super._ready()
 	set_sprite_visibility(spider_sprite)
 	set_active_sprite(spider_sprite)
