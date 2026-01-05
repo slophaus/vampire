@@ -23,6 +23,10 @@ func generate_level() -> void:
 	if tilemap == null:
 		print_debug("WFC: no target tilemap found (assign target_tilemap_path on the generator)")
 		return
+	var target_cells = tilemap.get_used_cells(0)
+	if target_cells.is_empty():
+		print_debug("WFC: target tilemap has no used cells")
+		return
 	var sample_tilemap = _get_tilemap(sample_tilemap_path)
 	if sample_tilemap == null:
 		print_debug("WFC: no sample tilemap provided; using target tilemap")
@@ -45,7 +49,7 @@ func generate_level() -> void:
 		_rng.randomize()
 	while attempt < max_attempts:
 		print_debug("WFC: attempt %d/%d" % [attempt + 1, max_attempts])
-		var collapsed = _run_wave_function_collapse(sample_cells, tile_variants.size(), tile_frequencies, adjacency)
+		var collapsed = _run_wave_function_collapse(target_cells, tile_variants.size(), tile_frequencies, adjacency)
 		if not collapsed.is_empty():
 			print_debug("WFC: collapsed %d tiles" % collapsed.size())
 			_apply_collapsed_tiles(tilemap, collapsed, tile_variants)
