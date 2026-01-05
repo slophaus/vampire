@@ -317,8 +317,6 @@ func update_ghost_state(delta: float) -> void:
 	update_ghost_fade(delta)
 	if ghost_possession_target != null:
 		if not is_instance_valid(ghost_possession_target):
-			if ghost_possession_was_enemy:
-				start_ghost_possession_cooldown()
 			end_ghost_possession(true)
 			return
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
@@ -482,6 +480,8 @@ func start_ghost_possession(target: Node2D, duration: float) -> void:
 
 
 func end_ghost_possession(force_peak_visibility: bool = false) -> void:
+	if ghost_possession_target != null:
+		start_ghost_possession_cooldown()
 	ghost_possession_target = null
 	ghost_possession_time_left = 0.0
 	ghost_possession_was_enemy = false
