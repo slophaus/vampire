@@ -17,6 +17,7 @@ const GHOST_ENEMY_INDEX := 5
 
 var base_spawn_time = 0  # sec
 var enemy_table = WeightedTable.new()
+var failed_spawn_count := 0
 
 
 func _ready():
@@ -122,6 +123,7 @@ func on_timer_timeout():
 		if spawn_position != Vector2.ZERO:
 			break
 	if spawn_position == Vector2.ZERO:
+		failed_spawn_count += 1
 		return
 
 	var enemy_index = enemy_table.pick_item()
@@ -132,6 +134,10 @@ func on_timer_timeout():
 	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
 	entities_layer.add_child(enemy)
 	enemy.global_position = spawn_position
+
+
+func get_failed_spawn_count() -> int:
+	return failed_spawn_count
 
 
 func get_spawn_rate() -> float:
