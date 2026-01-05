@@ -20,7 +20,7 @@ var ghost_possession_time_left := 0.0
 var ghost_possession_cooldown := 0.0
 
 func _ready():
-	super()
+	super._ready()
 	set_sprite_visibility(ghost_sprite)
 	set_active_sprite(ghost_sprite)
 	fireball_ability_controller.set_active(false)
