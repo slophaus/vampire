@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_0tq7x"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="1_hxoa7"]
-[ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="7_sd876"]
+[ext_resource type="PackedScene" path="res://scenes/game_object/basic_enemy/ghost_enemy.tscn" id="7_sd876"]
 [ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="8_ms8vg"]
 [ext_resource type="Texture2D" uid="uid://dej1p0au5qgos" path="res://sprites/blob_dirt_border_6.png" id="11_nvumn"]
 [ext_resource type="PackedScene" uid="uid://c8j2qneyiwkhy" path="res://scenes/game_object/experience_vial/experience_vial.tscn" id="14_raeie"]
@@ -395,9 +395,8 @@ y_sort_enabled = true
 [node name="LayerEffects" type="Node2D" parent="." groups=["effects_layer", "foreground_layer"]]
 z_index = 6
 
-[node name="BasicEnemy" parent="." instance=ExtResource("7_sd876")]
+[node name="GhostEnemy" parent="." instance=ExtResource("7_sd876")]
 position = Vector2(460, 371)
-enemy_index = 5
 
 [node name="WormEnemy" parent="." instance=ExtResource("8_ms8vg")]
 position = Vector2(512, 527)

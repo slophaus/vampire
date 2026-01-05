@@ -8,7 +8,7 @@ const MAX_SPAWN_ATTEMPTS = 100
 const GHOST_ENEMY_INDEX := 5
 
 @export var enemy_scene: PackedScene
-@export var worm_scene: PackedScene
+@export var enemy_scenes: Array[PackedScene] = []
 @export var arena_time_manager: ArenaTimeManager
 @export var arena_tilemap: TileMap
 @export var spawn_rate_keyframes: Array[Vector2] = [Vector2(1, 1.0), Vector2(16, 2.0)]
@@ -128,8 +128,6 @@ func on_timer_timeout():
 	if enemy_index == GHOST_ENEMY_INDEX and not can_spawn_ghost():
 		enemy_index = pick_non_ghost_enemy()
 	var enemy = get_enemy_scene(enemy_index).instantiate() as Node2D
-	if enemy_index != 3:
-		enemy.set("enemy_index", enemy_index)
 
 	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
 	entities_layer.add_child(enemy)
@@ -173,8 +171,10 @@ func get_spawn_rate_for_difficulty(arena_difficulty: int) -> float:
 
 
 func get_enemy_scene(enemy_index: int) -> PackedScene:
-	if enemy_index == 3 and worm_scene != null:
-		return worm_scene
+	if enemy_index >= 0 and enemy_index < enemy_scenes.size():
+		var scene = enemy_scenes[enemy_index]
+		if scene != null:
+			return scene
 	return enemy_scene
 
 

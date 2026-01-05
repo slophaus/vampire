@@ -1,13 +1,17 @@
-[gd_scene load_steps=4 format=3 uid="uid://eadorq7tpodo"]
+[gd_scene load_steps=7 format=3 uid="uid://eadorq7tpodo"]
 
 [ext_resource type="Script" uid="uid://fbx5f3e7sxto" path="res://scenes/manager/enemy_manager.gd" id="1_46876"]
-[ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="2_ytlsn"]
-[ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="3_0ybpt"]
+[ext_resource type="PackedScene" path="res://scenes/game_object/basic_enemy/mouse_enemy.tscn" id="2_ytlsn"]
+[ext_resource type="PackedScene" path="res://scenes/game_object/basic_enemy/dragon_enemy.tscn" id="3_0ybpt"]
+[ext_resource type="PackedScene" path="res://scenes/game_object/basic_enemy/rat_enemy.tscn" id="4_ntx8s"]
+[ext_resource type="PackedScene" uid="uid://cxsq2sucg8pjf" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="5_w8j1m"]
+[ext_resource type="PackedScene" path="res://scenes/game_object/basic_enemy/spider_enemy.tscn" id="6_6scq5"]
+[ext_resource type="PackedScene" path="res://scenes/game_object/basic_enemy/ghost_enemy.tscn" id="7_44g0d"]
 
 [node name="EnemyManager" type="Node"]
 script = ExtResource("1_46876")
 enemy_scene = ExtResource("2_ytlsn")
-worm_scene = ExtResource("3_0ybpt")
+enemy_scenes = Array[PackedScene]([ExtResource("2_ytlsn"), ExtResource("3_0ybpt"), ExtResource("4_ntx8s"), ExtResource("5_w8j1m"), ExtResource("6_6scq5"), ExtResource("7_44g0d")])
 spawn_rate_keyframes = Array[Vector2]([Vector2(1, 0.5), Vector2(3, 1), Vector2(16, 2)])
 
 [node name="Timer" type="Timer" parent="."]

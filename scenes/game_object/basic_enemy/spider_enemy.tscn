@@ -1,0 +1,9 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_4u6wh"]
+[ext_resource type="Script" path="res://scenes/game_object/basic_enemy/spider_enemy.gd" id="2_xg0uw"]
+[ext_resource type="Resource" path="res://resources/enemy_stats/spider_enemy.tres" id="3_45lbj"]
+
+[node name="SpiderEnemy" instance=ExtResource("1_4u6wh")]
+script = ExtResource("2_xg0uw")
+enemy_stats = ExtResource("3_45lbj")

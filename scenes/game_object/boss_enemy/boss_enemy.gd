@@ -10,7 +10,7 @@ const SEPARATION_RADIUS := 15.0
 const SEPARATION_PUSH_STRENGTH := 5.0
 const MINION_SPAWN_COUNT := 4
 const MINION_SPAWN_RADIUS := 32.0
-@export var minion_scene: PackedScene = preload("res://scenes/game_object/basic_enemy/basic_enemy.tscn")
+@export var minion_scene: PackedScene = preload("res://scenes/game_object/basic_enemy/dragon_enemy.tscn")
 @export var minion_spawn_interval_range := Vector2(6.0, 10.0)
 @export var explosion_scene: PackedScene = preload("res://scenes/vfx/explosion.tscn")
 @export var boss_explosion_duration_multiplier := 5.0
@@ -173,7 +173,6 @@ func spawn_minions() -> void:
 	rng.randomize()
 	for i in range(MINION_SPAWN_COUNT):
 		var minion = minion_scene.instantiate() as Node2D
-		minion.set("enemy_index", 1)
 		spawn_parent.add_child(minion)
 		var angle = rng.randf_range(0.0, TAU)
 		var offset = Vector2(cos(angle), sin(angle)) * MINION_SPAWN_RADIUS
