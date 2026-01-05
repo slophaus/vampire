@@ -18,14 +18,18 @@ func _ready() -> void:
 
 
 func generate_level() -> void:
+	print_debug("WFC: starting level generation")
 	var tilemap = _get_tilemap(target_tilemap_path)
 	if tilemap == null:
+		print_debug("WFC: no target tilemap found")
 		return
 	var sample_tilemap = _get_tilemap(sample_tilemap_path)
 	if sample_tilemap == null:
+		print_debug("WFC: no sample tilemap provided; using target tilemap")
 		sample_tilemap = tilemap
 	var sample_cells = sample_tilemap.get_used_cells(0)
 	if sample_cells.is_empty():
+		print_debug("WFC: sample tilemap has no used cells")
 		return
 	var cell_set: Dictionary = {}
 	for cell in sample_cells:
@@ -40,12 +44,16 @@ func generate_level() -> void:
 	else:
 		_rng.randomize()
 	while attempt < max_attempts:
+		print_debug("WFC: attempt %d/%d" % [attempt + 1, max_attempts])
 		var collapsed = _run_wave_function_collapse(sample_cells, tile_variants.size(), tile_frequencies, adjacency)
 		if not collapsed.is_empty():
+			print_debug("WFC: collapsed %d tiles" % collapsed.size())
 			_apply_collapsed_tiles(tilemap, collapsed, tile_variants)
 			TileEater.initialize_dirt_border_for_tilemap(tilemap)
+			print_debug("WFC: generation complete")
 			return
 		attempt += 1
+	print_debug("WFC: failed to generate after %d attempts" % max_attempts)
 
 
 func _collect_sample_data(sample_tilemap: TileMap, sample_cells: Array[Vector2i]) -> Dictionary:
@@ -103,6 +111,13 @@ func _run_wave_function_collapse(cells: Array[Vector2i], tile_count: int, freque
 		collapsed[next_cell] = chosen
 		if not _propagate_constraints(next_cell, possibilities, adjacency, tile_count):
 			return {}
+	if collapsed.size() < cells.size():
+		for cell in cells:
+			if collapsed.has(cell):
+				continue
+			var options = possibilities[cell] as Array
+			if options.size() == 1:
+				collapsed[cell] = options[0]
 	return collapsed
 
 
