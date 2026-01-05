@@ -27,6 +27,7 @@ const POSSESSION_BREAK_HITS := 3
 @onready var aim_laser: Line2D = $AimLaser
 @onready var player_collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var poison_component: PoisonComponent = $PoisonComponent
+@onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
 
 @export var player_number := 1
 @export var regen_rate := 0.67
@@ -76,6 +77,8 @@ func _ready():
 	visuals.modulate = Color.WHITE
 	normal_visuals_modulate = visuals.modulate
 	last_health = health_component.current_health
+	if navigation_agent != null:
+		navigation_agent.max_speed = velocity_component.max_speed
 	_update_status_tint()
 	
 	$hurtbox.body_entered.connect(on_body_entered)
@@ -170,10 +173,10 @@ func get_possession_movement_vector() -> Vector2:
 		possession_target = _find_possession_target()
 	if possession_target == null:
 		return Vector2.ZERO
-	var offset = possession_target.global_position - global_position
-	if offset.length_squared() <= POSSESSION_TARGET_DEADZONE * POSSESSION_TARGET_DEADZONE:
+	var direction = _get_possession_path_direction(possession_target)
+	if direction.length_squared() <= POSSESSION_TARGET_DEADZONE * POSSESSION_TARGET_DEADZONE:
 		return Vector2.ZERO
-	return offset.normalized()
+	return direction.normalized()
 
 
 func update_possession(delta: float) -> void:
@@ -190,6 +193,8 @@ func start_ghost_possession(duration: float, ghost_speed: float = -1.0) -> void:
 	possessed_original_speed = velocity_component.max_speed
 	if ghost_speed > 0.0:
 		velocity_component.max_speed = ghost_speed
+	if navigation_agent != null:
+		navigation_agent.max_speed = velocity_component.max_speed
 	_update_status_tint()
 
 
@@ -201,6 +206,8 @@ func end_ghost_possession() -> void:
 	if possessed_original_speed > 0.0:
 		velocity_component.max_speed = possessed_original_speed
 	possessed_original_speed = 0.0
+	if navigation_agent != null:
+		navigation_agent.max_speed = velocity_component.max_speed
 	_update_status_tint()
 
 
@@ -220,6 +227,18 @@ func _find_possession_target() -> Node2D:
 			closest_distance = distance
 			closest_enemy = enemy_node
 	return closest_enemy
+
+
+func _get_possession_path_direction(target: Node2D) -> Vector2:
+	var offset = target.global_position - global_position
+	if navigation_agent == null:
+		return offset
+	navigation_agent.target_position = target.global_position
+	var next_path_position = navigation_agent.get_next_path_position()
+	var direction = next_path_position - global_position
+	if direction.length_squared() <= 0.001:
+		return offset
+	return direction
 
 func get_aim_direction() -> Vector2:
 	var suffix = get_player_action_suffix()
