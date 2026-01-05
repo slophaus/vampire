@@ -7,6 +7,7 @@ class_name WFCLevelGenerator
 @export var max_attempts := 5
 @export var random_seed := 0
 @export_range(1, 4, 1) var overlap_size := 2
+@export var periodic_input := false
 
 const DIRECTIONS := [
 	Vector2i(0, -1),
@@ -44,7 +45,7 @@ func generate_level() -> void:
 	else:
 		rng.randomize()
 
-	var patterns_data: Dictionary = _build_patterns(sample_tilemap, sample_rect, overlap_size)
+	var patterns_data: Dictionary = _build_patterns(sample_tilemap, sample_rect, overlap_size, periodic_input)
 	if patterns_data.patterns.is_empty():
 		print_debug("WFC: no patterns extracted from sample.")
 		return
@@ -91,6 +92,8 @@ func generate_level() -> void:
 	target_tilemap.clear()
 	for tile_pos in output_tiles.keys():
 		var tile: Dictionary = output_tiles[tile_pos]
+		if tile.source_id == -1:
+			continue
 		target_tilemap.set_cell(
 			0,
 			tile_pos,
@@ -102,14 +105,19 @@ func generate_level() -> void:
 	print_debug("WFC: generation complete.")
 
 
-func _build_patterns(sample_tilemap: TileMap, sample_rect: Rect2i, pattern_size: int) -> Dictionary:
+func _build_patterns(
+	sample_tilemap: TileMap,
+	sample_rect: Rect2i,
+	pattern_size: int,
+	use_periodic_input: bool
+) -> Dictionary:
 	var pattern_map: Dictionary = {}
 	var patterns: Array = []
 	var weights: Array = []
 	var tile_data: Dictionary = {}
 	var pattern_limit := Vector2i(
-		sample_rect.size.x - pattern_size + 1,
-		sample_rect.size.y - pattern_size + 1
+		sample_rect.size.x if use_periodic_input else sample_rect.size.x - pattern_size + 1,
+		sample_rect.size.y if use_periodic_input else sample_rect.size.y - pattern_size + 1
 	)
 
 	for y_offset in range(pattern_limit.y):
@@ -119,10 +127,15 @@ func _build_patterns(sample_tilemap: TileMap, sample_rect: Rect2i, pattern_size:
 			for dy in range(pattern_size):
 				for dx in range(pattern_size):
 					var cell_pos := sample_rect.position + Vector2i(x_offset + dx, y_offset + dy)
+					if use_periodic_input:
+						cell_pos = sample_rect.position + Vector2i(
+							(x_offset + dx) % sample_rect.size.x,
+							(y_offset + dy) % sample_rect.size.y
+						)
 					var source_id := sample_tilemap.get_cell_source_id(0, cell_pos)
 					if source_id == -1:
-						valid = false
-						break
+						tiles.append(_empty_tile_key())
+						continue
 					var atlas_coords := sample_tilemap.get_cell_atlas_coords(0, cell_pos)
 					var alternative_tile := sample_tilemap.get_cell_alternative_tile(0, cell_pos)
 					var tile_key := _tile_key(source_id, atlas_coords, alternative_tile)
@@ -149,6 +162,13 @@ func _build_patterns(sample_tilemap: TileMap, sample_rect: Rect2i, pattern_size:
 				weights[index] += 1
 
 	var adjacency: Array = _build_adjacency(patterns, pattern_size)
+
+	if not tile_data.has(_empty_tile_key()):
+		tile_data[_empty_tile_key()] = {
+			"source_id": -1,
+			"atlas_coords": Vector2i.ZERO,
+			"alternative_tile": 0,
+		}
 
 	return {
 		"patterns": patterns,
@@ -330,3 +350,7 @@ func _build_output_tiles(
 
 func _tile_key(source_id: int, atlas_coords: Vector2i, alternative_tile: int) -> String:
 	return "%s:%s:%s:%s" % [source_id, atlas_coords.x, atlas_coords.y, alternative_tile]
+
+
+func _empty_tile_key() -> String:
+	return "empty"
