@@ -13,12 +13,12 @@ const ELITE_TINT_VALUE := 0.6
 const STANDARD_TINT_VALUE := 1.0
 const GHOST_POSSESSION_TINT := Color(0.2, 1.0, 0.6, 1.0)
 
-@export var base_max_health := 10.0
-@export var base_max_speed := 30.0
-@export var base_acceleration := 5.0
-@export var base_facing_multiplier := -1.0
-@export var base_contact_damage := 1.0
-@export var base_poison_contact_duration := 0.0
+@export var max_health := 10.0
+@export var max_speed := 30.0
+@export var acceleration := 5.0
+@export var facing_multiplier := -1.0
+@export var contact_damage := 1.0
+@export var poison_contact_duration := 0.0
 
 @onready var visuals := $Visuals
 @onready var velocity_component: VelocityComponent = $VelocityComponent
@@ -39,10 +39,7 @@ const GHOST_POSSESSION_TINT := Color(0.2, 1.0, 0.6, 1.0)
 @onready var spider_color: ColorRect = $Visuals/SpiderSprite/enemy_color
 @onready var ghost_color: ColorRect = $Visuals/GhostSprite/enemy_color
 
-var facing_multiplier := -1.0
 var enemy_tint := Color.WHITE
-var contact_damage := 1.0
-var poison_contact_duration := 0.0
 var is_elite := false
 var size_multiplier := 1.0
 var is_possessed := false
@@ -63,15 +60,12 @@ func on_hit():
 
 
 func apply_enemy_stats() -> void:
-	facing_multiplier = base_facing_multiplier
-	velocity_component.max_speed = base_max_speed
-	velocity_component.acceleration = base_acceleration
+	velocity_component.max_speed = max_speed
+	velocity_component.acceleration = acceleration
 	navigation_agent.max_speed = velocity_component.max_speed
 
-	health_component.max_health = base_max_health
-	health_component.current_health = base_max_health
-	contact_damage = base_contact_damage
-	poison_contact_duration = base_poison_contact_duration
+	health_component.max_health = max_health
+	health_component.current_health = max_health
 
 
 func set_active_sprite(active_sprite: CanvasItem) -> void:
