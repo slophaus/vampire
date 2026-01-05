@@ -1,7 +1,7 @@
 extends BaseEnemy
 
 func _ready():
-	super._ready()
+	super()
 	set_sprite_visibility(mouse_sprite)
 	set_active_sprite(mouse_sprite)
 	fireball_ability_controller.set_active(false)
