@@ -11,9 +11,9 @@ shader_parameter/lerp_percent = 0.0
 
 [node name="SpiderEnemy" instance=ExtResource("1_4u6wh")]
 script = ExtResource("2_xg0uw")
-base_max_speed = 200.0
-base_acceleration = 100.0
-base_poison_contact_duration = 8.0
+max_speed = 200.0
+acceleration = 100.0
+poison_contact_duration = 8.0
 
 [node name="HitFlashComponent" parent="." index="6"]
 hit_flash_material = SubResource("ShaderMaterial_ollop")
