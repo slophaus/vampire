@@ -392,7 +392,9 @@ z_index = 1
 [node name="DoorToMain" parent="LayerProps" instance=ExtResource("5_door")]
 position = Vector2(236, 214)
 target_scene = ExtResource("6_main")
+target_scene_path = "res://scenes/level/main_level.tscn"
 exit_door_name = &"DoorToWFC"
+preserve_current_level = true
 
 [node name="DoorToBoss" parent="LayerProps" instance=ExtResource("5_door")]
 position = Vector2(286, 214)

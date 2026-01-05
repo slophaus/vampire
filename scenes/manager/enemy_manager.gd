@@ -4,7 +4,7 @@ class_name EnemyManager
 const OFFSCREEN_MARGIN = 10
 const MAX_SPAWN_RADIUS_MULTIPLIER = 0.75
 const MAX_ENEMIES = 500
-const MAX_SPAWN_ATTEMPTS = 100
+const MAX_SPAWN_ATTEMPTS = 1
 const GHOST_ENEMY_INDEX := 5
 
 @export var enemy_scene: PackedScene
