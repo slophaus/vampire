@@ -1,4 +1,5 @@
 extends CharacterBody2D
+class_name BaseEnemy
 
 const SEPARATION_RADIUS := 15.0
 const SEPARATION_PUSH_STRENGTH := 5.0
