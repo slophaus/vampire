@@ -6,7 +6,7 @@
 [ext_resource type="Script" uid="uid://5520l23xtact" path="res://scripts/level/wfc_level_generator.gd" id="4_wfc"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="5_door"]
 [ext_resource type="PackedScene" uid="uid://ct3bt3o3o1yqf" path="res://scenes/level/main_level.tscn" id="6_main"]
-[ext_resource type="PackedScene" uid="uid://dsyce1nb002cw" path="res://scenes/level/boss_arena_level.tscn" id="7_boss"]
+[ext_resource type="PackedScene" uid="uid://d2t5e1r1c1gby" path="res://scenes/level/boss_arena_level.tscn" id="7_boss"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_nvumn"]
 texture = ExtResource("3_dirt_texture")
