@@ -120,8 +120,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		generate_level(true)
 
 
-func _move_players_to_nearest_floor(target_tilemap: TileMap) -> void:
+func _move_players_to_nearest_floor(target_tilemap: TileMap, retry_count: int = 0) -> void:
 	if target_tilemap == null:
+		return
+	var players := get_tree().get_nodes_in_group("player")
+	if players.is_empty():
+		if retry_count < 5:
+			call_deferred("_move_players_to_nearest_floor", target_tilemap, retry_count + 1)
 		return
 	var floor_positions: Array[Vector2] = []
 	for cell in target_tilemap.get_used_cells(0):
@@ -134,7 +139,7 @@ func _move_players_to_nearest_floor(target_tilemap: TileMap) -> void:
 			floor_positions.append(target_tilemap.to_global(local_position))
 	if floor_positions.is_empty():
 		return
-	for player in get_tree().get_nodes_in_group("player"):
+	for player in players:
 		var player_node := player as Node2D
 		if player_node == null:
 			continue
