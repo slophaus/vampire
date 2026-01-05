@@ -18,16 +18,19 @@ const DIRECTIONS := [
 
 
 func _ready() -> void:
+	set_process_unhandled_input(true)
 	if generate_on_ready:
 		generate_level()
 
 
-func generate_level() -> void:
+func generate_level(use_new_seed: bool = false) -> void:
 	var target_tilemap := get_node_or_null(target_tilemap_path) as TileMap
 	var sample_tilemap := get_node_or_null(sample_tilemap_path) as TileMap
 	if target_tilemap == null or sample_tilemap == null:
 		print_debug("WFC: missing tilemap references.")
 		return
+	sample_tilemap.visible = false
+	target_tilemap.visible = true
 
 	var target_rect := target_tilemap.get_used_rect()
 	if target_rect.size.x <= 0 or target_rect.size.y <= 0:
@@ -40,7 +43,9 @@ func generate_level() -> void:
 		return
 
 	var rng := RandomNumberGenerator.new()
-	if random_seed != 0:
+	if use_new_seed:
+		rng.randomize()
+	elif random_seed != 0:
 		rng.seed = random_seed
 	else:
 		rng.randomize()
@@ -103,6 +108,11 @@ func generate_level() -> void:
 		)
 
 	print_debug("WFC: generation complete.")
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_accept"):
+		generate_level(true)
 
 
 func _build_patterns(
