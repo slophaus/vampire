@@ -118,6 +118,7 @@ func _ready():
 	apply_elite_stats()
 	apply_random_tint()
 	update_visual_scale()
+	start_ghost_possession_cooldown()
 
 
 func _physics_process(delta):
@@ -480,8 +481,7 @@ func start_ghost_possession(target: Node2D, duration: float) -> void:
 
 
 func end_ghost_possession(force_peak_visibility: bool = false) -> void:
-	if ghost_possession_target != null:
-		start_ghost_possession_cooldown()
+	start_ghost_possession_cooldown()
 	ghost_possession_target = null
 	ghost_possession_time_left = 0.0
 	ghost_possession_was_enemy = false
