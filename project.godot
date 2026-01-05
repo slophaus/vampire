@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Vampire"
 config/description="Keep survive.."
-run/main_scene="uid://cdaelw5lh4xey"
+run/main_scene="uid://cwt0ajjcva1li"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="survivorTutorial"
 config/features=PackedStringArray("4.4", "Forward Plus")
