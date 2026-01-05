@@ -348,6 +348,8 @@ func on_health_changed():
 				_force_ghost_respawn()
 	elif not is_regenerating and health_component.current_health > last_health:
 		flash_visuals(Color(0.3, 1, 0.3))
+		if poison_component != null:
+			poison_component.clear_poison()
 	update_health_display()
 	last_health = health_component.current_health
 
@@ -379,6 +381,8 @@ func on_died():
 	if is_regenerating:
 		return
 	is_regenerating = true
+	if poison_component != null:
+		poison_component.clear_poison()
 	stop_flash()
 	stop_near_death_flash()
 	visuals.modulate = Color.BLACK
