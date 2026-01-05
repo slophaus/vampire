@@ -279,6 +279,8 @@ func _run_wfc(
 		wave.append(all_patterns.duplicate())
 
 	var stack: Array = []
+	var allowed_mask := PackedByteArray()
+	allowed_mask.resize(patterns.size())
 
 	while true:
 		var next_index := _find_lowest_entropy(wave, rng)
@@ -305,19 +307,27 @@ func _run_wfc(
 					continue
 
 				var neighbor_index: int = neighbor_pos.y * grid_size.x + neighbor_pos.x
-				var allowed: Dictionary = {}
+				allowed_mask.fill(0)
 				for pattern_index in current_patterns:
 					for allowed_index in adjacency[pattern_index][dir_index]:
-						allowed[allowed_index] = true
+						allowed_mask[allowed_index] = 1
 
 				var neighbor_patterns: Array = wave[neighbor_index]
 				var reduced: bool = false
-				for candidate in neighbor_patterns.duplicate():
-					if not allowed.has(candidate):
-						neighbor_patterns.erase(candidate)
+				var filtered_patterns: Array = []
+				filtered_patterns.resize(neighbor_patterns.size())
+				var filtered_count := 0
+				for candidate in neighbor_patterns:
+					if allowed_mask[candidate] == 1:
+						filtered_patterns[filtered_count] = candidate
+						filtered_count += 1
+					else:
 						reduced = true
+				if reduced:
+					filtered_patterns.resize(filtered_count)
+					wave[neighbor_index] = filtered_patterns
 
-				if neighbor_patterns.is_empty():
+				if wave[neighbor_index].is_empty():
 					return {"success": false}
 
 				if reduced:
