@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://ct3bt3o3o1yqf"]
+[gd_scene load_steps=14 format=3 uid="uid://ct3bt3o3o1yqf"]
 
 [ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_0tq7x"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="1_hxoa7"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="8_ms8vg"]
 [ext_resource type="PackedScene" uid="uid://owsousbyak2l" path="res://scenes/game_object/basic_enemy/spider_enemy.tscn" id="9_krg47"]
 [ext_resource type="PackedScene" uid="uid://cyjtpnmjqjlkd" path="res://scenes/game_object/basic_enemy/dragon_enemy.tscn" id="10_6i4h1"]
+[ext_resource type="PackedScene" uid="uid://ccfd7m5mjef0g" path="res://scenes/game_object/basic_enemy/rat_enemy.tscn" id="11_c4ags"]
 [ext_resource type="Texture2D" uid="uid://dej1p0au5qgos" path="res://sprites/blob_dirt_border_6.png" id="11_nvumn"]
 [ext_resource type="PackedScene" uid="uid://c8j2qneyiwkhy" path="res://scenes/game_object/experience_vial/experience_vial.tscn" id="14_raeie"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="15_raeie"]
@@ -408,3 +409,6 @@ position = Vector2(650, 453)
 
 [node name="DragonEnemy" parent="." instance=ExtResource("10_6i4h1")]
 position = Vector2(621, 363)
+
+[node name="RatEnemy" parent="." instance=ExtResource("11_c4ags")]
+position = Vector2(525, 478)
