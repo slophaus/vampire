@@ -66,13 +66,10 @@ func generate_level() -> void:
 
 
 func _collect_sample_data(sample_tilemap: TileMap, sample_cells: Array[Vector2i], pattern_size: int) -> Dictionary:
-	var cell_set := _make_cell_set(sample_cells)
 	var pattern_index_by_key: Dictionary = {}
 	var tile_patterns: Array = []
 	var tile_frequencies: Array = []
 	for cell in sample_cells:
-		if not _pattern_fits(cell, cell_set, pattern_size):
-			continue
 		var pattern = _pattern_from_cell(sample_tilemap, cell, pattern_size)
 		var pattern_key = _pattern_key(pattern)
 		if not pattern_index_by_key.has(pattern_key):
@@ -204,12 +201,19 @@ func _apply_collapsed_tiles(tilemap: TileMap, collapsed: Dictionary, tile_patter
 		for y in range(pattern_size):
 			for x in range(pattern_size):
 				var variant = pattern["variants"][y * pattern_size + x]
+				if variant.source_id == -1:
+					continue
 				var target_cell = cell + Vector2i(x, y)
 				tilemap.set_cell(0, target_cell, variant.source_id, variant.atlas_coords, variant.alternative)
 
 
 func _tile_key(tilemap: TileMap, cell: Vector2i) -> String:
 	var source_id = tilemap.get_cell_source_id(0, cell)
+	if source_id == -1:
+		return "empty"
+	var tile_data := tilemap.get_cell_tile_data(0, cell)
+	if tile_data != null and tile_data.terrain_set >= 0:
+		return "%s:terrain:%s:%s" % [source_id, tile_data.terrain_set, tile_data.terrain]
 	var atlas_coords = tilemap.get_cell_atlas_coords(0, cell)
 	var alternative = tilemap.get_cell_alternative_tile(0, cell)
 	return "%s:%s:%s" % [source_id, atlas_coords, alternative]
@@ -258,27 +262,10 @@ func _patterns_match_overlap(pattern_a: Dictionary, pattern_b: Dictionary, direc
 	return true
 
 func _collect_pattern_cells(cells: Array[Vector2i], pattern_size: int) -> Array[Vector2i]:
-	var cell_set := _make_cell_set(cells)
 	var pattern_cells: Array[Vector2i] = []
 	for cell in cells:
-		if _pattern_fits(cell, cell_set, pattern_size):
-			pattern_cells.append(cell)
+		pattern_cells.append(cell)
 	return pattern_cells
-
-
-func _pattern_fits(cell: Vector2i, cell_set: Dictionary, pattern_size: int) -> bool:
-	for y in range(pattern_size):
-		for x in range(pattern_size):
-			if not cell_set.has(cell + Vector2i(x, y)):
-				return false
-	return true
-
-
-func _make_cell_set(cells: Array[Vector2i]) -> Dictionary:
-	var cell_set: Dictionary = {}
-	for cell in cells:
-		cell_set[cell] = true
-	return cell_set
 
 
 func _get_tilemap(path: NodePath) -> TileMap:
