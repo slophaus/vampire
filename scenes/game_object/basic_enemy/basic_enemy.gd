@@ -476,7 +476,7 @@ func start_ghost_possession(target: Node2D, duration: float) -> void:
 	ghost_offscreen_time = 0.0
 
 
-func end_ghost_possession(force_peak_visibility: bool = false, start_cooldown: bool = false) -> void:
+func end_ghost_possession(force_peak_visibility: bool = false, start_cooldown: bool = true) -> void:
 	ghost_possession_target = null
 	ghost_possession_time_left = 0.0
 	if start_cooldown:
