@@ -8,6 +8,7 @@ const DIRECTIONS := [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 @export var generate_on_ready := true
 @export var max_attempts := 5
 @export var random_seed := 0
+@export_range(1, 4, 1) var overlap_size := 2
 
 var _rng := RandomNumberGenerator.new()
 
@@ -27,6 +28,11 @@ func generate_level() -> void:
 	if target_cells.is_empty():
 		print_debug("WFC: target tilemap has no used cells")
 		return
+	var pattern_size = max(1, overlap_size)
+	var pattern_cells = _collect_pattern_cells(target_cells, pattern_size)
+	if pattern_cells.is_empty():
+		print_debug("WFC: target tilemap has no cells that fit pattern size %d" % pattern_size)
+		return
 	var sample_tilemap = _get_tilemap(sample_tilemap_path)
 	if sample_tilemap == null:
 		print_debug("WFC: no sample tilemap provided; using target tilemap")
@@ -35,23 +41,23 @@ func generate_level() -> void:
 	if sample_cells.is_empty():
 		print_debug("WFC: sample tilemap has no used cells")
 		return
-	var cell_set: Dictionary = {}
-	for cell in sample_cells:
-		cell_set[cell] = true
-	var sample_data = _collect_sample_data(sample_tilemap, sample_cells)
-	var tile_variants: Array = sample_data["variants"]
+	var sample_data = _collect_sample_data(sample_tilemap, sample_cells, pattern_size)
+	var tile_patterns: Array = sample_data["patterns"]
 	var tile_frequencies: Array = sample_data["frequencies"]
 	var adjacency = sample_data["adjacency"]
+	if tile_patterns.is_empty():
+		print_debug("WFC: sample tilemap has no patterns for size %d" % pattern_size)
+		return
 	var attempt = 0
 	if random_seed != 0:
 		_rng.seed = random_seed
 	else:
 		_rng.randomize()
 	while attempt < max_attempts:
-		var collapsed = _run_wave_function_collapse(target_cells, tile_variants.size(), tile_frequencies, adjacency)
+		var collapsed = _run_wave_function_collapse(pattern_cells, tile_patterns.size(), tile_frequencies, adjacency)
 		if not collapsed.is_empty():
 			print_debug("WFC: collapsed %d tiles" % collapsed.size())
-			_apply_collapsed_tiles(tilemap, collapsed, tile_variants)
+			_apply_collapsed_tiles(tilemap, collapsed, tile_patterns, pattern_size)
 			TileEater.initialize_dirt_border_for_tilemap(tilemap)
 			print_debug("WFC: generation complete after %d attempts" % [attempt + 1])
 			return
@@ -59,39 +65,40 @@ func generate_level() -> void:
 	print_debug("WFC: failed to generate after %d attempts" % max_attempts)
 
 
-func _collect_sample_data(sample_tilemap: TileMap, sample_cells: Array[Vector2i]) -> Dictionary:
-	var tile_index_by_key: Dictionary = {}
-	var tile_variants: Array = []
+func _collect_sample_data(sample_tilemap: TileMap, sample_cells: Array[Vector2i], pattern_size: int) -> Dictionary:
+	var cell_set := _make_cell_set(sample_cells)
+	var pattern_index_by_key: Dictionary = {}
+	var tile_patterns: Array = []
 	var tile_frequencies: Array = []
+	var cell_pattern_index: Dictionary = {}
+	for cell in sample_cells:
+		if not _pattern_fits(cell, cell_set, pattern_size):
+			continue
+		var pattern = _pattern_from_cell(sample_tilemap, cell, pattern_size)
+		var pattern_key = _pattern_key(pattern)
+		if not pattern_index_by_key.has(pattern_key):
+			pattern_index_by_key[pattern_key] = tile_patterns.size()
+			tile_patterns.append(pattern)
+			tile_frequencies.append(0)
+		var index = pattern_index_by_key[pattern_key]
+		tile_frequencies[index] += 1
+		cell_pattern_index[cell] = index
 	var adjacency: Array = []
 	for _dir_index in range(DIRECTIONS.size()):
 		adjacency.append([])
-	for cell in sample_cells:
-		var tile_key = _tile_key(sample_tilemap, cell)
-		if not tile_index_by_key.has(tile_key):
-			var variant = _tile_variant_from_cell(sample_tilemap, cell)
-			tile_index_by_key[tile_key] = tile_variants.size()
-			tile_variants.append(variant)
-			tile_frequencies.append(0)
-			for dir_index in range(DIRECTIONS.size()):
-				adjacency[dir_index].append({})
-		var index = tile_index_by_key[tile_key]
-		tile_frequencies[index] += 1
-	var cell_set: Dictionary = {}
-	for cell in sample_cells:
-		cell_set[cell] = true
-	for cell in sample_cells:
-		var tile_key = _tile_key(sample_tilemap, cell)
-		var tile_index = tile_index_by_key[tile_key]
+	for _pattern_index in range(tile_patterns.size()):
+		for dir_index in range(DIRECTIONS.size()):
+			adjacency[dir_index].append({})
+	for cell in cell_pattern_index.keys():
+		var pattern_index = cell_pattern_index[cell]
 		for dir_index in range(DIRECTIONS.size()):
 			var neighbor = cell + DIRECTIONS[dir_index]
-			if not cell_set.has(neighbor):
+			if not cell_pattern_index.has(neighbor):
 				continue
-			var neighbor_key = _tile_key(sample_tilemap, neighbor)
-			var neighbor_index = tile_index_by_key[neighbor_key]
-			adjacency[dir_index][tile_index][neighbor_index] = true
+			var neighbor_index = cell_pattern_index[neighbor]
+			adjacency[dir_index][pattern_index][neighbor_index] = true
 	return {
-		"variants": tile_variants,
+		"patterns": tile_patterns,
 		"frequencies": tile_frequencies,
 		"adjacency": adjacency,
 	}
@@ -199,11 +206,15 @@ func _make_full_possibilities(tile_count: int) -> Array:
 	return options
 
 
-func _apply_collapsed_tiles(tilemap: TileMap, collapsed: Dictionary, tile_variants: Array) -> void:
+func _apply_collapsed_tiles(tilemap: TileMap, collapsed: Dictionary, tile_patterns: Array, pattern_size: int) -> void:
 	tilemap.clear()
 	for cell in collapsed.keys():
-		var variant = tile_variants[collapsed[cell]]
-		tilemap.set_cell(0, cell, variant.source_id, variant.atlas_coords, variant.alternative)
+		var pattern = tile_patterns[collapsed[cell]]
+		for y in range(pattern_size):
+			for x in range(pattern_size):
+				var variant = pattern["variants"][y * pattern_size + x]
+				var target_cell = cell + Vector2i(x, y)
+				tilemap.set_cell(0, target_cell, variant.source_id, variant.atlas_coords, variant.alternative)
 
 
 func _tile_key(tilemap: TileMap, cell: Vector2i) -> String:
@@ -219,6 +230,51 @@ func _tile_variant_from_cell(tilemap: TileMap, cell: Vector2i) -> Dictionary:
 		"atlas_coords": tilemap.get_cell_atlas_coords(0, cell),
 		"alternative": tilemap.get_cell_alternative_tile(0, cell),
 	}
+
+
+func _pattern_from_cell(tilemap: TileMap, cell: Vector2i, pattern_size: int) -> Dictionary:
+	var keys: Array = []
+	var variants: Array = []
+	keys.resize(pattern_size * pattern_size)
+	variants.resize(pattern_size * pattern_size)
+	for y in range(pattern_size):
+		for x in range(pattern_size):
+			var offset = Vector2i(x, y)
+			var index = y * pattern_size + x
+			keys[index] = _tile_key(tilemap, cell + offset)
+			variants[index] = _tile_variant_from_cell(tilemap, cell + offset)
+	return {
+		"keys": keys,
+		"variants": variants,
+	}
+
+
+func _pattern_key(pattern: Dictionary) -> String:
+	return "|".join(pattern["keys"])
+
+
+func _collect_pattern_cells(cells: Array[Vector2i], pattern_size: int) -> Array[Vector2i]:
+	var cell_set := _make_cell_set(cells)
+	var pattern_cells: Array[Vector2i] = []
+	for cell in cells:
+		if _pattern_fits(cell, cell_set, pattern_size):
+			pattern_cells.append(cell)
+	return pattern_cells
+
+
+func _pattern_fits(cell: Vector2i, cell_set: Dictionary, pattern_size: int) -> bool:
+	for y in range(pattern_size):
+		for x in range(pattern_size):
+			if not cell_set.has(cell + Vector2i(x, y)):
+				return false
+	return true
+
+
+func _make_cell_set(cells: Array[Vector2i]) -> Dictionary:
+	var cell_set: Dictionary = {}
+	for cell in cells:
+		cell_set[cell] = true
+	return cell_set
 
 
 func _get_tilemap(path: NodePath) -> TileMap:
