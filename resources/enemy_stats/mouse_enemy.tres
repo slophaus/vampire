@@ -1,11 +1,3 @@
-[gd_resource type="Resource" script_class="EnemyStats" load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://resources/enemy_stats.gd" id="1_1k0d8"]
+[gd_resource type="Resource" format=3 uid="uid://djivui2cpa6n1"]
 
 [resource]
-max_health = 10.0
-max_speed = 30.0
-acceleration = 5.0
-facing_multiplier = -1.0
-contact_damage = 1.0
-poison_contact_duration = 0.0

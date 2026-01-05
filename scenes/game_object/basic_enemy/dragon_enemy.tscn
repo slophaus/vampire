@@ -1,9 +1,18 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3 uid="uid://cyjtpnmjqjlkd"]
 
-[ext_resource type="PackedScene" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_p37b0"]
-[ext_resource type="Script" path="res://scenes/game_object/basic_enemy/dragon_enemy.gd" id="2_xc7fs"]
+[ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_p37b0"]
+[ext_resource type="Script" uid="uid://wf0crnwm3d5t" path="res://scenes/game_object/basic_enemy/dragon_enemy.gd" id="2_xc7fs"]
 [ext_resource type="Resource" path="res://resources/enemy_stats/dragon_enemy.tres" id="3_j20y1"]
+[ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="4_vmwrt"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ollop"]
+resource_local_to_scene = true
+shader = ExtResource("4_vmwrt")
+shader_parameter/lerp_percent = 0.0
 
 [node name="DragonEnemy" instance=ExtResource("1_p37b0")]
 script = ExtResource("2_xc7fs")
 enemy_stats = ExtResource("3_j20y1")
+
+[node name="HitFlashComponent" parent="." index="6"]
+hit_flash_material = SubResource("ShaderMaterial_ollop")

@@ -1,9 +1,18 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3 uid="uid://owsousbyak2l"]
 
-[ext_resource type="PackedScene" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_4u6wh"]
-[ext_resource type="Script" path="res://scenes/game_object/basic_enemy/spider_enemy.gd" id="2_xg0uw"]
-[ext_resource type="Resource" path="res://resources/enemy_stats/spider_enemy.tres" id="3_45lbj"]
+[ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_4u6wh"]
+[ext_resource type="Script" uid="uid://djn78hgdxoebn" path="res://scenes/game_object/basic_enemy/spider_enemy.gd" id="2_xg0uw"]
+[ext_resource type="Resource" uid="uid://252hed1u7h3d" path="res://resources/enemy_stats/spider_enemy.tres" id="3_45lbj"]
+[ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="4_y2o7k"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ollop"]
+resource_local_to_scene = true
+shader = ExtResource("4_y2o7k")
+shader_parameter/lerp_percent = 0.0
 
 [node name="SpiderEnemy" instance=ExtResource("1_4u6wh")]
 script = ExtResource("2_xg0uw")
 enemy_stats = ExtResource("3_45lbj")
+
+[node name="HitFlashComponent" parent="." index="6"]
+hit_flash_material = SubResource("ShaderMaterial_ollop")
