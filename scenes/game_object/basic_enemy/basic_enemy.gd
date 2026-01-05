@@ -68,6 +68,7 @@ const GHOST_POSSESSION_DURATION := 8.0
 const GHOST_POSSESSION_TINT := Color(0.2, 1.0, 0.6, 1.0)
 const GHOST_OFFSCREEN_RESPAWN_DELAY := 2.5
 const GHOST_RESPAWN_FADE_SPEED := 1.5
+const GHOST_POSSESSION_COOLDOWN := 1.0
 @export var enemy_index := 0
 
 @onready var visuals := $Visuals
@@ -105,6 +106,8 @@ var ghost_offscreen_time := 0.0
 var ghost_respawn_fade := 1.0
 var ghost_possession_target: Node2D
 var ghost_possession_time_left := 0.0
+var ghost_possession_cooldown_left := 0.0
+var ghost_possession_was_enemy := false
 var is_possessed := false
 var possessed_time_left := 0.0
 var possessed_original_stats: Dictionary = {}
@@ -310,9 +313,12 @@ func apply_dig_level() -> void:
 
 
 func update_ghost_state(delta: float) -> void:
+	ghost_possession_cooldown_left = max(ghost_possession_cooldown_left - delta, 0.0)
 	update_ghost_fade(delta)
 	if ghost_possession_target != null:
 		if not is_instance_valid(ghost_possession_target):
+			if ghost_possession_was_enemy:
+				start_ghost_possession_cooldown()
 			end_ghost_possession(true)
 			return
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
@@ -340,7 +346,11 @@ func update_ghost_fade(delta: float) -> void:
 	var alpha = 0.3 + (sin(ghost_fade_time) * 0.3)
 	if ghost_respawn_fade < 1.0:
 		ghost_respawn_fade = min(ghost_respawn_fade + (delta * GHOST_RESPAWN_FADE_SPEED), 1.0)
-	visuals.modulate.a = alpha * ghost_respawn_fade
+	var fade_alpha = alpha * ghost_respawn_fade
+	if ghost_possession_cooldown_left > 0.0:
+		visuals.modulate = Color(1.0, 0.2, 0.2, fade_alpha)
+	else:
+		visuals.modulate = Color(1.0, 1.0, 1.0, fade_alpha)
 
 
 func update_ghost_offscreen(delta: float) -> void:
@@ -386,6 +396,9 @@ func update_ghost_wander(delta: float) -> void:
 	velocity_component.accelerate_in_direction(ghost_wander_direction)
 
 func update_ghost_seek(delta: float) -> void:
+	if ghost_possession_cooldown_left > 0.0:
+		update_ghost_wander(delta)
+		return
 	var target = find_nearby_possession_target(GHOST_POSSESSION_SEEK_RADIUS)
 	if target != null:
 		var direction = target.global_position - global_position
@@ -396,6 +409,8 @@ func update_ghost_seek(delta: float) -> void:
 
 
 func try_start_ghost_possession() -> bool:
+	if ghost_possession_cooldown_left > 0.0:
+		return false
 	var player = get_tree().get_first_node_in_group("player") as Node2D
 	if player != null and global_position.distance_to(player.global_position) <= GHOST_POSSESSION_RADIUS:
 		if player.has_method("start_ghost_possession"):
@@ -461,6 +476,7 @@ func find_nearby_possession_target(radius: float) -> Node2D:
 func start_ghost_possession(target: Node2D, duration: float) -> void:
 	ghost_possession_target = target
 	ghost_possession_time_left = duration
+	ghost_possession_was_enemy = target.is_in_group("enemy") and not target.is_in_group("ghost")
 	visuals.modulate.a = 0.0
 	ghost_offscreen_time = 0.0
 
@@ -468,6 +484,7 @@ func start_ghost_possession(target: Node2D, duration: float) -> void:
 func end_ghost_possession(force_peak_visibility: bool = false) -> void:
 	ghost_possession_target = null
 	ghost_possession_time_left = 0.0
+	ghost_possession_was_enemy = false
 	respawn_ghost_on_screen(get_camera_view_rect())
 	ghost_offscreen_time = 0.0
 	if force_peak_visibility:
@@ -488,6 +505,10 @@ func update_ghost_flags() -> void:
 		collision_layer = 8
 		collision_mask = 9
 	visuals.modulate = Color(1, 1, 1, 1)
+
+
+func start_ghost_possession_cooldown() -> void:
+	ghost_possession_cooldown_left = GHOST_POSSESSION_COOLDOWN
 
 
 func update_visual_scale() -> void:
