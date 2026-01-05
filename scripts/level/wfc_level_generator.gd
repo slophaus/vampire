@@ -8,6 +8,8 @@ class_name WFCLevelGenerator
 @export var random_seed := 0
 @export_range(1, 4, 1) var overlap_size := 2
 @export var periodic_input := false
+@export var show_step_by_step := false
+@export_range(0.0, 5.0, 0.05) var step_delay_seconds := 0.0
 
 const DIRECTIONS := [
 	Vector2i(0, -1),
@@ -70,12 +72,29 @@ func generate_level(use_new_seed: bool = false) -> void:
 		if attempt == 1 or attempt % 50 == 0:
 			print_debug("WFC: attempt %d/%d" % [attempt, max_attempts])
 
-		result = _run_wfc(
+		var step_callback := Callable()
+		if show_step_by_step:
+			target_tilemap.clear()
+			step_callback = func(cell_index: int, chosen_pattern: int) -> void:
+				_apply_step_preview(
+					target_tilemap,
+					patterns_data.patterns,
+					patterns_data.tiles,
+					pattern_grid_size,
+					target_rect,
+					overlap_size,
+					cell_index,
+					chosen_pattern
+				)
+
+		result = await _run_wfc(
 			patterns_data.patterns,
 			patterns_data.weights,
 			patterns_data.adjacency,
 			pattern_grid_size,
-			rng
+			rng,
+			step_callback,
+			step_delay_seconds
 		)
 
 		if result.success:
@@ -267,7 +286,9 @@ func _run_wfc(
 	weights: Array,
 	adjacency: Array,
 	grid_size: Vector2i,
-	rng: RandomNumberGenerator
+	rng: RandomNumberGenerator,
+	step_callback: Callable = Callable(),
+	step_delay: float = 0.0
 ) -> Dictionary:
 	var total_cells: int = grid_size.x * grid_size.y
 	var wave: Array = []
@@ -293,6 +314,10 @@ func _run_wfc(
 		var chosen: int = _weighted_choice(wave[next_index], weights, rng)
 		wave[next_index] = [chosen]
 		stack.append(next_index)
+		if step_callback.is_valid():
+			step_callback.call(next_index, chosen)
+			if step_delay > 0.0:
+				await get_tree().create_timer(step_delay).timeout
 
 		while not stack.is_empty():
 			var current_index: int = stack.pop_back()
@@ -398,6 +423,35 @@ func _build_output_tiles(
 					}
 
 	return output_tiles
+
+
+func _apply_step_preview(
+	target_tilemap: TileMap,
+	patterns: Array,
+	tile_data: Dictionary,
+	grid_size: Vector2i,
+	target_rect: Rect2i,
+	pattern_size: int,
+	cell_index: int,
+	chosen_pattern: int
+) -> void:
+	var cell_pos := Vector2i(cell_index % grid_size.x, cell_index / grid_size.x)
+	var pattern_tiles: Array = patterns[chosen_pattern]
+	for dy in range(pattern_size):
+		for dx in range(pattern_size):
+			var tile_key: String = pattern_tiles[dy * pattern_size + dx]
+			var tile_pos := target_rect.position + Vector2i(cell_pos.x + dx, cell_pos.y + dy)
+			var data: Dictionary = tile_data[tile_key]
+			if data["source_id"] == -1:
+				target_tilemap.erase_cell(0, tile_pos)
+				continue
+			target_tilemap.set_cell(
+				0,
+				tile_pos,
+				data["source_id"],
+				data["atlas_coords"],
+				data["alternative_tile"]
+			)
 
 
 func _tile_key(source_id: int, atlas_coords: Vector2i, alternative_tile: int) -> String:
