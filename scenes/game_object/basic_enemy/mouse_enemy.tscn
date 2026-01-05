@@ -1,7 +1,16 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3 uid="uid://x0j8ytkng0vk"]
 
-[ext_resource type="PackedScene" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_b0v7n"]
-[ext_resource type="Script" path="res://scenes/game_object/basic_enemy/mouse_enemy.gd" id="2_8j86p"]
+[ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_b0v7n"]
+[ext_resource type="Script" uid="uid://d0kgxjlkn1nw7" path="res://scenes/game_object/basic_enemy/mouse_enemy.gd" id="2_8j86p"]
+[ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="3_rtidv"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ollop"]
+resource_local_to_scene = true
+shader = ExtResource("3_rtidv")
+shader_parameter/lerp_percent = 0.0
 
 [node name="MouseEnemy" instance=ExtResource("1_b0v7n")]
 script = ExtResource("2_8j86p")
+
+[node name="HitFlashComponent" parent="." index="6"]
+hit_flash_material = SubResource("ShaderMaterial_ollop")
