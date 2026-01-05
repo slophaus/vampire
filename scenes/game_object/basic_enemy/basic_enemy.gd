@@ -65,6 +65,7 @@ const GHOST_FADE_SPEED := 1.0
 const GHOST_POSSESSION_RADIUS := 28.0
 const GHOST_POSSESSION_SEEK_RADIUS := 200.0
 const GHOST_POSSESSION_DURATION := 3.0
+const GHOST_POSSESSION_COOLDOWN := 1.0
 const GHOST_POSSESSION_TINT := Color(0.2, 1.0, 0.6, 1.0)
 const GHOST_OFFSCREEN_RESPAWN_DELAY := 2.5
 const GHOST_RESPAWN_FADE_SPEED := 1.5
@@ -105,6 +106,7 @@ var ghost_offscreen_time := 0.0
 var ghost_respawn_fade := 1.0
 var ghost_possession_target: Node2D
 var ghost_possession_time_left := 0.0
+var ghost_possession_cooldown_left := 0.0
 var is_possessed := false
 var possessed_time_left := 0.0
 var possessed_original_stats: Dictionary = {}
@@ -114,6 +116,8 @@ func _ready():
 	apply_enemy_type(enemy_index)
 	apply_elite_stats()
 	apply_random_tint()
+	if enemy_index == GHOST_ENEMY_INDEX:
+		start_ghost_possession_cooldown()
 	update_visual_scale()
 
 
@@ -313,12 +317,18 @@ func update_ghost_state(delta: float) -> void:
 	update_ghost_fade(delta)
 	if ghost_possession_target != null:
 		if not is_instance_valid(ghost_possession_target):
-			end_ghost_possession(true)
+			end_ghost_possession(true, true)
 			return
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
 		global_position = ghost_possession_target.global_position
 		if ghost_possession_time_left <= 0.0:
 			end_ghost_possession()
+		return
+
+	if update_ghost_possession_cooldown(delta):
+		update_ghost_wander(delta)
+		velocity_component.move(self)
+		update_visual_facing()
 		return
 
 	if try_start_ghost_possession():
@@ -466,6 +476,10 @@ func start_ghost_possession(target: Node2D, duration: float) -> void:
 
 
 func end_ghost_possession(force_peak_visibility: bool = false) -> void:
+	end_ghost_possession_with_options(force_peak_visibility, false)
+
+
+func end_ghost_possession_with_options(force_peak_visibility: bool, start_cooldown: bool) -> void:
 	ghost_possession_target = null
 	ghost_possession_time_left = 0.0
 	respawn_ghost_on_screen(get_camera_view_rect())
@@ -474,6 +488,8 @@ func end_ghost_possession(force_peak_visibility: bool = false) -> void:
 		ghost_fade_time = PI * 0.5
 		ghost_respawn_fade = 1.0
 		update_ghost_fade(0.0)
+	if start_cooldown:
+		start_ghost_possession_cooldown()
 
 
 func update_ghost_flags() -> void:
@@ -488,10 +504,33 @@ func update_ghost_flags() -> void:
 		collision_layer = 8
 		collision_mask = 9
 	visuals.modulate = Color(1, 1, 1, 1)
+	apply_ghost_cooldown_tint()
 
 
 func update_visual_scale() -> void:
 	visuals.scale = Vector2(facing_multiplier * size_multiplier, size_multiplier)
+
+
+func start_ghost_possession_cooldown() -> void:
+	ghost_possession_cooldown_left = GHOST_POSSESSION_COOLDOWN
+	apply_ghost_cooldown_tint()
+
+
+func update_ghost_possession_cooldown(delta: float) -> bool:
+	if ghost_possession_cooldown_left <= 0.0:
+		return false
+	ghost_possession_cooldown_left = max(ghost_possession_cooldown_left - delta, 0.0)
+	apply_ghost_cooldown_tint()
+	return ghost_possession_cooldown_left > 0.0
+
+
+func apply_ghost_cooldown_tint() -> void:
+	if enemy_index != GHOST_ENEMY_INDEX or ghost_color == null:
+		return
+	if ghost_possession_cooldown_left > 0.0:
+		ghost_color.color = Color(1, 0.0, 0.0, 1.0)
+	else:
+		ghost_color.color = enemy_tint
 
 
 func can_be_possessed() -> bool:
