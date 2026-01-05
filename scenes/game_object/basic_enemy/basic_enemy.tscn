@@ -1,6 +1,6 @@
 [gd_scene load_steps=46 format=3 uid="uid://bses7vk27cfvt"]
 
-[ext_resource type="Script" uid="uid://d01scidly6bca" path="res://scenes/game_object/basic_enemy/basic_enemy.gd" id="1_gpcli"]
+[ext_resource type="Script" path="res://scenes/game_object/basic_enemy/base_enemy.gd" id="1_gpcli"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_en8ir"]
 [ext_resource type="PackedScene" uid="uid://ci3popyfx4vbv" path="res://scenes/component/vial_drop_component.tscn" id="3_v8t1l"]
 [ext_resource type="PackedScene" uid="uid://nipysc8tqhsn" path="res://scenes/component/blood_drop_component.tscn" id="3_ymf27"]

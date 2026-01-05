@@ -1,0 +1,9 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_b0v7n"]
+[ext_resource type="Script" path="res://scenes/game_object/basic_enemy/mouse_enemy.gd" id="2_8j86p"]
+[ext_resource type="Resource" path="res://resources/enemy_stats/mouse_enemy.tres" id="3_7q2fh"]
+
+[node name="MouseEnemy" instance=ExtResource("1_b0v7n")]
+script = ExtResource("2_8j86p")
+enemy_stats = ExtResource("3_7q2fh")
