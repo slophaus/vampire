@@ -99,6 +99,9 @@ libraries = {
 max_speed = 85
 acceleration = 25.0
 
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+path_postprocessing = 1
+
 [node name="HealthComponent" parent="." instance=ExtResource("2_3j6hq")]
 free_owner_on_death = false
 
