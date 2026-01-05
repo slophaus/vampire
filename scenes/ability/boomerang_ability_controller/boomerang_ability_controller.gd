@@ -37,6 +37,8 @@ func on_timer_timeout():
 
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	enemies = enemies.filter(func(enemy: Node2D):
+		if enemy.is_in_group("ghost"):
+			return false
 		return enemy.global_position.distance_squared_to(player.global_position) < pow(get_boomerang_range(), 2)
 	)
 
