@@ -319,6 +319,9 @@ func update_ghost_state(delta: float) -> void:
 		if not is_instance_valid(ghost_possession_target):
 			end_ghost_possession_with_options(true, true)
 			return
+		if not ghost_possession_target.is_inside_tree() or ghost_possession_target.is_queued_for_deletion():
+			end_ghost_possession_with_options(true, true)
+			return
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
 		global_position = ghost_possession_target.global_position
 		if ghost_possession_time_left <= 0.0:
