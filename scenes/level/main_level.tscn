@@ -1,14 +1,15 @@
-[gd_scene load_steps=12 format=3 uid="uid://ct3bt3o3o1yqf"]
+[gd_scene load_steps=13 format=3 uid="uid://ct3bt3o3o1yqf"]
 
 [ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_iqu8w"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="2_5fr2l"]
 [ext_resource type="Texture2D" uid="uid://dej1p0au5qgos" path="res://sprites/blob_dirt_border_6.png" id="3_2sb77"]
-[ext_resource type="PackedScene" uid="uid://bpgwbwa1p3m6i" path="res://scenes/game_object/player/player.tscn" id="4_fkrx8"]
+[ext_resource type="PackedScene" uid="uid://cwt0ajjcva1li" path="res://scenes/level/wfc_test_level.tscn" id="5_6i4h1"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="5_mwgft"]
 [ext_resource type="PackedScene" uid="uid://b6f3xj5k6h6vl" path="res://scenes/game_object/well/well.tscn" id="6_adxub"]
 [ext_resource type="PackedScene" uid="uid://c8j2qneyiwkhy" path="res://scenes/game_object/experience_vial/experience_vial.tscn" id="7_ff0s2"]
 [ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="8_uk2yf"]
 [ext_resource type="PackedScene" uid="uid://owsousbyak2l" path="res://scenes/game_object/basic_enemy/spider_enemy.tscn" id="9_ondrs"]
+[ext_resource type="PackedScene" uid="uid://bq0yg3a252iky" path="res://scenes/game_object/basic_enemy/ghost_enemy.tscn" id="10_5fr2l"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_nvumn"]
 texture = ExtResource("3_2sb77")
@@ -366,17 +367,12 @@ layer_0/tile_data = PackedInt32Array(1638448, 65536, 4, 1572912, 0, 4, 1507376, 
 [node name="dirt_border" type="TileMapLayer" parent="LayerTilemaps/TileMap"]
 tile_set = SubResource("TileSet_ou6is")
 
-[node name="Player" parent="LayerTilemaps" instance=ExtResource("4_fkrx8")]
-position = Vector2(338, 195)
-
-[node name="Player2" parent="LayerTilemaps" instance=ExtResource("4_fkrx8")]
-position = Vector2(416, 193)
-
 [node name="LayerProps" type="Node2D" parent="."]
 z_index = 1
 
 [node name="Door" parent="LayerProps" instance=ExtResource("5_mwgft")]
 position = Vector2(236, 214)
+main_scene = ExtResource("5_6i4h1")
 
 [node name="Well" parent="LayerProps" instance=ExtResource("6_adxub")]
 position = Vector2(123, 214)
@@ -407,3 +403,6 @@ position = Vector2(512, 527)
 
 [node name="SpiderEnemy" parent="." instance=ExtResource("9_ondrs")]
 position = Vector2(650, 453)
+
+[node name="GhostEnemy" parent="." instance=ExtResource("10_5fr2l")]
+position = Vector2(470, 198)

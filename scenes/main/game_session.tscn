@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dqritw4d7hf1w" path="res://scenes/main/game_session.gd" id="1_2f7ai"]
 [ext_resource type="PackedScene" uid="uid://i3j5tfdya4cy" path="res://scenes/ui/arena_time_ui.tscn" id="2_0gcf8"]
-[ext_resource type="PackedScene" uid="uid://ct3bt3o3o1yqf" path="res://scenes/main_level.tscn" id="2_fup3h"]
+[ext_resource type="PackedScene" uid="uid://ct3bt3o3o1yqf" path="res://scenes/level/main_level.tscn" id="2_fup3h"]
 [ext_resource type="PackedScene" uid="uid://bnu7ngqdh3vvq" path="res://scenes/ui/experience_bar.tscn" id="3_6t2sv"]
 [ext_resource type="PackedScene" uid="uid://b7qp4yxql7fd3" path="res://scenes/manager/arena_time_manager.tscn" id="4_8kr1v"]
 [ext_resource type="PackedScene" uid="uid://eadorq7tpodo" path="res://scenes/manager/enemy_manager.tscn" id="5_wjyps"]
