@@ -313,11 +313,18 @@ func _run_wfc(
 						allowed_mask[allowed_index] = 1
 
 				var neighbor_patterns: Array = wave[neighbor_index]
-				var reduced: bool = false
-				for candidate in neighbor_patterns.duplicate():
-					if allowed_mask[candidate] == 0:
-						neighbor_patterns.erase(candidate)
-						reduced = true
+				var filtered_patterns: Array = []
+				filtered_patterns.resize(neighbor_patterns.size())
+				var filtered_count := 0
+				for candidate in neighbor_patterns:
+					if allowed_mask[candidate] != 0:
+						filtered_patterns[filtered_count] = candidate
+						filtered_count += 1
+				filtered_patterns.resize(filtered_count)
+				var reduced: bool = filtered_count != neighbor_patterns.size()
+				if reduced:
+					wave[neighbor_index] = filtered_patterns
+					neighbor_patterns = wave[neighbor_index]
 
 				if neighbor_patterns.is_empty():
 					return {"success": false}
