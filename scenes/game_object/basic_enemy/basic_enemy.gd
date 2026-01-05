@@ -64,7 +64,7 @@ const GHOST_WANDER_MAX_DURATION := 2.4
 const GHOST_FADE_SPEED := 1.0
 const GHOST_POSSESSION_RADIUS := 28.0
 const GHOST_POSSESSION_SEEK_RADIUS := 200.0
-const GHOST_POSSESSION_DURATION := 3.0
+const GHOST_POSSESSION_DURATION := 8.0
 const GHOST_POSSESSION_COOLDOWN := 1.0
 const GHOST_POSSESSION_TINT := Color(0.2, 1.0, 0.6, 1.0)
 const GHOST_OFFSCREEN_RESPAWN_DELAY := 2.5
@@ -317,7 +317,7 @@ func update_ghost_state(delta: float) -> void:
 	update_ghost_fade(delta)
 	if ghost_possession_target != null:
 		if not is_instance_valid(ghost_possession_target):
-			end_ghost_possession(true, true)
+			end_ghost_possession(true)
 			return
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
 		global_position = ghost_possession_target.global_position
