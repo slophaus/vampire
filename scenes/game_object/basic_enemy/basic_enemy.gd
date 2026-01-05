@@ -318,7 +318,10 @@ func update_ghost_state(delta: float) -> void:
 	update_ghost_fade(delta)
 	if ghost_possession_target != null:
 		if not is_instance_valid(ghost_possession_target):
-			end_ghost_possession(true)
+			if ghost_possession_was_enemy:
+				end_ghost_possession_without_respawn(true)
+			else:
+				end_ghost_possession(true)
 			return
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
 		global_position = ghost_possession_target.global_position
@@ -490,6 +493,18 @@ func end_ghost_possession(force_peak_visibility: bool = false) -> void:
 	if force_peak_visibility:
 		ghost_fade_time = PI * 0.5
 		ghost_respawn_fade = 1.0
+		update_ghost_fade(0.0)
+
+
+func end_ghost_possession_without_respawn(force_peak_visibility: bool = false) -> void:
+	start_ghost_possession_cooldown()
+	ghost_possession_target = null
+	ghost_possession_time_left = 0.0
+	ghost_possession_was_enemy = false
+	ghost_offscreen_time = 0.0
+	ghost_respawn_fade = 1.0
+	if force_peak_visibility:
+		ghost_fade_time = PI * 0.5
 		update_ghost_fade(0.0)
 
 
