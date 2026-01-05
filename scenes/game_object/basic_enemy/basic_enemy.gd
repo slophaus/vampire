@@ -113,6 +113,7 @@ var possessed_time_left := 0.0
 var possessed_original_stats: Dictionary = {}
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
+	health_component.died.connect(_on_died)
 	assign_elite_status()
 	apply_enemy_type(enemy_index)
 	apply_elite_stats()
@@ -269,6 +270,15 @@ func apply_enemy_type(index: int) -> void:
 
 func on_hit():
 	$HitRandomAudioPlayerComponent.play_random()
+
+
+func _on_died() -> void:
+	if not is_possessed:
+		return
+	for ghost in get_tree().get_nodes_in_group("ghost"):
+		if ghost.has_method("end_ghost_possession") and ghost.ghost_possession_target == self:
+			ghost.call("end_ghost_possession", true)
+			return
 
 
 func apply_random_tint():
