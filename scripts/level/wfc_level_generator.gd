@@ -29,7 +29,8 @@ func generate_level() -> void:
 		print_debug("WFC: target tilemap has no used cells")
 		return
 	var pattern_size = max(1, overlap_size)
-	var pattern_cells = _collect_pattern_cells(target_cells, pattern_size)
+	var target_rect = tilemap.get_used_rect()
+	var pattern_cells = _collect_pattern_cells(target_cells, pattern_size, target_rect)
 	if pattern_cells.is_empty():
 		print_debug("WFC: target tilemap has no cells that fit pattern size %d" % pattern_size)
 		return
@@ -41,7 +42,8 @@ func generate_level() -> void:
 	if sample_cells.is_empty():
 		print_debug("WFC: sample tilemap has no used cells")
 		return
-	var sample_data = _collect_sample_data(sample_tilemap, sample_cells, pattern_size)
+	var sample_rect = sample_tilemap.get_used_rect()
+	var sample_data = _collect_sample_data(sample_tilemap, sample_cells, pattern_size, sample_rect)
 	var tile_patterns: Array = sample_data["patterns"]
 	var tile_frequencies: Array = sample_data["frequencies"]
 	var adjacency = sample_data["adjacency"]
@@ -65,11 +67,12 @@ func generate_level() -> void:
 	print_debug("WFC: failed to generate after %d attempts" % max_attempts)
 
 
-func _collect_sample_data(sample_tilemap: TileMap, sample_cells: Array[Vector2i], pattern_size: int) -> Dictionary:
+func _collect_sample_data(sample_tilemap: TileMap, sample_cells: Array[Vector2i], pattern_size: int, sample_rect: Rect2i) -> Dictionary:
 	var pattern_index_by_key: Dictionary = {}
 	var tile_patterns: Array = []
 	var tile_frequencies: Array = []
-	for cell in sample_cells:
+	var pattern_cells = _collect_pattern_cells(sample_cells, pattern_size, sample_rect)
+	for cell in pattern_cells:
 		var pattern = _pattern_from_cell(sample_tilemap, cell, pattern_size)
 		var pattern_key = _pattern_key(pattern)
 		if not pattern_index_by_key.has(pattern_key):
@@ -261,9 +264,15 @@ func _patterns_match_overlap(pattern_a: Dictionary, pattern_b: Dictionary, direc
 				return false
 	return true
 
-func _collect_pattern_cells(cells: Array[Vector2i], pattern_size: int) -> Array[Vector2i]:
+func _collect_pattern_cells(cells: Array[Vector2i], pattern_size: int, used_rect: Rect2i) -> Array[Vector2i]:
 	var pattern_cells: Array[Vector2i] = []
+	var min_pos = used_rect.position
+	var max_pos = used_rect.position + used_rect.size - Vector2i(pattern_size, pattern_size)
 	for cell in cells:
+		if cell.x < min_pos.x or cell.y < min_pos.y:
+			continue
+		if cell.x > max_pos.x or cell.y > max_pos.y:
+			continue
 		pattern_cells.append(cell)
 	return pattern_cells
 
