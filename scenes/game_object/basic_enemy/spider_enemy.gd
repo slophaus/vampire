@@ -62,6 +62,7 @@ func start_spider_burst() -> void:
 		spider_rest_time_left = SPIDER_REST_DURATION
 		return
 	spider_burst_time_left = SPIDER_BURST_DURATION
+	accelerate_to_player_with_pathfinding()
 
 
 func can_spider_jump(target_player: Node2D) -> bool:

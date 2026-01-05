@@ -286,6 +286,7 @@ func check_deal_damage():
 	if contact_damage <= 0:
 		return
 	health_component.damage(contact_damage)
+	apply_contact_poison()
 	damage_interval_timer.start()
 
 
@@ -306,22 +307,18 @@ func update_health_bar_size() -> void:
 
 
 func on_body_entered(other_body: Node2D):
-	if other_body == null or not other_body.is_in_group("enemy"):
+	var enemy = resolve_enemy_body(other_body)
+	if enemy == null:
 		return
-	var contact_damage = other_body.get("contact_damage")
-	var resolved_damage := 1.0
-	if typeof(contact_damage) in [TYPE_INT, TYPE_FLOAT]:
-		resolved_damage = float(contact_damage)
-	colliding_enemies[other_body] = resolved_damage
-	var poison_duration = other_body.get("poison_contact_duration")
-	if poison_component != null and typeof(poison_duration) in [TYPE_INT, TYPE_FLOAT] and poison_duration > 0.0:
-		poison_component.apply_poison(float(poison_duration))
+	colliding_enemies[enemy] = resolve_contact_damage(enemy)
+	apply_contact_poison()
 	check_deal_damage()
 
 
 func on_body_exited(other_body: Node2D):
-	if colliding_enemies.has(other_body):
-		colliding_enemies.erase(other_body)
+	var enemy = resolve_enemy_body(other_body)
+	if enemy != null and colliding_enemies.has(enemy):
+		colliding_enemies.erase(enemy)
 
 
 func on_damage_interval_timer_timeout():
@@ -333,6 +330,54 @@ func get_contact_damage() -> float:
 	for damage_value in colliding_enemies.values():
 		max_damage = max(max_damage, float(damage_value))
 	return max_damage
+
+
+func resolve_enemy_body(other_body: Node2D) -> Node2D:
+	if other_body == null:
+		return null
+	if other_body.is_in_group("enemy"):
+		return other_body
+	var parent = other_body.get_parent()
+	if parent is Node2D and parent.is_in_group("enemy"):
+		return parent
+	return null
+
+
+func resolve_contact_damage(enemy: Node2D) -> float:
+	var contact_damage = enemy.get("contact_damage")
+	if typeof(contact_damage) in [TYPE_INT, TYPE_FLOAT]:
+		return float(contact_damage)
+	var stats = enemy.get("enemy_stats")
+	if stats is EnemyStats:
+		return float(stats.contact_damage)
+	return 1.0
+
+
+func resolve_poison_contact_duration(enemy: Node2D) -> float:
+	var poison_duration = enemy.get("poison_contact_duration")
+	if typeof(poison_duration) in [TYPE_INT, TYPE_FLOAT]:
+		return float(poison_duration)
+	var stats = enemy.get("enemy_stats")
+	if stats is EnemyStats:
+		return float(stats.poison_contact_duration)
+	return 0.0
+
+
+func get_contact_poison_duration() -> float:
+	var max_duration := 0.0
+	for enemy in colliding_enemies.keys():
+		var resolved_duration = resolve_poison_contact_duration(enemy)
+		if resolved_duration > max_duration:
+			max_duration = resolved_duration
+	return max_duration
+
+
+func apply_contact_poison() -> void:
+	if poison_component == null:
+		return
+	var poison_duration = get_contact_poison_duration()
+	if poison_duration > 0.0:
+		poison_component.apply_poison(poison_duration)
 
 
 func on_health_changed():
