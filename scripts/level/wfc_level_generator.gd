@@ -70,7 +70,6 @@ func _collect_sample_data(sample_tilemap: TileMap, sample_cells: Array[Vector2i]
 	var pattern_index_by_key: Dictionary = {}
 	var tile_patterns: Array = []
 	var tile_frequencies: Array = []
-	var cell_pattern_index: Dictionary = {}
 	for cell in sample_cells:
 		if not _pattern_fits(cell, cell_set, pattern_size):
 			continue
@@ -82,21 +81,17 @@ func _collect_sample_data(sample_tilemap: TileMap, sample_cells: Array[Vector2i]
 			tile_frequencies.append(0)
 		var index = pattern_index_by_key[pattern_key]
 		tile_frequencies[index] += 1
-		cell_pattern_index[cell] = index
 	var adjacency: Array = []
 	for _dir_index in range(DIRECTIONS.size()):
 		adjacency.append([])
 	for _pattern_index in range(tile_patterns.size()):
 		for dir_index in range(DIRECTIONS.size()):
 			adjacency[dir_index].append({})
-	for cell in cell_pattern_index.keys():
-		var pattern_index = cell_pattern_index[cell]
-		for dir_index in range(DIRECTIONS.size()):
-			var neighbor = cell + DIRECTIONS[dir_index]
-			if not cell_pattern_index.has(neighbor):
-				continue
-			var neighbor_index = cell_pattern_index[neighbor]
-			adjacency[dir_index][pattern_index][neighbor_index] = true
+	for pattern_index in range(tile_patterns.size()):
+		for neighbor_index in range(tile_patterns.size()):
+			for dir_index in range(DIRECTIONS.size()):
+				if _patterns_match_overlap(tile_patterns[pattern_index], tile_patterns[neighbor_index], DIRECTIONS[dir_index], pattern_size):
+					adjacency[dir_index][pattern_index][neighbor_index] = true
 	return {
 		"patterns": tile_patterns,
 		"frequencies": tile_frequencies,
@@ -119,7 +114,7 @@ func _run_wave_function_collapse(cells: Array[Vector2i], tile_count: int, freque
 		var chosen = _choose_weighted_tile(options, frequencies)
 		possibilities[next_cell] = [chosen]
 		collapsed[next_cell] = chosen
-		if not _propagate_constraints(next_cell, possibilities, adjacency, tile_count):
+		if not _propagate_constraints(next_cell, possibilities, adjacency):
 			return {}
 	if collapsed.size() < cells.size():
 		for cell in cells:
@@ -131,7 +126,7 @@ func _run_wave_function_collapse(cells: Array[Vector2i], tile_count: int, freque
 	return collapsed
 
 
-func _propagate_constraints(start_cell: Vector2i, possibilities: Dictionary, adjacency: Array, tile_count: int) -> bool:
+func _propagate_constraints(start_cell: Vector2i, possibilities: Dictionary, adjacency: Array) -> bool:
 	var stack: Array[Vector2i] = [start_cell]
 	while not stack.is_empty():
 		var current = stack.pop_back()
@@ -143,7 +138,7 @@ func _propagate_constraints(start_cell: Vector2i, possibilities: Dictionary, adj
 			var neighbor_options = possibilities[neighbor] as Array
 			if neighbor_options.is_empty():
 				return false
-			var allowed = _collect_allowed_neighbors(current_options, adjacency, dir_index, tile_count)
+			var allowed = _collect_allowed_neighbors(current_options, adjacency, dir_index)
 			var filtered: Array = []
 			for option in neighbor_options:
 				if allowed.has(option):
@@ -157,14 +152,10 @@ func _propagate_constraints(start_cell: Vector2i, possibilities: Dictionary, adj
 	return true
 
 
-func _collect_allowed_neighbors(current_options: Array, adjacency: Array, dir_index: int, tile_count: int) -> Dictionary:
+func _collect_allowed_neighbors(current_options: Array, adjacency: Array, dir_index: int) -> Dictionary:
 	var allowed: Dictionary = {}
 	for option in current_options:
 		var neighbor_set = adjacency[dir_index][option]
-		if neighbor_set.is_empty():
-			for tile_index in range(tile_count):
-				allowed[tile_index] = true
-			return allowed
 		for neighbor_index in neighbor_set.keys():
 			allowed[neighbor_index] = true
 	return allowed
@@ -252,6 +243,19 @@ func _pattern_from_cell(tilemap: TileMap, cell: Vector2i, pattern_size: int) -> 
 func _pattern_key(pattern: Dictionary) -> String:
 	return "|".join(pattern["keys"])
 
+
+func _patterns_match_overlap(pattern_a: Dictionary, pattern_b: Dictionary, direction: Vector2i, pattern_size: int) -> bool:
+	var keys_a: Array = pattern_a["keys"]
+	var keys_b: Array = pattern_b["keys"]
+	for y in range(pattern_size):
+		for x in range(pattern_size):
+			var bx = x - direction.x
+			var by = y - direction.y
+			if bx < 0 or bx >= pattern_size or by < 0 or by >= pattern_size:
+				continue
+			if keys_a[y * pattern_size + x] != keys_b[by * pattern_size + bx]:
+				return false
+	return true
 
 func _collect_pattern_cells(cells: Array[Vector2i], pattern_size: int) -> Array[Vector2i]:
 	var cell_set := _make_cell_set(cells)
