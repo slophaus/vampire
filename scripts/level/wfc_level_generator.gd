@@ -103,14 +103,6 @@ func _run_wave_function_collapse(cells: Array[Vector2i], tile_count: int, freque
 		collapsed[next_cell] = chosen
 		if not _propagate_constraints(next_cell, possibilities, adjacency, tile_count):
 			return {}
-	if collapsed.size() < cells.size():
-		for cell in cells:
-			if collapsed.has(cell):
-				continue
-			var options = possibilities[cell] as Array
-			if options.is_empty():
-				return {}
-			collapsed[cell] = options[0]
 	return collapsed
 
 
