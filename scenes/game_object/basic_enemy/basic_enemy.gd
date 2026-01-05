@@ -65,7 +65,6 @@ const GHOST_FADE_SPEED := 1.0
 const GHOST_POSSESSION_RADIUS := 28.0
 const GHOST_POSSESSION_SEEK_RADIUS := 200.0
 const GHOST_POSSESSION_DURATION := 8.0
-const GHOST_POSSESSION_COOLDOWN := 1.0
 const GHOST_POSSESSION_TINT := Color(0.2, 1.0, 0.6, 1.0)
 const GHOST_OFFSCREEN_RESPAWN_DELAY := 2.5
 const GHOST_RESPAWN_FADE_SPEED := 1.5
@@ -106,7 +105,6 @@ var ghost_offscreen_time := 0.0
 var ghost_respawn_fade := 1.0
 var ghost_possession_target: Node2D
 var ghost_possession_time_left := 0.0
-var ghost_possession_cooldown := 0.0
 var is_possessed := false
 var possessed_time_left := 0.0
 var possessed_original_stats: Dictionary = {}
@@ -313,10 +311,9 @@ func apply_dig_level() -> void:
 
 func update_ghost_state(delta: float) -> void:
 	update_ghost_fade(delta)
-	ghost_possession_cooldown = max(ghost_possession_cooldown - delta, 0.0)
 	if ghost_possession_target != null:
 		if not is_instance_valid(ghost_possession_target):
-			end_ghost_possession(true, true)
+			end_ghost_possession(true)
 			return
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
 		global_position = ghost_possession_target.global_position
@@ -324,16 +321,10 @@ func update_ghost_state(delta: float) -> void:
 			end_ghost_possession()
 		return
 
-	update_ghost_offscreen(delta)
-	if ghost_possession_cooldown > 0.0:
-		update_ghost_wander(delta)
-		velocity_component.move(self)
-		update_visual_facing()
-		return
-
 	if try_start_ghost_possession():
 		return
 
+	update_ghost_offscreen(delta)
 	update_ghost_seek(delta)
 	velocity_component.move(self)
 	update_visual_facing()
@@ -405,8 +396,6 @@ func update_ghost_seek(delta: float) -> void:
 
 
 func try_start_ghost_possession() -> bool:
-	if ghost_possession_cooldown > 0.0:
-		return false
 	var player = get_tree().get_first_node_in_group("player") as Node2D
 	if player != null and global_position.distance_to(player.global_position) <= GHOST_POSSESSION_RADIUS:
 		if player.has_method("start_ghost_possession"):
@@ -476,11 +465,9 @@ func start_ghost_possession(target: Node2D, duration: float) -> void:
 	ghost_offscreen_time = 0.0
 
 
-func end_ghost_possession(force_peak_visibility: bool = false, start_cooldown: bool = false) -> void:
+func end_ghost_possession(force_peak_visibility: bool = false) -> void:
 	ghost_possession_target = null
 	ghost_possession_time_left = 0.0
-	if start_cooldown:
-		ghost_possession_cooldown = GHOST_POSSESSION_COOLDOWN
 	respawn_ghost_on_screen(get_camera_view_rect())
 	ghost_offscreen_time = 0.0
 	if force_peak_visibility:
