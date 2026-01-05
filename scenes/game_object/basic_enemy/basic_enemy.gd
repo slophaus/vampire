@@ -317,7 +317,9 @@ func apply_dig_level() -> void:
 func update_ghost_state(delta: float) -> void:
 	update_ghost_fade(delta)
 	if ghost_possession_target != null:
-		if not is_instance_valid(ghost_possession_target):
+		if not is_instance_valid(ghost_possession_target) \
+				or ghost_possession_target.is_queued_for_deletion() \
+				or not ghost_possession_target.is_inside_tree():
 			end_ghost_possession(true, true)
 			return
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
