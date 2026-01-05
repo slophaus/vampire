@@ -44,7 +44,7 @@ func generate_level() -> void:
 	else:
 		rng.randomize()
 
-	var patterns_data := _build_patterns(sample_tilemap, sample_rect, overlap_size)
+	var patterns_data: Dictionary = _build_patterns(sample_tilemap, sample_rect, overlap_size)
 	if patterns_data.patterns.is_empty():
 		print_debug("WFC: no patterns extracted from sample.")
 		return
@@ -58,7 +58,7 @@ func generate_level() -> void:
 		return
 
 	var attempt := 0
-	var result := {}
+	var result: Dictionary = {}
 	while attempt < max_attempts:
 		attempt += 1
 		if attempt == 1 or attempt % 50 == 0:
@@ -79,7 +79,7 @@ func generate_level() -> void:
 		print_debug("WFC: failed after %d attempts." % max_attempts)
 		return
 
-	var output_tiles := _build_output_tiles(
+	var output_tiles: Dictionary = _build_output_tiles(
 		patterns_data.patterns,
 		patterns_data.tiles,
 		result.grid,
@@ -90,7 +90,7 @@ func generate_level() -> void:
 
 	target_tilemap.clear()
 	for tile_pos in output_tiles.keys():
-		var tile := output_tiles[tile_pos]
+		var tile: Dictionary = output_tiles[tile_pos]
 		target_tilemap.set_cell(
 			0,
 			tile_pos,
@@ -103,10 +103,10 @@ func generate_level() -> void:
 
 
 func _build_patterns(sample_tilemap: TileMap, sample_rect: Rect2i, pattern_size: int) -> Dictionary:
-	var pattern_map := {}
-	var patterns := []
-	var weights := []
-	var tile_data := {}
+	var pattern_map: Dictionary = {}
+	var patterns: Array = []
+	var weights: Array = []
+	var tile_data: Dictionary = {}
 	var pattern_limit := Vector2i(
 		sample_rect.size.x - pattern_size + 1,
 		sample_rect.size.y - pattern_size + 1
@@ -114,8 +114,8 @@ func _build_patterns(sample_tilemap: TileMap, sample_rect: Rect2i, pattern_size:
 
 	for y_offset in range(pattern_limit.y):
 		for x_offset in range(pattern_limit.x):
-			var tiles := []
-			var valid := true
+			var tiles: Array = []
+			var valid: bool = true
 			for dy in range(pattern_size):
 				for dx in range(pattern_size):
 					var cell_pos := sample_rect.position + Vector2i(x_offset + dx, y_offset + dy)
@@ -145,10 +145,10 @@ func _build_patterns(sample_tilemap: TileMap, sample_rect: Rect2i, pattern_size:
 				patterns.append(tiles)
 				weights.append(1)
 			else:
-				var index := pattern_map[signature]
+				var index: int = int(pattern_map[signature])
 				weights[index] += 1
 
-	var adjacency := _build_adjacency(patterns, pattern_size)
+	var adjacency: Array = _build_adjacency(patterns, pattern_size)
 
 	return {
 		"patterns": patterns,
@@ -159,7 +159,7 @@ func _build_patterns(sample_tilemap: TileMap, sample_rect: Rect2i, pattern_size:
 
 
 func _build_adjacency(patterns: Array, pattern_size: int) -> Array:
-	var adjacency := []
+	var adjacency: Array = []
 	for _pattern in patterns:
 		var entry := []
 		for _dir in DIRECTIONS:
@@ -206,16 +206,16 @@ func _run_wfc(
 	grid_size: Vector2i,
 	rng: RandomNumberGenerator
 ) -> Dictionary:
-	var total_cells := grid_size.x * grid_size.y
-	var wave := []
-	var all_patterns := []
+	var total_cells: int = grid_size.x * grid_size.y
+	var wave: Array = []
+	var all_patterns: Array = []
 	for index in range(patterns.size()):
 		all_patterns.append(index)
 
 	for _i in range(total_cells):
 		wave.append(all_patterns.duplicate())
 
-	var stack := []
+	var stack: Array = []
 
 	while true:
 		var next_index := _find_lowest_entropy(wave, rng)
@@ -225,30 +225,30 @@ func _run_wfc(
 		if wave[next_index].is_empty():
 			return {"success": false}
 
-		var chosen := _weighted_choice(wave[next_index], weights, rng)
+		var chosen: int = _weighted_choice(wave[next_index], weights, rng)
 		wave[next_index] = [chosen]
 		stack.append(next_index)
 
 		while not stack.is_empty():
-			var current_index := stack.pop_back()
-			var current_pos := Vector2i(current_index % grid_size.x, current_index / grid_size.x)
-			var current_patterns := wave[current_index]
+			var current_index: int = stack.pop_back()
+			var current_pos: Vector2i = Vector2i(current_index % grid_size.x, current_index / grid_size.x)
+			var current_patterns: Array = wave[current_index]
 
 			for dir_index in range(DIRECTIONS.size()):
-				var neighbor_pos := current_pos + DIRECTIONS[dir_index]
+				var neighbor_pos: Vector2i = current_pos + DIRECTIONS[dir_index]
 				if neighbor_pos.x < 0 or neighbor_pos.y < 0:
 					continue
 				if neighbor_pos.x >= grid_size.x or neighbor_pos.y >= grid_size.y:
 					continue
 
-				var neighbor_index := neighbor_pos.y * grid_size.x + neighbor_pos.x
-				var allowed := {}
+				var neighbor_index: int = neighbor_pos.y * grid_size.x + neighbor_pos.x
+				var allowed: Dictionary = {}
 				for pattern_index in current_patterns:
 					for allowed_index in adjacency[pattern_index][dir_index]:
 						allowed[allowed_index] = true
 
-				var neighbor_patterns := wave[neighbor_index]
-				var reduced := false
+				var neighbor_patterns: Array = wave[neighbor_index]
+				var reduced: bool = false
 				for candidate in neighbor_patterns.duplicate():
 					if not allowed.has(candidate):
 						neighbor_patterns.erase(candidate)
@@ -264,10 +264,10 @@ func _run_wfc(
 
 
 func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator) -> int:
-	var best_entropy := INF
-	var best_indices := []
+	var best_entropy: float = INF
+	var best_indices: Array = []
 	for i in range(wave.size()):
-		var entropy := wave[i].size()
+		var entropy: int = wave[i].size()
 		if entropy <= 1:
 			continue
 		if entropy < best_entropy:
@@ -283,12 +283,12 @@ func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator) -> int:
 
 
 func _weighted_choice(options: Array, weights: Array, rng: RandomNumberGenerator) -> int:
-	var total := 0.0
+	var total: float = 0.0
 	for option in options:
 		total += float(weights[option])
 
-	var pick := rng.randf() * total
-	var cumulative := 0.0
+	var pick: float = rng.randf() * total
+	var cumulative: float = 0.0
 	for option in options:
 		cumulative += float(weights[option])
 		if pick <= cumulative:
@@ -304,20 +304,20 @@ func _build_output_tiles(
 	target_rect: Rect2i,
 	pattern_size: int
 ) -> Dictionary:
-	var output_tiles := {}
+	var output_tiles: Dictionary = {}
 	for y in range(grid_size.y):
 		for x in range(grid_size.x):
-			var pattern_index := grid[y * grid_size.x + x][0]
-			var pattern_tiles := patterns[pattern_index]
+			var pattern_index: int = grid[y * grid_size.x + x][0]
+			var pattern_tiles: Array = patterns[pattern_index]
 			for dy in range(pattern_size):
 				for dx in range(pattern_size):
-					var tile_key := pattern_tiles[dy * pattern_size + dx]
+					var tile_key: String = pattern_tiles[dy * pattern_size + dx]
 					var tile_pos := target_rect.position + Vector2i(x + dx, y + dy)
 					if output_tiles.has(tile_pos):
 						if output_tiles[tile_pos]["key"] != tile_key:
 							print_debug("WFC: tile conflict at %s." % tile_pos)
 						continue
-					var data := tile_data[tile_key]
+					var data: Dictionary = tile_data[tile_key]
 					output_tiles[tile_pos] = {
 						"key": tile_key,
 						"source_id": data["source_id"],
