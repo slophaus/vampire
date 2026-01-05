@@ -110,6 +110,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 	if target_tilemap.has_meta(TileEater.DIRT_BORDER_META_KEY):
 		target_tilemap.remove_meta(TileEater.DIRT_BORDER_META_KEY)
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
+	_move_players_to_nearest_floor(target_tilemap)
 
 	print_debug("WFC: generation complete.")
 
@@ -117,6 +118,34 @@ func generate_level(use_new_seed: bool = false) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept"):
 		generate_level(true)
+
+
+func _move_players_to_nearest_floor(target_tilemap: TileMap) -> void:
+	if target_tilemap == null:
+		return
+	var floor_positions: Array[Vector2] = []
+	for cell in target_tilemap.get_used_cells(0):
+		var tile_data := target_tilemap.get_cell_tile_data(0, cell)
+		if tile_data == null:
+			continue
+		var tile_type = tile_data.get_custom_data(TileEater.CUSTOM_DATA_KEY)
+		if tile_type != null and TileEater.WALKABLE_TILE_TYPES.has(tile_type):
+			var local_position = target_tilemap.map_to_local(cell)
+			floor_positions.append(target_tilemap.to_global(local_position))
+	if floor_positions.is_empty():
+		return
+	for player in get_tree().get_nodes_in_group("player"):
+		var player_node := player as Node2D
+		if player_node == null:
+			continue
+		var closest_position := floor_positions[0]
+		var closest_distance := INF
+		for floor_position in floor_positions:
+			var distance := player_node.global_position.distance_squared_to(floor_position)
+			if distance < closest_distance:
+				closest_distance = distance
+				closest_position = floor_position
+		player_node.global_position = closest_position
 
 
 func _build_patterns(
