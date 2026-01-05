@@ -21,7 +21,7 @@ func generate_level() -> void:
 	print_debug("WFC: starting level generation")
 	var tilemap = _get_tilemap(target_tilemap_path)
 	if tilemap == null:
-		print_debug("WFC: no target tilemap found (assign target_tilemap_path or add a TileMap to the 'arena_tilemap' group)")
+		print_debug("WFC: no target tilemap found (assign target_tilemap_path on the generator)")
 		return
 	var sample_tilemap = _get_tilemap(sample_tilemap_path)
 	if sample_tilemap == null:
@@ -220,25 +220,8 @@ func _tile_variant_from_cell(tilemap: TileMap, cell: Vector2i) -> Dictionary:
 
 func _get_tilemap(path: NodePath) -> TileMap:
 	if path == NodePath(""):
-		for node in get_tree().get_nodes_in_group("arena_tilemap"):
-			var tilemap := node as TileMap
-			if tilemap != null and tilemap.is_inside_tree():
-				return tilemap
-		var fallback = _find_first_tilemap(get_tree().get_root())
-		if fallback != null:
-			return fallback
 		return null
 	var node = get_node_or_null(path)
 	if node is TileMap:
 		return node as TileMap
-	return null
-
-
-func _find_first_tilemap(root: Node) -> TileMap:
-	if root is TileMap:
-		return root as TileMap
-	for child in root.get_children():
-		var found = _find_first_tilemap(child)
-		if found != null:
-			return found
 	return null
