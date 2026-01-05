@@ -12,7 +12,7 @@ var spider_rest_time_left := 0.0
 var spider_jump_cooldown := 0.0
 
 func _ready():
-	super()
+	super._ready()
 	set_sprite_visibility(spider_sprite)
 	set_active_sprite(spider_sprite)
 	fireball_ability_controller.set_active(false)
