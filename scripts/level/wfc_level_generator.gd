@@ -30,7 +30,7 @@ func generate_level() -> void:
 		return
 	var pattern_size = max(1, overlap_size)
 	var target_rect = tilemap.get_used_rect()
-	var pattern_cells = _collect_pattern_cells(target_cells, pattern_size, target_rect)
+	var pattern_cells = _collect_pattern_cells(pattern_size, target_rect)
 	if pattern_cells.is_empty():
 		print_debug("WFC: target tilemap has no cells that fit pattern size %d" % pattern_size)
 		return
@@ -71,7 +71,7 @@ func _collect_sample_data(sample_tilemap: TileMap, sample_cells: Array[Vector2i]
 	var pattern_index_by_key: Dictionary = {}
 	var tile_patterns: Array = []
 	var tile_frequencies: Array = []
-	var pattern_cells = _collect_pattern_cells(sample_cells, pattern_size, sample_rect)
+	var pattern_cells = _collect_pattern_cells(pattern_size, sample_rect)
 	for cell in pattern_cells:
 		var pattern = _pattern_from_cell(sample_tilemap, cell, pattern_size)
 		var pattern_key = _pattern_key(pattern)
@@ -264,16 +264,15 @@ func _patterns_match_overlap(pattern_a: Dictionary, pattern_b: Dictionary, direc
 				return false
 	return true
 
-func _collect_pattern_cells(cells: Array[Vector2i], pattern_size: int, used_rect: Rect2i) -> Array[Vector2i]:
+func _collect_pattern_cells(pattern_size: int, used_rect: Rect2i) -> Array[Vector2i]:
 	var pattern_cells: Array[Vector2i] = []
+	if used_rect.size.x < pattern_size or used_rect.size.y < pattern_size:
+		return pattern_cells
 	var min_pos = used_rect.position
 	var max_pos = used_rect.position + used_rect.size - Vector2i(pattern_size, pattern_size)
-	for cell in cells:
-		if cell.x < min_pos.x or cell.y < min_pos.y:
-			continue
-		if cell.x > max_pos.x or cell.y > max_pos.y:
-			continue
-		pattern_cells.append(cell)
+	for y in range(min_pos.y, max_pos.y + 1):
+		for x in range(min_pos.x, max_pos.x + 1):
+			pattern_cells.append(Vector2i(x, y))
 	return pattern_cells
 
 
