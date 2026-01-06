@@ -2,16 +2,15 @@
 
 [ext_resource type="Script" uid="uid://bye5hmlwe8gub" path="res://scenes/game_object/boss_enemy/boss_enemy.gd" id="1_gpcli"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_en8ir"]
-[ext_resource type="PackedScene" uid="uid://6kroo8paddhur" path="res://scenes/component/blood_drop_component.tscn" id="3_q7nm4"]
+[ext_resource type="PackedScene" uid="uid://nipysc8tqhsn" path="res://scenes/component/blood_drop_component.tscn" id="3_q7nm4"]
 [ext_resource type="PackedScene" uid="uid://cn4jjvvblm8lp" path="res://scenes/component/velocity_component.tscn" id="4_7n42o"]
 [ext_resource type="PackedScene" uid="uid://gsyk0iqo1m50" path="res://scenes/component/hurtbox_component.tscn" id="4_e2gan"]
-[ext_resource type="PackedScene" uid="uid://b4d5h026u4tmt" path="res://scenes/component/poison_component.tscn" id="4_qmdh2"]
 [ext_resource type="PackedScene" uid="uid://cjxiijis5jocn" path="res://scenes/component/death_component.tscn" id="4_j8jii"]
+[ext_resource type="PackedScene" uid="uid://b4d5h026u4tmt" path="res://scenes/component/poison_component.tscn" id="4_qmdh2"]
 [ext_resource type="PackedScene" uid="uid://b1rgnu4v5t5yp" path="res://scenes/ability/fireball_ability_controller/fireball_ability_controller.tscn" id="5_m1ysn"]
 [ext_resource type="PackedScene" uid="uid://b20x14h768t03" path="res://scenes/ability/sword_ability_controller/sword_ability_controller.tscn" id="6_5p4sr"]
-[ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="6_jhg8v"]
-[ext_resource type="Shader" uid="uid://d1j4gk5ldqed5" path="res://scenes/game_object/boss_enemy/boss_outline_flash.gdshader" id="7_6v7v1"]
 [ext_resource type="PackedScene" uid="uid://bkkq5ohgbnkxw" path="res://scenes/component/hit_flash_component.tscn" id="7_4kqgf"]
+[ext_resource type="Shader" uid="uid://by2jk0gd63l6o" path="res://scenes/game_object/boss_enemy/boss_outline_flash.gdshader" id="7_6v7v1"]
 [ext_resource type="PackedScene" uid="uid://bh478361trp2r" path="res://scenes/component/random_audio_stream_player_2d_component.tscn" id="10_74ju1"]
 [ext_resource type="AudioStream" uid="uid://ckjo8r6fns8s1" path="res://assets/audio/footstep_carpet_000.ogg" id="10_d8kjc"]
 [ext_resource type="AudioStream" uid="uid://bhxo10h1q3e2" path="res://assets/audio/footstep_carpet_001.ogg" id="12_2b1bb"]
@@ -24,6 +23,8 @@
 resource_local_to_scene = true
 shader = ExtResource("7_6v7v1")
 shader_parameter/lerp_percent = 0.0
+shader_parameter/outline_color = Color(1, 0, 0, 1)
+shader_parameter/outline_size = 1.5
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_5yb0v"]
 radius = 13.0384
@@ -137,7 +138,6 @@ target_group = "player"
 [node name="Visuals" type="Node2D" parent="."]
 
 [node name="dragon_sprite" type="AnimatedSprite2D" parent="Visuals"]
-clip_children = 2
 sprite_frames = SubResource("SpriteFrames_iguem")
 autoplay = "default"
 
