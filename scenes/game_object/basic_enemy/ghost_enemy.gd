@@ -49,6 +49,9 @@ func is_invulnerable() -> bool:
 func update_ghost_state(delta: float) -> void:
 	update_ghost_fade(delta)
 	ghost_possession_cooldown = max(ghost_possession_cooldown - delta, 0.0)
+	if ghost_possession_target == null and ghost_possession_time_left > 0.0:
+		end_ghost_possession(true, true)
+		return
 	if ghost_possession_target != null:
 		if not is_instance_valid(ghost_possession_target):
 			end_ghost_possession(true, true)
