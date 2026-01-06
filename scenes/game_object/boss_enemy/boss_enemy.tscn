@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://c1y0b6v3m7kqj"]
+[gd_scene load_steps=29 format=3 uid="uid://c1y0b6v3m7kqj"]
 
 [ext_resource type="Script" uid="uid://bye5hmlwe8gub" path="res://scenes/game_object/boss_enemy/boss_enemy.gd" id="1_gpcli"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_en8ir"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://b1rgnu4v5t5yp" path="res://scenes/ability/fireball_ability_controller/fireball_ability_controller.tscn" id="5_m1ysn"]
 [ext_resource type="PackedScene" uid="uid://b20x14h768t03" path="res://scenes/ability/sword_ability_controller/sword_ability_controller.tscn" id="6_5p4sr"]
 [ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="6_jhg8v"]
+[ext_resource type="Shader" uid="uid://cou4ir5deu1m3" path="res://scenes/game_object/boss_enemy/boss_outline_hit_flash.gdshader" id="7_1q5na"]
 [ext_resource type="PackedScene" uid="uid://bkkq5ohgbnkxw" path="res://scenes/component/hit_flash_component.tscn" id="7_4kqgf"]
 [ext_resource type="PackedScene" uid="uid://bh478361trp2r" path="res://scenes/component/random_audio_stream_player_2d_component.tscn" id="10_74ju1"]
 [ext_resource type="AudioStream" uid="uid://ckjo8r6fns8s1" path="res://assets/audio/footstep_carpet_000.ogg" id="10_d8kjc"]
@@ -21,7 +22,7 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ollop"]
 resource_local_to_scene = true
-shader = ExtResource("6_jhg8v")
+shader = ExtResource("7_1q5na")
 shader_parameter/lerp_percent = 0.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_5yb0v"]
