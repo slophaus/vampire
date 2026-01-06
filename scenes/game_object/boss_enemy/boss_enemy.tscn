@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://b20x14h768t03" path="res://scenes/ability/sword_ability_controller/sword_ability_controller.tscn" id="6_5p4sr"]
 [ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="6_jhg8v"]
 [ext_resource type="PackedScene" uid="uid://bkkq5ohgbnkxw" path="res://scenes/component/hit_flash_component.tscn" id="7_4kqgf"]
+[ext_resource type="PackedScene" path="res://scenes/component/outline_component.tscn" id="8_8iet2"]
 [ext_resource type="PackedScene" uid="uid://bh478361trp2r" path="res://scenes/component/random_audio_stream_player_2d_component.tscn" id="10_74ju1"]
 [ext_resource type="AudioStream" uid="uid://ckjo8r6fns8s1" path="res://assets/audio/footstep_carpet_000.ogg" id="10_d8kjc"]
 [ext_resource type="AudioStream" uid="uid://bhxo10h1q3e2" path="res://assets/audio/footstep_carpet_001.ogg" id="12_2b1bb"]
@@ -94,6 +95,9 @@ hit_flash_material = SubResource("ShaderMaterial_ollop")
 
 [node name="DeathComponent" parent="." node_paths=PackedStringArray("health_component", "sprite") instance=ExtResource("4_j8jii")]
 health_component = NodePath("../HealthComponent")
+sprite = NodePath("../Visuals/dragon_sprite")
+
+[node name="OutlineComponent" parent="." node_paths=PackedStringArray("sprite") instance=ExtResource("8_8iet2")]
 sprite = NodePath("../Visuals/dragon_sprite")
 
 [node name="HealthBar" type="ProgressBar" parent="."]
