@@ -89,6 +89,7 @@ func _load_level(level_scene: PackedScene, exit_door_name: StringName, preserve_
 func _apply_level_settings(level: LevelRoot) -> void:
 	var tilemap = _get_level_tilemap(level)
 	enemy_manager.arena_tilemap = tilemap
+	enemy_manager.apply_level_settings(level)
 	var should_run_timers = not level.is_timeless
 	_set_timed_systems_active(should_run_timers)
 

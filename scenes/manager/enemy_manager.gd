@@ -12,19 +12,23 @@ const GHOST_ENEMY_INDEX := 5
 @export var arena_time_manager: ArenaTimeManager
 @export var arena_tilemap: TileMap
 @export var spawn_rate_keyframes: Array[Vector2] = [Vector2(1, 1.0), Vector2(16, 2.0)]
+@export var enemy_spawn_keyframes: Array[EnemySpawnKeyframe] = []
 
 @onready var timer = $Timer
 
 var base_spawn_time = 0  # sec
 var enemy_table = WeightedTable.new()
 var failed_spawn_count := 0
+var applied_enemy_keyframes: Dictionary = {}
+var level_spawn_rate_keyframes: Array[Vector2] = []
+var level_enemy_spawn_keyframes: Array[EnemySpawnKeyframe] = []
 
 
 func _ready():
-	enemy_table.add_item(0, 15)
 	base_spawn_time = timer.wait_time
 	timer.timeout.connect(on_timer_timeout)
 	arena_time_manager.arena_difficulty_increased.connect(on_arena_difficulty_increased)
+	_reset_enemy_progression()
 	if arena_time_manager != null and arena_time_manager.get_arena_difficulty() > 0:
 		on_arena_difficulty_increased(arena_time_manager.get_arena_difficulty())
 
@@ -125,6 +129,9 @@ func on_timer_timeout():
 		failed_spawn_count += 1
 		return
 
+	if enemy_table.items.is_empty():
+		return
+
 	var enemy_index = enemy_table.pick_item()
 	if enemy_index == GHOST_ENEMY_INDEX and not can_spawn_ghost():
 		enemy_index = pick_non_ghost_enemy()
@@ -147,12 +154,13 @@ func get_spawn_rate() -> float:
 
 
 func get_spawn_rate_for_difficulty(arena_difficulty: int) -> float:
-	if spawn_rate_keyframes.is_empty():
+	var active_keyframes = _get_active_spawn_rate_keyframes()
+	if active_keyframes.is_empty():
 		if base_spawn_time <= 0.0:
 			return 0.0
 		return 1.0 / base_spawn_time
 
-	var keyframes = spawn_rate_keyframes.duplicate()
+	var keyframes = active_keyframes.duplicate()
 	keyframes.sort_custom(func(a, b): return a.x < b.x)
 
 	if arena_difficulty <= int(keyframes[0].x):
@@ -199,14 +207,77 @@ func on_arena_difficulty_increased(arena_difficulty: int):
 	var spawn_rate = get_spawn_rate_for_difficulty(arena_difficulty)
 	if spawn_rate > 0.0:
 		timer.wait_time = 1.0 / spawn_rate
-	
-	if arena_difficulty == 2:
-		enemy_table.add_item(3, 1)
-	if arena_difficulty == 4:
-		enemy_table.add_item(4, 2)
-	if arena_difficulty == 8:
-		enemy_table.add_item(1, 5)
-	if arena_difficulty == 12:
-		enemy_table.add_item(2, 4)
-	if arena_difficulty == 14:
-		enemy_table.add_item(GHOST_ENEMY_INDEX, 1)
+
+	_apply_enemy_keyframes_for_difficulty(arena_difficulty)
+
+
+func apply_level_settings(level: LevelRoot) -> void:
+	if level != null:
+		level_spawn_rate_keyframes = level.spawn_rate_keyframes
+		level_enemy_spawn_keyframes = level.enemy_spawn_keyframes
+	else:
+		level_spawn_rate_keyframes = []
+		level_enemy_spawn_keyframes = []
+	_reset_enemy_progression()
+	if arena_time_manager != null:
+		on_arena_difficulty_increased(arena_time_manager.get_arena_difficulty())
+
+
+func _reset_enemy_progression() -> void:
+	enemy_table = WeightedTable.new()
+	applied_enemy_keyframes.clear()
+
+
+func _get_active_spawn_rate_keyframes() -> Array[Vector2]:
+	if not level_spawn_rate_keyframes.is_empty():
+		return level_spawn_rate_keyframes
+	return spawn_rate_keyframes
+
+
+func _get_active_enemy_spawn_keyframes() -> Array[EnemySpawnKeyframe]:
+	if not level_enemy_spawn_keyframes.is_empty():
+		return level_enemy_spawn_keyframes
+	if not enemy_spawn_keyframes.is_empty():
+		return enemy_spawn_keyframes
+	return _build_default_enemy_keyframes()
+
+
+func _apply_enemy_keyframes_for_difficulty(arena_difficulty: int) -> void:
+	var keyframes = _get_active_enemy_spawn_keyframes()
+	if keyframes.is_empty():
+		return
+	var sorted = keyframes.duplicate()
+	sorted.sort_custom(func(a, b): return a.arena_difficulty < b.arena_difficulty)
+	for keyframe in sorted:
+		if arena_difficulty < keyframe.arena_difficulty:
+			continue
+		var keyframe_id = keyframe.get_instance_id()
+		if applied_enemy_keyframes.has(keyframe_id):
+			continue
+		_apply_enemy_keyframe(keyframe)
+		applied_enemy_keyframes[keyframe_id] = true
+
+
+func _apply_enemy_keyframe(keyframe: EnemySpawnKeyframe) -> void:
+	for weight_entry in keyframe.enemy_weights:
+		if weight_entry.y <= 0:
+			continue
+		enemy_table.add_item(weight_entry.x, weight_entry.y)
+
+
+func _build_default_enemy_keyframes() -> Array[EnemySpawnKeyframe]:
+	var keyframes: Array[EnemySpawnKeyframe] = []
+	keyframes.append(_make_enemy_keyframe(1, [Vector2i(0, 15)]))
+	keyframes.append(_make_enemy_keyframe(2, [Vector2i(3, 1)]))
+	keyframes.append(_make_enemy_keyframe(4, [Vector2i(4, 2)]))
+	keyframes.append(_make_enemy_keyframe(8, [Vector2i(1, 5)]))
+	keyframes.append(_make_enemy_keyframe(12, [Vector2i(2, 4)]))
+	keyframes.append(_make_enemy_keyframe(14, [Vector2i(GHOST_ENEMY_INDEX, 1)]))
+	return keyframes
+
+
+func _make_enemy_keyframe(difficulty: int, weights: Array[Vector2i]) -> EnemySpawnKeyframe:
+	var keyframe := EnemySpawnKeyframe.new()
+	keyframe.arena_difficulty = difficulty
+	keyframe.enemy_weights = weights
+	return keyframe
