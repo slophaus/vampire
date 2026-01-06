@@ -164,11 +164,11 @@ func _move_entities_to_nearest_floor(target_tilemap: TileMap) -> void:
 func _position_level_doors(target_tilemap: TileMap) -> void:
 	if target_tilemap == null:
 		return
-	var props_layer := get_parent().get_node_or_null("LayerProps")
-	if props_layer == null:
+	var door_group := get_parent().get_node_or_null("LayerProps/DoorGroup")
+	if door_group == null:
 		return
 	var door_nodes: Array[Node2D] = []
-	for child in props_layer.get_children():
+	for child in door_group.get_children():
 		var node_2d := child as Node2D
 		if node_2d == null:
 			continue
