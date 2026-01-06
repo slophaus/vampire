@@ -1,8 +1,0 @@
-[gd_scene load_steps=3 format=3]
-
-[ext_resource type="Script" path="res://scenes/component/outline_component.gd" id="1_4c4ow"]
-[ext_resource type="Material" path="res://scenes/component/outline_component_material.tres" id="2_i1pl3"]
-
-[node name="OutlineComponent" type="Node"]
-script = ExtResource("1_4c4ow")
-outline_material = ExtResource("2_i1pl3")
