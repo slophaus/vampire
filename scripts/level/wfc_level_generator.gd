@@ -137,7 +137,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 	if target_tilemap.has_meta(TileEater.DIRT_BORDER_META_KEY):
 		target_tilemap.remove_meta(TileEater.DIRT_BORDER_META_KEY)
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
-	_move_players_to_nearest_floor(target_tilemap)
+	_move_entities_to_nearest_floor(target_tilemap)
 
 	print_debug("WFC: phase finalize %d ms" % (Time.get_ticks_msec() - phase_start_ms))
 	print_debug("WFC: total time %d ms" % (Time.get_ticks_msec() - total_start_ms))
@@ -149,9 +149,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		generate_level(true)
 
 
-func _move_players_to_nearest_floor(target_tilemap: TileMap) -> void:
+func _move_entities_to_nearest_floor(target_tilemap: TileMap) -> void:
 	if target_tilemap == null:
 		return
+	var floor_positions := _get_floor_positions(target_tilemap)
+	if floor_positions.is_empty():
+		return
+	_move_nodes_in_group_to_nearest_floor("player", floor_positions)
+	_move_nodes_in_group_to_nearest_floor("enemy", floor_positions)
+	_move_props_to_nearest_floor(floor_positions)
+
+
+func _get_floor_positions(target_tilemap: TileMap) -> Array[Vector2]:
 	var floor_positions: Array[Vector2] = []
 	for cell in target_tilemap.get_used_cells(0):
 		var tile_data := target_tilemap.get_cell_tile_data(0, cell)
@@ -161,20 +170,40 @@ func _move_players_to_nearest_floor(target_tilemap: TileMap) -> void:
 		if tile_type != null and TileEater.WALKABLE_TILE_TYPES.has(tile_type):
 			var local_position = target_tilemap.map_to_local(cell)
 			floor_positions.append(target_tilemap.to_global(local_position))
-	if floor_positions.is_empty():
-		return
-	for player in get_tree().get_nodes_in_group("player"):
-		var player_node := player as Node2D
-		if player_node == null:
+	return floor_positions
+
+
+func _move_nodes_in_group_to_nearest_floor(group_name: String, floor_positions: Array[Vector2]) -> void:
+	for node in get_tree().get_nodes_in_group(group_name):
+		var node_2d := node as Node2D
+		if node_2d == null:
 			continue
-		var closest_position := floor_positions[0]
-		var closest_distance := INF
-		for floor_position in floor_positions:
-			var distance := player_node.global_position.distance_squared_to(floor_position)
-			if distance < closest_distance:
-				closest_distance = distance
-				closest_position = floor_position
-		player_node.global_position = closest_position
+		node_2d.global_position = _find_closest_floor_position(node_2d.global_position, floor_positions)
+
+
+func _move_props_to_nearest_floor(floor_positions: Array[Vector2]) -> void:
+	var props_layer := get_parent().get_node_or_null("LayerProps")
+	if props_layer == null:
+		return
+	for child in props_layer.get_children():
+		var node_2d := child as Node2D
+		if node_2d == null:
+			continue
+		node_2d.global_position = _find_closest_floor_position(node_2d.global_position, floor_positions)
+
+
+func _find_closest_floor_position(
+	start_position: Vector2,
+	floor_positions: Array[Vector2]
+) -> Vector2:
+	var closest_position := floor_positions[0]
+	var closest_distance := INF
+	for floor_position in floor_positions:
+		var distance := start_position.distance_squared_to(floor_position)
+		if distance < closest_distance:
+			closest_distance = distance
+			closest_position = floor_position
+	return closest_position
 
 
 func _build_patterns(
