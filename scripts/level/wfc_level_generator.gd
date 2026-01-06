@@ -295,8 +295,8 @@ func _build_path_from_distances(
 	while current != start_cell:
 		var current_distance: int = distances[current]
 		var next_cell := current
-		for direction in DIRECTIONS:
-			var neighbor := current + direction
+		for direction: Vector2i in DIRECTIONS:
+			var neighbor: Vector2i = current + direction
 			if distances.has(neighbor) and distances[neighbor] == current_distance - 1:
 				next_cell = neighbor
 				break
