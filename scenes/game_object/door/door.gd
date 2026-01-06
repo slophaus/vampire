@@ -8,11 +8,8 @@ extends Area2D
 
 var is_transitioning := false
 const REENABLE_DELAY_FRAMES := 2
-func _enter_tree() -> void:
-	add_to_group("doors")
-
-
 func _ready() -> void:
+	add_to_group("doors")
 	body_entered.connect(_on_body_entered)
 
 
