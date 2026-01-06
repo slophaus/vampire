@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://cwt0ajjcva1li"]
+[gd_scene load_steps=13 format=3 uid="uid://cwt0ajjcva1li"]
 
 [ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_level_root"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="2_tileset"]
@@ -7,7 +7,17 @@
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="5_door"]
 [ext_resource type="PackedScene" uid="uid://ct3bt3o3o1yqf" path="res://scenes/level/main_level.tscn" id="6_main"]
 [ext_resource type="PackedScene" uid="uid://d2t5e1r1c1gby" path="res://scenes/level/boss_arena_level.tscn" id="7_boss"]
-[ext_resource type="Script" uid="uid://bawvipyk640it" path="res://scripts/level/enemy_spawn_keyframe.gd" id="8_enemy_keyframe"]
+[ext_resource type="Script" uid="uid://wg6nsoff1cyg" path="res://scripts/level/enemy_spawn_keyframe.gd" id="8_enemy_keyframe"]
+
+[sub_resource type="Resource" id="Resource_enemy_keyframe_1"]
+script = ExtResource("8_enemy_keyframe")
+arena_difficulty = 1
+enemy_weights = Array[Vector2i]([Vector2i(2, 15)])
+
+[sub_resource type="Resource" id="Resource_enemy_keyframe_2"]
+script = ExtResource("8_enemy_keyframe")
+arena_difficulty = 4
+enemy_weights = Array[Vector2i]([Vector2i(4, 2)])
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_nvumn"]
 texture = ExtResource("3_dirt_texture")
@@ -351,21 +361,11 @@ terrain_set_0/terrain_0/name = "Terrain 0"
 terrain_set_0/terrain_0/color = Color(0.5, 0.34375, 0.25, 1)
 sources/0 = SubResource("TileSetAtlasSource_nvumn")
 
-[sub_resource type="Resource" id="Resource_enemy_keyframe_1"]
-script = ExtResource("8_enemy_keyframe")
-arena_difficulty = 1
-enemy_weights = Array[Vector2i]([Vector2i(2, 15)])
-
-[sub_resource type="Resource" id="Resource_enemy_keyframe_2"]
-script = ExtResource("8_enemy_keyframe")
-arena_difficulty = 4
-enemy_weights = Array[Vector2i]([Vector2i(4, 6)])
-
 [node name="WFCTestLevel" type="Node"]
 script = ExtResource("1_level_root")
 level_id = &"wfc_test"
-spawn_rate_keyframes = Array[Vector2]([Vector2(1, 0.5), Vector2(3, 1), Vector2(16, 2)])
-enemy_spawn_keyframes = Array[Resource]([SubResource("Resource_enemy_keyframe_1"), SubResource("Resource_enemy_keyframe_2")])
+spawn_rate_keyframes = Array[Vector2]([Vector2(1, 0.1), Vector2(3, 0.3), Vector2(16, 1)])
+enemy_spawn_keyframes = Array[ExtResource("8_enemy_keyframe")]([SubResource("Resource_enemy_keyframe_1"), SubResource("Resource_enemy_keyframe_2")])
 
 [node name="LayerTilemaps" type="Node2D" parent="."]
 
