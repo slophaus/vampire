@@ -369,13 +369,15 @@ tile_set = SubResource("TileSet_ab1yv")
 [node name="LayerProps" type="Node2D" parent="."]
 z_index = 1
 
-[node name="DoorToMain" parent="LayerProps" instance=ExtResource("10_t70je")]
+[node name="DoorGroup" type="Node2D" parent="LayerProps"]
+
+[node name="DoorToMain" parent="LayerProps/DoorGroup" instance=ExtResource("10_t70je")]
 position = Vector2(255, 378)
 target_scene = ExtResource("5_main")
 target_scene_path = "res://scenes/level/main_level.tscn"
 exit_door_name = &"DoorToBoss"
 
-[node name="DoorToWFC" parent="LayerProps" instance=ExtResource("10_t70je")]
+[node name="DoorToWFC" parent="LayerProps/DoorGroup" instance=ExtResource("10_t70je")]
 position = Vector2(215, 192)
 target_scene = ExtResource("6_wfc")
 target_scene_path = "res://scenes/level/wfc_test_level.tscn"
