@@ -138,7 +138,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 		target_tilemap.remove_meta(TileEater.DIRT_BORDER_META_KEY)
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
 	_move_entities_to_nearest_floor(target_tilemap)
-	_position_level_doors(target_tilemap)
+	_position_level_doors(target_tilemap, rng)
 
 	print_debug("WFC: phase finalize %d ms" % (Time.get_ticks_msec() - phase_start_ms))
 	print_debug("WFC: total time %d ms" % (Time.get_ticks_msec() - total_start_ms))
@@ -161,7 +161,7 @@ func _move_entities_to_nearest_floor(target_tilemap: TileMap) -> void:
 	_move_props_to_nearest_floor(floor_positions)
 
 
-func _position_level_doors(target_tilemap: TileMap) -> void:
+func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) -> void:
 	if target_tilemap == null:
 		print_debug("WFC: door placement skipped (missing target tilemap).")
 		return
@@ -183,7 +183,7 @@ func _position_level_doors(target_tilemap: TileMap) -> void:
 	if walkable_cells.is_empty():
 		print_debug("WFC: door placement skipped (no walkable cells).")
 		return
-	var start_cell := _find_near_corner_floor_cell(target_tilemap, walkable_cells)
+	var start_cell := _find_near_corner_floor_cell(target_tilemap, walkable_cells, rng)
 	var distances := _build_walkable_distance_field(walkable_cells, start_cell)
 	var farthest_cell := _find_farthest_cell(distances, start_cell)
 	print_debug("WFC: door placement choosing cells %s (start) and %s (farthest)." % [start_cell, farthest_cell])
@@ -209,16 +209,29 @@ func _get_walkable_cells(target_tilemap: TileMap) -> Dictionary:
 	return walkable_cells
 
 
-func _find_near_corner_floor_cell(target_tilemap: TileMap, walkable_cells: Dictionary) -> Vector2i:
+func _find_near_corner_floor_cell(
+	target_tilemap: TileMap,
+	walkable_cells: Dictionary,
+	rng: RandomNumberGenerator
+) -> Vector2i:
 	var used_rect := target_tilemap.get_used_rect()
 	var corner := Vector2i(used_rect.position.x, used_rect.position.y + used_rect.size.y - 1)
 	var best_cell: Vector2i = walkable_cells.keys()[0] as Vector2i
 	var best_distance := INF
+	var nearby_candidates: Array[Vector2i] = []
+	var min_distance_squared := 1
+	var max_distance_squared := 9
 	for cell in walkable_cells.keys():
 		var distance := corner.distance_squared_to(cell)
+		if distance >= min_distance_squared and distance <= max_distance_squared:
+			nearby_candidates.append(cell)
 		if distance < best_distance:
 			best_distance = distance
 			best_cell = cell
+	if not nearby_candidates.is_empty():
+		return nearby_candidates[rng.randi_range(0, nearby_candidates.size() - 1)]
+	if best_distance > 0:
+		return best_cell
 	return best_cell
 
 
