@@ -40,12 +40,11 @@ func get_spawn_position(player_position: Vector2) -> Vector2:
 	var offscreen_cells = get_offscreen_walkable_cells(offscreen_rect, view_rect.get_center(), max_spawn_radius, blocked_cells)
 	if offscreen_cells.is_empty():
 		return Vector2.ZERO
-	offscreen_cells.shuffle()
-	for spawn_cell in offscreen_cells:
-		if not is_spawn_cell_navigable_to_player(spawn_cell, player_position):
-			continue
-		var local_position = arena_tilemap.map_to_local(spawn_cell)
-		return arena_tilemap.to_global(local_position)
+	var spawn_cell = offscreen_cells.pick_random()
+	if not is_spawn_cell_navigable_to_player(spawn_cell, player_position):
+		return Vector2.ZERO
+	var local_position = arena_tilemap.map_to_local(spawn_cell)
+	return arena_tilemap.to_global(local_position)
 	return Vector2.ZERO
 
 
