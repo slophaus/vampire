@@ -1,9 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://d2t5e1r1c1gby"]
+[gd_scene load_steps=11 format=3 uid="uid://d2t5e1r1c1gby"]
 
 [ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_0tq7x"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="1_hxoa7"]
 [ext_resource type="PackedScene" uid="uid://ct3bt3o3o1yqf" path="res://scenes/level/main_level.tscn" id="5_main"]
 [ext_resource type="PackedScene" uid="uid://cwt0ajjcva1li" path="res://scenes/level/wfc_test_level.tscn" id="6_wfc"]
+[ext_resource type="PackedScene" uid="uid://b6f3xj5k6h6vl" path="res://scenes/game_object/well/well.tscn" id="7_rdh48"]
 [ext_resource type="Texture2D" uid="uid://dej1p0au5qgos" path="res://sprites/blob_dirt_border_6.png" id="8_qdgwu"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="10_t70je"]
 [ext_resource type="PackedScene" uid="uid://c1y0b6v3m7kqj" path="res://scenes/game_object/boss_enemy/boss_enemy.tscn" id="13_th5th"]
@@ -379,6 +380,11 @@ position = Vector2(215, 192)
 target_scene = ExtResource("6_wfc")
 target_scene_path = "res://scenes/level/wfc_test_level.tscn"
 exit_door_name = &"DoorToBoss"
+
+[node name="Well" parent="LayerProps" instance=ExtResource("7_rdh48")]
+position = Vector2(1013, 208)
+emission_interval = 0.25
+capacity = 50
 
 [node name="PlayerSpawn" type="Node2D" parent="."]
 position = Vector2(381, 374)
