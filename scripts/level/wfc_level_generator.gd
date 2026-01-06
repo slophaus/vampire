@@ -183,9 +183,14 @@ func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) 
 	if walkable_cells.is_empty():
 		print_debug("WFC: door placement skipped (no walkable cells).")
 		return
-	var start_cell := _find_near_corner_floor_cell(target_tilemap, walkable_cells, rng)
+	var door_cells := _filter_cells_min_distance_from_bottom(target_tilemap, walkable_cells, 8)
+	if door_cells.is_empty():
+		print_debug("WFC: door placement skipped (no walkable cells far enough from bottom).")
+		return
+	var start_cell := _find_near_corner_floor_cell(target_tilemap, door_cells, rng)
 	var distances := _build_walkable_distance_field(walkable_cells, start_cell)
-	var farthest_cell := _find_distance_percentile_cell(distances, start_cell, 0.9)
+	var door_distances := _filter_distances(distances, door_cells)
+	var farthest_cell := _find_distance_percentile_cell(door_distances, start_cell, 0.9)
 	print_debug("WFC: door placement choosing cells %s (start) and %s (~90%% farthest)." % [
 		start_cell,
 		farthest_cell
@@ -198,6 +203,12 @@ func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) 
 	])
 	door_nodes[0].global_position = _cell_to_world(target_tilemap, start_cell)
 	door_nodes[1].global_position = _cell_to_world(target_tilemap, farthest_cell)
+	var dirt_tile := _find_tile_by_type(target_tilemap, "dirt")
+	if dirt_tile.is_empty():
+		print_debug("WFC: door placement skipped dirt conversion (no dirt tile found).")
+		return
+	_apply_door_dirt(target_tilemap, start_cell, dirt_tile)
+	_apply_door_dirt(target_tilemap, farthest_cell, dirt_tile)
 
 
 func _get_walkable_cells(target_tilemap: TileMap) -> Dictionary:
@@ -222,8 +233,8 @@ func _find_near_corner_floor_cell(
 	var best_cell: Vector2i = walkable_cells.keys()[0] as Vector2i
 	var best_distance := INF
 	var nearby_candidates: Array[Vector2i] = []
-	var min_distance_squared := 1
-	var max_distance_squared := 9
+	var min_distance_squared := 100
+	var max_distance_squared := 300
 	for cell in walkable_cells.keys():
 		var distance := corner.distance_squared_to(cell)
 		if distance >= min_distance_squared and distance <= max_distance_squared:
@@ -255,6 +266,28 @@ func _build_walkable_distance_field(walkable_cells: Dictionary, start_cell: Vect
 			distances[neighbor] = current_distance + 1
 			queue.append(neighbor)
 	return distances
+
+
+func _filter_cells_min_distance_from_bottom(
+	target_tilemap: TileMap,
+	walkable_cells: Dictionary,
+	min_distance: int
+) -> Dictionary:
+	var filtered: Dictionary = {}
+	var used_rect := target_tilemap.get_used_rect()
+	var bottom_y := used_rect.position.y + used_rect.size.y - 1
+	for cell in walkable_cells.keys():
+		if bottom_y - cell.y >= min_distance:
+			filtered[cell] = true
+	return filtered
+
+
+func _filter_distances(distances: Dictionary, allowed_cells: Dictionary) -> Dictionary:
+	var filtered: Dictionary = {}
+	for cell in allowed_cells.keys():
+		if distances.has(cell):
+			filtered[cell] = distances[cell]
+	return filtered
 
 
 func _find_farthest_cell(distances: Dictionary, fallback: Vector2i) -> Vector2i:
@@ -292,6 +325,75 @@ func _find_distance_percentile_cell(
 			closest_delta = delta
 			closest_cell = cell
 	return closest_cell
+
+
+func _find_tile_by_type(target_tilemap: TileMap, tile_type: String) -> Dictionary:
+	if target_tilemap == null:
+		return {}
+	for cell in target_tilemap.get_used_cells(0):
+		var tile_data := target_tilemap.get_cell_tile_data(0, cell)
+		if _tile_data_has_type(tile_data, tile_type):
+			return {
+				"source_id": target_tilemap.get_cell_source_id(0, cell),
+				"atlas_coords": target_tilemap.get_cell_atlas_coords(0, cell),
+				"alternative": target_tilemap.get_cell_alternative_tile(0, cell),
+			}
+	var tile_set = target_tilemap.tile_set
+	if tile_set == null:
+		return {}
+	for source_index in range(tile_set.get_source_count()):
+		var source_id = tile_set.get_source_id(source_index)
+		var source = tile_set.get_source(source_id)
+		if source is TileSetAtlasSource:
+			var atlas := source as TileSetAtlasSource
+			for tile_index in range(atlas.get_tiles_count()):
+				var tile_id = atlas.get_tile_id(tile_index)
+				if _tile_data_has_type(atlas.get_tile_data(tile_id, 0), tile_type):
+					return {
+						"source_id": source_id,
+						"atlas_coords": tile_id,
+						"alternative": 0,
+					}
+				var alt_count = atlas.get_alternative_tiles_count(tile_id)
+				for alt_index in range(alt_count):
+					var alt_id = atlas.get_alternative_tile_id(tile_id, alt_index)
+					if _tile_data_has_type(atlas.get_tile_data(tile_id, alt_id), tile_type):
+						return {
+							"source_id": source_id,
+							"atlas_coords": tile_id,
+							"alternative": alt_id,
+						}
+	return {}
+
+
+func _tile_data_has_type(tile_data: TileData, tile_type: String) -> bool:
+	if tile_data == null:
+		return false
+	var custom_type = tile_data.get_custom_data(TileEater.CUSTOM_DATA_KEY)
+	return custom_type != null and custom_type == tile_type
+
+
+func _apply_door_dirt(target_tilemap: TileMap, door_cell: Vector2i, dirt_tile: Dictionary) -> void:
+	if dirt_tile.is_empty():
+		return
+	for direction in DIRECTIONS:
+		_set_cell_to_tile(target_tilemap, door_cell + direction, dirt_tile)
+	for offset in range(1, 5):
+		_set_cell_to_tile(target_tilemap, door_cell + Vector2i(0, offset), dirt_tile)
+
+
+func _set_cell_to_tile(target_tilemap: TileMap, cell: Vector2i, tile_info: Dictionary) -> void:
+	if target_tilemap == null:
+		return
+	if not tile_info.has("source_id"):
+		return
+	target_tilemap.set_cell(
+		0,
+		cell,
+		tile_info["source_id"],
+		tile_info["atlas_coords"],
+		tile_info["alternative"]
+	)
 
 
 func _cell_to_world(target_tilemap: TileMap, cell: Vector2i) -> Vector2:
