@@ -36,8 +36,7 @@ func _ready():
 	_apply_player_count()
 	_connect_player_signals()
 	if starting_level_scene != null:
-		var starting_scene_path = starting_level_scene.resource_path
-		_load_level(starting_scene_path, &"", false)
+		_load_level(starting_level_scene, &"", false)
 
 
 func _unhandled_input(event):
@@ -46,22 +45,19 @@ func _unhandled_input(event):
 		get_tree().root.set_input_as_handled()
 
 
-func transition_to_level(level_scene_path: String, exit_door_name: StringName = &"Door", preserve_current_level: bool = false) -> void:
+func transition_to_level(level_scene: PackedScene, exit_door_name: StringName = &"Door", preserve_current_level: bool = false) -> void:
 	if is_transitioning:
 		return
-	if level_scene_path.is_empty():
+	if level_scene == null:
 		return
 	is_transitioning = true
 	ScreenTransition.transition()
 	await ScreenTransition.transitioned_halfway
-	_load_level(level_scene_path, exit_door_name, preserve_current_level)
+	_load_level(level_scene, exit_door_name, preserve_current_level)
 	is_transitioning = false
 
 
-func _load_level(level_scene_path: String, exit_door_name: StringName, preserve_current_level: bool) -> void:
-	if level_scene_path.is_empty():
-		return
-	var level_scene = load(level_scene_path) as PackedScene
+func _load_level(level_scene: PackedScene, exit_door_name: StringName, preserve_current_level: bool) -> void:
 	if level_scene == null:
 		return
 	_detach_players_from_level()
@@ -71,7 +67,7 @@ func _load_level(level_scene_path: String, exit_door_name: StringName, preserve_
 		else:
 			current_level.queue_free()
 	var restored_from_cache := false
-	var cached_level = _take_cached_level(level_scene_path)
+	var cached_level = _take_cached_level(level_scene)
 	if cached_level != null:
 		current_level = cached_level
 		restored_from_cache = true
@@ -85,7 +81,7 @@ func _load_level(level_scene_path: String, exit_door_name: StringName, preserve_
 		_initialize_dirt_border(current_level)
 		arena_time_manager.reset_state()
 	else:
-		_restore_arena_time_state(level_scene_path)
+		_restore_arena_time_state(level_scene)
 	_apply_level_settings(current_level)
 	_position_players(current_level, exit_door_name)
 
@@ -208,24 +204,30 @@ func _cache_current_level() -> void:
 	cached_time_states[scene_path] = arena_time_manager.get_state()
 
 
-func _take_cached_level(level_scene_path: String) -> LevelRoot:
-	if level_scene_path.is_empty():
+func _take_cached_level(level_scene: PackedScene) -> LevelRoot:
+	if level_scene == null:
 		return null
-	if not cached_levels.has(level_scene_path):
+	var scene_path = level_scene.resource_path
+	if scene_path.is_empty():
 		return null
-	var cached_level = cached_levels[level_scene_path] as LevelRoot
-	cached_levels.erase(level_scene_path)
+	if not cached_levels.has(scene_path):
+		return null
+	var cached_level = cached_levels[scene_path] as LevelRoot
+	cached_levels.erase(scene_path)
 	return cached_level
 
 
-func _restore_arena_time_state(level_scene_path: String) -> void:
-	if level_scene_path.is_empty():
+func _restore_arena_time_state(level_scene: PackedScene) -> void:
+	if level_scene == null:
 		return
-	var cached_state = cached_time_states.get(level_scene_path, null)
+	var scene_path = level_scene.resource_path
+	if scene_path.is_empty():
+		return
+	var cached_state = cached_time_states.get(scene_path, null)
 	if cached_state == null:
 		arena_time_manager.reset_state()
 		return
-	cached_time_states.erase(level_scene_path)
+	cached_time_states.erase(scene_path)
 	arena_time_manager.apply_state(cached_state)
 
 
