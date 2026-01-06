@@ -163,26 +163,39 @@ func _move_entities_to_nearest_floor(target_tilemap: TileMap) -> void:
 
 func _position_level_doors(target_tilemap: TileMap) -> void:
 	if target_tilemap == null:
+		print_debug("WFC: door placement skipped (missing target tilemap).")
 		return
 	var door_group := get_parent().get_node_or_null("LayerProps/DoorGroup")
 	if door_group == null:
+		print_debug("WFC: door placement skipped (missing LayerProps/DoorGroup).")
 		return
 	var door_nodes: Array[Node2D] = []
 	for child in door_group.get_children():
 		var node_2d := child as Node2D
 		if node_2d == null:
+			print_debug("WFC: door placement ignored non-Node2D child %s." % child.name)
 			continue
 		if not node_2d.is_in_group("doors"):
+			print_debug("WFC: door placement ignored non-door node %s." % node_2d.name)
 			continue
 		door_nodes.append(node_2d)
 	if door_nodes.size() < 2:
+		print_debug("WFC: door placement skipped (found %d doors)." % door_nodes.size())
 		return
 	var walkable_cells := _get_walkable_cells(target_tilemap)
 	if walkable_cells.is_empty():
+		print_debug("WFC: door placement skipped (no walkable cells).")
 		return
 	var start_cell := _find_near_corner_floor_cell(target_tilemap, walkable_cells)
 	var distances := _build_walkable_distance_field(walkable_cells, start_cell)
 	var farthest_cell := _find_farthest_cell(distances, start_cell)
+	print_debug("WFC: door placement choosing cells %s (start) and %s (farthest)." % [start_cell, farthest_cell])
+	print_debug("WFC: door placement doors %s -> %s, %s -> %s." % [
+		door_nodes[0].name,
+		_cell_to_world(target_tilemap, start_cell),
+		door_nodes[1].name,
+		_cell_to_world(target_tilemap, farthest_cell)
+	])
 	door_nodes[0].global_position = _cell_to_world(target_tilemap, start_cell)
 	door_nodes[1].global_position = _cell_to_world(target_tilemap, farthest_cell)
 
