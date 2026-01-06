@@ -185,8 +185,11 @@ func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) 
 		return
 	var start_cell := _find_near_corner_floor_cell(target_tilemap, walkable_cells, rng)
 	var distances := _build_walkable_distance_field(walkable_cells, start_cell)
-	var farthest_cell := _find_farthest_cell(distances, start_cell)
-	print_debug("WFC: door placement choosing cells %s (start) and %s (farthest)." % [start_cell, farthest_cell])
+	var farthest_cell := _find_distance_percentile_cell(distances, start_cell, 0.9)
+	print_debug("WFC: door placement choosing cells %s (start) and %s (~90%% farthest)." % [
+		start_cell,
+		farthest_cell
+	])
 	print_debug("WFC: door placement doors %s -> %s, %s -> %s." % [
 		door_nodes[0].name,
 		_cell_to_world(target_tilemap, start_cell),
@@ -265,6 +268,30 @@ func _find_farthest_cell(distances: Dictionary, fallback: Vector2i) -> Vector2i:
 			farthest_distance = distance
 			farthest_cell = cell
 	return farthest_cell
+
+
+func _find_distance_percentile_cell(
+	distances: Dictionary,
+	fallback: Vector2i,
+	percent: float
+) -> Vector2i:
+	if distances.is_empty():
+		return fallback
+	var farthest_distance := -1
+	for distance in distances.values():
+		farthest_distance = max(farthest_distance, int(distance))
+	if farthest_distance <= 0:
+		return fallback
+	var target_distance := int(round(farthest_distance * clampf(percent, 0.0, 1.0)))
+	var closest_cell := fallback
+	var closest_delta := INF
+	for cell in distances.keys():
+		var distance: int = distances[cell]
+		var delta := abs(distance - target_distance)
+		if delta < closest_delta:
+			closest_delta = delta
+			closest_cell = cell
+	return closest_cell
 
 
 func _cell_to_world(target_tilemap: TileMap, cell: Vector2i) -> Vector2:
