@@ -278,8 +278,6 @@ func _move_props_to_nearest_floor(floor_positions: Array[Vector2]) -> void:
 		var node_2d := child as Node2D
 		if node_2d == null:
 			continue
-		if _node_or_descendant_in_group(node_2d, "doors"):
-			continue
 		node_2d.global_position = _find_closest_floor_position(node_2d.global_position, floor_positions)
 
 
@@ -295,15 +293,6 @@ func _find_closest_floor_position(
 			closest_distance = distance
 			closest_position = floor_position
 	return closest_position
-
-
-func _node_or_descendant_in_group(node: Node, group_name: String) -> bool:
-	if node.is_in_group(group_name):
-		return true
-	for child in node.get_children():
-		if _node_or_descendant_in_group(child, group_name):
-			return true
-	return false
 
 
 func _build_patterns(
