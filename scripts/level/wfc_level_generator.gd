@@ -6,6 +6,7 @@ class_name WFCLevelGenerator
 @export var generate_on_ready := true
 @export var max_attempts := 5
 @export var random_seed := 0
+@export var seeded_mode := true
 @export_range(1, 4, 1) var overlap_size := 2
 @export var periodic_input := false
 @export var show_step_by_step := false
@@ -55,7 +56,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 		return
 
 	var rng := RandomNumberGenerator.new()
-	if use_new_seed:
+	if use_new_seed or not seeded_mode:
 		rng.randomize()
 	elif random_seed != 0:
 		rng.seed = random_seed
