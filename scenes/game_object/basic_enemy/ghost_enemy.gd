@@ -50,7 +50,7 @@ func update_ghost_state(delta: float) -> void:
 	update_ghost_fade(delta)
 	ghost_possession_cooldown = max(ghost_possession_cooldown - delta, 0.0)
 	if ghost_possession_target == null and ghost_possession_time_left > 0.0:
-		end_ghost_possession(true, true)
+		end_ghost_possession(true, true, false)
 		return
 	if ghost_possession_target != null:
 		if not is_instance_valid(ghost_possession_target):
@@ -221,13 +221,14 @@ func start_ghost_possession(target: Node2D, duration: float) -> void:
 	ghost_offscreen_time = 0.0
 
 
-func end_ghost_possession(force_peak_visibility: bool = false, start_cooldown: bool = false) -> void:
+func end_ghost_possession(force_peak_visibility: bool = false, start_cooldown: bool = false, respawn_on_exit: bool = true) -> void:
 	ghost_possession_target = null
 	ghost_possession_time_left = 0.0
 	if start_cooldown:
 		ghost_possession_cooldown = GHOST_POSSESSION_COOLDOWN
-	respawn_ghost_on_screen(get_camera_view_rect())
-	ghost_offscreen_time = 0.0
+	if respawn_on_exit:
+		respawn_ghost_on_screen(get_camera_view_rect())
+		ghost_offscreen_time = 0.0
 	if force_peak_visibility:
 		ghost_fade_time = PI * 0.5
 		ghost_respawn_fade = 1.0
