@@ -427,9 +427,12 @@ func _move_props_to_nearest_floor(floor_positions: Array[Vector2]) -> void:
 	var props_layer := get_parent().get_node_or_null("LayerProps")
 	if props_layer == null:
 		return
+	var door_group := props_layer.get_node_or_null("DoorGroup")
 	for child in props_layer.get_children():
 		var node_2d := child as Node2D
 		if node_2d == null:
+			continue
+		if door_group != null and node_2d == door_group:
 			continue
 		node_2d.global_position = _find_closest_floor_position(node_2d.global_position, floor_positions)
 
