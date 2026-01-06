@@ -18,7 +18,7 @@ var enemy_table = WeightedTable.new()
 var failed_spawn_count := 0
 var applied_enemy_keyframes: Dictionary = {}
 var level_spawn_rate_keyframes: Array[Vector2] = []
-var level_enemy_spawn_keyframes: Array[EnemySpawnKeyframe] = []
+var level_enemy_spawn_keyframes: Array[Vector3] = []
 
 
 func _ready():
@@ -226,7 +226,7 @@ func _get_active_spawn_rate_keyframes() -> Array[Vector2]:
 	return level_spawn_rate_keyframes
 
 
-func _get_active_enemy_spawn_keyframes() -> Array[EnemySpawnKeyframe]:
+func _get_active_enemy_spawn_keyframes() -> Array[Vector3]:
 	return level_enemy_spawn_keyframes
 
 
@@ -235,20 +235,21 @@ func _apply_enemy_keyframes_for_difficulty(arena_difficulty: int) -> void:
 	if keyframes.is_empty():
 		return
 	var sorted = keyframes.duplicate()
-	sorted.sort_custom(func(a, b): return a.arena_difficulty < b.arena_difficulty)
+	sorted.sort_custom(func(a, b): return a.x < b.x)
 	for keyframe in sorted:
-		if arena_difficulty < keyframe.arena_difficulty:
+		var keyframe_difficulty = int(keyframe.x)
+		if arena_difficulty < keyframe_difficulty:
 			continue
-		var keyframe_id = keyframe.get_instance_id()
+		var keyframe_id = Vector3i(keyframe_difficulty, int(keyframe.y), int(keyframe.z))
 		if applied_enemy_keyframes.has(keyframe_id):
 			continue
 		_apply_enemy_keyframe(keyframe)
 		applied_enemy_keyframes[keyframe_id] = true
 
 
-func _apply_enemy_keyframe(keyframe: EnemySpawnKeyframe) -> void:
-	for weight_entry in keyframe.enemy_weights:
-		if weight_entry.y <= 0:
-			continue
-		enemy_table.add_item(weight_entry.x, weight_entry.y)
-
+func _apply_enemy_keyframe(keyframe: Vector3) -> void:
+	var enemy_index = int(keyframe.y)
+	var weight = int(keyframe.z)
+	if weight <= 0:
+		return
+	enemy_table.add_item(enemy_index, weight)
