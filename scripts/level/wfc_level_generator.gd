@@ -187,6 +187,10 @@ func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) 
 	if door_cells.is_empty():
 		print_debug("WFC: door placement skipped (no walkable cells far enough from bottom).")
 		return
+	door_cells = _filter_cells_min_distance_from_top_and_sides(target_tilemap, door_cells, 3)
+	if door_cells.is_empty():
+		print_debug("WFC: door placement skipped (no walkable cells far enough from top/sides).")
+		return
 	var start_cell := _find_near_corner_floor_cell(target_tilemap, door_cells, rng)
 	var distances := _build_walkable_distance_field(walkable_cells, start_cell)
 	var door_distances := _filter_distances(distances, door_cells)
@@ -279,6 +283,27 @@ func _filter_cells_min_distance_from_bottom(
 	for cell in walkable_cells.keys():
 		if bottom_y - cell.y >= min_distance:
 			filtered[cell] = true
+	return filtered
+
+
+func _filter_cells_min_distance_from_top_and_sides(
+	target_tilemap: TileMap,
+	walkable_cells: Dictionary,
+	min_distance: int
+) -> Dictionary:
+	var filtered: Dictionary = {}
+	var used_rect := target_tilemap.get_used_rect()
+	var top_y := used_rect.position.y
+	var left_x := used_rect.position.x
+	var right_x := used_rect.position.x + used_rect.size.x - 1
+	for cell in walkable_cells.keys():
+		if cell.y - top_y < min_distance:
+			continue
+		if cell.x - left_x < min_distance:
+			continue
+		if right_x - cell.x < min_distance:
+			continue
+		filtered[cell] = true
 	return filtered
 
 
