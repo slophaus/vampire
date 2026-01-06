@@ -9,6 +9,9 @@ const GHOST_POSSESSION_DURATION := 8.0
 const GHOST_POSSESSION_COOLDOWN := 1.0
 const GHOST_OFFSCREEN_RESPAWN_DELAY := 2.5
 const GHOST_RESPAWN_FADE_SPEED := 1.5
+const GHOST_COOLDOWN_BLINK_SPEED := 6.5
+const GHOST_COOLDOWN_ALPHA_MIN := 0.2
+const GHOST_COOLDOWN_ALPHA_MAX := 0.7
 
 var ghost_wander_time_left := 0.0
 var ghost_wander_direction := Vector2.ZERO
@@ -50,6 +53,12 @@ func update_ghost_state(delta: float) -> void:
 		if not is_instance_valid(ghost_possession_target):
 			end_ghost_possession(true, true)
 			return
+		if ghost_possession_target.is_queued_for_deletion() or not ghost_possession_target.is_inside_tree():
+			end_ghost_possession(true, true)
+			return
+		if not ghost_possession_target.is_in_group("player") and not ghost_possession_target.is_in_group("enemy"):
+			end_ghost_possession(true, true)
+			return
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
 		global_position = ghost_possession_target.global_position
 		if ghost_possession_time_left <= 0.0:
@@ -76,6 +85,14 @@ func update_ghost_fade(delta: float) -> void:
 		return
 	if ghost_possession_target != null:
 		visuals.modulate.a = 0.0
+		return
+	if ghost_possession_cooldown > 0.0:
+		ghost_fade_time += delta * GHOST_COOLDOWN_BLINK_SPEED
+		var blink = (sin(ghost_fade_time) + 1.0) * 0.5
+		var alpha = lerp(GHOST_COOLDOWN_ALPHA_MIN, GHOST_COOLDOWN_ALPHA_MAX, blink)
+		if ghost_respawn_fade < 1.0:
+			ghost_respawn_fade = min(ghost_respawn_fade + (delta * GHOST_RESPAWN_FADE_SPEED), 1.0)
+		visuals.modulate.a = alpha * ghost_respawn_fade
 		return
 	ghost_fade_time += delta * GHOST_FADE_SPEED
 	var alpha = 0.3 + (sin(ghost_fade_time) * 0.3)
