@@ -204,6 +204,7 @@ func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) 
 	var distances := _build_walkable_distance_field(walkable_cells, start_cell)
 	var door_distances := _filter_distances(distances, door_cells)
 	var farthest_cell := _find_distance_percentile_cell(door_distances, start_cell, 0.9)
+	var path_cells := _build_path_from_distances(distances, start_cell, farthest_cell)
 	_debug_log("WFC: door placement choosing cells %s (start) and %s (~90%% farthest)." % [
 		start_cell,
 		farthest_cell
@@ -216,13 +217,15 @@ func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) 
 	])
 	door_nodes[0].global_position = _cell_to_world(target_tilemap, start_cell)
 	door_nodes[1].global_position = _cell_to_world(target_tilemap, farthest_cell)
-	_update_debug_door_path(target_tilemap, distances, start_cell, farthest_cell)
+	_update_debug_door_path(target_tilemap, path_cells)
 	var floor_tile := _find_tile_by_type(target_tilemap, "floor")
 	if floor_tile.is_empty():
 		_debug_log("WFC: door placement skipped floor conversion (no floor tile found).")
 		return
-	_apply_door_floor(target_tilemap, start_cell, floor_tile)
-	_apply_door_floor(target_tilemap, farthest_cell, floor_tile)
+	var wall_tile := _find_tile_by_type(target_tilemap, "wall")
+	var path_lookup := _cells_to_lookup(path_cells)
+	_apply_door_clearance(target_tilemap, start_cell, floor_tile, wall_tile, path_lookup)
+	_apply_door_clearance(target_tilemap, farthest_cell, floor_tile, wall_tile, path_lookup)
 
 
 func _get_walkable_cells(target_tilemap: TileMap) -> Dictionary:
@@ -434,14 +437,32 @@ func _tile_data_has_type(tile_data: TileData, tile_type: String) -> bool:
 	return custom_type != null and custom_type == tile_type
 
 
-func _apply_door_floor(target_tilemap: TileMap, door_cell: Vector2i, floor_tile: Dictionary) -> void:
+func _apply_door_clearance(
+	target_tilemap: TileMap,
+	door_cell: Vector2i,
+	floor_tile: Dictionary,
+	wall_tile: Dictionary,
+	path_lookup: Dictionary
+) -> void:
 	if floor_tile.is_empty():
 		return
-	for x_offset in range(-1, 2):
-		for y_offset in range(-1, 2):
-			_set_cell_to_tile(target_tilemap, door_cell + Vector2i(x_offset, y_offset), floor_tile)
-	for offset in range(1, 5):
-		_set_cell_to_tile(target_tilemap, door_cell + Vector2i(0, offset), floor_tile)
+	var min_x := door_cell.x - 1
+	var max_x := door_cell.x + 1
+	var min_y := door_cell.y - 1
+	var max_y := door_cell.y + 4
+	for x in range(min_x, max_x + 1):
+		for y in range(min_y, max_y + 1):
+			_set_cell_to_tile(target_tilemap, Vector2i(x, y), floor_tile)
+	if wall_tile.is_empty():
+		return
+	for x in range(min_x - 1, max_x + 2):
+		for y in range(min_y - 1, max_y + 2):
+			if x >= min_x and x <= max_x and y >= min_y and y <= max_y:
+				continue
+			var cell := Vector2i(x, y)
+			if path_lookup.has(cell):
+				continue
+			_set_cell_to_tile(target_tilemap, cell, wall_tile)
 
 
 func _reset_debug_door_path() -> void:
@@ -454,9 +475,7 @@ func _reset_debug_door_path() -> void:
 
 func _update_debug_door_path(
 	target_tilemap: TileMap,
-	distances: Dictionary,
-	start_cell: Vector2i,
-	end_cell: Vector2i
+	path_cells: Array[Vector2i]
 ) -> void:
 	var debug_line := get_node_or_null(debug_path_line_path) as Line2D
 	if debug_line == null:
@@ -465,7 +484,6 @@ func _update_debug_door_path(
 	if not debug_logs:
 		debug_line.visible = false
 		return
-	var path_cells := _build_path_from_distances(distances, start_cell, end_cell)
 	if path_cells.is_empty():
 		debug_line.visible = false
 		return
@@ -473,6 +491,13 @@ func _update_debug_door_path(
 		var world_position := _cell_to_world(target_tilemap, cell)
 		debug_line.add_point(debug_line.to_local(world_position))
 	debug_line.visible = true
+
+
+func _cells_to_lookup(cells: Array[Vector2i]) -> Dictionary:
+	var lookup: Dictionary = {}
+	for cell in cells:
+		lookup[cell] = true
+	return lookup
 
 
 func _set_cell_to_tile(target_tilemap: TileMap, cell: Vector2i, tile_info: Dictionary) -> void:
