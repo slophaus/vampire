@@ -138,6 +138,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 		target_tilemap.remove_meta(TileEater.DIRT_BORDER_META_KEY)
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
 	_move_entities_to_nearest_floor(target_tilemap)
+	_position_level_doors(target_tilemap)
 
 	print_debug("WFC: phase finalize %d ms" % (Time.get_ticks_msec() - phase_start_ms))
 	print_debug("WFC: total time %d ms" % (Time.get_ticks_msec() - total_start_ms))
@@ -158,6 +159,94 @@ func _move_entities_to_nearest_floor(target_tilemap: TileMap) -> void:
 	_move_nodes_in_group_to_nearest_floor("player", floor_positions)
 	_move_nodes_in_group_to_nearest_floor("enemy", floor_positions)
 	_move_props_to_nearest_floor(floor_positions)
+
+
+func _position_level_doors(target_tilemap: TileMap) -> void:
+	if target_tilemap == null:
+		return
+	var props_layer := get_parent().get_node_or_null("LayerProps")
+	if props_layer == null:
+		return
+	var door_nodes: Array[Node2D] = []
+	for child in props_layer.get_children():
+		var node_2d := child as Node2D
+		if node_2d == null:
+			continue
+		if not node_2d.is_in_group("doors"):
+			continue
+		door_nodes.append(node_2d)
+	if door_nodes.size() < 2:
+		return
+	var walkable_cells := _get_walkable_cells(target_tilemap)
+	if walkable_cells.is_empty():
+		return
+	var start_cell := _find_near_corner_floor_cell(target_tilemap, walkable_cells)
+	var distances := _build_walkable_distance_field(walkable_cells, start_cell)
+	var farthest_cell := _find_farthest_cell(distances, start_cell)
+	door_nodes[0].global_position = _cell_to_world(target_tilemap, start_cell)
+	door_nodes[1].global_position = _cell_to_world(target_tilemap, farthest_cell)
+
+
+func _get_walkable_cells(target_tilemap: TileMap) -> Dictionary:
+	var walkable_cells: Dictionary = {}
+	for cell in target_tilemap.get_used_cells(0):
+		var tile_data := target_tilemap.get_cell_tile_data(0, cell)
+		if tile_data == null:
+			continue
+		var tile_type = tile_data.get_custom_data(TileEater.CUSTOM_DATA_KEY)
+		if tile_type != null and TileEater.WALKABLE_TILE_TYPES.has(tile_type):
+			walkable_cells[cell] = true
+	return walkable_cells
+
+
+func _find_near_corner_floor_cell(target_tilemap: TileMap, walkable_cells: Dictionary) -> Vector2i:
+	var used_rect := target_tilemap.get_used_rect()
+	var corner := Vector2i(used_rect.position.x, used_rect.position.y + used_rect.size.y - 1)
+	var best_cell := walkable_cells.keys()[0]
+	var best_distance := INF
+	for cell in walkable_cells.keys():
+		var distance := corner.distance_squared_to(cell)
+		if distance < best_distance:
+			best_distance = distance
+			best_cell = cell
+	return best_cell
+
+
+func _build_walkable_distance_field(walkable_cells: Dictionary, start_cell: Vector2i) -> Dictionary:
+	var distances: Dictionary = {}
+	var queue: Array[Vector2i] = []
+	queue.append(start_cell)
+	distances[start_cell] = 0
+	while not queue.is_empty():
+		var current := queue.pop_front()
+		var current_distance: int = distances[current]
+		for direction in DIRECTIONS:
+			var neighbor := current + direction
+			if not walkable_cells.has(neighbor):
+				continue
+			if distances.has(neighbor):
+				continue
+			distances[neighbor] = current_distance + 1
+			queue.append(neighbor)
+	return distances
+
+
+func _find_farthest_cell(distances: Dictionary, fallback: Vector2i) -> Vector2i:
+	if distances.is_empty():
+		return fallback
+	var farthest_cell := fallback
+	var farthest_distance := -1
+	for cell in distances.keys():
+		var distance: int = distances[cell]
+		if distance > farthest_distance:
+			farthest_distance = distance
+			farthest_cell = cell
+	return farthest_cell
+
+
+func _cell_to_world(target_tilemap: TileMap, cell: Vector2i) -> Vector2:
+	var local_position = target_tilemap.map_to_local(cell)
+	return target_tilemap.to_global(local_position)
 
 
 func _get_floor_positions(target_tilemap: TileMap) -> Array[Vector2]:
