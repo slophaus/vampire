@@ -32,19 +32,12 @@ func _on_body_entered(body: Node) -> void:
 
 
 func _transition_to_target() -> void:
-	var target_scene_path = _get_target_scene_path()
-	if target_scene_path.is_empty():
+	if target_scene == null:
 		return
 	is_transitioning = true
 	var session = _get_game_session()
 	if session != null:
-		session.transition_to_level(target_scene_path, exit_door_name, preserve_current_level)
-
-
-func _get_target_scene_path() -> String:
-	if target_scene == null:
-		return ""
-	return target_scene.resource_path
+		session.transition_to_level(target_scene, exit_door_name, preserve_current_level)
 
 
 func _get_game_session() -> GameSession:
