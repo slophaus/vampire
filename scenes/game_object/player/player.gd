@@ -357,7 +357,7 @@ func on_health_changed():
 func _force_ghost_respawn() -> void:
 	for ghost in get_tree().get_nodes_in_group("ghost"):
 		if ghost.has_method("end_ghost_possession"):
-			ghost.call("end_ghost_possession")
+			ghost.call("end_ghost_possession", false, true)
 
 
 func spawn_damage_text(damage_amount: float) -> void:
