@@ -59,7 +59,7 @@ func update_ghost_state(delta: float) -> void:
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
 		global_position = ghost_possession_target.global_position
 		if ghost_possession_time_left <= 0.0:
-			end_ghost_possession()
+			end_ghost_possession(false, true)
 		return
 
 	update_ghost_offscreen(delta)
