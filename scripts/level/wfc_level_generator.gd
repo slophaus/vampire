@@ -26,6 +26,8 @@ func _ready() -> void:
 
 
 func generate_level(use_new_seed: bool = false) -> void:
+	var total_start_ms := Time.get_ticks_msec()
+	var phase_start_ms := total_start_ms
 	var target_tilemap := get_node_or_null(target_tilemap_path) as TileMap
 	var sample_tilemap := get_node_or_null(sample_tilemap_path) as TileMap
 	if target_tilemap == null or sample_tilemap == null:
@@ -53,6 +55,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 		rng.randomize()
 
 	var patterns_data: Dictionary = _build_patterns(sample_tilemap, sample_rect, overlap_size, periodic_input)
+	print_debug("WFC: phase patterns %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	phase_start_ms = Time.get_ticks_msec()
 	if patterns_data.patterns.is_empty():
 		print_debug("WFC: no patterns extracted from sample.")
 		return
@@ -103,6 +107,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 	if not result.success:
 		print_debug("WFC: failed after %d attempts." % max_attempts)
 		return
+	print_debug("WFC: phase solve %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	phase_start_ms = Time.get_ticks_msec()
 
 	var output_tiles: Dictionary = _build_output_tiles(
 		patterns_data.patterns,
@@ -112,6 +118,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 		target_rect,
 		overlap_size
 	)
+	print_debug("WFC: phase output tiles %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	phase_start_ms = Time.get_ticks_msec()
 
 	target_tilemap.clear()
 	for tile_pos in output_tiles.keys():
@@ -131,6 +139,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
 	_move_players_to_nearest_floor(target_tilemap)
 
+	print_debug("WFC: phase finalize %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	print_debug("WFC: total time %d ms" % (Time.get_ticks_msec() - total_start_ms))
 	print_debug("WFC: generation complete.")
 
 
