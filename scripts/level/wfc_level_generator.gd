@@ -101,27 +101,6 @@ func generate_level(use_new_seed: bool = false) -> void:
 			step_delay_seconds
 		)
 
-		if result.has("timing"):
-			var timing: Dictionary = result["timing"]
-			print_debug(
-				"WFC: timing entropy %.2f ms | collapse %.2f ms | propagate %.2f ms | filter %.2f ms"
-				% [
-					float(timing.entropy_us) / 1000.0,
-					float(timing.collapse_us) / 1000.0,
-					float(timing.propagate_us) / 1000.0,
-					float(timing.filter_us) / 1000.0,
-				]
-			)
-			print_debug(
-				"WFC: timing steps %d | propagations %d | filter checks %d | filter reductions %d"
-				% [
-					int(timing.steps),
-					int(timing.propagations),
-					int(timing.filter_checks),
-					int(timing.filter_reductions),
-				]
-			)
-
 		if result.success:
 			break
 
@@ -321,16 +300,6 @@ func _run_wfc(
 	step_callback: Callable = Callable(),
 	step_delay: float = 0.0
 ) -> Dictionary:
-	var timing := {
-		"entropy_us": 0,
-		"collapse_us": 0,
-		"propagate_us": 0,
-		"filter_us": 0,
-		"steps": 0,
-		"propagations": 0,
-		"filter_checks": 0,
-		"filter_reductions": 0,
-	}
 	var total_cells: int = grid_size.x * grid_size.y
 	var wave: Array = []
 	var all_patterns: Array = []
@@ -341,29 +310,25 @@ func _run_wfc(
 		wave.append(all_patterns.duplicate())
 
 	var stack: Array = []
+	var allowed_mask := PackedByteArray()
+	allowed_mask.resize(patterns.size())
 
 	while true:
-		var entropy_start := Time.get_ticks_usec()
 		var next_index := _find_lowest_entropy(wave, rng)
-		timing.entropy_us += Time.get_ticks_usec() - entropy_start
 		if next_index == -1:
-			return {"success": true, "grid": wave, "timing": timing}
+			return {"success": true, "grid": wave}
 
 		if wave[next_index].is_empty():
-			return {"success": false, "timing": timing}
+			return {"success": false}
 
-		var collapse_start := Time.get_ticks_usec()
 		var chosen: int = _weighted_choice(wave[next_index], weights, rng)
 		wave[next_index] = [chosen]
 		stack.append(next_index)
-		timing.collapse_us += Time.get_ticks_usec() - collapse_start
-		timing.steps += 1
 		if step_callback.is_valid():
 			step_callback.call(next_index, chosen)
 			if step_delay > 0.0:
 				await get_tree().create_timer(step_delay).timeout
 
-		var propagation_start := Time.get_ticks_usec()
 		while not stack.is_empty():
 			var current_index: int = stack.pop_back()
 			var current_pos: Vector2i = Vector2i(current_index % grid_size.x, current_index / grid_size.x)
@@ -377,34 +342,32 @@ func _run_wfc(
 					continue
 
 				var neighbor_index: int = neighbor_pos.y * grid_size.x + neighbor_pos.x
+				allowed_mask.fill(0)
+				for pattern_index in current_patterns:
+					for allowed_index in adjacency[pattern_index][dir_index]:
+						allowed_mask[allowed_index] = 1
+
 				var neighbor_patterns: Array = wave[neighbor_index]
-				var filter_start := Time.get_ticks_usec()
 				var filtered_patterns: Array = []
+				filtered_patterns.resize(neighbor_patterns.size())
+				var filtered_count := 0
 				for candidate in neighbor_patterns:
-					var compatible := false
-					for pattern_index in current_patterns:
-						timing.filter_checks += 1
-						if adjacency[pattern_index][dir_index].has(candidate):
-							compatible = true
-							break
-					if compatible:
-						filtered_patterns.append(candidate)
-				timing.filter_us += Time.get_ticks_usec() - filter_start
-				var reduced: bool = filtered_patterns.size() != neighbor_patterns.size()
+					if allowed_mask[candidate] != 0:
+						filtered_patterns[filtered_count] = candidate
+						filtered_count += 1
+				filtered_patterns.resize(filtered_count)
+				var reduced: bool = filtered_count != neighbor_patterns.size()
 				if reduced:
-					timing.filter_reductions += 1
 					wave[neighbor_index] = filtered_patterns
 					neighbor_patterns = wave[neighbor_index]
 
 				if neighbor_patterns.is_empty():
-					return {"success": false, "timing": timing}
+					return {"success": false}
 
 				if reduced:
 					stack.append(neighbor_index)
-					timing.propagations += 1
-		timing.propagate_us += Time.get_ticks_usec() - propagation_start
 
-	return {"success": false, "timing": timing}
+	return {"success": false}
 
 
 func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator) -> int:
