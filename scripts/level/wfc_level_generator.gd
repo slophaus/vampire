@@ -10,6 +10,7 @@ class_name WFCLevelGenerator
 @export var periodic_input := false
 @export var show_step_by_step := false
 @export_range(0.0, 5.0, 0.05) var step_delay_seconds := 0.0
+@export var debug_timing := false
 
 const DIRECTIONS := [
 	Vector2i(0, -1),
@@ -55,7 +56,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 		rng.randomize()
 
 	var patterns_data: Dictionary = _build_patterns(sample_tilemap, sample_rect, overlap_size, periodic_input)
-	print_debug("WFC: phase patterns %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	if debug_timing:
+		print_debug("WFC: phase patterns %d ms" % (Time.get_ticks_msec() - phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 	if patterns_data.patterns.is_empty():
 		print_debug("WFC: no patterns extracted from sample.")
@@ -101,7 +103,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 			step_delay_seconds
 		)
 
-		if result.has("timing"):
+		if debug_timing and result.has("timing"):
 			var timing: Dictionary = result["timing"]
 			print_debug(
 				"WFC: timing entropy %.2f ms | collapse %.2f ms | propagate %.2f ms | filter %.2f ms"
@@ -128,7 +130,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 	if not result.success:
 		print_debug("WFC: failed after %d attempts." % max_attempts)
 		return
-	print_debug("WFC: phase solve %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	if debug_timing:
+		print_debug("WFC: phase solve %d ms" % (Time.get_ticks_msec() - phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 
 	var output_tiles: Dictionary = _build_output_tiles(
@@ -139,7 +142,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 		target_rect,
 		overlap_size
 	)
-	print_debug("WFC: phase output tiles %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	if debug_timing:
+		print_debug("WFC: phase output tiles %d ms" % (Time.get_ticks_msec() - phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 
 	target_tilemap.clear()
@@ -160,8 +164,9 @@ func generate_level(use_new_seed: bool = false) -> void:
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
 	_move_players_to_nearest_floor(target_tilemap)
 
-	print_debug("WFC: phase finalize %d ms" % (Time.get_ticks_msec() - phase_start_ms))
-	print_debug("WFC: total time %d ms" % (Time.get_ticks_msec() - total_start_ms))
+	if debug_timing:
+		print_debug("WFC: phase finalize %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+		print_debug("WFC: total time %d ms" % (Time.get_ticks_msec() - total_start_ms))
 	print_debug("WFC: generation complete.")
 
 
