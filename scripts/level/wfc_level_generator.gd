@@ -10,6 +10,8 @@ class_name WFCLevelGenerator
 @export var periodic_input := false
 @export var show_step_by_step := false
 @export_range(0.0, 5.0, 0.05) var step_delay_seconds := 0.0
+@export var debug_logs := false
+@export var debug_path_line_path: NodePath
 
 const DIRECTIONS := [
 	Vector2i(0, -1),
@@ -17,6 +19,12 @@ const DIRECTIONS := [
 	Vector2i(0, 1),
 	Vector2i(-1, 0),
 ]
+
+
+func _debug_log(message: String) -> void:
+	if not debug_logs:
+		return
+	print_debug(message)
 
 
 func _ready() -> void:
@@ -31,19 +39,19 @@ func generate_level(use_new_seed: bool = false) -> void:
 	var target_tilemap := get_node_or_null(target_tilemap_path) as TileMap
 	var sample_tilemap := get_node_or_null(sample_tilemap_path) as TileMap
 	if target_tilemap == null or sample_tilemap == null:
-		print_debug("WFC: missing tilemap references.")
+		_debug_log("WFC: missing tilemap references.")
 		return
 	sample_tilemap.visible = false
 	target_tilemap.visible = true
 
 	var target_rect := target_tilemap.get_used_rect()
 	if target_rect.size.x <= 0 or target_rect.size.y <= 0:
-		print_debug("WFC: target tilemap has no used tiles to define bounds.")
+		_debug_log("WFC: target tilemap has no used tiles to define bounds.")
 		return
 
 	var sample_rect := sample_tilemap.get_used_rect()
 	if sample_rect.size.x < overlap_size or sample_rect.size.y < overlap_size:
-		print_debug("WFC: sample tilemap too small for overlap size.")
+		_debug_log("WFC: sample tilemap too small for overlap size.")
 		return
 
 	var rng := RandomNumberGenerator.new()
@@ -55,10 +63,10 @@ func generate_level(use_new_seed: bool = false) -> void:
 		rng.randomize()
 
 	var patterns_data: Dictionary = _build_patterns(sample_tilemap, sample_rect, overlap_size, periodic_input)
-	print_debug("WFC: phase patterns %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	_debug_log("WFC: phase patterns %d ms" % (Time.get_ticks_msec() - phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 	if patterns_data.patterns.is_empty():
-		print_debug("WFC: no patterns extracted from sample.")
+		_debug_log("WFC: no patterns extracted from sample.")
 		return
 
 	var pattern_grid_size := Vector2i(
@@ -66,7 +74,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 		target_rect.size.y - overlap_size + 1
 	)
 	if pattern_grid_size.x <= 0 or pattern_grid_size.y <= 0:
-		print_debug("WFC: target bounds smaller than overlap size.")
+		_debug_log("WFC: target bounds smaller than overlap size.")
 		return
 
 	var attempt := 0
@@ -74,7 +82,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 	while attempt < max_attempts:
 		attempt += 1
 		if attempt == 1 or attempt % 50 == 0:
-			print_debug("WFC: attempt %d/%d" % [attempt, max_attempts])
+			_debug_log("WFC: attempt %d/%d" % [attempt, max_attempts])
 
 		var step_callback := Callable()
 		if show_step_by_step:
@@ -105,9 +113,9 @@ func generate_level(use_new_seed: bool = false) -> void:
 			break
 
 	if not result.success:
-		print_debug("WFC: failed after %d attempts." % max_attempts)
+		_debug_log("WFC: failed after %d attempts." % max_attempts)
 		return
-	print_debug("WFC: phase solve %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	_debug_log("WFC: phase solve %d ms" % (Time.get_ticks_msec() - phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 
 	var output_tiles: Dictionary = _build_output_tiles(
@@ -118,7 +126,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 		target_rect,
 		overlap_size
 	)
-	print_debug("WFC: phase output tiles %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	_debug_log("WFC: phase output tiles %d ms" % (Time.get_ticks_msec() - phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 
 	target_tilemap.clear()
@@ -140,9 +148,9 @@ func generate_level(use_new_seed: bool = false) -> void:
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
 	_move_entities_to_nearest_floor(target_tilemap)
 
-	print_debug("WFC: phase finalize %d ms" % (Time.get_ticks_msec() - phase_start_ms))
-	print_debug("WFC: total time %d ms" % (Time.get_ticks_msec() - total_start_ms))
-	print_debug("WFC: generation complete.")
+	_debug_log("WFC: phase finalize %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	_debug_log("WFC: total time %d ms" % (Time.get_ticks_msec() - total_start_ms))
+	_debug_log("WFC: generation complete.")
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -162,44 +170,45 @@ func _move_entities_to_nearest_floor(target_tilemap: TileMap) -> void:
 
 
 func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) -> void:
+	_reset_debug_door_path()
 	if target_tilemap == null:
-		print_debug("WFC: door placement skipped (missing target tilemap).")
+		_debug_log("WFC: door placement skipped (missing target tilemap).")
 		return
 	var door_group := get_parent().get_node_or_null("LayerProps/DoorGroup")
 	if door_group == null:
-		print_debug("WFC: door placement skipped (missing LayerProps/DoorGroup).")
+		_debug_log("WFC: door placement skipped (missing LayerProps/DoorGroup).")
 		return
 	var door_nodes: Array[Node2D] = []
 	for child in door_group.get_children():
 		var node_2d := child as Node2D
 		if node_2d == null:
-			print_debug("WFC: door placement ignored non-Node2D child %s." % child.name)
+			_debug_log("WFC: door placement ignored non-Node2D child %s." % child.name)
 			continue
 		door_nodes.append(node_2d)
 	if door_nodes.size() < 2:
-		print_debug("WFC: door placement skipped (found %d doors)." % door_nodes.size())
+		_debug_log("WFC: door placement skipped (found %d doors)." % door_nodes.size())
 		return
 	var walkable_cells := _get_walkable_cells(target_tilemap)
 	if walkable_cells.is_empty():
-		print_debug("WFC: door placement skipped (no walkable cells).")
+		_debug_log("WFC: door placement skipped (no walkable cells).")
 		return
 	var door_cells := _filter_cells_min_distance_from_bottom(target_tilemap, walkable_cells, 8)
 	if door_cells.is_empty():
-		print_debug("WFC: door placement skipped (no walkable cells far enough from bottom).")
+		_debug_log("WFC: door placement skipped (no walkable cells far enough from bottom).")
 		return
 	door_cells = _filter_cells_min_distance_from_top_and_sides(target_tilemap, door_cells, 3)
 	if door_cells.is_empty():
-		print_debug("WFC: door placement skipped (no walkable cells far enough from top/sides).")
+		_debug_log("WFC: door placement skipped (no walkable cells far enough from top/sides).")
 		return
 	var start_cell := _find_near_corner_floor_cell(target_tilemap, door_cells, rng)
 	var distances := _build_walkable_distance_field(walkable_cells, start_cell)
 	var door_distances := _filter_distances(distances, door_cells)
 	var farthest_cell := _find_distance_percentile_cell(door_distances, start_cell, 0.9)
-	print_debug("WFC: door placement choosing cells %s (start) and %s (~90%% farthest)." % [
+	_debug_log("WFC: door placement choosing cells %s (start) and %s (~90%% farthest)." % [
 		start_cell,
 		farthest_cell
 	])
-	print_debug("WFC: door placement doors %s -> %s, %s -> %s." % [
+	_debug_log("WFC: door placement doors %s -> %s, %s -> %s." % [
 		door_nodes[0].name,
 		_cell_to_world(target_tilemap, start_cell),
 		door_nodes[1].name,
@@ -207,9 +216,10 @@ func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) 
 	])
 	door_nodes[0].global_position = _cell_to_world(target_tilemap, start_cell)
 	door_nodes[1].global_position = _cell_to_world(target_tilemap, farthest_cell)
+	_update_debug_door_path(target_tilemap, distances, start_cell, farthest_cell)
 	var floor_tile := _find_tile_by_type(target_tilemap, "floor")
 	if floor_tile.is_empty():
-		print_debug("WFC: door placement skipped floor conversion (no floor tile found).")
+		_debug_log("WFC: door placement skipped floor conversion (no floor tile found).")
 		return
 	_apply_door_floor(target_tilemap, start_cell, floor_tile)
 	_apply_door_floor(target_tilemap, farthest_cell, floor_tile)
@@ -270,6 +280,32 @@ func _build_walkable_distance_field(walkable_cells: Dictionary, start_cell: Vect
 			distances[neighbor] = current_distance + 1
 			queue.append(neighbor)
 	return distances
+
+
+func _build_path_from_distances(
+	distances: Dictionary,
+	start_cell: Vector2i,
+	end_cell: Vector2i
+) -> Array[Vector2i]:
+	var path: Array[Vector2i] = []
+	if not distances.has(end_cell):
+		return path
+	var current := end_cell
+	path.append(current)
+	while current != start_cell:
+		var current_distance: int = distances[current]
+		var next_cell := current
+		for direction in DIRECTIONS:
+			var neighbor := current + direction
+			if distances.has(neighbor) and distances[neighbor] == current_distance - 1:
+				next_cell = neighbor
+				break
+		if next_cell == current:
+			break
+		current = next_cell
+		path.append(current)
+	path.reverse()
+	return path
 
 
 func _filter_cells_min_distance_from_bottom(
@@ -406,6 +442,37 @@ func _apply_door_floor(target_tilemap: TileMap, door_cell: Vector2i, floor_tile:
 			_set_cell_to_tile(target_tilemap, door_cell + Vector2i(x_offset, y_offset), floor_tile)
 	for offset in range(1, 5):
 		_set_cell_to_tile(target_tilemap, door_cell + Vector2i(0, offset), floor_tile)
+
+
+func _reset_debug_door_path() -> void:
+	var debug_line := get_node_or_null(debug_path_line_path) as Line2D
+	if debug_line == null:
+		return
+	debug_line.clear_points()
+	debug_line.visible = false
+
+
+func _update_debug_door_path(
+	target_tilemap: TileMap,
+	distances: Dictionary,
+	start_cell: Vector2i,
+	end_cell: Vector2i
+) -> void:
+	var debug_line := get_node_or_null(debug_path_line_path) as Line2D
+	if debug_line == null:
+		return
+	debug_line.clear_points()
+	if not debug_logs:
+		debug_line.visible = false
+		return
+	var path_cells := _build_path_from_distances(distances, start_cell, end_cell)
+	if path_cells.is_empty():
+		debug_line.visible = false
+		return
+	for cell in path_cells:
+		var world_position := _cell_to_world(target_tilemap, cell)
+		debug_line.add_point(debug_line.to_local(world_position))
+	debug_line.visible = true
 
 
 func _set_cell_to_tile(target_tilemap: TileMap, cell: Vector2i, tile_info: Dictionary) -> void:
@@ -721,7 +788,7 @@ func _build_output_tiles(
 					var tile_pos := target_rect.position + Vector2i(x + dx, y + dy)
 					if output_tiles.has(tile_pos):
 						if output_tiles[tile_pos]["key"] != tile_key:
-							print_debug("WFC: tile conflict at %s." % tile_pos)
+							_debug_log("WFC: tile conflict at %s." % tile_pos)
 						continue
 					var data: Dictionary = tile_data[tile_key]
 					output_tiles[tile_pos] = {
