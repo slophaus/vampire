@@ -6,7 +6,7 @@ const GHOST_FADE_SPEED := 1.0
 const GHOST_POSSESSION_RADIUS := 28.0
 const GHOST_POSSESSION_SEEK_RADIUS := 200.0
 const GHOST_POSSESSION_DURATION := 8.0
-const GHOST_POSSESSION_COOLDOWN := 1.0
+const GHOST_POSSESSION_COOLDOWN := 3.0
 const GHOST_COOLDOWN_BLINK_SPEED := 9.0
 const GHOST_COOLDOWN_MIN_ALPHA := 0.15
 const GHOST_COOLDOWN_MAX_ALPHA := 0.7
@@ -50,19 +50,13 @@ func update_ghost_state(delta: float) -> void:
 	update_ghost_fade(delta)
 	ghost_possession_cooldown = max(ghost_possession_cooldown - delta, 0.0)
 	if ghost_possession_target == null and ghost_possession_time_left > 0.0:
-		end_ghost_possession(true, true, false)
+		end_ghost_possession(false, true, false)
 		return
 	if ghost_possession_target != null:
-		if not is_instance_valid(ghost_possession_target):
-			end_ghost_possession(true, true)
-			return
-		if ghost_possession_target.is_queued_for_deletion() or not ghost_possession_target.is_inside_tree():
-			end_ghost_possession(true, true)
-			return
 		ghost_possession_time_left = max(ghost_possession_time_left - delta, 0.0)
 		global_position = ghost_possession_target.global_position
 		if ghost_possession_time_left <= 0.0:
-			end_ghost_possession(false, true)
+			end_ghost_possession(false, true, true)
 		return
 
 	update_ghost_offscreen(delta)
