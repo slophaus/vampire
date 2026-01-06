@@ -107,6 +107,7 @@ free_owner_on_death = false
 
 [node name="PoisonComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("4_t1pou")]
 health_component = NodePath("../HealthComponent")
+tick_rate = 3.0
 
 [node name="Abilities" type="Node" parent="."]
 
