@@ -287,7 +287,7 @@ func _find_distance_percentile_cell(
 	var closest_delta := INF
 	for cell in distances.keys():
 		var distance: int = distances[cell]
-		var delta := abs(distance - target_distance)
+		var delta: int = absi(distance - target_distance)
 		if delta < closest_delta:
 			closest_delta = delta
 			closest_cell = cell
