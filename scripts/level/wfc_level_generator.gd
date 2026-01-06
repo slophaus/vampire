@@ -175,9 +175,6 @@ func _position_level_doors(target_tilemap: TileMap) -> void:
 		if node_2d == null:
 			print_debug("WFC: door placement ignored non-Node2D child %s." % child.name)
 			continue
-		if not node_2d.is_in_group("doors"):
-			print_debug("WFC: door placement ignored non-door node %s." % node_2d.name)
-			continue
 		door_nodes.append(node_2d)
 	if door_nodes.size() < 2:
 		print_debug("WFC: door placement skipped (found %d doors)." % door_nodes.size())
