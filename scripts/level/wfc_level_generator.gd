@@ -136,9 +136,9 @@ func generate_level(use_new_seed: bool = false) -> void:
 
 	if target_tilemap.has_meta(TileEater.DIRT_BORDER_META_KEY):
 		target_tilemap.remove_meta(TileEater.DIRT_BORDER_META_KEY)
+	_position_level_doors(target_tilemap, rng)
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
 	_move_entities_to_nearest_floor(target_tilemap)
-	_position_level_doors(target_tilemap, rng)
 
 	print_debug("WFC: phase finalize %d ms" % (Time.get_ticks_msec() - phase_start_ms))
 	print_debug("WFC: total time %d ms" % (Time.get_ticks_msec() - total_start_ms))
@@ -203,12 +203,12 @@ func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) 
 	])
 	door_nodes[0].global_position = _cell_to_world(target_tilemap, start_cell)
 	door_nodes[1].global_position = _cell_to_world(target_tilemap, farthest_cell)
-	var dirt_tile := _find_tile_by_type(target_tilemap, "dirt")
-	if dirt_tile.is_empty():
-		print_debug("WFC: door placement skipped dirt conversion (no dirt tile found).")
+	var floor_tile := _find_tile_by_type(target_tilemap, "floor")
+	if floor_tile.is_empty():
+		print_debug("WFC: door placement skipped floor conversion (no floor tile found).")
 		return
-	_apply_door_dirt(target_tilemap, start_cell, dirt_tile)
-	_apply_door_dirt(target_tilemap, farthest_cell, dirt_tile)
+	_apply_door_floor(target_tilemap, start_cell, floor_tile)
+	_apply_door_floor(target_tilemap, farthest_cell, floor_tile)
 
 
 func _get_walkable_cells(target_tilemap: TileMap) -> Dictionary:
@@ -373,13 +373,16 @@ func _tile_data_has_type(tile_data: TileData, tile_type: String) -> bool:
 	return custom_type != null and custom_type == tile_type
 
 
-func _apply_door_dirt(target_tilemap: TileMap, door_cell: Vector2i, dirt_tile: Dictionary) -> void:
-	if dirt_tile.is_empty():
+func _apply_door_floor(target_tilemap: TileMap, door_cell: Vector2i, floor_tile: Dictionary) -> void:
+	if floor_tile.is_empty():
 		return
-	for direction in DIRECTIONS:
-		_set_cell_to_tile(target_tilemap, door_cell + direction, dirt_tile)
-	for offset in range(1, 5):
-		_set_cell_to_tile(target_tilemap, door_cell + Vector2i(0, offset), dirt_tile)
+	for offset_y in range(-1, 2):
+		for offset_x in range(-1, 2):
+			_set_cell_to_tile(
+				target_tilemap,
+				door_cell + Vector2i(offset_x, offset_y),
+				floor_tile
+			)
 
 
 func _set_cell_to_tile(target_tilemap: TileMap, cell: Vector2i, tile_info: Dictionary) -> void:
