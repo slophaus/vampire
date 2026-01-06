@@ -144,6 +144,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 		)
 
 	_position_level_doors(target_tilemap, rng)
+	_set_border_tiles_to_wall(target_tilemap, target_rect)
 	if target_tilemap.has_meta(TileEater.DIRT_BORDER_META_KEY):
 		target_tilemap.remove_meta(TileEater.DIRT_BORDER_META_KEY)
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
@@ -168,6 +169,26 @@ func _move_entities_to_nearest_floor(target_tilemap: TileMap) -> void:
 	_move_nodes_in_group_to_nearest_floor("player", floor_positions)
 	_move_nodes_in_group_to_nearest_floor("enemy", floor_positions)
 	_move_props_to_nearest_floor(floor_positions)
+
+
+func _set_border_tiles_to_wall(target_tilemap: TileMap, target_rect: Rect2i) -> void:
+	if target_tilemap == null:
+		return
+	if target_rect.size.x <= 0 or target_rect.size.y <= 0:
+		return
+	var wall_tile := _find_tile_by_type(target_tilemap, "wall")
+	if wall_tile.is_empty():
+		return
+	var min_x := target_rect.position.x
+	var min_y := target_rect.position.y
+	var max_x := target_rect.position.x + target_rect.size.x - 1
+	var max_y := target_rect.position.y + target_rect.size.y - 1
+	for x in range(min_x, max_x + 1):
+		_set_cell_to_tile(target_tilemap, Vector2i(x, min_y), wall_tile)
+		_set_cell_to_tile(target_tilemap, Vector2i(x, max_y), wall_tile)
+	for y in range(min_y + 1, max_y):
+		_set_cell_to_tile(target_tilemap, Vector2i(min_x, y), wall_tile)
+		_set_cell_to_tile(target_tilemap, Vector2i(max_x, y), wall_tile)
 
 
 func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) -> void:
