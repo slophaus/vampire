@@ -12,7 +12,6 @@
 script = ExtResource("1_46876")
 enemy_scene = ExtResource("2_ytlsn")
 enemy_scenes = Array[PackedScene]([ExtResource("2_ytlsn"), ExtResource("3_0ybpt"), ExtResource("4_ntx8s"), ExtResource("5_w8j1m"), ExtResource("6_6scq5"), ExtResource("7_44g0d")])
-spawn_rate_keyframes = Array[Vector2]([Vector2(1, 0.5), Vector2(3, 1), Vector2(16, 2)])
 
 [node name="Timer" type="Timer" parent="."]
 wait_time = 0.75
