@@ -202,7 +202,7 @@ func _get_walkable_cells(target_tilemap: TileMap) -> Dictionary:
 func _find_near_corner_floor_cell(target_tilemap: TileMap, walkable_cells: Dictionary) -> Vector2i:
 	var used_rect := target_tilemap.get_used_rect()
 	var corner := Vector2i(used_rect.position.x, used_rect.position.y + used_rect.size.y - 1)
-	var best_cell := walkable_cells.keys()[0]
+	var best_cell: Vector2i = walkable_cells.keys()[0] as Vector2i
 	var best_distance := INF
 	for cell in walkable_cells.keys():
 		var distance := corner.distance_squared_to(cell)
@@ -218,10 +218,10 @@ func _build_walkable_distance_field(walkable_cells: Dictionary, start_cell: Vect
 	queue.append(start_cell)
 	distances[start_cell] = 0
 	while not queue.is_empty():
-		var current := queue.pop_front()
+		var current: Vector2i = queue.pop_front() as Vector2i
 		var current_distance: int = distances[current]
 		for direction in DIRECTIONS:
-			var neighbor := current + direction
+			var neighbor: Vector2i = current + direction
 			if not walkable_cells.has(neighbor):
 				continue
 			if distances.has(neighbor):
