@@ -28,6 +28,10 @@ func _debug_log(message: String) -> void:
 	print_debug(message)
 
 
+func _elapsed_seconds(start_ms: int) -> float:
+	return float(Time.get_ticks_msec() - start_ms) / 1000.0
+
+
 func _ready() -> void:
 	set_process_unhandled_input(true)
 	if generate_on_ready:
@@ -64,7 +68,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 		rng.randomize()
 
 	var patterns_data: Dictionary = _build_patterns(sample_tilemap, sample_rect, overlap_size, periodic_input)
-	_debug_log("WFC: phase patterns %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	_debug_log("WFC: phase patterns %.3f s" % _elapsed_seconds(phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 	if patterns_data.patterns.is_empty():
 		_debug_log("WFC: no patterns extracted from sample.")
@@ -116,7 +120,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 	if not result.success:
 		_debug_log("WFC: failed after %d attempts." % max_attempts)
 		return
-	_debug_log("WFC: phase solve %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	_debug_log("WFC: phase solve %.3f s" % _elapsed_seconds(phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 
 	var output_tiles: Dictionary = _build_output_tiles(
@@ -127,7 +131,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 		target_rect,
 		overlap_size
 	)
-	_debug_log("WFC: phase output tiles %d ms" % (Time.get_ticks_msec() - phase_start_ms))
+	_debug_log("WFC: phase output tiles %.3f s" % _elapsed_seconds(phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 
 	target_tilemap.clear()
@@ -150,8 +154,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
 	_move_entities_to_nearest_floor(target_tilemap)
 
-	_debug_log("WFC: phase finalize %d ms" % (Time.get_ticks_msec() - phase_start_ms))
-	_debug_log("WFC: total time %d ms" % (Time.get_ticks_msec() - total_start_ms))
+	_debug_log("WFC: phase finalize %.3f s" % _elapsed_seconds(phase_start_ms))
+	_debug_log("WFC: total time %.3f s" % _elapsed_seconds(total_start_ms))
 	_debug_log("WFC: generation complete.")
 
 
