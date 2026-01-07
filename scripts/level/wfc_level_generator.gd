@@ -1072,8 +1072,11 @@ func _update_entropy_entry(
 
 
 func _rebuild_entropy_state(wave: Array, buckets: Array, entropy_sizes: Array) -> void:
-	for bucket in buckets:
-		bucket.clear()
+	for i in range(buckets.size()):
+		if buckets[i] == null:
+			buckets[i] = []
+		else:
+			buckets[i].clear()
 	entropy_sizes.resize(wave.size())
 	for i in range(wave.size()):
 		var entropy: int = wave[i].size()
