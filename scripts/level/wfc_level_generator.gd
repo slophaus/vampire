@@ -16,6 +16,8 @@ class_name WFCLevelGenerator
 
 @export_range(0.0, 30.0, 0.1) var time_budget_seconds := 3.0
 @export_range(0.0, 5.0, 0.01) var pick_time_budget_seconds := 0.0
+@export_enum("dirt", "most_common", "least_common", "random_tile", "random_same") var time_budget_timeout_tile := "random_tile"
+@export_enum("dirt", "most_common", "least_common", "random_tile", "random_same") var pick_time_budget_timeout_tile := "random_tile"
 const DIRECTIONS := [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -144,7 +146,20 @@ func generate_level(use_new_seed: bool = false) -> void:
 			target_rect,
 			overlap_size
 		)
-		_fill_missing_tiles_with_random_sample_tile(target_rect, output_tiles, sample_tiles, rng)
+		var timeout_reason: String = result.get("timeout_reason", "")
+		var timeout_mode := time_budget_timeout_tile
+		if timeout_reason == "pick_budget":
+			timeout_mode = pick_time_budget_timeout_tile
+		_fill_missing_tiles_with_timeout_mode(
+			target_tilemap,
+			target_rect,
+			output_tiles,
+			sample_tiles,
+			patterns_data.tiles,
+			patterns_data.tile_counts,
+			rng,
+			timeout_mode
+		)
 	else:
 		output_tiles = _build_output_tiles(
 			patterns_data.patterns,
@@ -686,6 +701,7 @@ func _build_patterns(
 		"patterns": patterns,
 		"weights": weights,
 		"tiles": tile_data,
+		"tile_counts": _build_tile_counts(sample_tilemap, sample_rect),
 		"adjacency": adjacency,
 	}
 
@@ -763,6 +779,7 @@ func _run_wfc(
 				"success": false,
 				"timed_out": true,
 				"grid": wave,
+				"timeout_reason": "time_budget",
 				"elapsed_seconds": _elapsed_seconds(start_ms)
 			}
 		var next_index := _find_lowest_entropy(wave, rng)
@@ -787,6 +804,7 @@ func _run_wfc(
 					"success": false,
 					"timed_out": true,
 					"grid": wave,
+					"timeout_reason": "time_budget",
 					"elapsed_seconds": _elapsed_seconds(start_ms)
 				}
 			if pick_time_budget_seconds > 0.0 and _elapsed_seconds(pick_start_ms) > pick_time_budget_seconds:
@@ -794,6 +812,7 @@ func _run_wfc(
 					"success": false,
 					"timed_out": true,
 					"grid": wave,
+					"timeout_reason": "pick_budget",
 					"elapsed_seconds": _elapsed_seconds(start_ms)
 				}
 			var current_index: int = stack.pop_back()
@@ -936,10 +955,12 @@ func _build_output_tiles_partial(
 
 func _build_sample_tiles(tile_data: Dictionary) -> Array[Dictionary]:
 	var tiles: Array[Dictionary] = []
-	for entry in tile_data.values():
+	for key in tile_data.keys():
+		var entry: Dictionary = tile_data[key]
 		if entry["source_id"] == -1:
 			continue
 		tiles.append({
+			"key": key,
 			"source_id": entry["source_id"],
 			"atlas_coords": entry["atlas_coords"],
 			"alternative_tile": entry["alternative_tile"],
@@ -947,31 +968,136 @@ func _build_sample_tiles(tile_data: Dictionary) -> Array[Dictionary]:
 	return tiles
 
 
-func _fill_missing_tiles_with_random_sample_tile(
+func _fill_missing_tiles_with_timeout_mode(
+	target_tilemap: TileMap,
 	target_rect: Rect2i,
 	output_tiles: Dictionary,
 	sample_tiles: Array[Dictionary],
-	rng: RandomNumberGenerator
+	tile_data: Dictionary,
+	tile_counts: Dictionary,
+	rng: RandomNumberGenerator,
+	timeout_mode: String
 ) -> void:
 	if sample_tiles.is_empty():
 		_debug_log("WFC: time budget exceeded but no sample tiles found.")
+		return
+	var shared_tile := _resolve_timeout_tile(
+		timeout_mode,
+		sample_tiles,
+		tile_data,
+		tile_counts,
+		target_tilemap,
+		rng
+	)
+	if shared_tile.is_empty():
+		shared_tile = _resolve_timeout_tile(
+			"random_tile",
+			sample_tiles,
+			tile_data,
+			tile_counts,
+			target_tilemap,
+			rng
+		)
+	if shared_tile.is_empty():
+		_debug_log("WFC: timeout fill failed to resolve any tile.")
 		return
 	for y in range(target_rect.position.y, target_rect.position.y + target_rect.size.y):
 		for x in range(target_rect.position.x, target_rect.position.x + target_rect.size.x):
 			var tile_pos := Vector2i(x, y)
 			if output_tiles.has(tile_pos):
 				continue
-			var fallback_tile: Dictionary = sample_tiles[rng.randi_range(0, sample_tiles.size() - 1)]
+			var fallback_tile := shared_tile
+			if timeout_mode == "random_tile":
+				fallback_tile = _resolve_timeout_tile(
+					"random_tile",
+					sample_tiles,
+					tile_data,
+					tile_counts,
+					target_tilemap,
+					rng
+				)
 			output_tiles[tile_pos] = {
-				"key": _tile_key(
-					fallback_tile["source_id"],
-					fallback_tile["atlas_coords"],
-					fallback_tile["alternative_tile"]
-				),
+				"key": fallback_tile["key"],
 				"source_id": fallback_tile["source_id"],
 				"atlas_coords": fallback_tile["atlas_coords"],
 				"alternative_tile": fallback_tile["alternative_tile"],
 			}
+
+
+func _build_tile_counts(sample_tilemap: TileMap, sample_rect: Rect2i) -> Dictionary:
+	var counts: Dictionary = {}
+	for y in range(sample_rect.position.y, sample_rect.position.y + sample_rect.size.y):
+		for x in range(sample_rect.position.x, sample_rect.position.x + sample_rect.size.x):
+			var cell_pos := Vector2i(x, y)
+			var source_id := sample_tilemap.get_cell_source_id(0, cell_pos)
+			if source_id == -1:
+				continue
+			var atlas_coords := sample_tilemap.get_cell_atlas_coords(0, cell_pos)
+			var alternative_tile := sample_tilemap.get_cell_alternative_tile(0, cell_pos)
+			var tile_key := _tile_key(source_id, atlas_coords, alternative_tile)
+			counts[tile_key] = int(counts.get(tile_key, 0)) + 1
+	return counts
+
+
+func _resolve_timeout_tile(
+	timeout_mode: String,
+	sample_tiles: Array[Dictionary],
+	tile_data: Dictionary,
+	tile_counts: Dictionary,
+	target_tilemap: TileMap,
+	rng: RandomNumberGenerator
+) -> Dictionary:
+	match timeout_mode:
+		"dirt":
+			var dirt_tile := _find_tile_by_type(target_tilemap, "dirt")
+			if dirt_tile.is_empty():
+				return {}
+			var dirt_key := _tile_key(dirt_tile["source_id"], dirt_tile["atlas_coords"], dirt_tile["alternative"])
+			return {
+				"key": dirt_key,
+				"source_id": dirt_tile["source_id"],
+				"atlas_coords": dirt_tile["atlas_coords"],
+				"alternative_tile": dirt_tile["alternative"],
+			}
+		"most_common":
+			return _pick_common_tile(tile_counts, tile_data, false)
+		"least_common":
+			return _pick_common_tile(tile_counts, tile_data, true)
+		"random_tile", "random_same":
+			if sample_tiles.is_empty():
+				return {}
+			return sample_tiles[rng.randi_range(0, sample_tiles.size() - 1)]
+	return {}
+
+
+func _pick_common_tile(
+	tile_counts: Dictionary,
+	tile_data: Dictionary,
+	pick_least: bool
+) -> Dictionary:
+	var best_key := ""
+	var best_count := INF if pick_least else -1
+	for key in tile_counts.keys():
+		var count: int = int(tile_counts[key])
+		if pick_least:
+			if count < best_count:
+				best_count = count
+				best_key = key
+		else:
+			if count > best_count:
+				best_count = count
+				best_key = key
+	if best_key == "":
+		return {}
+	var data: Dictionary = tile_data.get(best_key, {})
+	if data.is_empty():
+		return {}
+	return {
+		"key": best_key,
+		"source_id": data["source_id"],
+		"atlas_coords": data["atlas_coords"],
+		"alternative_tile": data["alternative_tile"],
+	}
 
 
 func _apply_step_preview(
