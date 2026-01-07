@@ -377,13 +377,11 @@ z_index = 1
 
 [node name="DoorToBoss" parent="LayerProps/DoorGroup" instance=ExtResource("5_mwgft")]
 position = Vector2(390, -256)
-target_scene = ExtResource("4_2a5xr")
 exit_door_name = &"DoorToMain"
 preserve_current_level = true
 
 [node name="DoorToWFC" parent="LayerProps/DoorGroup" instance=ExtResource("5_mwgft")]
 position = Vector2(72, 551)
-target_scene = ExtResource("5_6i4h1")
 exit_door_name = &"DoorToMain"
 preserve_current_level = true
 
