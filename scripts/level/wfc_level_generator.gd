@@ -18,6 +18,7 @@ class_name WFCLevelGenerator
 @export_range(0.0, 5.0, 0.01) var pick_time_budget_seconds := 0.0
 @export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var time_budget_timeout_tile := "random_tile"
 @export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var pick_time_budget_timeout_tile := "random_tile"
+@export_enum("retry", "dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var contradiction_mode := "retry"
 const DIRECTIONS := [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -89,6 +90,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 	var attempt := 0
 	var result: Dictionary = {}
 	var timed_out := false
+	var contradiction_fallback := false
 	var sample_tiles := _build_sample_tiles(patterns_data.tiles)
 	while attempt < max_attempts:
 		attempt += 1
@@ -138,15 +140,19 @@ func generate_level(use_new_seed: bool = false) -> void:
 
 		if result.success:
 			break
+		if result.get("status", "") == "contradiction" and contradiction_mode != "retry":
+			_debug_log("WFC: contradiction fallback using %s." % contradiction_mode)
+			contradiction_fallback = true
+			break
 
-	if not result.success and not timed_out:
+	if not result.success and not timed_out and not contradiction_fallback:
 		_debug_log("WFC: failed after %d attempts." % max_attempts)
 		return
 	_debug_log("WFC: phase solve %.3f s" % _elapsed_seconds(phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 
 	var output_tiles: Dictionary = {}
-	if timed_out:
+	if timed_out or contradiction_fallback:
 		output_tiles = _build_output_tiles_partial(
 			patterns_data.patterns,
 			patterns_data.tiles,
@@ -155,10 +161,12 @@ func generate_level(use_new_seed: bool = false) -> void:
 			target_rect,
 			overlap_size
 		)
-		var timeout_reason: String = result.get("timeout_reason", "")
-		var timeout_mode := time_budget_timeout_tile
-		if timeout_reason == "pick_budget":
-			timeout_mode = pick_time_budget_timeout_tile
+		var timeout_mode := contradiction_mode
+		if timed_out:
+			var timeout_reason: String = result.get("timeout_reason", "")
+			timeout_mode = time_budget_timeout_tile
+			if timeout_reason == "pick_budget":
+				timeout_mode = pick_time_budget_timeout_tile
 		_fill_missing_tiles_with_timeout_mode(
 			target_tilemap,
 			target_rect,
@@ -809,7 +817,7 @@ func _run_wfc(
 
 		if wave[next_index].is_empty():
 			_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-			return {"success": false, "status": "contradiction"}
+			return {"success": false, "status": "contradiction", "grid": wave}
 
 		pick_start_ms = Time.get_ticks_msec()
 		var chosen: int = _weighted_choice(wave[next_index], weights, rng)
@@ -881,7 +889,7 @@ func _run_wfc(
 					propagate_seconds += _elapsed_seconds(propagate_start_ms)
 					propagation_steps += 1
 					_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-					return {"success": false, "status": "contradiction"}
+					return {"success": false, "status": "contradiction", "grid": wave}
 
 				if reduced:
 					stack.append(neighbor_index)
