@@ -14,6 +14,7 @@ class_name WFCLevelGenerator
 @export var debug_logs := false
 @export var debug_path_line_path: NodePath
 
+const WFC_TIME_BUDGET_SECONDS := 3.0
 const DIRECTIONS := [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -84,6 +85,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 
 	var attempt := 0
 	var result: Dictionary = {}
+	var timed_out := false
 	while attempt < max_attempts:
 		attempt += 1
 		if attempt == 1 or attempt % 50 == 0:
@@ -111,26 +113,44 @@ func generate_level(use_new_seed: bool = false) -> void:
 			pattern_grid_size,
 			rng,
 			step_callback,
-			step_delay_seconds
+			step_delay_seconds,
+			WFC_TIME_BUDGET_SECONDS
 		)
+
+		timed_out = result.get("timed_out", false)
+		if timed_out:
+			_debug_log("WFC: time budget exceeded after %.3f s." % result.get("elapsed_seconds", 0.0))
+			break
 
 		if result.success:
 			break
 
-	if not result.success:
+	if not result.success and not timed_out:
 		_debug_log("WFC: failed after %d attempts." % max_attempts)
 		return
 	_debug_log("WFC: phase solve %.3f s" % _elapsed_seconds(phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 
-	var output_tiles: Dictionary = _build_output_tiles(
-		patterns_data.patterns,
-		patterns_data.tiles,
-		result.grid,
-		pattern_grid_size,
-		target_rect,
-		overlap_size
-	)
+	var output_tiles: Dictionary = {}
+	if timed_out:
+		output_tiles = _build_output_tiles_partial(
+			patterns_data.patterns,
+			patterns_data.tiles,
+			result.grid,
+			pattern_grid_size,
+			target_rect,
+			overlap_size
+		)
+		_fill_missing_tiles_with_dirt(target_tilemap, target_rect, output_tiles)
+	else:
+		output_tiles = _build_output_tiles(
+			patterns_data.patterns,
+			patterns_data.tiles,
+			result.grid,
+			pattern_grid_size,
+			target_rect,
+			overlap_size
+		)
 	_debug_log("WFC: phase output tiles %.3f s" % _elapsed_seconds(phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 
@@ -715,8 +735,10 @@ func _run_wfc(
 	grid_size: Vector2i,
 	rng: RandomNumberGenerator,
 	step_callback: Callable = Callable(),
-	step_delay: float = 0.0
+	step_delay: float = 0.0,
+	time_budget_seconds: float = 0.0
 ) -> Dictionary:
+	var start_ms := Time.get_ticks_msec()
 	var total_cells: int = grid_size.x * grid_size.y
 	var wave: Array = []
 	var all_patterns: Array = []
@@ -731,6 +753,13 @@ func _run_wfc(
 	allowed_mask.resize(patterns.size())
 
 	while true:
+		if time_budget_seconds > 0.0 and _elapsed_seconds(start_ms) > time_budget_seconds:
+			return {
+				"success": false,
+				"timed_out": true,
+				"grid": wave,
+				"elapsed_seconds": _elapsed_seconds(start_ms)
+			}
 		var next_index := _find_lowest_entropy(wave, rng)
 		if next_index == -1:
 			return {"success": true, "grid": wave}
@@ -747,6 +776,13 @@ func _run_wfc(
 				await get_tree().create_timer(step_delay).timeout
 
 		while not stack.is_empty():
+			if time_budget_seconds > 0.0 and _elapsed_seconds(start_ms) > time_budget_seconds:
+				return {
+					"success": false,
+					"timed_out": true,
+					"grid": wave,
+					"elapsed_seconds": _elapsed_seconds(start_ms)
+				}
 			var current_index: int = stack.pop_back()
 			var current_pos: Vector2i = Vector2i(current_index % grid_size.x, current_index / grid_size.x)
 			var current_patterns: Array = wave[current_index]
@@ -850,6 +886,63 @@ func _build_output_tiles(
 					}
 
 	return output_tiles
+
+
+func _build_output_tiles_partial(
+	patterns: Array,
+	tile_data: Dictionary,
+	grid: Array,
+	grid_size: Vector2i,
+	target_rect: Rect2i,
+	pattern_size: int
+) -> Dictionary:
+	var output_tiles: Dictionary = {}
+	for y in range(grid_size.y):
+		for x in range(grid_size.x):
+			var cell_patterns: Array = grid[y * grid_size.x + x]
+			if cell_patterns.size() != 1:
+				continue
+			var pattern_index: int = cell_patterns[0]
+			var pattern_tiles: Array = patterns[pattern_index]
+			for dy in range(pattern_size):
+				for dx in range(pattern_size):
+					var tile_key: String = pattern_tiles[dy * pattern_size + dx]
+					var tile_pos := target_rect.position + Vector2i(x + dx, y + dy)
+					if output_tiles.has(tile_pos):
+						continue
+					var data: Dictionary = tile_data[tile_key]
+					output_tiles[tile_pos] = {
+						"key": tile_key,
+						"source_id": data["source_id"],
+						"atlas_coords": data["atlas_coords"],
+						"alternative_tile": data["alternative_tile"],
+					}
+
+	return output_tiles
+
+
+func _fill_missing_tiles_with_dirt(
+	target_tilemap: TileMap,
+	target_rect: Rect2i,
+	output_tiles: Dictionary
+) -> void:
+	if target_tilemap == null:
+		return
+	var dirt_tile := _find_tile_by_type(target_tilemap, "dirt")
+	if dirt_tile.is_empty():
+		_debug_log("WFC: time budget exceeded but no dirt tile found.")
+		return
+	for y in range(target_rect.position.y, target_rect.position.y + target_rect.size.y):
+		for x in range(target_rect.position.x, target_rect.position.x + target_rect.size.x):
+			var tile_pos := Vector2i(x, y)
+			if output_tiles.has(tile_pos):
+				continue
+			output_tiles[tile_pos] = {
+				"key": "dirt",
+				"source_id": dirt_tile["source_id"],
+				"atlas_coords": dirt_tile["atlas_coords"],
+				"alternative_tile": dirt_tile["alternative"],
+			}
 
 
 func _apply_step_preview(
