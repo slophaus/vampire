@@ -192,8 +192,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 			tile.alternative_tile
 		)
 
-	_position_level_doors(target_tilemap, rng)
 	_set_border_tiles_to_wall(target_tilemap, target_rect)
+	_position_level_doors(target_tilemap, rng)
 	if target_tilemap.has_meta(TileEater.DIRT_BORDER_META_KEY):
 		target_tilemap.remove_meta(TileEater.DIRT_BORDER_META_KEY)
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
