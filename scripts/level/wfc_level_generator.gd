@@ -19,6 +19,8 @@ class_name WFCLevelGenerator
 @export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var time_budget_timeout_tile := "random_tile"
 @export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var pick_time_budget_timeout_tile := "random_tile"
 @export_enum("retry", "dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var contradiction_mode := "retry"
+@export_range(0.0, 1.0, 0.01) var contradiction_avoid_until_solved_ratio := 0.8
+@export_range(0, 3, 1) var contradiction_avoid_radius := 1
 const DIRECTIONS := [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -798,6 +800,7 @@ func _run_wfc(
 	var entropy_picks := 0
 	var propagation_steps := 0
 
+	var contradiction_hotspots: Dictionary = {}
 	while true:
 		if time_budget_seconds > 0.0 and _elapsed_seconds(start_ms) > time_budget_seconds:
 			_log_wfc_solve_timing("timeout", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
@@ -810,7 +813,16 @@ func _run_wfc(
 				"elapsed_seconds": _elapsed_seconds(start_ms)
 			}
 		var entropy_start_ms := Time.get_ticks_msec()
-		var next_index := _find_lowest_entropy(wave, rng)
+		var solved_ratio := _get_solved_ratio(wave)
+		var avoid_contradictions := solved_ratio < contradiction_avoid_until_solved_ratio
+		var next_index := _find_lowest_entropy(
+			wave,
+			rng,
+			grid_size,
+			contradiction_hotspots,
+			avoid_contradictions,
+			contradiction_avoid_radius
+		)
 		entropy_seconds += _elapsed_seconds(entropy_start_ms)
 		entropy_picks += 1
 		if next_index == -1:
@@ -829,7 +841,23 @@ func _run_wfc(
 					propagation_steps
 				)
 				return {"success": false, "status": "contradiction", "grid": wave}
+			if avoid_contradictions:
+				wave[next_index] = all_patterns.duplicate()
+				_mark_contradiction_hotspot(
+					next_index,
+					grid_size,
+					contradiction_hotspots,
+					contradiction_avoid_radius
+				)
+				_debug_log("WFC: contradiction deferred at %s." % str(next_index))
+				continue
 			chosen = _resolve_contradiction_pattern(contradiction_mode, all_patterns, weights, rng)
+			_mark_contradiction_hotspot(
+				next_index,
+				grid_size,
+				contradiction_hotspots,
+				contradiction_avoid_radius
+			)
 			_debug_log("WFC: contradiction resolved at %s using %s." % [str(next_index), contradiction_mode])
 		else:
 			chosen = _weighted_choice(wave[next_index], weights, rng)
@@ -912,11 +940,27 @@ func _run_wfc(
 							propagation_steps
 						)
 						return {"success": false, "status": "contradiction", "grid": wave}
+					if avoid_contradictions:
+						wave[neighbor_index] = all_patterns.duplicate()
+						_mark_contradiction_hotspot(
+							neighbor_index,
+							grid_size,
+							contradiction_hotspots,
+							contradiction_avoid_radius
+						)
+						_debug_log("WFC: contradiction deferred at %s." % str(neighbor_index))
+						continue
 					var fallback_pattern := _resolve_contradiction_pattern(
 						contradiction_mode,
 						all_patterns,
 						weights,
 						rng
+					)
+					_mark_contradiction_hotspot(
+						neighbor_index,
+						grid_size,
+						contradiction_hotspots,
+						contradiction_avoid_radius
 					)
 					wave[neighbor_index] = [fallback_pattern]
 					stack.append(neighbor_index)
@@ -954,12 +998,21 @@ func _log_wfc_solve_timing(
 	])
 
 
-func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator) -> int:
+func _find_lowest_entropy(
+	wave: Array,
+	rng: RandomNumberGenerator,
+	grid_size: Vector2i,
+	contradiction_hotspots: Dictionary,
+	avoid_contradictions: bool,
+	avoid_radius: int
+) -> int:
 	var best_entropy: float = INF
 	var best_indices: Array = []
 	for i in range(wave.size()):
 		var entropy: int = wave[i].size()
 		if entropy <= 1:
+			continue
+		if avoid_contradictions and _is_contradiction_hotspot(i, grid_size, contradiction_hotspots, avoid_radius):
 			continue
 		if entropy < best_entropy:
 			best_entropy = entropy
@@ -969,8 +1022,64 @@ func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator) -> int:
 			best_indices.append(i)
 
 	if best_indices.is_empty():
+		if avoid_contradictions:
+			return _find_lowest_entropy(wave, rng, grid_size, {}, false, 0)
 		return -1
 	return best_indices[rng.randi_range(0, best_indices.size() - 1)]
+
+
+func _get_solved_ratio(wave: Array) -> float:
+	if wave.is_empty():
+		return 1.0
+	var solved_count := 0
+	for cell in wave:
+		if cell.size() <= 1:
+			solved_count += 1
+	return float(solved_count) / float(wave.size())
+
+
+func _mark_contradiction_hotspot(
+	cell_index: int,
+	grid_size: Vector2i,
+	contradiction_hotspots: Dictionary,
+	radius: int
+) -> void:
+	var cell_pos := Vector2i(cell_index % grid_size.x, cell_index / grid_size.x)
+	for dy in range(-radius, radius + 1):
+		for dx in range(-radius, radius + 1):
+			var neighbor_pos := cell_pos + Vector2i(dx, dy)
+			if neighbor_pos.x < 0 or neighbor_pos.y < 0:
+				continue
+			if neighbor_pos.x >= grid_size.x or neighbor_pos.y >= grid_size.y:
+				continue
+			var neighbor_index := neighbor_pos.y * grid_size.x + neighbor_pos.x
+			contradiction_hotspots[neighbor_index] = true
+
+
+func _is_contradiction_hotspot(
+	cell_index: int,
+	grid_size: Vector2i,
+	contradiction_hotspots: Dictionary,
+	radius: int
+) -> bool:
+	if contradiction_hotspots.is_empty():
+		return false
+	if contradiction_hotspots.has(cell_index):
+		return true
+	if radius <= 0:
+		return false
+	var cell_pos := Vector2i(cell_index % grid_size.x, cell_index / grid_size.x)
+	for dy in range(-radius, radius + 1):
+		for dx in range(-radius, radius + 1):
+			var neighbor_pos := cell_pos + Vector2i(dx, dy)
+			if neighbor_pos.x < 0 or neighbor_pos.y < 0:
+				continue
+			if neighbor_pos.x >= grid_size.x or neighbor_pos.y >= grid_size.y:
+				continue
+			var neighbor_index := neighbor_pos.y * grid_size.x + neighbor_pos.x
+			if contradiction_hotspots.has(neighbor_index):
+				return true
+	return false
 
 
 func _resolve_contradiction_pattern(
