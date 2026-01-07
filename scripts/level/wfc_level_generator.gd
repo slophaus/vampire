@@ -141,7 +141,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 			target_rect,
 			overlap_size
 		)
-		_fill_missing_tiles_with_dirt(target_tilemap, target_rect, output_tiles)
+		_fill_missing_tiles_with_random_used_tile(target_tilemap, target_rect, output_tiles, rng)
 	else:
 		output_tiles = _build_output_tiles(
 			patterns_data.patterns,
@@ -921,16 +921,17 @@ func _build_output_tiles_partial(
 	return output_tiles
 
 
-func _fill_missing_tiles_with_dirt(
+func _fill_missing_tiles_with_random_used_tile(
 	target_tilemap: TileMap,
 	target_rect: Rect2i,
-	output_tiles: Dictionary
+	output_tiles: Dictionary,
+	rng: RandomNumberGenerator
 ) -> void:
 	if target_tilemap == null:
 		return
-	var dirt_tile := _find_tile_by_type(target_tilemap, "dirt")
-	if dirt_tile.is_empty():
-		_debug_log("WFC: time budget exceeded but no dirt tile found.")
+	var fallback_tile := _pick_random_used_tile(target_tilemap, rng)
+	if fallback_tile.is_empty():
+		_debug_log("WFC: time budget exceeded but no used tiles found.")
 		return
 	for y in range(target_rect.position.y, target_rect.position.y + target_rect.size.y):
 		for x in range(target_rect.position.x, target_rect.position.x + target_rect.size.x):
@@ -938,11 +939,29 @@ func _fill_missing_tiles_with_dirt(
 			if output_tiles.has(tile_pos):
 				continue
 			output_tiles[tile_pos] = {
-				"key": "dirt",
-				"source_id": dirt_tile["source_id"],
-				"atlas_coords": dirt_tile["atlas_coords"],
-				"alternative_tile": dirt_tile["alternative"],
+				"key": fallback_tile["key"],
+				"source_id": fallback_tile["source_id"],
+				"atlas_coords": fallback_tile["atlas_coords"],
+				"alternative_tile": fallback_tile["alternative"],
 			}
+
+
+func _pick_random_used_tile(target_tilemap: TileMap, rng: RandomNumberGenerator) -> Dictionary:
+	if target_tilemap == null:
+		return {}
+	var used_cells := target_tilemap.get_used_cells(0)
+	if used_cells.is_empty():
+		return {}
+	var cell: Vector2i = used_cells[rng.randi_range(0, used_cells.size() - 1)]
+	var source_id := target_tilemap.get_cell_source_id(0, cell)
+	var atlas_coords := target_tilemap.get_cell_atlas_coords(0, cell)
+	var alternative := target_tilemap.get_cell_alternative_tile(0, cell)
+	return {
+		"key": _tile_key(source_id, atlas_coords, alternative),
+		"source_id": source_id,
+		"atlas_coords": atlas_coords,
+		"alternative": alternative,
+	}
 
 
 func _apply_step_preview(
