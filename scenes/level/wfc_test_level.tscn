@@ -381,7 +381,6 @@ layer_0/tile_data = PackedInt32Array(0, 2, 0, 65536, 2, 0, 131072, 2, 0, 196608,
 script = ExtResource("4_wfc")
 target_tilemap_path = NodePath("../LayerTilemaps/TileMapTarget")
 sample_tilemap_path = NodePath("../LayerTilemaps/TileMapSample")
-max_attempts = 10000
 random_seed = 6
 periodic_input = true
 debug_logs = true
