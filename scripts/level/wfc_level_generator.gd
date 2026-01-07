@@ -14,7 +14,8 @@ class_name WFCLevelGenerator
 @export var debug_logs := false
 @export var debug_path_line_path: NodePath
 
-const WFC_TIME_BUDGET_SECONDS := 3.0
+@export_range(0.0, 30.0, 0.1) var time_budget_seconds := 3.0
+@export_range(0.0, 5.0, 0.01) var pick_time_budget_seconds := 0.0
 const DIRECTIONS := [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -86,6 +87,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 	var attempt := 0
 	var result: Dictionary = {}
 	var timed_out := false
+	var sample_tiles := _build_sample_tiles(patterns_data.tiles)
 	while attempt < max_attempts:
 		attempt += 1
 		if attempt == 1 or attempt % 50 == 0:
@@ -114,7 +116,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 			rng,
 			step_callback,
 			step_delay_seconds,
-			WFC_TIME_BUDGET_SECONDS
+			time_budget_seconds,
+			pick_time_budget_seconds
 		)
 
 		timed_out = result.get("timed_out", false)
@@ -141,7 +144,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 			target_rect,
 			overlap_size
 		)
-		_fill_missing_tiles_with_random_used_tile(target_tilemap, target_rect, output_tiles, rng)
+		_fill_missing_tiles_with_random_sample_tile(target_rect, output_tiles, sample_tiles, rng)
 	else:
 		output_tiles = _build_output_tiles(
 			patterns_data.patterns,
@@ -736,9 +739,11 @@ func _run_wfc(
 	rng: RandomNumberGenerator,
 	step_callback: Callable = Callable(),
 	step_delay: float = 0.0,
-	time_budget_seconds: float = 0.0
+	time_budget_seconds: float = 0.0,
+	pick_time_budget_seconds: float = 0.0
 ) -> Dictionary:
 	var start_ms := Time.get_ticks_msec()
+	var pick_start_ms := start_ms
 	var total_cells: int = grid_size.x * grid_size.y
 	var wave: Array = []
 	var all_patterns: Array = []
@@ -767,6 +772,7 @@ func _run_wfc(
 		if wave[next_index].is_empty():
 			return {"success": false}
 
+		pick_start_ms = Time.get_ticks_msec()
 		var chosen: int = _weighted_choice(wave[next_index], weights, rng)
 		wave[next_index] = [chosen]
 		stack.append(next_index)
@@ -777,6 +783,13 @@ func _run_wfc(
 
 		while not stack.is_empty():
 			if time_budget_seconds > 0.0 and _elapsed_seconds(start_ms) > time_budget_seconds:
+				return {
+					"success": false,
+					"timed_out": true,
+					"grid": wave,
+					"elapsed_seconds": _elapsed_seconds(start_ms)
+				}
+			if pick_time_budget_seconds > 0.0 and _elapsed_seconds(pick_start_ms) > pick_time_budget_seconds:
 				return {
 					"success": false,
 					"timed_out": true,
@@ -921,47 +934,44 @@ func _build_output_tiles_partial(
 	return output_tiles
 
 
-func _fill_missing_tiles_with_random_used_tile(
-	target_tilemap: TileMap,
+func _build_sample_tiles(tile_data: Dictionary) -> Array[Dictionary]:
+	var tiles: Array[Dictionary] = []
+	for entry in tile_data.values():
+		if entry["source_id"] == -1:
+			continue
+		tiles.append({
+			"source_id": entry["source_id"],
+			"atlas_coords": entry["atlas_coords"],
+			"alternative_tile": entry["alternative_tile"],
+		})
+	return tiles
+
+
+func _fill_missing_tiles_with_random_sample_tile(
 	target_rect: Rect2i,
 	output_tiles: Dictionary,
+	sample_tiles: Array[Dictionary],
 	rng: RandomNumberGenerator
 ) -> void:
-	if target_tilemap == null:
-		return
-	var fallback_tile := _pick_random_used_tile(target_tilemap, rng)
-	if fallback_tile.is_empty():
-		_debug_log("WFC: time budget exceeded but no used tiles found.")
+	if sample_tiles.is_empty():
+		_debug_log("WFC: time budget exceeded but no sample tiles found.")
 		return
 	for y in range(target_rect.position.y, target_rect.position.y + target_rect.size.y):
 		for x in range(target_rect.position.x, target_rect.position.x + target_rect.size.x):
 			var tile_pos := Vector2i(x, y)
 			if output_tiles.has(tile_pos):
 				continue
+			var fallback_tile: Dictionary = sample_tiles[rng.randi_range(0, sample_tiles.size() - 1)]
 			output_tiles[tile_pos] = {
-				"key": fallback_tile["key"],
+				"key": _tile_key(
+					fallback_tile["source_id"],
+					fallback_tile["atlas_coords"],
+					fallback_tile["alternative_tile"]
+				),
 				"source_id": fallback_tile["source_id"],
 				"atlas_coords": fallback_tile["atlas_coords"],
-				"alternative_tile": fallback_tile["alternative"],
+				"alternative_tile": fallback_tile["alternative_tile"],
 			}
-
-
-func _pick_random_used_tile(target_tilemap: TileMap, rng: RandomNumberGenerator) -> Dictionary:
-	if target_tilemap == null:
-		return {}
-	var used_cells := target_tilemap.get_used_cells(0)
-	if used_cells.is_empty():
-		return {}
-	var cell: Vector2i = used_cells[rng.randi_range(0, used_cells.size() - 1)]
-	var source_id := target_tilemap.get_cell_source_id(0, cell)
-	var atlas_coords := target_tilemap.get_cell_atlas_coords(0, cell)
-	var alternative := target_tilemap.get_cell_alternative_tile(0, cell)
-	return {
-		"key": _tile_key(source_id, atlas_coords, alternative),
-		"source_id": source_id,
-		"atlas_coords": atlas_coords,
-		"alternative": alternative,
-	}
 
 
 func _apply_step_preview(
