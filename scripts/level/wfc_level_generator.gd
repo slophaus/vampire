@@ -16,8 +16,8 @@ class_name WFCLevelGenerator
 
 @export_range(0.0, 30.0, 0.1) var time_budget_seconds := 3.0
 @export_range(0.0, 5.0, 0.01) var pick_time_budget_seconds := 0.0
-@export_enum("dirt", "most_common", "least_common", "random_tile", "random_same") var time_budget_timeout_tile := "random_tile"
-@export_enum("dirt", "most_common", "least_common", "random_tile", "random_same") var pick_time_budget_timeout_tile := "random_tile"
+@export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var time_budget_timeout_tile := "random_tile"
+@export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var pick_time_budget_timeout_tile := "random_tile"
 const DIRECTIONS := [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -1007,9 +1007,9 @@ func _fill_missing_tiles_with_timeout_mode(
 			if output_tiles.has(tile_pos):
 				continue
 			var fallback_tile := shared_tile
-			if timeout_mode == "random_tile":
+			if timeout_mode == "random_tile" or timeout_mode == "random_top_three":
 				fallback_tile = _resolve_timeout_tile(
-					"random_tile",
+					timeout_mode,
 					sample_tiles,
 					tile_data,
 					tile_counts,
@@ -1067,6 +1067,8 @@ func _resolve_timeout_tile(
 			if sample_tiles.is_empty():
 				return {}
 			return sample_tiles[rng.randi_range(0, sample_tiles.size() - 1)]
+		"random_top_three":
+			return _pick_random_from_top_common(tile_counts, tile_data, rng, 3)
 	return {}
 
 
@@ -1094,6 +1096,38 @@ func _pick_common_tile(
 		return {}
 	return {
 		"key": best_key,
+		"source_id": data["source_id"],
+		"atlas_coords": data["atlas_coords"],
+		"alternative_tile": data["alternative_tile"],
+	}
+
+
+func _pick_random_from_top_common(
+	tile_counts: Dictionary,
+	tile_data: Dictionary,
+	rng: RandomNumberGenerator,
+	top_count: int
+) -> Dictionary:
+	if tile_counts.is_empty():
+		return {}
+	var pairs: Array = []
+	for key in tile_counts.keys():
+		pairs.append({
+			"key": key,
+			"count": int(tile_counts[key]),
+		})
+	pairs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return a["count"] > b["count"]
+	)
+	var limit := min(top_count, pairs.size())
+	if limit <= 0:
+		return {}
+	var chosen := pairs[rng.randi_range(0, limit - 1)]["key"]
+	var data: Dictionary = tile_data.get(chosen, {})
+	if data.is_empty():
+		return {}
+	return {
+		"key": chosen,
 		"source_id": data["source_id"],
 		"atlas_coords": data["atlas_coords"],
 		"alternative_tile": data["alternative_tile"],
