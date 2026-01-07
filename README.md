@@ -39,17 +39,18 @@
 
 Enemies spawn on a timer that accelerates with arena difficulty, and they appear on walkable
 tiles just outside the camera view. Spawns are also capped at 500 active enemies to prevent
-runaway counts.
+runaway counts. Arena difficulty starts at 1 and increases every 15 seconds.
 
 ### Enemy spawn flow
 
-* Spawn rate uses difficulty keyframes from `EnemyManager.spawn_rate_keyframes`. The keyframes map
+* Spawn rate uses difficulty keyframes from each level's `spawn_rate_keyframes`. The keyframes map
   arena difficulty to a spawn rate (spawns per second). When difficulty lands between keyframes,
   the spawn rate is linearly interpolated; outside the range it clamps to the nearest keyframe.
-  The default keyframes set difficulty 1 to 1 spawn/sec and difficulty 16 to 2 spawns/sec.
-* `EnemyManager` builds a weighted table of enemy types: it starts with Mouse entries (weight 15),
-  adds Worms at difficulty 2 (weight 1), Dragons at difficulty 8 (weight 5), and Rats at
-  difficulty 12 (weight 4).
+* `EnemyManager` builds a weighted table of enemy types from each level's
+  `enemy_spawn_keyframes`. Each keyframe `(difficulty, enemy_id, weight)` is applied once when the
+  arena difficulty reaches the keyframe difficulty, adding `weight` to the enemy's entries in the
+  weighted table. Ghosts can only exist once at a time; if the ghost slot is chosen while a ghost
+  is alive, another enemy is picked.
 * For each spawn, it looks for walkable tilemap cells (no collision polygons) that are outside the
   camera view rectangle (`OFFSCREEN_MARGIN` pixels beyond the view), but still within
   `MAX_SPAWN_RADIUS_MULTIPLIER` (75%) of the view size. A random eligible cell is chosen and
@@ -63,9 +64,55 @@ runaway counts.
 | Mouse | Always in pool | 10 HP, 30 max speed, 5.0 acceleration, 1 contact damage | Small melee chaser. |
 | Dragon | Added at arena difficulty 8 | 10 HP, 45 max speed, 2.0 acceleration, 1 contact damage | Ranged caster that fires fireballs. |
 | Rat | Added at arena difficulty 12 | 37.5 HP, 105 max speed, 1.5 acceleration, 2 contact damage | Fast bruiser with higher contact damage. |
+| Spider | Added via level keyframes | 20 HP, 55 max speed, 2.0 acceleration, 1 contact damage | Mid-speed melee chaser. |
+| Ghost | Added via level keyframes | 15 HP, 60 max speed, 3.0 acceleration, 1 contact damage | Only one ghost can exist at a time. |
 
 ### Worm enemy
 
 | Enemy | Spawn behavior | Stats | Notes |
 | --- | --- | --- | --- |
 | Worm | Added at arena difficulty 2 | 20 HP, 15 segments, moves every 0.8s | Grid-based mover that avoids overlapping bodies, digs through blocked tiles, and explodes segments on death. |
+
+### Enemy IDs
+
+Enemy spawn keyframes reference these IDs:
+
+| Enemy ID | Enemy |
+| --- | --- |
+| 0 | Mouse |
+| 1 | Dragon |
+| 2 | Rat |
+| 3 | Worm |
+| 4 | Spider |
+| 5 | Ghost |
+
+### Level spawn rates
+
+| Level | Spawn rate keyframes (difficulty → spawns/sec) |
+| --- | --- |
+| Main level (`level_id = main`) | 1 → 0.5, 3 → 1, 16 → 2 |
+| WFC test level (`level_id = wfc_test`) | 1 → 0.1, 8 → 0.3, 16 → 1 |
+
+### Level enemy progressions
+
+Keyframes below describe the cumulative additions to the weighted spawn table as arena difficulty
+increases.
+
+**Main level (`level_id = main`)**
+
+| Arena difficulty | Enemy added | Weight added |
+| --- | --- | --- |
+| 1 | Mouse | 15 |
+| 2 | Worm | 1 |
+| 4 | Spider | 2 |
+| 8 | Dragon | 5 |
+| 12 | Rat | 4 |
+| 14 | Ghost | 1 |
+
+**WFC test level (`level_id = wfc_test`)**
+
+| Arena difficulty | Enemy added | Weight added |
+| --- | --- | --- |
+| 1 | Rat | 15 |
+| 3 | Spider | 5 |
+| 5 | Ghost | 2 |
