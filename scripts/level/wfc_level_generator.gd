@@ -1119,10 +1119,10 @@ func _pick_random_from_top_common(
 	pairs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return a["count"] > b["count"]
 	)
-	var limit := min(top_count, pairs.size())
+	var limit: int = min(top_count, pairs.size())
 	if limit <= 0:
 		return {}
-	var chosen := pairs[rng.randi_range(0, limit - 1)]["key"]
+	var chosen: String = pairs[rng.randi_range(0, limit - 1)]["key"]
 	var data: Dictionary = tile_data.get(chosen, {})
 	if data.is_empty():
 		return {}
