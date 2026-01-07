@@ -13,6 +13,7 @@ class_name WFCLevelGenerator
 @export_range(0.0, 5.0, 0.05) var step_delay_seconds := 0.0
 @export var debug_logs := false
 @export var debug_path_line_path: NodePath
+@export_range(0, 8, 1) var entropy_slack := 0
 
 const DIRECTIONS := [
 	Vector2i(0, -1),
@@ -731,7 +732,7 @@ func _run_wfc(
 	allowed_mask.resize(patterns.size())
 
 	while true:
-		var next_index := _find_lowest_entropy(wave, rng)
+		var next_index := _find_lowest_entropy(wave, rng, entropy_slack)
 		if next_index == -1:
 			return {"success": true, "grid": wave}
 
@@ -787,7 +788,7 @@ func _run_wfc(
 	return {"success": false}
 
 
-func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator) -> int:
+func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator, slack: int = 0) -> int:
 	var best_entropy: float = INF
 	var best_indices: Array = []
 	for i in range(wave.size()):
@@ -803,7 +804,21 @@ func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator) -> int:
 
 	if best_indices.is_empty():
 		return -1
-	return best_indices[rng.randi_range(0, best_indices.size() - 1)]
+	if slack <= 0:
+		return best_indices[rng.randi_range(0, best_indices.size() - 1)]
+
+	var relaxed_indices: Array = []
+	var max_entropy := best_entropy + slack
+	for i in range(wave.size()):
+		var entropy: int = wave[i].size()
+		if entropy <= 1:
+			continue
+		if entropy <= max_entropy:
+			relaxed_indices.append(i)
+
+	if relaxed_indices.is_empty():
+		return best_indices[rng.randi_range(0, best_indices.size() - 1)]
+	return relaxed_indices[rng.randi_range(0, relaxed_indices.size() - 1)]
 
 
 func _weighted_choice(options: Array, weights: Array, rng: RandomNumberGenerator) -> int:
