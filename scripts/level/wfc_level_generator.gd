@@ -797,6 +797,9 @@ func _run_wfc(
 	var propagate_seconds := 0.0
 	var entropy_picks := 0
 	var propagation_steps := 0
+	var contradiction_hotspots: Dictionary = {}
+	var hotspot_initial_penalty := 6.0
+	var hotspot_decay := 0.5
 
 	while true:
 		if time_budget_seconds > 0.0 and _elapsed_seconds(start_ms) > time_budget_seconds:
@@ -809,8 +812,9 @@ func _run_wfc(
 				"timeout_reason": "time_budget",
 				"elapsed_seconds": _elapsed_seconds(start_ms)
 			}
+		_decay_hotspots(contradiction_hotspots, hotspot_decay)
 		var entropy_start_ms := Time.get_ticks_msec()
-		var next_index := _find_lowest_entropy(wave, rng)
+		var next_index := _find_lowest_entropy(wave, rng, contradiction_hotspots, grid_size)
 		entropy_seconds += _elapsed_seconds(entropy_start_ms)
 		entropy_picks += 1
 		if next_index == -1:
@@ -831,6 +835,7 @@ func _run_wfc(
 				return {"success": false, "status": "contradiction", "grid": wave}
 			chosen = _resolve_contradiction_pattern(contradiction_mode, all_patterns, weights, rng)
 			_debug_log("WFC: contradiction resolved at %s using %s." % [str(next_index), contradiction_mode])
+			_register_contradiction_hotspot(contradiction_hotspots, next_index, hotspot_initial_penalty)
 		else:
 			chosen = _weighted_choice(wave[next_index], weights, rng)
 
@@ -844,6 +849,7 @@ func _run_wfc(
 
 		while not stack.is_empty():
 			var propagate_start_ms := Time.get_ticks_msec()
+			_decay_hotspots(contradiction_hotspots, hotspot_decay)
 			if time_budget_seconds > 0.0 and _elapsed_seconds(start_ms) > time_budget_seconds:
 				propagate_seconds += _elapsed_seconds(propagate_start_ms)
 				propagation_steps += 1
@@ -925,6 +931,7 @@ func _run_wfc(
 						if step_delay > 0.0:
 							await get_tree().create_timer(step_delay).timeout
 					_debug_log("WFC: contradiction resolved at %s using %s." % [str(neighbor_index), contradiction_mode])
+					_register_contradiction_hotspot(contradiction_hotspots, neighbor_index, hotspot_initial_penalty)
 					continue
 
 				if reduced:
@@ -954,23 +961,70 @@ func _log_wfc_solve_timing(
 	])
 
 
-func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator) -> int:
-	var best_entropy: float = INF
+func _find_lowest_entropy(
+	wave: Array,
+	rng: RandomNumberGenerator,
+	hotspots: Dictionary,
+	grid_size: Vector2i
+) -> int:
+	var best_score: float = INF
 	var best_indices: Array = []
 	for i in range(wave.size()):
 		var entropy: int = wave[i].size()
 		if entropy <= 1:
 			continue
-		if entropy < best_entropy:
-			best_entropy = entropy
+		var score := float(entropy) + _calculate_hotspot_penalty(i, hotspots, grid_size)
+		if score < best_score:
+			best_score = score
 			best_indices.clear()
 			best_indices.append(i)
-		elif entropy == best_entropy:
+		elif score == best_score:
 			best_indices.append(i)
 
 	if best_indices.is_empty():
 		return -1
 	return best_indices[rng.randi_range(0, best_indices.size() - 1)]
+
+
+func _register_contradiction_hotspot(
+	hotspots: Dictionary,
+	cell_index: int,
+	initial_penalty: float
+) -> void:
+	if not hotspots.has(cell_index):
+		hotspots[cell_index] = initial_penalty
+		return
+	hotspots[cell_index] = max(float(hotspots[cell_index]), initial_penalty)
+
+
+func _decay_hotspots(hotspots: Dictionary, decay_amount: float) -> void:
+	if hotspots.is_empty():
+		return
+	var to_remove: Array = []
+	for index in hotspots.keys():
+		var next_value := float(hotspots[index]) - decay_amount
+		if next_value <= 0.0:
+			to_remove.append(index)
+		else:
+			hotspots[index] = next_value
+	for index in to_remove:
+		hotspots.erase(index)
+
+
+func _calculate_hotspot_penalty(
+	cell_index: int,
+	hotspots: Dictionary,
+	grid_size: Vector2i
+) -> float:
+	if hotspots.is_empty():
+		return 0.0
+	var cell_pos := Vector2i(cell_index % grid_size.x, cell_index / grid_size.x)
+	var penalty := 0.0
+	for index in hotspots.keys():
+		var hotspot_pos := Vector2i(index % grid_size.x, index / grid_size.x)
+		var distance := absi(cell_pos.x - hotspot_pos.x) + absi(cell_pos.y - hotspot_pos.y)
+		penalty += float(hotspots[index]) / float(distance + 1)
+	return penalty
 
 
 func _resolve_contradiction_pattern(
