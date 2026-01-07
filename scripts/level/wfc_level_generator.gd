@@ -15,9 +15,7 @@ class_name WFCLevelGenerator
 @export var debug_path_line_path: NodePath
 
 @export_range(0.0, 30.0, 0.1) var time_budget_seconds := 3.0
-@export_range(0.0, 5.0, 0.01) var pick_time_budget_seconds := 0.0
 @export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var time_budget_timeout_tile := "random_tile"
-@export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var pick_time_budget_timeout_tile := "random_tile"
 @export var enable_backtracking := true
 @export_range(0, 10000, 1) var max_backtracks := 500
 const DIRECTIONS := [
@@ -122,7 +120,6 @@ func generate_level(use_new_seed: bool = false) -> void:
 			step_callback,
 			step_delay_seconds,
 			time_budget_seconds,
-			pick_time_budget_seconds,
 			enable_backtracking,
 			max_backtracks
 		)
@@ -159,10 +156,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 			target_rect,
 			overlap_size
 		)
-		var timeout_reason: String = result.get("timeout_reason", "")
 		var timeout_mode := time_budget_timeout_tile
-		if timeout_reason == "pick_budget":
-			timeout_mode = pick_time_budget_timeout_tile
 		_fill_missing_tiles_with_timeout_mode(
 			target_tilemap,
 			target_rect,
@@ -769,13 +763,11 @@ func _run_wfc(
 	step_callback: Callable = Callable(),
 	step_delay: float = 0.0,
 	time_budget_seconds: float = 0.0,
-	pick_time_budget_seconds: float = 0.0,
 	allow_backtracking: bool = false,
 	max_backtracks: int = 0
 ) -> Dictionary:
 	var init_start_ms := Time.get_ticks_msec()
 	var start_ms := Time.get_ticks_msec()
-	var pick_start_ms := start_ms
 	var total_cells: int = grid_size.x * grid_size.y
 	var wave: Array = []
 	var all_patterns: Array = []
@@ -838,7 +830,6 @@ func _run_wfc(
 				_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 				return {"success": false, "status": "contradiction", "backtracks": backtracks}
 
-			pick_start_ms = Time.get_ticks_msec()
 			var chosen: int = _weighted_choice(wave[next_index], weights, rng)
 			if allow_backtracking:
 				var remaining: Array = wave[next_index].duplicate()
@@ -869,19 +860,6 @@ func _run_wfc(
 					"timed_out": true,
 					"grid": wave,
 					"timeout_reason": "time_budget",
-					"elapsed_seconds": _elapsed_seconds(start_ms),
-					"backtracks": backtracks
-				}
-			if pick_time_budget_seconds > 0.0 and _elapsed_seconds(pick_start_ms) > pick_time_budget_seconds:
-				propagate_seconds += _elapsed_seconds(propagate_start_ms)
-				propagation_steps += 1
-				_log_wfc_solve_timing("pick timeout", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-				return {
-					"success": false,
-					"status": "pick_timeout",
-					"timed_out": true,
-					"grid": wave,
-					"timeout_reason": "pick_budget",
 					"elapsed_seconds": _elapsed_seconds(start_ms),
 					"backtracks": backtracks
 				}
