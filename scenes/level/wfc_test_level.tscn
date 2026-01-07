@@ -353,8 +353,8 @@ sources/0 = SubResource("TileSetAtlasSource_nvumn")
 [node name="WFCTestLevel" type="Node"]
 script = ExtResource("1_level_root")
 level_id = &"wfc_test"
-spawn_rate_keyframes = Array[Vector2]([Vector2(1, 0.1), Vector2(3, 0.3), Vector2(16, 1)])
-enemy_spawn_keyframes = Array[Vector3]([Vector3(1, 2, 15), Vector3(4, 4, 2)])
+spawn_rate_keyframes = Array[Vector2]([Vector2(1, 0.1), Vector2(8, 0.3), Vector2(16, 1)])
+enemy_spawn_keyframes = Array[Vector3]([Vector3(1, 2, 15), Vector3(3, 4, 5), Vector3(5, 5, 2)])
 
 [node name="LayerTilemaps" type="Node2D" parent="."]
 
@@ -423,7 +423,7 @@ z_index = 2
 [node name="LayerVials" type="Node2D" parent="." groups=["vials_layer"]]
 z_index = 3
 
-[node name="LayerEntities2" type="Node2D" parent="." groups=["entities_layer"]]
+[node name="LayerEntities" type="Node2D" parent="." groups=["entities_layer"]]
 z_index = 5
 y_sort_enabled = true
 
