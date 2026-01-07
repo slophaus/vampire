@@ -18,6 +18,8 @@ class_name WFCLevelGenerator
 @export_range(0.0, 5.0, 0.01) var pick_time_budget_seconds := 0.0
 @export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var time_budget_timeout_tile := "random_tile"
 @export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var pick_time_budget_timeout_tile := "random_tile"
+@export var enable_backtracking := true
+@export_range(0, 10000, 1) var max_backtracks := 500
 const DIRECTIONS := [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -120,7 +122,9 @@ func generate_level(use_new_seed: bool = false) -> void:
 			step_callback,
 			step_delay_seconds,
 			time_budget_seconds,
-			pick_time_budget_seconds
+			pick_time_budget_seconds,
+			enable_backtracking,
+			max_backtracks
 		)
 		var attempt_seconds := _elapsed_seconds(attempt_start_ms)
 		var attempt_status: String = str(result.get("status", "unknown"))
@@ -765,7 +769,9 @@ func _run_wfc(
 	step_callback: Callable = Callable(),
 	step_delay: float = 0.0,
 	time_budget_seconds: float = 0.0,
-	pick_time_budget_seconds: float = 0.0
+	pick_time_budget_seconds: float = 0.0,
+	allow_backtracking: bool = false,
+	max_backtracks: int = 0
 ) -> Dictionary:
 	var init_start_ms := Time.get_ticks_msec()
 	var start_ms := Time.get_ticks_msec()
@@ -787,6 +793,8 @@ func _run_wfc(
 	var propagate_seconds := 0.0
 	var entropy_picks := 0
 	var propagation_steps := 0
+	var backtracks := 0
+	var decision_stack: Array = []
 
 	while true:
 		if time_budget_seconds > 0.0 and _elapsed_seconds(start_ms) > time_budget_seconds:
@@ -797,7 +805,8 @@ func _run_wfc(
 				"timed_out": true,
 				"grid": wave,
 				"timeout_reason": "time_budget",
-				"elapsed_seconds": _elapsed_seconds(start_ms)
+				"elapsed_seconds": _elapsed_seconds(start_ms),
+				"backtracks": backtracks
 			}
 		var entropy_start_ms := Time.get_ticks_msec()
 		var next_index := _find_lowest_entropy(wave, rng)
@@ -805,20 +814,48 @@ func _run_wfc(
 		entropy_picks += 1
 		if next_index == -1:
 			_log_wfc_solve_timing("success", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-			return {"success": true, "status": "success", "grid": wave}
+			return {"success": true, "status": "success", "grid": wave, "backtracks": backtracks}
 
-		if wave[next_index].is_empty():
-			_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-			return {"success": false, "status": "contradiction"}
+		var selection_done := false
+		while not selection_done:
+			if wave[next_index].is_empty():
+				if allow_backtracking:
+					var backtrack_result := await _perform_backtrack(
+						decision_stack,
+						weights,
+						rng,
+						step_callback,
+						step_delay,
+						stack,
+						backtracks,
+						max_backtracks
+					)
+					backtracks = backtrack_result.backtracks
+					if backtrack_result.success:
+						wave = backtrack_result.wave
+						selection_done = true
+						break
+				_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
+				return {"success": false, "status": "contradiction", "backtracks": backtracks}
 
-		pick_start_ms = Time.get_ticks_msec()
-		var chosen: int = _weighted_choice(wave[next_index], weights, rng)
-		wave[next_index] = [chosen]
-		stack.append(next_index)
-		if step_callback.is_valid():
-			step_callback.call(next_index, chosen)
-			if step_delay > 0.0:
-				await get_tree().create_timer(step_delay).timeout
+			pick_start_ms = Time.get_ticks_msec()
+			var chosen: int = _weighted_choice(wave[next_index], weights, rng)
+			if allow_backtracking:
+				var remaining: Array = wave[next_index].duplicate()
+				remaining.erase(chosen)
+				if not remaining.is_empty():
+					decision_stack.append({
+						"wave": _clone_wave(wave),
+						"index": next_index,
+						"remaining": remaining
+					})
+			wave[next_index] = [chosen]
+			stack.append(next_index)
+			if step_callback.is_valid():
+				step_callback.call(next_index, chosen)
+				if step_delay > 0.0:
+					await get_tree().create_timer(step_delay).timeout
+			selection_done = true
 
 		while not stack.is_empty():
 			var propagate_start_ms := Time.get_ticks_msec()
@@ -832,7 +869,8 @@ func _run_wfc(
 					"timed_out": true,
 					"grid": wave,
 					"timeout_reason": "time_budget",
-					"elapsed_seconds": _elapsed_seconds(start_ms)
+					"elapsed_seconds": _elapsed_seconds(start_ms),
+					"backtracks": backtracks
 				}
 			if pick_time_budget_seconds > 0.0 and _elapsed_seconds(pick_start_ms) > pick_time_budget_seconds:
 				propagate_seconds += _elapsed_seconds(propagate_start_ms)
@@ -844,11 +882,13 @@ func _run_wfc(
 					"timed_out": true,
 					"grid": wave,
 					"timeout_reason": "pick_budget",
-					"elapsed_seconds": _elapsed_seconds(start_ms)
+					"elapsed_seconds": _elapsed_seconds(start_ms),
+					"backtracks": backtracks
 				}
 			var current_index: int = stack.pop_back()
 			var current_pos: Vector2i = Vector2i(current_index % grid_size.x, current_index / grid_size.x)
 			var current_patterns: Array = wave[current_index]
+			var restart_propagation := false
 
 			for dir_index in range(DIRECTIONS.size()):
 				var neighbor_pos: Vector2i = current_pos + DIRECTIONS[dir_index]
@@ -880,16 +920,81 @@ func _run_wfc(
 				if neighbor_patterns.is_empty():
 					propagate_seconds += _elapsed_seconds(propagate_start_ms)
 					propagation_steps += 1
+					if allow_backtracking:
+						var backtrack_result := await _perform_backtrack(
+							decision_stack,
+							weights,
+							rng,
+							step_callback,
+							step_delay,
+							stack,
+							backtracks,
+							max_backtracks
+						)
+						backtracks = backtrack_result.backtracks
+						if backtrack_result.success:
+							wave = backtrack_result.wave
+							restart_propagation = true
+							break
 					_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-					return {"success": false, "status": "contradiction"}
+					return {"success": false, "status": "contradiction", "backtracks": backtracks}
 
 				if reduced:
 					stack.append(neighbor_index)
 			propagate_seconds += _elapsed_seconds(propagate_start_ms)
 			propagation_steps += 1
+			if restart_propagation:
+				continue
 
 	_log_wfc_solve_timing("failed", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-	return {"success": false, "status": "failed"}
+	return {"success": false, "status": "failed", "backtracks": backtracks}
+
+
+func _perform_backtrack(
+	decision_stack: Array,
+	weights: Array,
+	rng: RandomNumberGenerator,
+	step_callback: Callable,
+	step_delay: float,
+	stack: Array,
+	backtracks: int,
+	max_backtracks: int
+) -> Dictionary:
+	while not decision_stack.is_empty():
+		if max_backtracks > 0 and backtracks >= max_backtracks:
+			return {"success": false, "backtracks": backtracks}
+		var decision: Dictionary = decision_stack.pop_back()
+		var remaining: Array = decision.get("remaining", [])
+		if remaining.is_empty():
+			continue
+		backtracks += 1
+		_debug_log("WFC: backtrack %d/%d." % [backtracks, max_backtracks])
+		var wave: Array = decision["wave"]
+		var chosen: int = _weighted_choice(remaining, weights, rng)
+		remaining.erase(chosen)
+		if not remaining.is_empty():
+			decision_stack.append({
+				"wave": _clone_wave(wave),
+				"index": decision["index"],
+				"remaining": remaining
+			})
+		wave[decision["index"]] = [chosen]
+		stack.clear()
+		stack.append(decision["index"])
+		if step_callback.is_valid():
+			step_callback.call(decision["index"], chosen)
+			if step_delay > 0.0:
+				await get_tree().create_timer(step_delay).timeout
+		return {"success": true, "wave": wave, "backtracks": backtracks}
+	return {"success": false, "backtracks": backtracks}
+
+
+func _clone_wave(wave: Array) -> Array:
+	var cloned: Array = []
+	cloned.resize(wave.size())
+	for i in range(wave.size()):
+		cloned[i] = wave[i].duplicate()
+	return cloned
 
 
 func _log_wfc_solve_timing(
