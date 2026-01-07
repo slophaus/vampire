@@ -813,14 +813,12 @@ func _run_wfc(
 				"elapsed_seconds": _elapsed_seconds(start_ms)
 			}
 		var entropy_start_ms := Time.get_ticks_msec()
-		var solved_ratio := _get_solved_ratio(wave)
-		var avoid_contradictions := solved_ratio < contradiction_avoid_until_solved_ratio
 		var next_index := _find_lowest_entropy(
 			wave,
 			rng,
 			grid_size,
 			contradiction_hotspots,
-			avoid_contradictions,
+			contradiction_avoid_until_solved_ratio,
 			contradiction_avoid_radius
 		)
 		entropy_seconds += _elapsed_seconds(entropy_start_ms)
@@ -1003,11 +1001,13 @@ func _find_lowest_entropy(
 	rng: RandomNumberGenerator,
 	grid_size: Vector2i,
 	contradiction_hotspots: Dictionary,
-	avoid_contradictions: bool,
+	avoid_until_solved_ratio: float,
 	avoid_radius: int
 ) -> int:
 	var best_entropy: float = INF
 	var best_indices: Array = []
+	var solved_ratio := _get_solved_ratio(wave)
+	var avoid_contradictions := solved_ratio < avoid_until_solved_ratio
 	for i in range(wave.size()):
 		var entropy: int = wave[i].size()
 		if entropy <= 1:
@@ -1023,7 +1023,7 @@ func _find_lowest_entropy(
 
 	if best_indices.is_empty():
 		if avoid_contradictions:
-			return _find_lowest_entropy(wave, rng, grid_size, {}, false, 0)
+			return _find_lowest_entropy(wave, rng, grid_size, {}, 0.0, 0)
 		return -1
 	return best_indices[rng.randi_range(0, best_indices.size() - 1)]
 
