@@ -94,6 +94,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 		attempt += 1
 		if attempt == 1 or attempt % 50 == 0:
 			_debug_log("WFC: attempt %d/%d" % [attempt, max_attempts])
+		var attempt_start_ms := Time.get_ticks_msec()
 
 		var step_callback := Callable()
 		if show_step_by_step:
@@ -121,6 +122,14 @@ func generate_level(use_new_seed: bool = false) -> void:
 			time_budget_seconds,
 			pick_time_budget_seconds
 		)
+		var attempt_seconds := _elapsed_seconds(attempt_start_ms)
+		var attempt_status := result.get("status", "unknown")
+		_debug_log("WFC: attempt %d result %s in %.3f s (total %.3f s)." % [
+			attempt,
+			attempt_status,
+			attempt_seconds,
+			_elapsed_seconds(total_start_ms)
+		])
 
 		timed_out = result.get("timed_out", false)
 		if timed_out:
@@ -784,6 +793,7 @@ func _run_wfc(
 			_log_wfc_solve_timing("timeout", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 			return {
 				"success": false,
+				"status": "timeout",
 				"timed_out": true,
 				"grid": wave,
 				"timeout_reason": "time_budget",
@@ -795,11 +805,11 @@ func _run_wfc(
 		entropy_picks += 1
 		if next_index == -1:
 			_log_wfc_solve_timing("success", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-			return {"success": true, "grid": wave}
+			return {"success": true, "status": "success", "grid": wave}
 
 		if wave[next_index].is_empty():
 			_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-			return {"success": false}
+			return {"success": false, "status": "contradiction"}
 
 		pick_start_ms = Time.get_ticks_msec()
 		var chosen: int = _weighted_choice(wave[next_index], weights, rng)
@@ -818,6 +828,7 @@ func _run_wfc(
 				_log_wfc_solve_timing("timeout", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 				return {
 					"success": false,
+					"status": "timeout",
 					"timed_out": true,
 					"grid": wave,
 					"timeout_reason": "time_budget",
@@ -829,6 +840,7 @@ func _run_wfc(
 				_log_wfc_solve_timing("pick timeout", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 				return {
 					"success": false,
+					"status": "pick_timeout",
 					"timed_out": true,
 					"grid": wave,
 					"timeout_reason": "pick_budget",
@@ -869,7 +881,7 @@ func _run_wfc(
 					propagate_seconds += _elapsed_seconds(propagate_start_ms)
 					propagation_steps += 1
 					_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-					return {"success": false}
+					return {"success": false, "status": "contradiction"}
 
 				if reduced:
 					stack.append(neighbor_index)
@@ -877,7 +889,7 @@ func _run_wfc(
 			propagation_steps += 1
 
 	_log_wfc_solve_timing("failed", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-	return {"success": false}
+	return {"success": false, "status": "failed"}
 
 
 func _log_wfc_solve_timing(
