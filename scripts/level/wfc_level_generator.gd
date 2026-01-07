@@ -839,6 +839,16 @@ func _run_wfc(
 					propagation_steps
 				)
 				return {"success": false, "status": "contradiction", "grid": wave}
+			if avoid_contradictions:
+				wave[next_index] = all_patterns.duplicate()
+				_mark_contradiction_hotspot(
+					next_index,
+					grid_size,
+					contradiction_hotspots,
+					contradiction_avoid_radius
+				)
+				_debug_log("WFC: contradiction deferred at %s." % str(next_index))
+				continue
 			chosen = _resolve_contradiction_pattern(contradiction_mode, all_patterns, weights, rng)
 			_mark_contradiction_hotspot(
 				next_index,
@@ -928,6 +938,16 @@ func _run_wfc(
 							propagation_steps
 						)
 						return {"success": false, "status": "contradiction", "grid": wave}
+					if avoid_contradictions:
+						wave[neighbor_index] = all_patterns.duplicate()
+						_mark_contradiction_hotspot(
+							neighbor_index,
+							grid_size,
+							contradiction_hotspots,
+							contradiction_avoid_radius
+						)
+						_debug_log("WFC: contradiction deferred at %s." % str(neighbor_index))
+						continue
 					var fallback_pattern := _resolve_contradiction_pattern(
 						contradiction_mode,
 						all_patterns,
