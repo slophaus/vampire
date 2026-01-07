@@ -123,7 +123,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 			pick_time_budget_seconds
 		)
 		var attempt_seconds := _elapsed_seconds(attempt_start_ms)
-		var attempt_status := result.get("status", "unknown")
+		var attempt_status: String = str(result.get("status", "unknown"))
 		_debug_log("WFC: attempt %d result %s in %.3f s (total %.3f s)." % [
 			attempt,
 			attempt_status,
