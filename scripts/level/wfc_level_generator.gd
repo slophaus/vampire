@@ -780,11 +780,6 @@ func _run_wfc(
 	var stack: Array = []
 	var allowed_mask := PackedByteArray()
 	allowed_mask.resize(patterns.size())
-	var entropy_sizes: Array = []
-	entropy_sizes.resize(total_cells)
-	var entropy_buckets: Array = []
-	entropy_buckets.resize(patterns.size() + 1)
-	_rebuild_entropy_state(wave, entropy_buckets, entropy_sizes)
 	var init_seconds := _elapsed_seconds(init_start_ms)
 	var entropy_seconds := 0.0
 	var propagate_seconds := 0.0
@@ -806,7 +801,7 @@ func _run_wfc(
 				"backtracks": backtracks
 			}
 		var entropy_start_ms := Time.get_ticks_msec()
-		var next_index := _find_lowest_entropy_bucket(entropy_buckets, entropy_sizes, rng)
+		var next_index := _find_lowest_entropy(wave, rng)
 		entropy_seconds += _elapsed_seconds(entropy_start_ms)
 		entropy_picks += 1
 		if next_index == -1:
@@ -825,14 +820,11 @@ func _run_wfc(
 						step_delay,
 						stack,
 						backtracks,
-						max_backtracks,
-						entropy_sizes,
-						entropy_buckets
+						max_backtracks
 					)
 					backtracks = backtrack_result.backtracks
 					if backtrack_result.success:
 						wave = backtrack_result.wave
-						_rebuild_entropy_state(wave, entropy_buckets, entropy_sizes)
 						selection_done = true
 						break
 				_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
@@ -848,9 +840,7 @@ func _run_wfc(
 						"index": next_index,
 						"remaining": remaining
 					})
-			var previous_entropy: int = entropy_sizes[next_index]
 			wave[next_index] = [chosen]
-			_update_entropy_entry(next_index, previous_entropy, 1, entropy_sizes, entropy_buckets)
 			stack.append(next_index)
 			if step_callback.is_valid():
 				step_callback.call(next_index, chosen)
@@ -902,16 +892,8 @@ func _run_wfc(
 				filtered_patterns.resize(filtered_count)
 				var reduced: bool = filtered_count != neighbor_patterns.size()
 				if reduced:
-					var previous_neighbor_entropy: int = entropy_sizes[neighbor_index]
 					wave[neighbor_index] = filtered_patterns
 					neighbor_patterns = wave[neighbor_index]
-					_update_entropy_entry(
-						neighbor_index,
-						previous_neighbor_entropy,
-						filtered_count,
-						entropy_sizes,
-						entropy_buckets
-					)
 
 				if neighbor_patterns.is_empty():
 					propagate_seconds += _elapsed_seconds(propagate_start_ms)
@@ -925,14 +907,11 @@ func _run_wfc(
 							step_delay,
 							stack,
 							backtracks,
-							max_backtracks,
-							entropy_sizes,
-							entropy_buckets
+							max_backtracks
 						)
 						backtracks = backtrack_result.backtracks
 						if backtrack_result.success:
 							wave = backtrack_result.wave
-							_rebuild_entropy_state(wave, entropy_buckets, entropy_sizes)
 							restart_propagation = true
 							break
 					_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
@@ -957,9 +936,7 @@ func _perform_backtrack(
 	step_delay: float,
 	stack: Array,
 	backtracks: int,
-	max_backtracks: int,
-	entropy_sizes: Array,
-	entropy_buckets: Array
+	max_backtracks: int
 ) -> Dictionary:
 	while not decision_stack.is_empty():
 		if max_backtracks > 0 and backtracks >= max_backtracks:
@@ -980,7 +957,6 @@ func _perform_backtrack(
 				"remaining": remaining
 			})
 		wave[decision["index"]] = [chosen]
-		_rebuild_entropy_state(wave, entropy_buckets, entropy_sizes)
 		stack.clear()
 		stack.append(decision["index"])
 		if step_callback.is_valid():
@@ -1034,52 +1010,6 @@ func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator) -> int:
 	if best_indices.is_empty():
 		return -1
 	return best_indices[rng.randi_range(0, best_indices.size() - 1)]
-
-
-func _find_lowest_entropy_bucket(
-	buckets: Array,
-	entropy_sizes: Array,
-	rng: RandomNumberGenerator
-) -> int:
-	for entropy in range(2, buckets.size()):
-		var bucket: Array = buckets[entropy]
-		if bucket.is_empty():
-			continue
-		var valid_indices: Array = []
-		for index in bucket:
-			if entropy_sizes[index] == entropy:
-				valid_indices.append(index)
-		if valid_indices.is_empty():
-			buckets[entropy].clear()
-			continue
-		buckets[entropy] = valid_indices
-		return valid_indices[rng.randi_range(0, valid_indices.size() - 1)]
-	return -1
-
-
-func _update_entropy_entry(
-	index: int,
-	previous_entropy: int,
-	new_entropy: int,
-	entropy_sizes: Array,
-	buckets: Array
-) -> void:
-	if previous_entropy == new_entropy:
-		return
-	entropy_sizes[index] = new_entropy
-	if new_entropy > 1:
-		buckets[new_entropy].append(index)
-
-
-func _rebuild_entropy_state(wave: Array, buckets: Array, entropy_sizes: Array) -> void:
-	for bucket in buckets:
-		bucket.clear()
-	entropy_sizes.resize(wave.size())
-	for i in range(wave.size()):
-		var entropy: int = wave[i].size()
-		entropy_sizes[i] = entropy
-		if entropy > 1:
-			buckets[entropy].append(i)
 
 
 func _weighted_choice(options: Array, weights: Array, rng: RandomNumberGenerator) -> int:
