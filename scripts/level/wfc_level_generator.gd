@@ -787,6 +787,9 @@ func _run_wfc(
 	var propagation_steps := 0
 	var backtracks := 0
 	var decision_stack: Array = []
+	var entropy_queue := _build_entropy_queue(wave)
+	var entropy_heap: Array = entropy_queue.heap
+	var entropy_versions: Array = entropy_queue.versions
 
 	while true:
 		if time_budget_seconds > 0.0 and _elapsed_seconds(start_ms) > time_budget_seconds:
@@ -801,7 +804,7 @@ func _run_wfc(
 				"backtracks": backtracks
 			}
 		var entropy_start_ms := Time.get_ticks_msec()
-		var next_index := _find_lowest_entropy(wave, rng)
+		var next_index := _pop_next_entropy(entropy_heap, entropy_versions, wave, rng)
 		entropy_seconds += _elapsed_seconds(entropy_start_ms)
 		entropy_picks += 1
 		if next_index == -1:
@@ -825,6 +828,9 @@ func _run_wfc(
 					backtracks = backtrack_result.backtracks
 					if backtrack_result.success:
 						wave = backtrack_result.wave
+						entropy_queue = _build_entropy_queue(wave)
+						entropy_heap = entropy_queue.heap
+						entropy_versions = entropy_queue.versions
 						selection_done = true
 						break
 				_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
@@ -912,6 +918,9 @@ func _run_wfc(
 						backtracks = backtrack_result.backtracks
 						if backtrack_result.success:
 							wave = backtrack_result.wave
+							entropy_queue = _build_entropy_queue(wave)
+							entropy_heap = entropy_queue.heap
+							entropy_versions = entropy_queue.versions
 							restart_propagation = true
 							break
 					_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
@@ -919,6 +928,8 @@ func _run_wfc(
 
 				if reduced:
 					stack.append(neighbor_index)
+					if neighbor_patterns.size() > 1:
+						_entropy_queue_push(entropy_heap, entropy_versions, neighbor_index, neighbor_patterns.size())
 			propagate_seconds += _elapsed_seconds(propagate_start_ms)
 			propagation_steps += 1
 			if restart_propagation:
@@ -993,23 +1004,101 @@ func _log_wfc_solve_timing(
 	])
 
 
-func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator) -> int:
-	var best_entropy: float = INF
-	var best_indices: Array = []
+func _build_entropy_queue(wave: Array) -> Dictionary:
+	var heap: Array = []
+	var versions: Array = []
+	versions.resize(wave.size())
 	for i in range(wave.size()):
+		versions[i] = 0
 		var entropy: int = wave[i].size()
+		if entropy > 1:
+			_entropy_queue_push(heap, versions, i, entropy)
+	return {"heap": heap, "versions": versions}
+
+
+func _pop_next_entropy(heap: Array, versions: Array, wave: Array, rng: RandomNumberGenerator) -> int:
+	var best_entropy := INF
+	var candidates: Array = []
+	var stash: Array = []
+	while not heap.is_empty():
+		var entry: Dictionary = _heap_pop(heap)
+		var index: int = entry["index"]
+		if entry["version"] != versions[index]:
+			continue
+		var entropy: int = wave[index].size()
 		if entropy <= 1:
 			continue
-		if entropy < best_entropy:
+		if best_entropy == INF:
 			best_entropy = entropy
-			best_indices.clear()
-			best_indices.append(i)
-		elif entropy == best_entropy:
-			best_indices.append(i)
+			candidates.append(entry)
+			continue
+		if entropy == best_entropy:
+			candidates.append(entry)
+			continue
+		stash.append(entry)
+		break
 
-	if best_indices.is_empty():
+	for entry in stash:
+		_heap_push_entry(heap, entry)
+
+	if candidates.is_empty():
 		return -1
-	return best_indices[rng.randi_range(0, best_indices.size() - 1)]
+	var pick_index := rng.randi_range(0, candidates.size() - 1)
+	var picked_entry: Dictionary = candidates[pick_index]
+	for i in range(candidates.size()):
+		if i == pick_index:
+			continue
+		_heap_push_entry(heap, candidates[i])
+	return picked_entry["index"]
+
+
+func _entropy_queue_push(heap: Array, versions: Array, index: int, entropy: int) -> void:
+	versions[index] += 1
+	_heap_push_entry(heap, {
+		"entropy": entropy,
+		"index": index,
+		"version": versions[index]
+	})
+
+
+func _heap_push_entry(heap: Array, entry: Dictionary) -> void:
+	heap.append(entry)
+	var index := heap.size() - 1
+	while index > 0:
+		var parent := (index - 1) / 2
+		if heap[parent]["entropy"] <= heap[index]["entropy"]:
+			break
+		var temp = heap[parent]
+		heap[parent] = heap[index]
+		heap[index] = temp
+		index = parent
+
+
+func _heap_pop(heap: Array) -> Dictionary:
+	var result: Dictionary = heap[0]
+	var last: Dictionary = heap.pop_back()
+	if not heap.is_empty():
+		heap[0] = last
+		_heap_sift_down(heap, 0)
+	return result
+
+
+func _heap_sift_down(heap: Array, start_index: int) -> void:
+	var index := start_index
+	while true:
+		var left := index * 2 + 1
+		var right := left + 1
+		var smallest := index
+		if left < heap.size() and heap[left]["entropy"] < heap[smallest]["entropy"]:
+			smallest = left
+		if right < heap.size() and heap[right]["entropy"] < heap[smallest]["entropy"]:
+			smallest = right
+		if smallest == index:
+			return
+		var temp = heap[index]
+		heap[index] = heap[smallest]
+		heap[smallest] = temp
+		index = smallest
 
 
 func _weighted_choice(options: Array, weights: Array, rng: RandomNumberGenerator) -> int:
