@@ -1076,7 +1076,7 @@ func _pick_common_tile(
 	pick_least: bool
 ) -> Dictionary:
 	var best_key := ""
-	var best_count := INF if pick_least else -1
+	var best_count: float = INF if pick_least else -1.0
 	for key in tile_counts.keys():
 		var count: int = int(tile_counts[key])
 		if pick_least:
