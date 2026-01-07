@@ -1,10 +1,8 @@
-[gd_scene load_steps=14 format=3 uid="uid://ct3bt3o3o1yqf"]
+[gd_scene load_steps=12 format=3 uid="uid://ct3bt3o3o1yqf"]
 
 [ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_iqu8w"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="2_5fr2l"]
 [ext_resource type="Texture2D" uid="uid://dej1p0au5qgos" path="res://sprites/blob_dirt_border_6.png" id="3_2sb77"]
-[ext_resource type="PackedScene" uid="uid://d2t5e1r1c1gby" path="res://scenes/level/boss_arena_level.tscn" id="4_2a5xr"]
-[ext_resource type="PackedScene" uid="uid://cwt0ajjcva1li" path="res://scenes/level/wfc_test_level.tscn" id="5_6i4h1"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="5_mwgft"]
 [ext_resource type="PackedScene" uid="uid://b6f3xj5k6h6vl" path="res://scenes/game_object/well/well.tscn" id="6_adxub"]
 [ext_resource type="PackedScene" uid="uid://c8j2qneyiwkhy" path="res://scenes/game_object/experience_vial/experience_vial.tscn" id="7_ff0s2"]
@@ -382,6 +380,7 @@ preserve_current_level = true
 
 [node name="DoorToWFC" parent="LayerProps/DoorGroup" instance=ExtResource("5_mwgft")]
 position = Vector2(72, 551)
+target_scene_path = "uid://cwt0ajjcva1li"
 exit_door_name = &"DoorToMain"
 preserve_current_level = true
 
