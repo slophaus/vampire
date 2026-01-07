@@ -4,17 +4,15 @@ class_name WFCLevelGenerator
 @export var target_tilemap_path: NodePath
 @export var sample_tilemap_path: NodePath
 @export var generate_on_ready := true
-@export var max_attempts := 5
+@export var max_attempts := 1
 @export var random_seed := 0
 @export var seeded_mode := true
 @export_range(1, 4, 1) var overlap_size := 2
 @export var periodic_input := false
-@export var show_step_by_step := false
-@export_range(0.0, 5.0, 0.05) var step_delay_seconds := 0.0
 @export var debug_logs := false
 @export var debug_path_line_path: NodePath
 
-@export_range(0.0, 30.0, 0.1) var time_budget_seconds := 3.0
+@export var time_budget_seconds := 30.0
 @export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var time_budget_timeout_tile := "random_tile"
 @export var enable_backtracking := true
 @export_range(0, 10000, 1) var max_backtracks := 500
@@ -96,29 +94,12 @@ func generate_level(use_new_seed: bool = false) -> void:
 			_debug_log("WFC: attempt %d/%d" % [attempt, max_attempts])
 		var attempt_start_ms := Time.get_ticks_msec()
 
-		var step_callback := Callable()
-		if show_step_by_step:
-			target_tilemap.clear()
-			step_callback = func(cell_index: int, chosen_pattern: int) -> void:
-				_apply_step_preview(
-					target_tilemap,
-					patterns_data.patterns,
-					patterns_data.tiles,
-					pattern_grid_size,
-					target_rect,
-					overlap_size,
-					cell_index,
-					chosen_pattern
-				)
-
 		result = await _run_wfc(
 			patterns_data.patterns,
 			patterns_data.weights,
 			patterns_data.adjacency,
 			pattern_grid_size,
 			rng,
-			step_callback,
-			step_delay_seconds,
 			time_budget_seconds,
 			enable_backtracking,
 			max_backtracks
@@ -760,8 +741,6 @@ func _run_wfc(
 	adjacency: Array,
 	grid_size: Vector2i,
 	rng: RandomNumberGenerator,
-	step_callback: Callable = Callable(),
-	step_delay: float = 0.0,
 	time_budget_seconds: float = 0.0,
 	allow_backtracking: bool = false,
 	max_backtracks: int = 0
@@ -816,8 +795,6 @@ func _run_wfc(
 						decision_stack,
 						weights,
 						rng,
-						step_callback,
-						step_delay,
 						stack,
 						backtracks,
 						max_backtracks
@@ -842,10 +819,6 @@ func _run_wfc(
 					})
 			wave[next_index] = [chosen]
 			stack.append(next_index)
-			if step_callback.is_valid():
-				step_callback.call(next_index, chosen)
-				if step_delay > 0.0:
-					await get_tree().create_timer(step_delay).timeout
 			selection_done = true
 
 		while not stack.is_empty():
@@ -903,8 +876,6 @@ func _run_wfc(
 							decision_stack,
 							weights,
 							rng,
-							step_callback,
-							step_delay,
 							stack,
 							backtracks,
 							max_backtracks
@@ -932,8 +903,6 @@ func _perform_backtrack(
 	decision_stack: Array,
 	weights: Array,
 	rng: RandomNumberGenerator,
-	step_callback: Callable,
-	step_delay: float,
 	stack: Array,
 	backtracks: int,
 	max_backtracks: int
@@ -959,10 +928,6 @@ func _perform_backtrack(
 		wave[decision["index"]] = [chosen]
 		stack.clear()
 		stack.append(decision["index"])
-		if step_callback.is_valid():
-			step_callback.call(decision["index"], chosen)
-			if step_delay > 0.0:
-				await get_tree().create_timer(step_delay).timeout
 		return {"success": true, "wave": wave, "backtracks": backtracks}
 	return {"success": false, "backtracks": backtracks}
 
@@ -1270,35 +1235,6 @@ func _pick_random_from_top_common(
 		"atlas_coords": data["atlas_coords"],
 		"alternative_tile": data["alternative_tile"],
 	}
-
-
-func _apply_step_preview(
-	target_tilemap: TileMap,
-	patterns: Array,
-	tile_data: Dictionary,
-	grid_size: Vector2i,
-	target_rect: Rect2i,
-	pattern_size: int,
-	cell_index: int,
-	chosen_pattern: int
-) -> void:
-	var cell_pos := Vector2i(cell_index % grid_size.x, cell_index / grid_size.x)
-	var pattern_tiles: Array = patterns[chosen_pattern]
-	for dy in range(pattern_size):
-		for dx in range(pattern_size):
-			var tile_key: String = pattern_tiles[dy * pattern_size + dx]
-			var tile_pos := target_rect.position + Vector2i(cell_pos.x + dx, cell_pos.y + dy)
-			var data: Dictionary = tile_data[tile_key]
-			if data["source_id"] == -1:
-				target_tilemap.erase_cell(0, tile_pos)
-				continue
-			target_tilemap.set_cell(
-				0,
-				tile_pos,
-				data["source_id"],
-				data["atlas_coords"],
-				data["alternative_tile"]
-			)
 
 
 func _tile_key(source_id: int, atlas_coords: Vector2i, alternative_tile: int) -> String:
