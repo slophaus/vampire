@@ -122,7 +122,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 			step_callback,
 			step_delay_seconds,
 			time_budget_seconds,
-			pick_time_budget_seconds
+			pick_time_budget_seconds,
+			contradiction_mode
 		)
 		var attempt_seconds := _elapsed_seconds(attempt_start_ms)
 		var attempt_status: String = str(result.get("status", "unknown"))
@@ -773,7 +774,8 @@ func _run_wfc(
 	step_callback: Callable = Callable(),
 	step_delay: float = 0.0,
 	time_budget_seconds: float = 0.0,
-	pick_time_budget_seconds: float = 0.0
+	pick_time_budget_seconds: float = 0.0,
+	contradiction_mode: String = "retry"
 ) -> Dictionary:
 	var init_start_ms := Time.get_ticks_msec()
 	var start_ms := Time.get_ticks_msec()
@@ -815,12 +817,24 @@ func _run_wfc(
 			_log_wfc_solve_timing("success", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 			return {"success": true, "status": "success", "grid": wave}
 
+		var chosen: int = -1
 		if wave[next_index].is_empty():
-			_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-			return {"success": false, "status": "contradiction", "grid": wave}
+			if contradiction_mode == "retry":
+				_log_wfc_solve_timing(
+					"contradiction",
+					init_seconds,
+					entropy_seconds,
+					propagate_seconds,
+					entropy_picks,
+					propagation_steps
+				)
+				return {"success": false, "status": "contradiction", "grid": wave}
+			chosen = _resolve_contradiction_pattern(contradiction_mode, all_patterns, weights, rng)
+			_debug_log("WFC: contradiction resolved at %s using %s." % [str(next_index), contradiction_mode])
+		else:
+			chosen = _weighted_choice(wave[next_index], weights, rng)
 
 		pick_start_ms = Time.get_ticks_msec()
-		var chosen: int = _weighted_choice(wave[next_index], weights, rng)
 		wave[next_index] = [chosen]
 		stack.append(next_index)
 		if step_callback.is_valid():
@@ -888,8 +902,30 @@ func _run_wfc(
 				if neighbor_patterns.is_empty():
 					propagate_seconds += _elapsed_seconds(propagate_start_ms)
 					propagation_steps += 1
-					_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-					return {"success": false, "status": "contradiction", "grid": wave}
+					if contradiction_mode == "retry":
+						_log_wfc_solve_timing(
+							"contradiction",
+							init_seconds,
+							entropy_seconds,
+							propagate_seconds,
+							entropy_picks,
+							propagation_steps
+						)
+						return {"success": false, "status": "contradiction", "grid": wave}
+					var fallback_pattern := _resolve_contradiction_pattern(
+						contradiction_mode,
+						all_patterns,
+						weights,
+						rng
+					)
+					wave[neighbor_index] = [fallback_pattern]
+					stack.append(neighbor_index)
+					if step_callback.is_valid():
+						step_callback.call(neighbor_index, fallback_pattern)
+						if step_delay > 0.0:
+							await get_tree().create_timer(step_delay).timeout
+					_debug_log("WFC: contradiction resolved at %s using %s." % [str(neighbor_index), contradiction_mode])
+					continue
 
 				if reduced:
 					stack.append(neighbor_index)
@@ -935,6 +971,66 @@ func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator) -> int:
 	if best_indices.is_empty():
 		return -1
 	return best_indices[rng.randi_range(0, best_indices.size() - 1)]
+
+
+func _resolve_contradiction_pattern(
+	contradiction_mode: String,
+	all_patterns: Array,
+	weights: Array,
+	rng: RandomNumberGenerator
+) -> int:
+	if all_patterns.is_empty():
+		return -1
+	match contradiction_mode:
+		"most_common":
+			return _pick_extreme_pattern_weight(all_patterns, weights, rng, true)
+		"least_common":
+			return _pick_extreme_pattern_weight(all_patterns, weights, rng, false)
+		"random_top_three":
+			return _pick_random_top_three_pattern(all_patterns, weights, rng)
+		_:
+			return _weighted_choice(all_patterns, weights, rng)
+
+
+func _pick_extreme_pattern_weight(
+	all_patterns: Array,
+	weights: Array,
+	rng: RandomNumberGenerator,
+	pick_max: bool
+) -> int:
+	var best_weight := -INF if pick_max else INF
+	var best_patterns: Array = []
+	for pattern_index in all_patterns:
+		var weight: float = weights[pattern_index]
+		if pick_max:
+			if weight > best_weight:
+				best_weight = weight
+				best_patterns.clear()
+				best_patterns.append(pattern_index)
+			elif weight == best_weight:
+				best_patterns.append(pattern_index)
+		else:
+			if weight < best_weight:
+				best_weight = weight
+				best_patterns.clear()
+				best_patterns.append(pattern_index)
+			elif weight == best_weight:
+				best_patterns.append(pattern_index)
+	if best_patterns.is_empty():
+		return all_patterns[0]
+	return best_patterns[rng.randi_range(0, best_patterns.size() - 1)]
+
+
+func _pick_random_top_three_pattern(
+	all_patterns: Array,
+	weights: Array,
+	rng: RandomNumberGenerator
+) -> int:
+	if all_patterns.size() <= 3:
+		return _weighted_choice(all_patterns, weights, rng)
+	var sorted_patterns := all_patterns.duplicate()
+	sorted_patterns.sort_custom(func(a, b): return weights[a] > weights[b])
+	return sorted_patterns[rng.randi_range(0, 2)]
 
 
 func _weighted_choice(options: Array, weights: Array, rng: RandomNumberGenerator) -> int:
