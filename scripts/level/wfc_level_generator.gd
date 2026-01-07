@@ -29,7 +29,7 @@ const DIRECTIONS := [
 func _debug_log(message: String) -> void:
 	if not debug_logs:
 		return
-	print_debug(message)
+	print(message)
 
 
 func _elapsed_seconds(start_ms: int) -> float:
@@ -758,6 +758,7 @@ func _run_wfc(
 	time_budget_seconds: float = 0.0,
 	pick_time_budget_seconds: float = 0.0
 ) -> Dictionary:
+	var init_start_ms := Time.get_ticks_msec()
 	var start_ms := Time.get_ticks_msec()
 	var pick_start_ms := start_ms
 	var total_cells: int = grid_size.x * grid_size.y
@@ -772,9 +773,15 @@ func _run_wfc(
 	var stack: Array = []
 	var allowed_mask := PackedByteArray()
 	allowed_mask.resize(patterns.size())
+	var init_seconds := _elapsed_seconds(init_start_ms)
+	var entropy_seconds := 0.0
+	var propagate_seconds := 0.0
+	var entropy_picks := 0
+	var propagation_steps := 0
 
 	while true:
 		if time_budget_seconds > 0.0 and _elapsed_seconds(start_ms) > time_budget_seconds:
+			_log_wfc_solve_timing("timeout", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 			return {
 				"success": false,
 				"timed_out": true,
@@ -782,11 +789,16 @@ func _run_wfc(
 				"timeout_reason": "time_budget",
 				"elapsed_seconds": _elapsed_seconds(start_ms)
 			}
+		var entropy_start_ms := Time.get_ticks_msec()
 		var next_index := _find_lowest_entropy(wave, rng)
+		entropy_seconds += _elapsed_seconds(entropy_start_ms)
+		entropy_picks += 1
 		if next_index == -1:
+			_log_wfc_solve_timing("success", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 			return {"success": true, "grid": wave}
 
 		if wave[next_index].is_empty():
+			_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 			return {"success": false}
 
 		pick_start_ms = Time.get_ticks_msec()
@@ -799,7 +811,11 @@ func _run_wfc(
 				await get_tree().create_timer(step_delay).timeout
 
 		while not stack.is_empty():
+			var propagate_start_ms := Time.get_ticks_msec()
 			if time_budget_seconds > 0.0 and _elapsed_seconds(start_ms) > time_budget_seconds:
+				propagate_seconds += _elapsed_seconds(propagate_start_ms)
+				propagation_steps += 1
+				_log_wfc_solve_timing("timeout", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 				return {
 					"success": false,
 					"timed_out": true,
@@ -808,6 +824,9 @@ func _run_wfc(
 					"elapsed_seconds": _elapsed_seconds(start_ms)
 				}
 			if pick_time_budget_seconds > 0.0 and _elapsed_seconds(pick_start_ms) > pick_time_budget_seconds:
+				propagate_seconds += _elapsed_seconds(propagate_start_ms)
+				propagation_steps += 1
+				_log_wfc_solve_timing("pick timeout", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 				return {
 					"success": false,
 					"timed_out": true,
@@ -847,12 +866,36 @@ func _run_wfc(
 					neighbor_patterns = wave[neighbor_index]
 
 				if neighbor_patterns.is_empty():
+					propagate_seconds += _elapsed_seconds(propagate_start_ms)
+					propagation_steps += 1
+					_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 					return {"success": false}
 
 				if reduced:
 					stack.append(neighbor_index)
+			propagate_seconds += _elapsed_seconds(propagate_start_ms)
+			propagation_steps += 1
 
+	_log_wfc_solve_timing("failed", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 	return {"success": false}
+
+
+func _log_wfc_solve_timing(
+	status: String,
+	init_seconds: float,
+	entropy_seconds: float,
+	propagate_seconds: float,
+	entropy_picks: int,
+	propagation_steps: int
+) -> void:
+	_debug_log("WFC: solve timing (%s) init %.3f s, entropy %.3f s (%d picks), propagate %.3f s (%d steps)." % [
+		status,
+		init_seconds,
+		entropy_seconds,
+		entropy_picks,
+		propagate_seconds,
+		propagation_steps
+	])
 
 
 func _find_lowest_entropy(wave: Array, rng: RandomNumberGenerator) -> int:
