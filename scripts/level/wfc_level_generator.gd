@@ -21,6 +21,7 @@ class_name WFCLevelGenerator
 @export_enum("retry", "dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var contradiction_mode := "retry"
 @export_range(0.0, 1.0, 0.01) var contradiction_avoid_until_solved_ratio := 0.8
 @export_range(0, 3, 1) var contradiction_avoid_radius := 1
+@export var defer_contradictions_during_propagation := true
 const DIRECTIONS := [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -928,17 +929,21 @@ func _run_wfc(
 							propagation_steps
 						)
 						return {"success": false, "status": "contradiction", "grid": wave}
-					var fallback_pattern := _resolve_contradiction_pattern(
-						contradiction_mode,
-						all_patterns,
-						weights,
-						rng
-					)
 					_mark_contradiction_hotspot(
 						neighbor_index,
 						grid_size,
 						contradiction_hotspots,
 						contradiction_avoid_radius
+					)
+					if defer_contradictions_during_propagation:
+						wave[neighbor_index] = all_patterns.duplicate()
+						_debug_log("WFC: contradiction deferred at %s using %s." % [str(neighbor_index), contradiction_mode])
+						continue
+					var fallback_pattern := _resolve_contradiction_pattern(
+						contradiction_mode,
+						all_patterns,
+						weights,
+						rng
 					)
 					wave[neighbor_index] = [fallback_pattern]
 					stack.append(neighbor_index)
