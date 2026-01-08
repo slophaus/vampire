@@ -1010,7 +1010,7 @@ func _build_constrained_wave(
 func _merge_output_tiles(output_tiles: Dictionary, new_tiles: Dictionary) -> void:
 	for tile_pos in new_tiles.keys():
 		if output_tiles.has(tile_pos):
-			if output_tiles[tile_pos]["key"] != new_tiles[tile_pos]["key"]:
+			if output_tiles[tile_pos]["key"] != new_tiles[tile_pos]["key"] and not ignore_chunk_borders:
 				_debug_log("WFC: tile conflict at %s during chunk merge." % tile_pos)
 			continue
 		output_tiles[tile_pos] = new_tiles[tile_pos]
