@@ -4,7 +4,7 @@ class_name WFCLevelGenerator
 @export var target_tilemap_path: NodePath
 @export var sample_tilemap_path: NodePath
 @export var generate_on_ready := true
-@export var max_attempts := 1
+@export var max_attempts_per_chunk := 1 # Attempts per chunk (or per full solve when not chunked).
 @export var random_seed := 6
 @export var seeded_mode := true
 @export_range(1, 4, 1) var overlap_size := 2
@@ -130,10 +130,10 @@ func generate_level(use_new_seed: bool = false) -> void:
 	else:
 		var attempt := 0
 		var result: Dictionary = {}
-		while attempt < max_attempts:
+		while attempt < max_attempts_per_chunk:
 			attempt += 1
 			if attempt == 1 or attempt % 50 == 0:
-				_debug_log("WFC: attempt %d/%d" % [attempt, max_attempts])
+				_debug_log("WFC: attempt %d/%d" % [attempt, max_attempts_per_chunk])
 			var attempt_start_ms := Time.get_ticks_msec()
 
 			result = await _run_wfc(
@@ -164,7 +164,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 				break
 
 		if not result.success and not timed_out:
-			_debug_log("WFC: failed after %d attempts." % max_attempts)
+			_debug_log("WFC: failed after %d attempts." % max_attempts_per_chunk)
 			return
 		if timed_out:
 			output_tiles = _build_output_tiles_partial(
@@ -898,7 +898,7 @@ func _run_chunked_wfc(
 		var attempt := 0
 		var result: Dictionary = {}
 		var chunk_timed_out := false
-		while attempt < max_attempts:
+		while attempt < max_attempts_per_chunk:
 			attempt += 1
 			var initial_wave: Array = []
 			if not ignore_chunk_borders:
@@ -931,7 +931,7 @@ func _run_chunked_wfc(
 		if not result.success and not chunk_timed_out:
 			_debug_log("WFC: %s solve failed after %d attempts at %s; marking for border-ignored retry." % [
 				chunk_label,
-				max_attempts,
+				max_attempts_per_chunk,
 				chunk_rect
 			])
 			failed.append(next_coord)
@@ -1015,7 +1015,7 @@ func _run_chunked_wfc(
 			var attempt := 0
 			var result: Dictionary = {}
 			var chunk_timed_out := false
-			while attempt < max_attempts:
+			while attempt < max_attempts_per_chunk:
 				attempt += 1
 				result = await _run_wfc(
 					patterns,
