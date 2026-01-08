@@ -1,23 +1,31 @@
 extends Node
 class_name WFCLevelGenerator
 
+@export_category("Tilemaps")
 @export var target_tilemap_path: NodePath
 @export var sample_tilemap_path: NodePath
+
+@export_category("Generation")
 @export var generate_on_ready := true
-@export var max_attempts_per_chunk := 1 # Attempts per chunk (or per full solve when not chunked).
-@export var random_seed := 6
-@export var seeded_mode := true
-@export_range(1, 4, 1) var overlap_size := 2
-@export var periodic_input := true
-@export var debug := true
 @export var use_chunked_wfc := true
 @export_range(4, 256, 1) var chunk_size := 10
 @export var ignore_chunk_borders := false
+@export_range(1, 4, 1) var overlap_size := 2
+@export var periodic_input := true
+@export var max_attempts_per_solve := 1 # Attempts per chunk (or per full solve when not chunked).
 
+@export_category("Randomness")
+@export var use_fixed_seed := true
+@export var fixed_seed := 6
+
+@export_category("Time Budget")
 @export var time_budget_seconds := 30.0
 @export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var time_budget_timeout_tile := "dirt"
 @export var enable_backtracking := true
 @export_range(0, 10000, 1) var max_backtracks := 50
+
+@export_category("Debug")
+@export var debug := true
 const DIRECTIONS := [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -35,6 +43,11 @@ func _debug_log(message: String) -> void:
 	if not debug:
 		return
 	print(message)
+
+
+func _report_generation_failure(message: String) -> void:
+	_debug_log(message)
+	print("generation fail")
 
 
 func _elapsed_seconds(start_ms: int) -> float:
@@ -61,26 +74,26 @@ func generate_level(use_new_seed: bool = false) -> void:
 	var target_tilemap := get_node_or_null(target_tilemap_path) as TileMap
 	var sample_tilemap := get_node_or_null(sample_tilemap_path) as TileMap
 	if target_tilemap == null or sample_tilemap == null:
-		_debug_log("WFC: missing tilemap references.")
+		_report_generation_failure("WFC: missing tilemap references.")
 		return
 	sample_tilemap.visible = false
 	target_tilemap.visible = true
 
 	var target_rect := target_tilemap.get_used_rect()
 	if target_rect.size.x <= 0 or target_rect.size.y <= 0:
-		_debug_log("WFC: target tilemap has no used tiles to define bounds.")
+		_report_generation_failure("WFC: target tilemap has no used tiles to define bounds.")
 		return
 
 	var sample_rect := sample_tilemap.get_used_rect()
 	if sample_rect.size.x < overlap_size or sample_rect.size.y < overlap_size:
-		_debug_log("WFC: sample tilemap too small for overlap size.")
+		_report_generation_failure("WFC: sample tilemap too small for overlap size.")
 		return
 
 	var rng := RandomNumberGenerator.new()
-	if use_new_seed or not seeded_mode:
+	if use_new_seed or not use_fixed_seed:
 		rng.randomize()
-	elif random_seed != 0:
-		rng.seed = random_seed
+	elif fixed_seed != 0:
+		rng.seed = fixed_seed
 	else:
 		rng.randomize()
 
@@ -89,7 +102,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 	_debug_log("WFC: phase patterns %.3f s" % patterns_seconds)
 	phase_start_ms = Time.get_ticks_msec()
 	if patterns_data.patterns.is_empty():
-		_debug_log("WFC: no patterns extracted from sample.")
+		_report_generation_failure("WFC: no patterns extracted from sample.")
 		return
 
 	var pattern_grid_size := Vector2i(
@@ -97,7 +110,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 		target_rect.size.y - overlap_size + 1
 	)
 	if pattern_grid_size.x <= 0 or pattern_grid_size.y <= 0:
-		_debug_log("WFC: target bounds smaller than overlap size.")
+		_report_generation_failure("WFC: target bounds smaller than overlap size.")
 		return
 
 	var output_tiles: Dictionary = {}
@@ -118,7 +131,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 			patterns_data.tile_counts
 		)
 		if not chunk_result.success:
-			_debug_log("WFC: chunked solve failed.")
+			_report_generation_failure("WFC: chunked solve failed.")
 			return
 		output_tiles = chunk_result.output_tiles
 		timed_out = chunk_result.timed_out
@@ -130,10 +143,10 @@ func generate_level(use_new_seed: bool = false) -> void:
 	else:
 		var attempt := 0
 		var result: Dictionary = {}
-		while attempt < max_attempts_per_chunk:
+		while attempt < max_attempts_per_solve:
 			attempt += 1
 			if attempt == 1 or attempt % 50 == 0:
-				_debug_log("WFC: attempt %d/%d" % [attempt, max_attempts_per_chunk])
+				_debug_log("WFC: attempt %d/%d" % [attempt, max_attempts_per_solve])
 			var attempt_start_ms := Time.get_ticks_msec()
 
 			result = await _run_wfc(
@@ -164,7 +177,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 				break
 
 		if not result.success and not timed_out:
-			_debug_log("WFC: failed after %d attempts." % max_attempts_per_chunk)
+			_report_generation_failure("WFC: failed after %d attempts." % max_attempts_per_solve)
 			return
 		if timed_out:
 			output_tiles = _build_output_tiles_partial(
@@ -897,7 +910,7 @@ func _run_chunked_wfc(
 		var result: Dictionary = {}
 		var chunk_timed_out := false
 		var constraints_invalid := false
-		while attempt < max_attempts_per_chunk:
+		while attempt < max_attempts_per_solve:
 			attempt += 1
 			var initial_wave: Array = []
 			if not ignore_chunk_borders:
@@ -936,7 +949,7 @@ func _run_chunked_wfc(
 		if not result.success and not chunk_timed_out:
 			_debug_log("WFC: %s solve failed after %d attempts at %s; marking for border-ignored retry." % [
 				chunk_label,
-				max_attempts_per_chunk,
+				max_attempts_per_solve,
 				chunk_rect
 			])
 			failed.append(next_coord)
@@ -1020,7 +1033,7 @@ func _run_chunked_wfc(
 			var attempt := 0
 			var result: Dictionary = {}
 			var chunk_timed_out := false
-			while attempt < max_attempts_per_chunk:
+			while attempt < max_attempts_per_solve:
 				attempt += 1
 				result = await _run_wfc(
 					patterns,
