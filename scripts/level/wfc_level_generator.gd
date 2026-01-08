@@ -47,6 +47,14 @@ func _ready() -> void:
 func generate_level(use_new_seed: bool = false) -> void:
 	var total_start_ms := Time.get_ticks_msec()
 	var phase_start_ms := total_start_ms
+	var patterns_seconds := 0.0
+	var solve_seconds := 0.0
+	var output_seconds := 0.0
+	var finalize_seconds := 0.0
+	var total_seconds := 0.0
+	var solve_backtracks := 0
+	var chunk_total := 0
+	var chunk_solved := 0
 	var target_tilemap := get_node_or_null(target_tilemap_path) as TileMap
 	var sample_tilemap := get_node_or_null(sample_tilemap_path) as TileMap
 	if target_tilemap == null or sample_tilemap == null:
@@ -74,7 +82,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 		rng.randomize()
 
 	var patterns_data: Dictionary = _build_patterns(sample_tilemap, sample_rect, overlap_size, periodic_input)
-	_debug_log("WFC: phase patterns %.3f s" % _elapsed_seconds(phase_start_ms))
+	patterns_seconds = _elapsed_seconds(phase_start_ms)
+	_debug_log("WFC: phase patterns %.3f s" % patterns_seconds)
 	phase_start_ms = Time.get_ticks_msec()
 	if patterns_data.patterns.is_empty():
 		_debug_log("WFC: no patterns extracted from sample.")
@@ -110,6 +119,9 @@ func generate_level(use_new_seed: bool = false) -> void:
 			return
 		output_tiles = chunk_result.output_tiles
 		timed_out = chunk_result.timed_out
+		solve_backtracks = chunk_result.get("backtracks", 0)
+		chunk_total = chunk_result.get("chunk_total", 0)
+		chunk_solved = chunk_result.get("chunk_solved", 0)
 		if chunk_result.get("partial", false):
 			_debug_log("WFC: chunked solve incomplete; using solved chunks only.")
 	else:
@@ -180,12 +192,15 @@ func generate_level(use_new_seed: bool = false) -> void:
 				target_rect,
 				overlap_size
 			)
-	_debug_log("WFC: phase solve %.3f s" % _elapsed_seconds(phase_start_ms))
+		solve_backtracks = result.get("backtracks", 0)
+	solve_seconds = _elapsed_seconds(phase_start_ms)
+	_debug_log("WFC: phase solve %.3f s" % solve_seconds)
 	phase_start_ms = Time.get_ticks_msec()
 
 	if timed_out:
 		_debug_log("WFC: time budget exceeded; filled remaining tiles with fallback mode.")
-	_debug_log("WFC: phase output tiles %.3f s" % _elapsed_seconds(phase_start_ms))
+	output_seconds = _elapsed_seconds(phase_start_ms)
+	_debug_log("WFC: phase output tiles %.3f s" % output_seconds)
 	phase_start_ms = Time.get_ticks_msec()
 
 	target_tilemap.clear()
@@ -209,8 +224,22 @@ func generate_level(use_new_seed: bool = false) -> void:
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
 	_move_entities_to_nearest_floor(target_tilemap)
 
-	_debug_log("WFC: phase finalize %.3f s" % _elapsed_seconds(phase_start_ms))
-	_debug_log("WFC: total time %.3f s" % _elapsed_seconds(total_start_ms))
+	finalize_seconds = _elapsed_seconds(phase_start_ms)
+	total_seconds = _elapsed_seconds(total_start_ms)
+	_debug_log("WFC: phase finalize %.3f s" % finalize_seconds)
+	_debug_log("WFC: total time %.3f s" % total_seconds)
+	var summary_parts: Array[String] = [
+		"patterns %.3f s" % patterns_seconds,
+		"solve %.3f s" % solve_seconds,
+		"output %.3f s" % output_seconds,
+		"finalize %.3f s" % finalize_seconds,
+		"total %.3f s" % total_seconds
+	]
+	if use_chunked_wfc and chunk_total > 0:
+		summary_parts.append("chunks %d/%d" % [chunk_solved, chunk_total])
+	if enable_backtracking:
+		summary_parts.append("backtracks %d" % solve_backtracks)
+	_debug_log("WFC: summary %s." % ", ".join(summary_parts))
 	_debug_log("WFC: generation complete.")
 
 
@@ -286,10 +315,11 @@ func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) 
 	var door_distances := _filter_distances(distances, door_cells)
 	var farthest_cell := _find_distance_percentile_cell(door_distances, start_cell, 0.9)
 	var path_cells := _build_path_from_distances(distances, start_cell, farthest_cell)
-	_debug_log("WFC: door placement choosing cells %s (start) and %s (~90%% farthest)." % [
+	_debug_log("WFC: door placement choosing cells %s (start) and %s." % [
 		start_cell,
 		farthest_cell
 	])
+	_debug_log("WFC: door placement path length %d." % max(path_cells.size() - 1, 0))
 	_debug_log("WFC: door placement doors %s -> %s, %s -> %s." % [
 		door_nodes[0].name,
 		_cell_to_world(target_tilemap, start_cell),
@@ -826,6 +856,8 @@ func _run_chunked_wfc(
 	var output_tiles: Dictionary = {}
 	var timed_out := false
 	var failed: Array[Vector2i] = []
+	var solved_count := 0
+	var backtracks_total := 0
 
 	while not remaining.is_empty():
 		var next_coord := _pick_next_chunk_coord(remaining, solved, rng)
@@ -871,6 +903,7 @@ func _run_chunked_wfc(
 				initial_wave
 			)
 			chunk_timed_out = result.get("timed_out", false)
+			backtracks_total += result.get("backtracks", 0)
 			if chunk_timed_out or result.success:
 				break
 		if not result.success and not chunk_timed_out:
@@ -915,6 +948,7 @@ func _run_chunked_wfc(
 				overlap_size
 			)
 			_merge_output_tiles(output_tiles, chunk_tiles, chunk_label)
+		solved_count += 1
 
 		solved[next_coord] = true
 		remaining.erase(next_coord)
@@ -932,7 +966,15 @@ func _run_chunked_wfc(
 			)
 			if grid_size.x <= 0 or grid_size.y <= 0:
 				_debug_log("WFC: chunk too small for overlap size at %s." % chunk_rect)
-				return {"success": true, "output_tiles": output_tiles, "timed_out": timed_out, "partial": true}
+				return {
+					"success": true,
+					"output_tiles": output_tiles,
+					"timed_out": timed_out,
+					"partial": true,
+					"chunk_total": total_chunks,
+					"chunk_solved": solved_count,
+					"backtracks": backtracks_total
+				}
 
 			var attempt := 0
 			var result: Dictionary = {}
@@ -950,12 +992,21 @@ func _run_chunked_wfc(
 					max_backtracks
 				)
 				chunk_timed_out = result.get("timed_out", false)
+				backtracks_total += result.get("backtracks", 0)
 				if chunk_timed_out or result.success:
 					break
 
 			if not result.success and not chunk_timed_out:
 				_debug_log("WFC: %s solve still failed with ignored borders at %s." % [chunk_label, chunk_rect])
-				return {"success": true, "output_tiles": output_tiles, "timed_out": timed_out, "partial": true}
+				return {
+					"success": true,
+					"output_tiles": output_tiles,
+					"timed_out": timed_out,
+					"partial": true,
+					"chunk_total": total_chunks,
+					"chunk_solved": solved_count,
+					"backtracks": backtracks_total
+				}
 
 			if chunk_timed_out:
 				timed_out = true
@@ -988,8 +1039,16 @@ func _run_chunked_wfc(
 					overlap_size
 				)
 				_merge_output_tiles(output_tiles, chunk_tiles, chunk_label)
+			solved_count += 1
 
-	return {"success": true, "output_tiles": output_tiles, "timed_out": timed_out}
+	return {
+		"success": true,
+		"output_tiles": output_tiles,
+		"timed_out": timed_out,
+		"chunk_total": total_chunks,
+		"chunk_solved": solved_count,
+		"backtracks": backtracks_total
+	}
 
 
 func _build_chunk_rects(target_rect: Rect2i, size: int, pattern_size: int) -> Dictionary:
