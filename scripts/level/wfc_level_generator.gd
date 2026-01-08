@@ -809,6 +809,14 @@ func _run_chunked_wfc(
 	if chunk_rects.is_empty():
 		_debug_log("WFC: chunked solve found no chunks.")
 		return {"success": false}
+	var chunk_coords: Array[Vector2i] = chunk_rects.keys()
+	chunk_coords.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return a.y < b.y if a.y != b.y else a.x < b.x
+	)
+	var chunk_index_by_coord: Dictionary = {}
+	for i in range(chunk_coords.size()):
+		chunk_index_by_coord[chunk_coords[i]] = i + 1
+	var total_chunks := chunk_coords.size()
 	var remaining: Array[Vector2i] = []
 	for key in chunk_rects.keys():
 		remaining.append(key)
@@ -820,6 +828,9 @@ func _run_chunked_wfc(
 	while not remaining.is_empty():
 		var next_coord := _pick_next_chunk_coord(remaining, solved, rng)
 		var chunk_rect: Rect2i = chunk_rects[next_coord]
+		var chunk_index: int = chunk_index_by_coord[next_coord]
+		var chunk_label := "chunk %d/%d" % [chunk_index, total_chunks]
+		_debug_log("WFC: %s at %s." % [chunk_label, chunk_rect])
 		var grid_size := Vector2i(
 			chunk_rect.size.x - overlap_size + 1,
 			chunk_rect.size.y - overlap_size + 1
@@ -861,7 +872,8 @@ func _run_chunked_wfc(
 			if chunk_timed_out or result.success:
 				break
 		if not result.success and not chunk_timed_out:
-			_debug_log("WFC: chunk solve failed after %d attempts at %s; marking for border-ignored retry." % [
+			_debug_log("WFC: %s solve failed after %d attempts at %s; marking for border-ignored retry." % [
+				chunk_label,
 				max_attempts,
 				chunk_rect
 			])
@@ -880,7 +892,7 @@ func _run_chunked_wfc(
 				chunk_rect,
 				overlap_size
 			)
-			_merge_output_tiles(output_tiles, partial_tiles)
+			_merge_output_tiles(output_tiles, partial_tiles, chunk_label)
 			_fill_missing_tiles_with_timeout_mode(
 				get_node_or_null(target_tilemap_path) as TileMap,
 				chunk_rect,
@@ -900,7 +912,7 @@ func _run_chunked_wfc(
 				chunk_rect,
 				overlap_size
 			)
-			_merge_output_tiles(output_tiles, chunk_tiles)
+			_merge_output_tiles(output_tiles, chunk_tiles, chunk_label)
 
 		solved[next_coord] = true
 		remaining.erase(next_coord)
@@ -909,6 +921,9 @@ func _run_chunked_wfc(
 		_debug_log("WFC: retrying %d failed chunks with ignored borders." % failed.size())
 		for chunk_coord in failed:
 			var chunk_rect: Rect2i = chunk_rects[chunk_coord]
+			var chunk_index: int = chunk_index_by_coord[chunk_coord]
+			var chunk_label := "chunk %d/%d" % [chunk_index, total_chunks]
+			_debug_log("WFC: %s retrying with ignored borders at %s." % [chunk_label, chunk_rect])
 			var grid_size := Vector2i(
 				chunk_rect.size.x - overlap_size + 1,
 				chunk_rect.size.y - overlap_size + 1
@@ -937,7 +952,7 @@ func _run_chunked_wfc(
 					break
 
 			if not result.success and not chunk_timed_out:
-				_debug_log("WFC: chunk solve still failed with ignored borders at %s." % chunk_rect)
+				_debug_log("WFC: %s solve still failed with ignored borders at %s." % [chunk_label, chunk_rect])
 				return {"success": true, "output_tiles": output_tiles, "timed_out": timed_out, "partial": true}
 
 			if chunk_timed_out:
@@ -950,7 +965,7 @@ func _run_chunked_wfc(
 					chunk_rect,
 					overlap_size
 				)
-				_merge_output_tiles(output_tiles, partial_tiles)
+				_merge_output_tiles(output_tiles, partial_tiles, chunk_label)
 				_fill_missing_tiles_with_timeout_mode(
 					get_node_or_null(target_tilemap_path) as TileMap,
 					chunk_rect,
@@ -970,7 +985,7 @@ func _run_chunked_wfc(
 					chunk_rect,
 					overlap_size
 				)
-				_merge_output_tiles(output_tiles, chunk_tiles)
+				_merge_output_tiles(output_tiles, chunk_tiles, chunk_label)
 
 	return {"success": true, "output_tiles": output_tiles, "timed_out": timed_out}
 
@@ -1081,13 +1096,19 @@ func _build_constrained_wave(
 	return wave
 
 
-func _merge_output_tiles(output_tiles: Dictionary, new_tiles: Dictionary) -> void:
+func _merge_output_tiles(output_tiles: Dictionary, new_tiles: Dictionary, chunk_label: String = "") -> void:
+	var conflict_count := 0
 	for tile_pos in new_tiles.keys():
 		if output_tiles.has(tile_pos):
 			if output_tiles[tile_pos]["key"] != new_tiles[tile_pos]["key"] and not ignore_chunk_borders:
-				_debug_log("WFC: tile conflict at %s during chunk merge." % tile_pos)
+				conflict_count += 1
 			continue
 		output_tiles[tile_pos] = new_tiles[tile_pos]
+	if conflict_count > 0 and not ignore_chunk_borders:
+		var prefix := "WFC: tile conflicts during chunk merge"
+		if not chunk_label.is_empty():
+			prefix = "WFC: %s tile conflicts during chunk merge" % chunk_label
+		_debug_log("%s (%d)." % [prefix, conflict_count])
 
 
 func _run_wfc(
@@ -1362,6 +1383,7 @@ func _build_output_tiles(
 	pattern_size: int
 ) -> Dictionary:
 	var output_tiles: Dictionary = {}
+	var conflict_count := 0
 	for y in range(grid_size.y):
 		for x in range(grid_size.x):
 			var pattern_index: int = grid[y * grid_size.x + x][0]
@@ -1372,7 +1394,7 @@ func _build_output_tiles(
 					var tile_pos := target_rect.position + Vector2i(x + dx, y + dy)
 					if output_tiles.has(tile_pos):
 						if output_tiles[tile_pos]["key"] != tile_key:
-							_debug_log("WFC: tile conflict at %s." % tile_pos)
+							conflict_count += 1
 						continue
 					var data: Dictionary = tile_data[tile_key]
 					output_tiles[tile_pos] = {
@@ -1382,6 +1404,11 @@ func _build_output_tiles(
 						"alternative_tile": data["alternative_tile"],
 					}
 
+	if conflict_count > 0:
+		_debug_log("WFC: tile conflicts while building output tiles for %s (%d)." % [
+			target_rect,
+			conflict_count
+		])
 	return output_tiles
 
 
