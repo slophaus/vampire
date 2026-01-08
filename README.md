@@ -12,7 +12,7 @@
 | Boomerang Level (`boomerang_level`) | Level | Added after unlocking Boomerang | +2 damage per level, +25 range per level, +3 penetration per level, +0.2 size scale per level. |
 | Dig (`dig`) | Unlock | Always in pool | Grants the Dig ability controller (burrow through dirt). |
 | Dig Level (`dig_level`) | Level | Added after unlocking Dig | Shortens dig cooldowns and allows digging walls at level 2. |
-| Fireball (`fireball`) | Unlock | Always in pool | Grants the Fireball ability controller (launches a fireball at a random enemy). |
+| Fireball Level 1 (`fireball`) | Unlock | Always in pool | Grants the Fireball ability controller (launches a fireball at a random enemy). |
 | Fireball Level (`fireball_level`) | Level | Added after unlocking Fireball | +3 damage per level, +3 splash radius per level, and +0.15 scale per level. |
 | Sword Level (`sword_level`) | Level | Always in pool | Adds +1 sword per attack per level. |
 | Whip (`whip`) | Unlock | Always in pool | Grants the Whip ability controller (aimed whip strike). |
@@ -23,7 +23,7 @@
 | Upgrade | Availability | Effect |
 | --- | --- | --- |
 | Axe Damage (`axe_damage`) | Added after unlocking Axe | +50% axe damage per level. |
-| Sword Damage (`sword_damage`) | Always in pool | +35% sword damage per level. |
+| Sword Damage (`sword_damage`) | Always in pool | +5 sword damage per level. |
 | Sword Rate (`sword_rate`) | Always in pool | +20% sword attack rate per level. |
 | Move Speed (`player_speed`) | Always in pool | +20% player movement speed per level. |
 | Health (`player_health`) | Always in pool | +8 max health per level and heals 8 on pickup. |
@@ -63,9 +63,9 @@ runaway counts. Arena difficulty starts at 1 and increases every 15 seconds.
 | --- | --- | --- | --- |
 | Mouse | Always in pool | 10 HP, 30 max speed, 5.0 acceleration, 1 contact damage | Small melee chaser. |
 | Dragon | Added at arena difficulty 8 | 10 HP, 45 max speed, 2.0 acceleration, 1 contact damage | Ranged caster that fires fireballs. |
-| Rat | Added at arena difficulty 12 | 37.5 HP, 105 max speed, 1.5 acceleration, 2 contact damage | Fast bruiser with higher contact damage. |
-| Spider | Added via level keyframes | 20 HP, 55 max speed, 2.0 acceleration, 1 contact damage | Mid-speed melee chaser. |
-| Ghost | Added via level keyframes | 15 HP, 60 max speed, 3.0 acceleration, 1 contact damage | Only one ghost can exist at a time. |
+| Rat | Added at arena difficulty 12 | 38 HP, 105 max speed, 1.5 acceleration, 2 contact damage | Fast bruiser with higher contact damage. |
+| Spider | Added via level keyframes | 5 HP, 200 max speed, 100 acceleration, 1 contact damage | Fast jumper that can apply poison on contact. |
+| Ghost | Added via level keyframes | 25 HP, 28 max speed, 3.0 acceleration, 0 contact damage | Only one ghost can exist at a time. |
 
 ### Worm enemy
 
