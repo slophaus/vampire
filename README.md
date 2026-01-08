@@ -146,6 +146,20 @@ The generator is attached to the WFC test level scene and expects:
      corner and a far (90th percentile) walkable cell, and
    * rebuilds the dirt border and moves players/enemies/props to the nearest floor cell.
 
+### Chunked WFC
+
+When `use_chunked_wfc` is enabled, the generator splits the target bounds into overlapping
+chunks (size `chunk_size`, clamped to at least `overlap_size`) and solves each chunk in a
+neighbor-biased order. By default it constrains each chunk to already-solved tiles so borders
+line up; you can bypass those constraints by setting `ignore_chunk_borders` to `true`.
+
+Chunked solving uses `max_attempts_per_solve` per chunk. If a chunk cannot be solved with the
+current borders or its constraints are invalid, it is queued for a second pass where borders
+are ignored. The chunked pass can still time out; in that case the generator writes whatever
+tiles are solved and fills the rest of the chunk using the `time_budget_timeout_tile` mode.
+Tiles from solved chunks are merged into the final output, and border conflicts are logged
+when border constraints are active.
+
 ### Runtime controls
 
 * `generate_on_ready` triggers generation when the scene loads.
