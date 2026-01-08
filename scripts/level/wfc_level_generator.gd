@@ -634,21 +634,21 @@ func _update_debug_door_path(
 	if path_cells.is_empty():
 		debug_line.visible = false
 		return
-	var props_layer := debug_line.get_parent() as Node2D
+	var blood_layer := debug_line.get_parent() as Node2D
 	for cell in path_cells:
 		var world_position := _cell_to_world(target_tilemap, cell)
 		var local_position := world_position
-		if props_layer != null:
-			local_position = props_layer.to_local(world_position)
+		if blood_layer != null:
+			local_position = blood_layer.to_local(world_position)
 		debug_line.add_point(local_position)
 	debug_line.visible = true
 
 
 func _get_or_create_debug_door_path_line() -> Line2D:
-	var props_layer := get_parent().get_node_or_null("LayerProps")
-	if props_layer == null:
+	var blood_layer := get_parent().get_node_or_null("LayerBlood")
+	if blood_layer == null:
 		return null
-	var debug_line := props_layer.get_node_or_null(DEBUG_DOOR_PATH_NAME) as Line2D
+	var debug_line := blood_layer.get_node_or_null(DEBUG_DOOR_PATH_NAME) as Line2D
 	if debug_line != null:
 		return debug_line
 	debug_line = Line2D.new()
@@ -657,7 +657,7 @@ func _get_or_create_debug_door_path_line() -> Line2D:
 	debug_line.z_index = DEBUG_DOOR_PATH_Z_INDEX
 	debug_line.width = DEBUG_DOOR_PATH_WIDTH
 	debug_line.default_color = DEBUG_DOOR_PATH_COLOR
-	props_layer.add_child(debug_line)
+	blood_layer.add_child(debug_line)
 	return debug_line
 
 
