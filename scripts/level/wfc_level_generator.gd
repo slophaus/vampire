@@ -1509,10 +1509,10 @@ func _run_wfc(
 							max_backtracks
 						)
 						backtracks = backtrack_result.backtracks
-					if backtrack_result.success:
-						wave = backtrack_result.wave
-						restart_propagation = true
-						break
+						if backtrack_result.success:
+							wave = backtrack_result.wave
+							restart_propagation = true
+							break
 					_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
 					return {
 						"success": false,
