@@ -12,6 +12,9 @@ const GHOST_COOLDOWN_MIN_ALPHA := 0.15
 const GHOST_COOLDOWN_MAX_ALPHA := 0.7
 const GHOST_OFFSCREEN_RESPAWN_DELAY := 2.5
 const GHOST_RESPAWN_FADE_SPEED := 1.5
+const GHOST_WAKE_RADIUS := 200.0
+const GHOST_RESPAWN_MIN_DISTANCE := 120.0
+const GHOST_RESPAWN_MAX_DISTANCE := 320.0
 
 var ghost_wander_time_left := 0.0
 var ghost_wander_direction := Vector2.ZERO
@@ -21,6 +24,7 @@ var ghost_respawn_fade := 1.0
 var ghost_possession_target: Node2D
 var ghost_possession_time_left := 0.0
 var ghost_possession_cooldown := 0.0
+var ghost_dormant := true
 
 func _ready():
 	super._ready()
@@ -31,6 +35,9 @@ func _ready():
 	add_to_group("ghost")
 	collision_layer = 0
 	collision_mask = 0
+	ghost_dormant = true
+	ghost_respawn_fade = 0.0
+	visuals.modulate.a = 0.0
 
 
 func _physics_process(delta):
@@ -47,6 +54,9 @@ func is_invulnerable() -> bool:
 
 
 func update_ghost_state(delta: float) -> void:
+	if ghost_dormant:
+		update_ghost_dormant_state()
+		return
 	update_ghost_fade(delta)
 	ghost_possession_cooldown = max(ghost_possession_cooldown - delta, 0.0)
 	if ghost_possession_target == null and ghost_possession_time_left > 0.0:
@@ -103,13 +113,10 @@ func update_ghost_offscreen(delta: float) -> void:
 
 
 func respawn_ghost_on_screen(view_rect: Rect2) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
-	var spawn_x = rng.randf_range(view_rect.position.x, view_rect.position.x + view_rect.size.x)
-	var spawn_y = rng.randf_range(view_rect.position.y, view_rect.position.y + view_rect.size.y)
-	global_position = Vector2(spawn_x, spawn_y)
 	ghost_fade_time = 0.0
 	ghost_respawn_fade = 0.0
+	visuals.modulate.a = 0.0
+	global_position = pick_ghost_respawn_position(view_rect)
 
 
 func get_camera_view_rect() -> Rect2:
@@ -120,6 +127,39 @@ func get_camera_view_rect() -> Rect2:
 	var half_size := viewport_size * camera.zoom * 0.5
 	var min_position := camera.global_position - half_size
 	return Rect2(min_position, half_size * 2.0)
+
+
+func update_ghost_dormant_state() -> void:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return
+	if global_position.distance_to(player.global_position) > GHOST_WAKE_RADIUS:
+		return
+	ghost_dormant = false
+	ghost_fade_time = 0.0
+	ghost_respawn_fade = 0.0
+	visuals.modulate.a = 0.0
+
+
+func pick_ghost_respawn_position(view_rect: Rect2) -> Vector2:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	if player == null:
+		return Vector2(
+			rng.randf_range(view_rect.position.x, view_rect.position.x + view_rect.size.x),
+			rng.randf_range(view_rect.position.y, view_rect.position.y + view_rect.size.y)
+		)
+	var player_position = player.global_position
+	for attempt in range(12):
+		var angle = rng.randf_range(0.0, TAU)
+		var distance = rng.randf_range(GHOST_RESPAWN_MIN_DISTANCE, GHOST_RESPAWN_MAX_DISTANCE)
+		var candidate = player_position + Vector2(cos(angle), sin(angle)) * distance
+		if view_rect.has_point(candidate):
+			return candidate
+	var fallback_angle = rng.randf_range(0.0, TAU)
+	var fallback_distance = rng.randf_range(GHOST_RESPAWN_MIN_DISTANCE, GHOST_RESPAWN_MAX_DISTANCE)
+	return player_position + Vector2(cos(fallback_angle), sin(fallback_angle)) * fallback_distance
 
 
 func update_ghost_wander(delta: float) -> void:
