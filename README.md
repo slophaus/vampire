@@ -132,7 +132,7 @@ The generator is attached to the WFC test level scene and expects:
 * `target_tilemap_path`: tilemap that will be cleared and populated with generated tiles.
 * `sample_tilemap_path`: tilemap that provides the source patterns; it is hidden at runtime.
 * `debug_path_line_path`: optional `Line2D` used to visualize door path selection when
-  `debug_logs` is enabled.
+  `debug` is enabled.
 
 ### Generation flow
 
