@@ -22,6 +22,7 @@ const DIRECTIONS := [
 	Vector2i(0, 1),
 	Vector2i(-1, 0),
 ]
+var _largest_walkable_cells: Dictionary = {}
 
 
 func _debug_log(message: String) -> void:
@@ -174,6 +175,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 		)
 
 	_set_border_tiles_to_wall(target_tilemap, target_rect)
+	_refresh_largest_walkable_cells(target_tilemap)
 	_position_level_doors(target_tilemap, rng)
 	if target_tilemap.has_meta(TileEater.DIRT_BORDER_META_KEY):
 		target_tilemap.remove_meta(TileEater.DIRT_BORDER_META_KEY)
@@ -193,7 +195,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _move_entities_to_nearest_floor(target_tilemap: TileMap) -> void:
 	if target_tilemap == null:
 		return
-	var floor_positions := _get_floor_positions(target_tilemap)
+	var floor_positions := _get_floor_positions_from_cells(target_tilemap, _largest_walkable_cells)
 	if floor_positions.is_empty():
 		return
 	_move_nodes_in_group_to_nearest_floor("player", floor_positions)
@@ -240,7 +242,7 @@ func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) 
 	if door_nodes.size() < 2:
 		_debug_log("WFC: door placement skipped (found %d doors)." % door_nodes.size())
 		return
-	var walkable_cells := _get_walkable_cells(target_tilemap)
+	var walkable_cells := _largest_walkable_cells
 	if walkable_cells.is_empty():
 		_debug_log("WFC: door placement skipped (no walkable cells).")
 		return
@@ -290,6 +292,38 @@ func _get_walkable_cells(target_tilemap: TileMap) -> Dictionary:
 		if tile_type != null and TileEater.WALKABLE_TILE_TYPES.has(tile_type):
 			walkable_cells[cell] = true
 	return walkable_cells
+
+
+func _refresh_largest_walkable_cells(target_tilemap: TileMap) -> void:
+	_largest_walkable_cells.clear()
+	if target_tilemap == null:
+		return
+	var walkable_cells := _get_walkable_cells(target_tilemap)
+	if walkable_cells.is_empty():
+		return
+	var visited: Dictionary = {}
+	var largest_component: Dictionary = {}
+	for cell in walkable_cells.keys():
+		if visited.has(cell):
+			continue
+		var component: Dictionary = {}
+		var queue: Array[Vector2i] = [cell]
+		visited[cell] = true
+		component[cell] = true
+		while not queue.is_empty():
+			var current: Vector2i = queue.pop_front() as Vector2i
+			for direction in DIRECTIONS:
+				var neighbor := current + direction
+				if not walkable_cells.has(neighbor):
+					continue
+				if visited.has(neighbor):
+					continue
+				visited[neighbor] = true
+				component[neighbor] = true
+				queue.append(neighbor)
+		if component.size() > largest_component.size():
+			largest_component = component
+	_largest_walkable_cells = largest_component
 
 
 func _find_near_corner_floor_cell(
@@ -571,16 +605,11 @@ func _cell_to_world(target_tilemap: TileMap, cell: Vector2i) -> Vector2:
 	return target_tilemap.to_global(local_position)
 
 
-func _get_floor_positions(target_tilemap: TileMap) -> Array[Vector2]:
+func _get_floor_positions_from_cells(target_tilemap: TileMap, walkable_cells: Dictionary) -> Array[Vector2]:
 	var floor_positions: Array[Vector2] = []
-	for cell in target_tilemap.get_used_cells(0):
-		var tile_data := target_tilemap.get_cell_tile_data(0, cell)
-		if tile_data == null:
-			continue
-		var tile_type = tile_data.get_custom_data(TileEater.CUSTOM_DATA_KEY)
-		if tile_type != null and TileEater.WALKABLE_TILE_TYPES.has(tile_type):
-			var local_position = target_tilemap.map_to_local(cell)
-			floor_positions.append(target_tilemap.to_global(local_position))
+	for cell in walkable_cells.keys():
+		var local_position = target_tilemap.map_to_local(cell)
+		floor_positions.append(target_tilemap.to_global(local_position))
 	return floor_positions
 
 
