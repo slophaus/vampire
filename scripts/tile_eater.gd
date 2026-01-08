@@ -2,6 +2,7 @@ extends RefCounted
 class_name TileEater
 
 const CUSTOM_DATA_KEY := "tile_type"
+const DIG_FLOOR_CUSTOM_DATA_KEY := "dig_floor"
 const WALKABLE_TILE_TYPES := ["floor"]
 const OCCUPIED_TILE_TYPE := "occupied"
 const DIRT_BORDER_LAYER_NAME := "dirt_border"
@@ -21,10 +22,12 @@ var occupied_tile_source_id := -1
 var occupied_tile_atlas := Vector2i.ZERO
 var occupied_tile_alternative := 0
 var occupied_cells: Dictionary = {}
+var rng := RandomNumberGenerator.new()
 
 
 func _init(owner_node: Node2D) -> void:
 	owner = owner_node
+	rng.randomize()
 	arena_tilemap = _find_arena_tilemap()
 	if arena_tilemap != null:
 		dirt_border_layer = arena_tilemap.get_node_or_null(DIRT_BORDER_LAYER_NAME) as TileMapLayer
@@ -37,7 +40,9 @@ func cache_walkable_tile() -> void:
 func _cache_walkable_tile() -> void:
 	if arena_tilemap == null or owner == null:
 		return
-	var tile_info = _find_tile_by_type(WALKABLE_TILE_TYPES[0])
+	var tile_info = _find_random_dig_floor_tile()
+	if tile_info.is_empty():
+		tile_info = _find_tile_by_type(WALKABLE_TILE_TYPES[0])
 	if tile_info.is_empty():
 		return
 	walkable_tile_source_id = tile_info.source_id
@@ -278,8 +283,46 @@ func _find_tile_by_type(tile_type: String) -> Dictionary:
 	return {}
 
 
+func _find_random_dig_floor_tile() -> Dictionary:
+	if arena_tilemap == null or arena_tilemap.tile_set == null:
+		return {}
+	var candidates: Array[Dictionary] = []
+	var tile_set = arena_tilemap.tile_set
+	for source_index in range(tile_set.get_source_count()):
+		var source_id = tile_set.get_source_id(source_index)
+		var source = tile_set.get_source(source_id)
+		if source is TileSetAtlasSource:
+			var atlas := source as TileSetAtlasSource
+			for tile_index in range(atlas.get_tiles_count()):
+				var tile_id = atlas.get_tile_id(tile_index)
+				if _tile_data_has_custom_bool(atlas.get_tile_data(tile_id, 0), DIG_FLOOR_CUSTOM_DATA_KEY):
+					candidates.append({
+						"source_id": source_id,
+						"atlas_coords": tile_id,
+						"alternative": 0,
+					})
+				var alt_count = atlas.get_alternative_tiles_count(tile_id)
+				for alt_index in range(alt_count):
+					var alt_id = atlas.get_alternative_tile_id(tile_id, alt_index)
+					if _tile_data_has_custom_bool(atlas.get_tile_data(tile_id, alt_id), DIG_FLOOR_CUSTOM_DATA_KEY):
+						candidates.append({
+							"source_id": source_id,
+							"atlas_coords": tile_id,
+							"alternative": alt_id,
+						})
+	if candidates.is_empty():
+		return {}
+	return candidates[rng.randi_range(0, candidates.size() - 1)]
+
+
 func _tile_data_has_type(tile_data: TileData, tile_type: String) -> bool:
 	if tile_data == null:
 		return false
 	var custom_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
 	return custom_type != null and custom_type == tile_type
+
+
+func _tile_data_has_custom_bool(tile_data: TileData, custom_key: String) -> bool:
+	if tile_data == null:
+		return false
+	return tile_data.get_custom_data(custom_key) == true
