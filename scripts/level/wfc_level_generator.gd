@@ -806,7 +806,7 @@ func _run_chunked_wfc(
 	if chunk_rects.is_empty():
 		_debug_log("WFC: chunked solve found no chunks.")
 		return {"success": false}
-	var remaining: Array[Vector2i] = chunk_rects.keys()
+	var remaining: Array[Vector2i] = Array[Vector2i](chunk_rects.keys())
 	var solved: Dictionary = {}
 	var output_tiles: Dictionary = {}
 	var timed_out := false
