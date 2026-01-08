@@ -7,11 +7,11 @@ class_name WFCLevelGenerator
 
 @export_category("Generation")
 @export var generate_on_ready := true
+@export_range(1, 4, 1) var overlap_size := 2
+@export var periodic_input := true
 @export var use_chunked_wfc := true
 @export_range(4, 256, 1) var chunk_size := 10
 @export var ignore_chunk_borders := false
-@export_range(1, 4, 1) var overlap_size := 2
-@export var periodic_input := true
 @export var max_attempts_per_solve := 1 # Attempts per chunk (or per full solve when not chunked).
 
 @export_category("Randomness")
