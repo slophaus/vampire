@@ -801,7 +801,7 @@ func _run_chunked_wfc(
 	tile_data: Dictionary,
 	tile_counts: Dictionary
 ) -> Dictionary:
-	var adjusted_chunk_size := max(chunk_size, overlap_size)
+	var adjusted_chunk_size: int = max(chunk_size, overlap_size)
 	var chunk_rects := _build_chunk_rects(target_rect, adjusted_chunk_size, overlap_size)
 	if chunk_rects.is_empty():
 		_debug_log("WFC: chunked solve found no chunks.")
@@ -902,10 +902,10 @@ func _build_chunk_rects(target_rect: Rect2i, size: int, pattern_size: int) -> Di
 	var y_end := target_rect.position.y + target_rect.size.y
 	for x_index in range(x_starts.size()):
 		var start_x := x_starts[x_index]
-		var width := min(size, x_end - start_x)
+		var width: int = min(size, x_end - start_x)
 		for y_index in range(y_starts.size()):
 			var start_y := y_starts[y_index]
-			var height := min(size, y_end - start_y)
+			var height: int = min(size, y_end - start_y)
 			rects[Vector2i(x_index, y_index)] = Rect2i(start_x, start_y, width, height)
 	return rects
 
@@ -916,7 +916,7 @@ func _build_chunk_axis_starts(
 	size: int,
 	pattern_size: int
 ) -> Array[int]:
-	var adjusted_size := max(size, pattern_size)
+	var adjusted_size: int = max(size, pattern_size)
 	if length <= adjusted_size:
 		return [start_pos]
 	var starts: Array[int] = []
