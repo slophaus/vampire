@@ -857,6 +857,8 @@ func _run_chunked_wfc(
 	var timed_out := false
 	var failed: Array[Vector2i] = []
 	var solved_count := 0
+	var solved_with_borders := 0
+	var timed_out_with_borders := 0
 	var backtracks_total := 0
 
 	while not remaining.is_empty():
@@ -919,6 +921,7 @@ func _run_chunked_wfc(
 
 		if chunk_timed_out:
 			timed_out = true
+			timed_out_with_borders += 1
 			var partial_tiles := _build_output_tiles_partial(
 				patterns,
 				tile_data,
@@ -939,6 +942,7 @@ func _run_chunked_wfc(
 				time_budget_timeout_tile
 			)
 		else:
+			solved_with_borders += 1
 			var chunk_tiles := _build_output_tiles(
 				patterns,
 				tile_data,
@@ -953,7 +957,19 @@ func _run_chunked_wfc(
 		solved[next_coord] = true
 		remaining.erase(next_coord)
 
+	_debug_log("WFC: chunked pass complete: %d/%d solved with borders, %d timed out, %d queued for border-ignored retry." % [
+		solved_with_borders,
+		total_chunks,
+		timed_out_with_borders,
+		failed.size()
+	])
+
 	if not failed.is_empty():
+		var retry_solved := 0
+		var retry_timed_out := 0
+		var retry_failed := 0
+		var retry_conflict_total := 0
+		var retry_conflict_chunks := 0
 		_debug_log("WFC: retrying %d failed chunks with ignored borders." % failed.size())
 		for chunk_coord in failed:
 			var chunk_rect: Rect2i = chunk_rects[chunk_coord]
@@ -997,7 +1013,16 @@ func _run_chunked_wfc(
 					break
 
 			if not result.success and not chunk_timed_out:
+				retry_failed += 1
 				_debug_log("WFC: %s solve still failed with ignored borders at %s." % [chunk_label, chunk_rect])
+				_debug_log("WFC: border-ignored retry halted: %d/%d solved, %d timed out, %d failed, %d tile conflicts across %d chunks." % [
+					retry_solved,
+					failed.size(),
+					retry_timed_out,
+					retry_failed,
+					retry_conflict_total,
+					retry_conflict_chunks
+				])
 				return {
 					"success": true,
 					"output_tiles": output_tiles,
@@ -1010,6 +1035,7 @@ func _run_chunked_wfc(
 
 			if chunk_timed_out:
 				timed_out = true
+				retry_timed_out += 1
 				var partial_tiles := _build_output_tiles_partial(
 					patterns,
 					tile_data,
@@ -1018,7 +1044,10 @@ func _run_chunked_wfc(
 					chunk_rect,
 					overlap_size
 				)
-				_merge_output_tiles(output_tiles, partial_tiles, chunk_label)
+				var conflict_count := _merge_output_tiles(output_tiles, partial_tiles, chunk_label)
+				if conflict_count > 0:
+					retry_conflict_total += conflict_count
+					retry_conflict_chunks += 1
 				_fill_missing_tiles_with_timeout_mode(
 					get_node_or_null(target_tilemap_path) as TileMap,
 					chunk_rect,
@@ -1030,6 +1059,7 @@ func _run_chunked_wfc(
 					time_budget_timeout_tile
 				)
 			else:
+				retry_solved += 1
 				var chunk_tiles := _build_output_tiles(
 					patterns,
 					tile_data,
@@ -1038,8 +1068,20 @@ func _run_chunked_wfc(
 					chunk_rect,
 					overlap_size
 				)
-				_merge_output_tiles(output_tiles, chunk_tiles, chunk_label)
+				var conflict_count := _merge_output_tiles(output_tiles, chunk_tiles, chunk_label)
+				if conflict_count > 0:
+					retry_conflict_total += conflict_count
+					retry_conflict_chunks += 1
 			solved_count += 1
+
+		_debug_log("WFC: border-ignored retry complete: %d/%d solved, %d timed out, %d failed, %d tile conflicts across %d chunks." % [
+			retry_solved,
+			failed.size(),
+			retry_timed_out,
+			retry_failed,
+			retry_conflict_total,
+			retry_conflict_chunks
+		])
 
 	return {
 		"success": true,
@@ -1157,7 +1199,7 @@ func _build_constrained_wave(
 	return wave
 
 
-func _merge_output_tiles(output_tiles: Dictionary, new_tiles: Dictionary, chunk_label: String = "") -> void:
+func _merge_output_tiles(output_tiles: Dictionary, new_tiles: Dictionary, chunk_label: String = "") -> int:
 	var conflict_count := 0
 	for tile_pos in new_tiles.keys():
 		if output_tiles.has(tile_pos):
@@ -1170,6 +1212,7 @@ func _merge_output_tiles(output_tiles: Dictionary, new_tiles: Dictionary, chunk_
 		if not chunk_label.is_empty():
 			prefix = "WFC: %s tile conflicts during chunk merge" % chunk_label
 		_debug_log("%s (%d)." % [prefix, conflict_count])
+	return conflict_count
 
 
 func _run_wfc(
