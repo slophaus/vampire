@@ -1066,7 +1066,7 @@ func _run_chunked_wfc(
 				chunk_rect,
 				overlap_size
 			)
-			_merge_output_tiles(output_tiles, partial_tiles, chunk_label)
+			_merge_output_tiles(output_tiles, partial_tiles, chunk_label, contradiction_cells)
 			_fill_missing_tiles_with_timeout_mode(
 				get_node_or_null(target_tilemap_path) as TileMap,
 				chunk_rect,
@@ -1087,7 +1087,7 @@ func _run_chunked_wfc(
 				chunk_rect,
 				overlap_size
 			)
-			_merge_output_tiles(output_tiles, chunk_tiles, chunk_label)
+			_merge_output_tiles(output_tiles, chunk_tiles, chunk_label, contradiction_cells)
 		solved_count += 1
 
 		solved[next_coord] = true
@@ -1186,7 +1186,7 @@ func _run_chunked_wfc(
 					chunk_rect,
 					overlap_size
 				)
-				var conflict_count := _merge_output_tiles(output_tiles, partial_tiles, chunk_label)
+				var conflict_count := _merge_output_tiles(output_tiles, partial_tiles, chunk_label, contradiction_cells)
 				if conflict_count > 0:
 					retry_conflict_total += conflict_count
 					retry_conflict_chunks += 1
@@ -1210,7 +1210,7 @@ func _run_chunked_wfc(
 					chunk_rect,
 					overlap_size
 				)
-				var conflict_count := _merge_output_tiles(output_tiles, chunk_tiles, chunk_label)
+				var conflict_count := _merge_output_tiles(output_tiles, chunk_tiles, chunk_label, contradiction_cells)
 				if conflict_count > 0:
 					retry_conflict_total += conflict_count
 					retry_conflict_chunks += 1
@@ -1342,12 +1342,18 @@ func _build_constrained_wave(
 	return wave
 
 
-func _merge_output_tiles(output_tiles: Dictionary, new_tiles: Dictionary, chunk_label: String = "") -> int:
+func _merge_output_tiles(
+	output_tiles: Dictionary,
+	new_tiles: Dictionary,
+	chunk_label: String = "",
+	conflict_cells: Array[Vector2i] = []
+) -> int:
 	var conflict_count := 0
 	for tile_pos in new_tiles.keys():
 		if output_tiles.has(tile_pos):
 			if output_tiles[tile_pos]["key"] != new_tiles[tile_pos]["key"] and not ignore_chunk_borders:
 				conflict_count += 1
+				conflict_cells.append(tile_pos)
 			continue
 		output_tiles[tile_pos] = new_tiles[tile_pos]
 	if conflict_count > 0 and not ignore_chunk_borders:
