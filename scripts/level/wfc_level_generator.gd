@@ -9,7 +9,7 @@ class_name WFCLevelGenerator
 @export var seeded_mode := true
 @export_range(1, 4, 1) var overlap_size := 2
 @export var periodic_input := true
-@export var debug_logs := true
+@export var debug := true
 @export var use_chunked_wfc := true
 @export_range(4, 256, 1) var chunk_size := 10
 @export var ignore_chunk_borders := false
@@ -17,7 +17,7 @@ class_name WFCLevelGenerator
 @export var time_budget_seconds := 30.0
 @export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var time_budget_timeout_tile := "dirt"
 @export var enable_backtracking := true
-@export_range(0, 10000, 1) var max_backtracks := 500
+@export_range(0, 10000, 1) var max_backtracks := 50
 const DIRECTIONS := [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -32,7 +32,7 @@ var _largest_walkable_cells: Dictionary = {}
 
 
 func _debug_log(message: String) -> void:
-	if not debug_logs:
+	if not debug:
 		return
 	print(message)
 
@@ -230,13 +230,11 @@ func generate_level(use_new_seed: bool = false) -> void:
 	finalize_seconds = _elapsed_seconds(phase_start_ms)
 	total_seconds = _elapsed_seconds(total_start_ms)
 	_debug_log("WFC: phase finalize %.3f s" % finalize_seconds)
-	_debug_log("WFC: total time %.3f s" % total_seconds)
 	var summary_parts: Array[String] = [
 		"patterns %.3f s" % patterns_seconds,
 		"solve %.3f s" % solve_seconds,
 		"output %.3f s" % output_seconds,
-		"finalize %.3f s" % finalize_seconds,
-		"total %.3f s" % total_seconds
+		"finalize %.3f s" % finalize_seconds
 	]
 	if use_chunked_wfc and chunk_total > 0:
 		summary_parts.append("chunks %d/%d" % [chunk_solved, chunk_total])
@@ -244,6 +242,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 		summary_parts.append("backtracks %d" % solve_backtracks)
 	_debug_log("WFC: summary %s." % ", ".join(summary_parts))
 	_debug_log("WFC: generation complete.")
+	print("generation time: %.3f sec" % total_seconds)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -628,7 +627,7 @@ func _update_debug_door_path(
 		return
 	debug_line.position = Vector2.ZERO
 	debug_line.clear_points()
-	if not debug_logs:
+	if not debug:
 		debug_line.visible = false
 		return
 	if path_cells.is_empty():
