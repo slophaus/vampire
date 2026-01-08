@@ -815,6 +815,7 @@ func _run_chunked_wfc(
 	var solved: Dictionary = {}
 	var output_tiles: Dictionary = {}
 	var timed_out := false
+	var failed: Array[Vector2i] = []
 
 	while not remaining.is_empty():
 		var next_coord := _pick_next_chunk_coord(remaining, solved, rng)
@@ -860,8 +861,14 @@ func _run_chunked_wfc(
 			if chunk_timed_out or result.success:
 				break
 		if not result.success and not chunk_timed_out:
-			_debug_log("WFC: chunk solve failed after %d attempts at %s." % [max_attempts, chunk_rect])
-			return {"success": true, "output_tiles": output_tiles, "timed_out": timed_out, "partial": true}
+			_debug_log("WFC: chunk solve failed after %d attempts at %s; marking for border-ignored retry." % [
+				max_attempts,
+				chunk_rect
+			])
+			failed.append(next_coord)
+			solved[next_coord] = false
+			remaining.erase(next_coord)
+			continue
 
 		if chunk_timed_out:
 			timed_out = true
@@ -897,6 +904,73 @@ func _run_chunked_wfc(
 
 		solved[next_coord] = true
 		remaining.erase(next_coord)
+
+	if not failed.is_empty():
+		_debug_log("WFC: retrying %d failed chunks with ignored borders." % failed.size())
+		for chunk_coord in failed:
+			var chunk_rect: Rect2i = chunk_rects[chunk_coord]
+			var grid_size := Vector2i(
+				chunk_rect.size.x - overlap_size + 1,
+				chunk_rect.size.y - overlap_size + 1
+			)
+			if grid_size.x <= 0 or grid_size.y <= 0:
+				_debug_log("WFC: chunk too small for overlap size at %s." % chunk_rect)
+				return {"success": true, "output_tiles": output_tiles, "timed_out": timed_out, "partial": true}
+
+			var attempt := 0
+			var result: Dictionary = {}
+			var chunk_timed_out := false
+			while attempt < max_attempts:
+				attempt += 1
+				result = await _run_wfc(
+					patterns,
+					weights,
+					adjacency,
+					grid_size,
+					rng,
+					time_budget_seconds,
+					allow_backtracking,
+					max_backtracks
+				)
+				chunk_timed_out = result.get("timed_out", false)
+				if chunk_timed_out or result.success:
+					break
+
+			if not result.success and not chunk_timed_out:
+				_debug_log("WFC: chunk solve still failed with ignored borders at %s." % chunk_rect)
+				return {"success": true, "output_tiles": output_tiles, "timed_out": timed_out, "partial": true}
+
+			if chunk_timed_out:
+				timed_out = true
+				var partial_tiles := _build_output_tiles_partial(
+					patterns,
+					tile_data,
+					result.grid,
+					grid_size,
+					chunk_rect,
+					overlap_size
+				)
+				_merge_output_tiles(output_tiles, partial_tiles)
+				_fill_missing_tiles_with_timeout_mode(
+					get_node_or_null(target_tilemap_path) as TileMap,
+					chunk_rect,
+					output_tiles,
+					sample_tiles,
+					tile_data,
+					tile_counts,
+					rng,
+					time_budget_timeout_tile
+				)
+			else:
+				var chunk_tiles := _build_output_tiles(
+					patterns,
+					tile_data,
+					result.grid,
+					grid_size,
+					chunk_rect,
+					overlap_size
+				)
+				_merge_output_tiles(output_tiles, chunk_tiles)
 
 	return {"success": true, "output_tiles": output_tiles, "timed_out": timed_out}
 
