@@ -45,6 +45,15 @@ func _physics_process(delta):
 	update_possession_timer(delta)
 
 
+func on_hit():
+	super.on_hit()
+	if ghost_dormant:
+		ghost_dormant = false
+		ghost_fade_time = 0.0
+		ghost_respawn_fade = 0.0
+		visuals.modulate.a = 0.0
+
+
 func can_be_possessed() -> bool:
 	return false
 
