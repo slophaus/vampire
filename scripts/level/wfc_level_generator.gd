@@ -809,7 +809,9 @@ func _run_chunked_wfc(
 	if chunk_rects.is_empty():
 		_debug_log("WFC: chunked solve found no chunks.")
 		return {"success": false}
-	var chunk_coords: Array[Vector2i] = chunk_rects.keys()
+	var chunk_coords: Array[Vector2i] = []
+	for key in chunk_rects.keys():
+		chunk_coords.append(key)
 	chunk_coords.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
 		return a.y < b.y if a.y != b.y else a.x < b.x
 	)
@@ -818,7 +820,7 @@ func _run_chunked_wfc(
 		chunk_index_by_coord[chunk_coords[i]] = i + 1
 	var total_chunks := chunk_coords.size()
 	var remaining: Array[Vector2i] = []
-	for key in chunk_rects.keys():
+	for key in chunk_coords:
 		remaining.append(key)
 	var solved: Dictionary = {}
 	var output_tiles: Dictionary = {}
