@@ -36,7 +36,29 @@ const DEBUG_DOOR_PATH_NAME := "DoorDebugPath"
 const DEBUG_DOOR_PATH_WIDTH := 4.0
 const DEBUG_DOOR_PATH_Z_INDEX := 10
 const DEBUG_DOOR_PATH_COLOR := Color(1, 0, 0, 1)
+const DEBUG_CONTRADICTION_DOTS_NAME := "WFCContradictionDots"
+const DEBUG_CONTRADICTION_COLOR := Color(1, 0, 0, 1)
 var _largest_walkable_cells: Dictionary = {}
+
+
+class DebugContradictionDots:
+	extends Node2D
+
+	var points: Array[Vector2] = []
+	var radius := 2.0
+	var color := Color(1, 0, 0, 1)
+
+	func set_points(new_points: Array[Vector2]) -> void:
+		points = new_points
+		queue_redraw()
+
+	func clear_points() -> void:
+		points.clear()
+		queue_redraw()
+
+	func _draw() -> void:
+		for point in points:
+			draw_circle(point, radius, color)
 
 
 func _debug_log(message: String) -> void:
@@ -76,6 +98,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 	if target_tilemap == null or sample_tilemap == null:
 		_report_generation_failure("WFC: missing tilemap references.")
 		return
+	_reset_debug_contradiction_dots()
 	sample_tilemap.visible = false
 	target_tilemap.visible = true
 
@@ -115,6 +138,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 
 	var output_tiles: Dictionary = {}
 	var timed_out := false
+	var contradiction_cells: Array[Vector2i] = []
 	var sample_tiles := _build_sample_tiles(patterns_data.tiles)
 	if use_chunked_wfc:
 		var chunk_result := await _run_chunked_wfc(
@@ -135,6 +159,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 			return
 		output_tiles = chunk_result.output_tiles
 		timed_out = chunk_result.timed_out
+		contradiction_cells = chunk_result.get("contradiction_cells", [])
 		solve_backtracks = chunk_result.get("backtracks", 0)
 		chunk_total = chunk_result.get("chunk_total", 0)
 		chunk_solved = chunk_result.get("chunk_solved", 0)
@@ -143,6 +168,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 	else:
 		var attempt := 0
 		var result: Dictionary = {}
+		var last_contradiction_cells: Array[Vector2i] = []
 		while attempt < max_attempts_per_solve:
 			attempt += 1
 			if attempt == 1 or attempt % 50 == 0:
@@ -175,8 +201,12 @@ func generate_level(use_new_seed: bool = false) -> void:
 
 			if result.success:
 				break
+			if attempt_status == "contradiction":
+				last_contradiction_cells = result.get("contradiction_cells", [])
 
 		if not result.success and not timed_out:
+			contradiction_cells = _offset_cells(last_contradiction_cells, target_rect.position)
+			_update_debug_contradiction_dots(target_tilemap, contradiction_cells)
 			_report_generation_failure("WFC: failed after %d attempts." % max_attempts_per_solve)
 			return
 		if timed_out:
@@ -209,6 +239,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 				overlap_size
 			)
 		solve_backtracks = result.get("backtracks", 0)
+	if not contradiction_cells.is_empty():
+		_update_debug_contradiction_dots(target_tilemap, contradiction_cells)
 	solve_seconds = _elapsed_seconds(phase_start_ms)
 	_debug_log("WFC: phase solve %.3f s" % solve_seconds)
 	phase_start_ms = Time.get_ticks_msec()
@@ -631,6 +663,14 @@ func _reset_debug_door_path() -> void:
 	debug_line.visible = false
 
 
+func _reset_debug_contradiction_dots() -> void:
+	var dots := _get_or_create_debug_contradiction_dots()
+	if dots == null:
+		return
+	dots.clear_points()
+	dots.visible = false
+
+
 func _update_debug_door_path(
 	target_tilemap: TileMap,
 	path_cells: Array[Vector2i]
@@ -650,6 +690,27 @@ func _update_debug_door_path(
 	debug_line.visible = true
 
 
+func _update_debug_contradiction_dots(
+	target_tilemap: TileMap,
+	contradiction_cells: Array[Vector2i]
+) -> void:
+	var dots := _get_or_create_debug_contradiction_dots()
+	if dots == null:
+		return
+	dots.clear_points()
+	if not debug:
+		dots.visible = false
+		return
+	if contradiction_cells.is_empty():
+		dots.visible = false
+		return
+	var positions: Array[Vector2] = []
+	for cell in contradiction_cells:
+		positions.append(target_tilemap.map_to_local(cell))
+	dots.set_points(positions)
+	dots.visible = true
+
+
 func _get_or_create_debug_door_path_line() -> Line2D:
 	var blood_layer := get_parent().get_node_or_null("LayerBlood")
 	if blood_layer == null:
@@ -667,11 +728,35 @@ func _get_or_create_debug_door_path_line() -> Line2D:
 	return debug_line
 
 
+func _get_or_create_debug_contradiction_dots() -> DebugContradictionDots:
+	var blood_layer := get_parent().get_node_or_null("LayerBlood")
+	if blood_layer == null:
+		return null
+	var dots := blood_layer.get_node_or_null(DEBUG_CONTRADICTION_DOTS_NAME) as DebugContradictionDots
+	if dots != null:
+		return dots
+	dots = DebugContradictionDots.new()
+	dots.name = DEBUG_CONTRADICTION_DOTS_NAME
+	dots.visible = false
+	dots.z_index = DEBUG_DOOR_PATH_Z_INDEX
+	dots.radius = DEBUG_DOOR_PATH_WIDTH * 0.5
+	dots.color = DEBUG_CONTRADICTION_COLOR
+	blood_layer.add_child(dots)
+	return dots
+
+
 func _cells_to_lookup(cells: Array[Vector2i]) -> Dictionary:
 	var lookup: Dictionary = {}
 	for cell in cells:
 		lookup[cell] = true
 	return lookup
+
+
+func _offset_cells(cells: Array[Vector2i], offset: Vector2i) -> Array[Vector2i]:
+	var offset_cells: Array[Vector2i] = []
+	for cell in cells:
+		offset_cells.append(cell + offset)
+	return offset_cells
 
 
 func _set_cell_to_tile(target_tilemap: TileMap, cell: Vector2i, tile_info: Dictionary) -> void:
@@ -891,6 +976,7 @@ func _run_chunked_wfc(
 	var solved_with_borders := 0
 	var timed_out_with_borders := 0
 	var backtracks_total := 0
+	var contradiction_cells: Array[Vector2i] = []
 
 	while not remaining.is_empty():
 		var next_coord := _pick_next_chunk_coord(remaining, solved, rng)
@@ -910,6 +996,7 @@ func _run_chunked_wfc(
 		var result: Dictionary = {}
 		var chunk_timed_out := false
 		var constraints_invalid := false
+		var chunk_contradiction_cells: Array[Vector2i] = []
 		while attempt < max_attempts_per_solve:
 			attempt += 1
 			var initial_wave: Array = []
@@ -937,6 +1024,8 @@ func _run_chunked_wfc(
 				max_backtracks,
 				initial_wave
 			)
+			if result.get("status", "") == "contradiction":
+				chunk_contradiction_cells = result.get("contradiction_cells", [])
 			chunk_timed_out = result.get("timed_out", false)
 			backtracks_total += result.get("backtracks", 0)
 			if chunk_timed_out or result.success:
@@ -947,6 +1036,8 @@ func _run_chunked_wfc(
 			remaining.erase(next_coord)
 			continue
 		if not result.success and not chunk_timed_out:
+			if not chunk_contradiction_cells.is_empty():
+				contradiction_cells.append_array(_offset_cells(chunk_contradiction_cells, chunk_rect.position))
 			_debug_log("WFC: %s solve failed after %d attempts at %s; marking for border-ignored retry." % [
 				chunk_label,
 				max_attempts_per_solve,
@@ -1033,6 +1124,7 @@ func _run_chunked_wfc(
 			var attempt := 0
 			var result: Dictionary = {}
 			var chunk_timed_out := false
+			var chunk_contradiction_cells: Array[Vector2i] = []
 			while attempt < max_attempts_per_solve:
 				attempt += 1
 				result = await _run_wfc(
@@ -1045,12 +1137,16 @@ func _run_chunked_wfc(
 					allow_backtracking,
 					max_backtracks
 				)
+				if result.get("status", "") == "contradiction":
+					chunk_contradiction_cells = result.get("contradiction_cells", [])
 				chunk_timed_out = result.get("timed_out", false)
 				backtracks_total += result.get("backtracks", 0)
 				if chunk_timed_out or result.success:
 					break
 
 			if not result.success and not chunk_timed_out:
+				if not chunk_contradiction_cells.is_empty():
+					contradiction_cells.append_array(_offset_cells(chunk_contradiction_cells, chunk_rect.position))
 				retry_failed += 1
 				_debug_log("WFC: %s solve still failed with ignored borders at %s." % [chunk_label, chunk_rect])
 				_debug_log("WFC: border-ignored retry halted: %d/%d solved, %d timed out, %d failed, %d tile conflicts across %d chunks." % [
@@ -1066,6 +1162,7 @@ func _run_chunked_wfc(
 					"output_tiles": output_tiles,
 					"timed_out": timed_out,
 					"partial": true,
+					"contradiction_cells": contradiction_cells,
 					"chunk_total": total_chunks,
 					"chunk_solved": solved_count,
 					"backtracks": backtracks_total
@@ -1125,6 +1222,7 @@ func _run_chunked_wfc(
 		"success": true,
 		"output_tiles": output_tiles,
 		"timed_out": timed_out,
+		"contradiction_cells": contradiction_cells,
 		"chunk_total": total_chunks,
 		"chunk_solved": solved_count,
 		"backtracks": backtracks_total
@@ -1330,7 +1428,12 @@ func _run_wfc(
 						selection_done = true
 						break
 				_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-				return {"success": false, "status": "contradiction", "backtracks": backtracks}
+				return {
+					"success": false,
+					"status": "contradiction",
+					"backtracks": backtracks,
+					"contradiction_cells": [Vector2i(next_index % grid_size.x, next_index / grid_size.x)]
+				}
 
 			var chosen: int = _weighted_choice(wave[next_index], weights, rng)
 			if allow_backtracking:
@@ -1406,12 +1509,17 @@ func _run_wfc(
 							max_backtracks
 						)
 						backtracks = backtrack_result.backtracks
-						if backtrack_result.success:
-							wave = backtrack_result.wave
-							restart_propagation = true
-							break
+					if backtrack_result.success:
+						wave = backtrack_result.wave
+						restart_propagation = true
+						break
 					_log_wfc_solve_timing("contradiction", init_seconds, entropy_seconds, propagate_seconds, entropy_picks, propagation_steps)
-					return {"success": false, "status": "contradiction", "backtracks": backtracks}
+					return {
+						"success": false,
+						"status": "contradiction",
+						"backtracks": backtracks,
+						"contradiction_cells": [neighbor_pos]
+					}
 
 				if reduced:
 					stack.append(neighbor_index)
