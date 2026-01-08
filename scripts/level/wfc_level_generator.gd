@@ -13,6 +13,7 @@ class_name WFCLevelGenerator
 @export var debug_path_line_path: NodePath
 @export var use_chunked_wfc := true
 @export_range(4, 256, 1) var chunk_size := 32
+@export var ignore_chunk_borders := false
 
 @export var time_budget_seconds := 30.0
 @export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var time_budget_timeout_tile := "random_tile"
@@ -109,6 +110,8 @@ func generate_level(use_new_seed: bool = false) -> void:
 			return
 		output_tiles = chunk_result.output_tiles
 		timed_out = chunk_result.timed_out
+		if chunk_result.get("partial", false):
+			_debug_log("WFC: chunked solve incomplete; using solved chunks only.")
 	else:
 		var attempt := 0
 		var result: Dictionary = {}
@@ -829,17 +832,19 @@ func _run_chunked_wfc(
 		var chunk_timed_out := false
 		while attempt < max_attempts:
 			attempt += 1
-			var known_tiles := _collect_known_tiles(output_tiles, chunk_rect)
-			var initial_wave := _build_constrained_wave(
-				patterns,
-				chunk_rect,
-				grid_size,
-				overlap_size,
-				known_tiles
-			)
-			if initial_wave.is_empty():
-				_debug_log("WFC: chunked constraints invalid for %s." % chunk_rect)
-				return {"success": false}
+			var initial_wave: Array = []
+			if not ignore_chunk_borders:
+				var known_tiles := _collect_known_tiles(output_tiles, chunk_rect)
+				initial_wave = _build_constrained_wave(
+					patterns,
+					chunk_rect,
+					grid_size,
+					overlap_size,
+					known_tiles
+				)
+				if initial_wave.is_empty():
+					_debug_log("WFC: chunked constraints invalid for %s." % chunk_rect)
+					return {"success": false}
 			result = await _run_wfc(
 				patterns,
 				weights,
@@ -856,7 +861,7 @@ func _run_chunked_wfc(
 				break
 		if not result.success and not chunk_timed_out:
 			_debug_log("WFC: chunk solve failed after %d attempts at %s." % [max_attempts, chunk_rect])
-			return {"success": false}
+			return {"success": true, "output_tiles": output_tiles, "timed_out": timed_out, "partial": true}
 
 		if chunk_timed_out:
 			timed_out = true
