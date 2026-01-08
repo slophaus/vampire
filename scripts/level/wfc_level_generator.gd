@@ -11,7 +11,7 @@ class_name WFCLevelGenerator
 @export var periodic_input := false
 @export var debug_logs := false
 @export var debug_path_line_path: NodePath
-@export var use_chunked_wfc := false
+@export var use_chunked_wfc := true
 @export_range(4, 256, 1) var chunk_size := 32
 
 @export var time_budget_seconds := 30.0
@@ -806,7 +806,9 @@ func _run_chunked_wfc(
 	if chunk_rects.is_empty():
 		_debug_log("WFC: chunked solve found no chunks.")
 		return {"success": false}
-	var remaining: Array[Vector2i] = chunk_rects.keys() as Array[Vector2i]
+	var remaining: Array[Vector2i] = []
+	for key in chunk_rects.keys():
+		remaining.append(key)
 	var solved: Dictionary = {}
 	var output_tiles: Dictionary = {}
 	var timed_out := false
