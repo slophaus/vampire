@@ -903,6 +903,7 @@ func _run_chunked_wfc(
 		var attempt := 0
 		var result: Dictionary = {}
 		var chunk_timed_out := false
+		var constraints_invalid := false
 		while attempt < max_attempts_per_chunk:
 			attempt += 1
 			var initial_wave: Array = []
@@ -916,8 +917,9 @@ func _run_chunked_wfc(
 					known_tiles
 				)
 				if initial_wave.is_empty():
-					_debug_log("WFC: chunked constraints invalid for %s." % chunk_rect)
-					return {"success": false}
+					_debug_log("WFC: chunked constraints invalid for %s; marking for border-ignored retry." % chunk_rect)
+					constraints_invalid = true
+					break
 			result = await _run_wfc(
 				patterns,
 				weights,
@@ -933,6 +935,11 @@ func _run_chunked_wfc(
 			backtracks_total += result.get("backtracks", 0)
 			if chunk_timed_out or result.success:
 				break
+		if constraints_invalid:
+			failed.append(next_coord)
+			solved[next_coord] = false
+			remaining.erase(next_coord)
+			continue
 		if not result.success and not chunk_timed_out:
 			_debug_log("WFC: %s solve failed after %d attempts at %s; marking for border-ignored retry." % [
 				chunk_label,
