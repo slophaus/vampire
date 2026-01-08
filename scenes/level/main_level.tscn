@@ -412,7 +412,7 @@ position = Vector2(535, 474)
 position = Vector2(650, 453)
 
 [node name="GhostEnemy" parent="LayerEntities" instance=ExtResource("10_5fr2l")]
-position = Vector2(470, 198)
+position = Vector2(72, 573)
 
 [node name="WormEnemy2" parent="LayerEntities" instance=ExtResource("8_uk2yf")]
 position = Vector2(321, -396)
