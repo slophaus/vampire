@@ -159,7 +159,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 			return
 		output_tiles = chunk_result.output_tiles
 		timed_out = chunk_result.timed_out
-		contradiction_cells = chunk_result.get("contradiction_cells", []) as Array[Vector2i]
+		contradiction_cells = _as_vector2i_array(chunk_result.get("contradiction_cells", []))
 		solve_backtracks = chunk_result.get("backtracks", 0)
 		chunk_total = chunk_result.get("chunk_total", 0)
 		chunk_solved = chunk_result.get("chunk_solved", 0)
@@ -202,7 +202,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 			if result.success:
 				break
 			if attempt_status == "contradiction":
-				last_contradiction_cells = result.get("contradiction_cells", []) as Array[Vector2i]
+				last_contradiction_cells = _as_vector2i_array(result.get("contradiction_cells", []))
 
 		if not result.success and not timed_out:
 			contradiction_cells = _offset_cells(last_contradiction_cells, target_rect.position)
@@ -752,6 +752,13 @@ func _cells_to_lookup(cells: Array[Vector2i]) -> Dictionary:
 	return lookup
 
 
+func _as_vector2i_array(values: Array) -> Array[Vector2i]:
+	var typed: Array[Vector2i] = []
+	for value in values:
+		typed.append(value)
+	return typed
+
+
 func _offset_cells(cells: Array[Vector2i], offset: Vector2i) -> Array[Vector2i]:
 	var offset_cells: Array[Vector2i] = []
 	for cell in cells:
@@ -1025,7 +1032,7 @@ func _run_chunked_wfc(
 				initial_wave
 			)
 			if result.get("status", "") == "contradiction":
-				chunk_contradiction_cells = result.get("contradiction_cells", []) as Array[Vector2i]
+				chunk_contradiction_cells = _as_vector2i_array(result.get("contradiction_cells", []))
 			chunk_timed_out = result.get("timed_out", false)
 			backtracks_total += result.get("backtracks", 0)
 			if chunk_timed_out or result.success:
@@ -1138,7 +1145,7 @@ func _run_chunked_wfc(
 					max_backtracks
 				)
 				if result.get("status", "") == "contradiction":
-					chunk_contradiction_cells = result.get("contradiction_cells", []) as Array[Vector2i]
+					chunk_contradiction_cells = _as_vector2i_array(result.get("contradiction_cells", []))
 				chunk_timed_out = result.get("timed_out", false)
 				backtracks_total += result.get("backtracks", 0)
 				if chunk_timed_out or result.success:
