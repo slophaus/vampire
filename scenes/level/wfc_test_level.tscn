@@ -385,6 +385,7 @@ random_seed = 6
 periodic_input = true
 debug_logs = true
 debug_path_line_path = NodePath("../DoorDebugPath")
+chunk_size = 10
 time_budget_timeout_tile = "dirt"
 
 [node name="DoorDebugPath" type="Line2D" parent="."]
