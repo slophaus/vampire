@@ -5,18 +5,18 @@ class_name WFCLevelGenerator
 @export var sample_tilemap_path: NodePath
 @export var generate_on_ready := true
 @export var max_attempts := 1
-@export var random_seed := 0
+@export var random_seed := 6
 @export var seeded_mode := true
 @export_range(1, 4, 1) var overlap_size := 2
-@export var periodic_input := false
-@export var debug_logs := false
+@export var periodic_input := true
+@export var debug_logs := true
 @export var debug_path_line_path: NodePath
 @export var use_chunked_wfc := true
-@export_range(4, 256, 1) var chunk_size := 32
+@export_range(4, 256, 1) var chunk_size := 10
 @export var ignore_chunk_borders := false
 
 @export var time_budget_seconds := 30.0
-@export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var time_budget_timeout_tile := "random_tile"
+@export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var time_budget_timeout_tile := "dirt"
 @export var enable_backtracking := true
 @export_range(0, 10000, 1) var max_backtracks := 500
 const DIRECTIONS := [
