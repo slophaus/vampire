@@ -10,7 +10,6 @@ class_name WFCLevelGenerator
 @export_range(1, 4, 1) var overlap_size := 2
 @export var periodic_input := true
 @export var debug_logs := true
-@export var debug_path_line_path: NodePath
 @export var use_chunked_wfc := true
 @export_range(4, 256, 1) var chunk_size := 10
 @export var ignore_chunk_borders := false
@@ -25,6 +24,10 @@ const DIRECTIONS := [
 	Vector2i(0, 1),
 	Vector2i(-1, 0),
 ]
+const DEBUG_DOOR_PATH_NAME := "DoorDebugPath"
+const DEBUG_DOOR_PATH_WIDTH := 4.0
+const DEBUG_DOOR_PATH_Z_INDEX := 10
+const DEBUG_DOOR_PATH_COLOR := Color(1, 0, 0, 1)
 var _largest_walkable_cells: Dictionary = {}
 
 
@@ -609,7 +612,7 @@ func _apply_door_clearance(
 
 
 func _reset_debug_door_path() -> void:
-	var debug_line := get_node_or_null(debug_path_line_path) as Line2D
+	var debug_line := _get_or_create_debug_door_path_line()
 	if debug_line == null:
 		return
 	debug_line.clear_points()
@@ -620,7 +623,7 @@ func _update_debug_door_path(
 	target_tilemap: TileMap,
 	path_cells: Array[Vector2i]
 ) -> void:
-	var debug_line := get_node_or_null(debug_path_line_path) as Line2D
+	var debug_line := _get_or_create_debug_door_path_line()
 	if debug_line == null:
 		return
 	debug_line.clear_points()
@@ -634,6 +637,23 @@ func _update_debug_door_path(
 		var world_position := _cell_to_world(target_tilemap, cell)
 		debug_line.add_point(debug_line.to_local(world_position))
 	debug_line.visible = true
+
+
+func _get_or_create_debug_door_path_line() -> Line2D:
+	var props_layer := get_parent().get_node_or_null("LayerProps")
+	if props_layer == null:
+		return null
+	var debug_line := props_layer.get_node_or_null(DEBUG_DOOR_PATH_NAME) as Line2D
+	if debug_line != null:
+		return debug_line
+	debug_line = Line2D.new()
+	debug_line.name = DEBUG_DOOR_PATH_NAME
+	debug_line.visible = false
+	debug_line.z_index = DEBUG_DOOR_PATH_Z_INDEX
+	debug_line.width = DEBUG_DOOR_PATH_WIDTH
+	debug_line.default_color = DEBUG_DOOR_PATH_COLOR
+	props_layer.add_child(debug_line)
+	return debug_line
 
 
 func _cells_to_lookup(cells: Array[Vector2i]) -> Dictionary:
