@@ -626,6 +626,7 @@ func _update_debug_door_path(
 	var debug_line := _get_or_create_debug_door_path_line()
 	if debug_line == null:
 		return
+	debug_line.position = Vector2.ZERO
 	debug_line.clear_points()
 	if not debug_logs:
 		debug_line.visible = false
@@ -633,9 +634,13 @@ func _update_debug_door_path(
 	if path_cells.is_empty():
 		debug_line.visible = false
 		return
+	var props_layer := debug_line.get_parent() as Node2D
 	for cell in path_cells:
 		var world_position := _cell_to_world(target_tilemap, cell)
-		debug_line.add_point(debug_line.to_local(world_position))
+		var local_position := world_position
+		if props_layer != null:
+			local_position = props_layer.to_local(world_position)
+		debug_line.add_point(local_position)
 	debug_line.visible = true
 
 
