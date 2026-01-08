@@ -11,6 +11,8 @@ class_name WFCLevelGenerator
 @export var periodic_input := false
 @export var debug_logs := false
 @export var debug_path_line_path: NodePath
+@export var use_chunked_wfc := false
+@export_range(4, 256, 1) var chunk_size := 32
 
 @export var time_budget_seconds := 30.0
 @export_enum("dirt", "most_common", "least_common", "random_tile", "random_same", "random_top_three") var time_budget_timeout_tile := "random_tile"
@@ -85,79 +87,101 @@ func generate_level(use_new_seed: bool = false) -> void:
 		_debug_log("WFC: target bounds smaller than overlap size.")
 		return
 
-	var attempt := 0
-	var result: Dictionary = {}
+	var output_tiles: Dictionary = {}
 	var timed_out := false
 	var sample_tiles := _build_sample_tiles(patterns_data.tiles)
-	while attempt < max_attempts:
-		attempt += 1
-		if attempt == 1 or attempt % 50 == 0:
-			_debug_log("WFC: attempt %d/%d" % [attempt, max_attempts])
-		var attempt_start_ms := Time.get_ticks_msec()
-
-		result = await _run_wfc(
+	if use_chunked_wfc:
+		var chunk_result := await _run_chunked_wfc(
 			patterns_data.patterns,
 			patterns_data.weights,
 			patterns_data.adjacency,
-			pattern_grid_size,
+			target_rect,
 			rng,
 			time_budget_seconds,
 			enable_backtracking,
-			max_backtracks
+			max_backtracks,
+			sample_tiles,
+			patterns_data.tiles,
+			patterns_data.tile_counts
 		)
-		var attempt_seconds := _elapsed_seconds(attempt_start_ms)
-		var attempt_status: String = str(result.get("status", "unknown"))
-		_debug_log("WFC: attempt %d result %s in %.3f s (total %.3f s)." % [
-			attempt,
-			attempt_status,
-			attempt_seconds,
-			_elapsed_seconds(total_start_ms)
-		])
+		if not chunk_result.success:
+			_debug_log("WFC: chunked solve failed.")
+			return
+		output_tiles = chunk_result.output_tiles
+		timed_out = chunk_result.timed_out
+	else:
+		var attempt := 0
+		var result: Dictionary = {}
+		while attempt < max_attempts:
+			attempt += 1
+			if attempt == 1 or attempt % 50 == 0:
+				_debug_log("WFC: attempt %d/%d" % [attempt, max_attempts])
+			var attempt_start_ms := Time.get_ticks_msec()
 
-		timed_out = result.get("timed_out", false)
+			result = await _run_wfc(
+				patterns_data.patterns,
+				patterns_data.weights,
+				patterns_data.adjacency,
+				pattern_grid_size,
+				rng,
+				time_budget_seconds,
+				enable_backtracking,
+				max_backtracks
+			)
+			var attempt_seconds := _elapsed_seconds(attempt_start_ms)
+			var attempt_status: String = str(result.get("status", "unknown"))
+			_debug_log("WFC: attempt %d result %s in %.3f s (total %.3f s)." % [
+				attempt,
+				attempt_status,
+				attempt_seconds,
+				_elapsed_seconds(total_start_ms)
+			])
+
+			timed_out = result.get("timed_out", false)
+			if timed_out:
+				_debug_log("WFC: time budget exceeded after %.3f s." % result.get("elapsed_seconds", 0.0))
+				break
+
+			if result.success:
+				break
+
+		if not result.success and not timed_out:
+			_debug_log("WFC: failed after %d attempts." % max_attempts)
+			return
 		if timed_out:
-			_debug_log("WFC: time budget exceeded after %.3f s." % result.get("elapsed_seconds", 0.0))
-			break
-
-		if result.success:
-			break
-
-	if not result.success and not timed_out:
-		_debug_log("WFC: failed after %d attempts." % max_attempts)
-		return
+			output_tiles = _build_output_tiles_partial(
+				patterns_data.patterns,
+				patterns_data.tiles,
+				result.grid,
+				pattern_grid_size,
+				target_rect,
+				overlap_size
+			)
+			var timeout_mode := time_budget_timeout_tile
+			_fill_missing_tiles_with_timeout_mode(
+				target_tilemap,
+				target_rect,
+				output_tiles,
+				sample_tiles,
+				patterns_data.tiles,
+				patterns_data.tile_counts,
+				rng,
+				timeout_mode
+			)
+		else:
+			output_tiles = _build_output_tiles(
+				patterns_data.patterns,
+				patterns_data.tiles,
+				result.grid,
+				pattern_grid_size,
+				target_rect,
+				overlap_size
+			)
 	_debug_log("WFC: phase solve %.3f s" % _elapsed_seconds(phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 
-	var output_tiles: Dictionary = {}
 	if timed_out:
-		output_tiles = _build_output_tiles_partial(
-			patterns_data.patterns,
-			patterns_data.tiles,
-			result.grid,
-			pattern_grid_size,
-			target_rect,
-			overlap_size
-		)
-		var timeout_mode := time_budget_timeout_tile
-		_fill_missing_tiles_with_timeout_mode(
-			target_tilemap,
-			target_rect,
-			output_tiles,
-			sample_tiles,
-			patterns_data.tiles,
-			patterns_data.tile_counts,
-			rng,
-			timeout_mode
-		)
-	else:
-		output_tiles = _build_output_tiles(
-			patterns_data.patterns,
-			patterns_data.tiles,
-			result.grid,
-			pattern_grid_size,
-			target_rect,
-			overlap_size
-		)
+		_debug_log("WFC: time budget exceeded; filled remaining tiles with fallback mode.")
 	_debug_log("WFC: phase output tiles %.3f s" % _elapsed_seconds(phase_start_ms))
 	phase_start_ms = Time.get_ticks_msec()
 
@@ -764,6 +788,227 @@ func _patterns_compatible(pattern_a: Array, pattern_b: Array, pattern_size: int,
 	return true
 
 
+func _run_chunked_wfc(
+	patterns: Array,
+	weights: Array,
+	adjacency: Array,
+	target_rect: Rect2i,
+	rng: RandomNumberGenerator,
+	time_budget_seconds: float,
+	allow_backtracking: bool,
+	max_backtracks: int,
+	sample_tiles: Array[Dictionary],
+	tile_data: Dictionary,
+	tile_counts: Dictionary
+) -> Dictionary:
+	var adjusted_chunk_size := max(chunk_size, overlap_size)
+	var chunk_rects := _build_chunk_rects(target_rect, adjusted_chunk_size, overlap_size)
+	if chunk_rects.is_empty():
+		_debug_log("WFC: chunked solve found no chunks.")
+		return {"success": false}
+	var remaining: Array[Vector2i] = chunk_rects.keys()
+	var solved: Dictionary = {}
+	var output_tiles: Dictionary = {}
+	var timed_out := false
+
+	while not remaining.is_empty():
+		var next_coord := _pick_next_chunk_coord(remaining, solved, rng)
+		var chunk_rect: Rect2i = chunk_rects[next_coord]
+		var grid_size := Vector2i(
+			chunk_rect.size.x - overlap_size + 1,
+			chunk_rect.size.y - overlap_size + 1
+		)
+		if grid_size.x <= 0 or grid_size.y <= 0:
+			_debug_log("WFC: chunk too small for overlap size at %s." % chunk_rect)
+			return {"success": false}
+
+		var attempt := 0
+		var result: Dictionary = {}
+		var chunk_timed_out := false
+		while attempt < max_attempts:
+			attempt += 1
+			var known_tiles := _collect_known_tiles(output_tiles, chunk_rect)
+			var initial_wave := _build_constrained_wave(
+				patterns,
+				chunk_rect,
+				grid_size,
+				overlap_size,
+				known_tiles
+			)
+			if initial_wave.is_empty():
+				_debug_log("WFC: chunked constraints invalid for %s." % chunk_rect)
+				return {"success": false}
+			result = await _run_wfc(
+				patterns,
+				weights,
+				adjacency,
+				grid_size,
+				rng,
+				time_budget_seconds,
+				allow_backtracking,
+				max_backtracks,
+				initial_wave
+			)
+			chunk_timed_out = result.get("timed_out", false)
+			if chunk_timed_out or result.success:
+				break
+		if not result.success and not chunk_timed_out:
+			_debug_log("WFC: chunk solve failed after %d attempts at %s." % [max_attempts, chunk_rect])
+			return {"success": false}
+
+		if chunk_timed_out:
+			timed_out = true
+			var partial_tiles := _build_output_tiles_partial(
+				patterns,
+				tile_data,
+				result.grid,
+				grid_size,
+				chunk_rect,
+				overlap_size
+			)
+			_merge_output_tiles(output_tiles, partial_tiles)
+			_fill_missing_tiles_with_timeout_mode(
+				get_node_or_null(target_tilemap_path) as TileMap,
+				chunk_rect,
+				output_tiles,
+				sample_tiles,
+				tile_data,
+				tile_counts,
+				rng,
+				time_budget_timeout_tile
+			)
+		else:
+			var chunk_tiles := _build_output_tiles(
+				patterns,
+				tile_data,
+				result.grid,
+				grid_size,
+				chunk_rect,
+				overlap_size
+			)
+			_merge_output_tiles(output_tiles, chunk_tiles)
+
+		solved[next_coord] = true
+		remaining.erase(next_coord)
+
+	return {"success": true, "output_tiles": output_tiles, "timed_out": timed_out}
+
+
+func _build_chunk_rects(target_rect: Rect2i, size: int, pattern_size: int) -> Dictionary:
+	var x_starts := _build_chunk_axis_starts(target_rect.position.x, target_rect.size.x, size, pattern_size)
+	var y_starts := _build_chunk_axis_starts(target_rect.position.y, target_rect.size.y, size, pattern_size)
+	var rects: Dictionary = {}
+	var x_end := target_rect.position.x + target_rect.size.x
+	var y_end := target_rect.position.y + target_rect.size.y
+	for x_index in range(x_starts.size()):
+		var start_x := x_starts[x_index]
+		var width := min(size, x_end - start_x)
+		for y_index in range(y_starts.size()):
+			var start_y := y_starts[y_index]
+			var height := min(size, y_end - start_y)
+			rects[Vector2i(x_index, y_index)] = Rect2i(start_x, start_y, width, height)
+	return rects
+
+
+func _build_chunk_axis_starts(
+	start_pos: int,
+	length: int,
+	size: int,
+	pattern_size: int
+) -> Array[int]:
+	var adjusted_size := max(size, pattern_size)
+	if length <= adjusted_size:
+		return [start_pos]
+	var starts: Array[int] = []
+	var end_pos := start_pos + length
+	var pos := start_pos
+	while pos < end_pos:
+		if end_pos - pos < adjusted_size:
+			pos = end_pos - adjusted_size
+		if not starts.is_empty() and pos <= starts.back():
+			break
+		starts.append(pos)
+		pos += adjusted_size
+	return starts
+
+
+func _pick_next_chunk_coord(
+	remaining: Array[Vector2i],
+	solved: Dictionary,
+	rng: RandomNumberGenerator
+) -> Vector2i:
+	if solved.is_empty():
+		return remaining[rng.randi_range(0, remaining.size() - 1)]
+	var candidates: Array[Vector2i] = []
+	for coord in remaining:
+		if _has_solved_neighbor(coord, solved):
+			candidates.append(coord)
+	if candidates.is_empty():
+		return remaining[rng.randi_range(0, remaining.size() - 1)]
+	return candidates[rng.randi_range(0, candidates.size() - 1)]
+
+
+func _has_solved_neighbor(coord: Vector2i, solved: Dictionary) -> bool:
+	for dir in DIRECTIONS:
+		if solved.has(coord + dir):
+			return true
+	return false
+
+
+func _collect_known_tiles(output_tiles: Dictionary, rect: Rect2i) -> Dictionary:
+	var known: Dictionary = {}
+	for y in range(rect.position.y, rect.position.y + rect.size.y):
+		for x in range(rect.position.x, rect.position.x + rect.size.x):
+			var pos := Vector2i(x, y)
+			if output_tiles.has(pos):
+				known[pos] = output_tiles[pos]
+	return known
+
+
+func _build_constrained_wave(
+	patterns: Array,
+	target_rect: Rect2i,
+	grid_size: Vector2i,
+	pattern_size: int,
+	known_tiles: Dictionary
+) -> Array:
+	var total_cells: int = grid_size.x * grid_size.y
+	var wave: Array = []
+	wave.resize(total_cells)
+	var pattern_count := patterns.size()
+	for y in range(grid_size.y):
+		for x in range(grid_size.x):
+			var allowed: Array = []
+			for pattern_index in range(pattern_count):
+				var pattern_tiles: Array = patterns[pattern_index]
+				var valid := true
+				for dy in range(pattern_size):
+					for dx in range(pattern_size):
+						var tile_pos := target_rect.position + Vector2i(x + dx, y + dy)
+						if known_tiles.has(tile_pos):
+							var tile_key: String = pattern_tiles[dy * pattern_size + dx]
+							if known_tiles[tile_pos]["key"] != tile_key:
+								valid = false
+								break
+					if not valid:
+						break
+				if valid:
+					allowed.append(pattern_index)
+			if allowed.is_empty():
+				return []
+			wave[y * grid_size.x + x] = allowed
+	return wave
+
+
+func _merge_output_tiles(output_tiles: Dictionary, new_tiles: Dictionary) -> void:
+	for tile_pos in new_tiles.keys():
+		if output_tiles.has(tile_pos):
+			if output_tiles[tile_pos]["key"] != new_tiles[tile_pos]["key"]:
+				_debug_log("WFC: tile conflict at %s during chunk merge." % tile_pos)
+			continue
+		output_tiles[tile_pos] = new_tiles[tile_pos]
+
+
 func _run_wfc(
 	patterns: Array,
 	weights: Array,
@@ -772,20 +1017,27 @@ func _run_wfc(
 	rng: RandomNumberGenerator,
 	time_budget_seconds: float = 0.0,
 	allow_backtracking: bool = false,
-	max_backtracks: int = 0
+	max_backtracks: int = 0,
+	initial_wave: Array = []
 ) -> Dictionary:
 	var init_start_ms := Time.get_ticks_msec()
 	var start_ms := Time.get_ticks_msec()
 	var total_cells: int = grid_size.x * grid_size.y
 	var wave: Array = []
-	var all_patterns: Array = []
-	for index in range(patterns.size()):
-		all_patterns.append(index)
-
-	for _i in range(total_cells):
-		wave.append(all_patterns.duplicate())
+	if initial_wave.is_empty():
+		var all_patterns: Array = []
+		for index in range(patterns.size()):
+			all_patterns.append(index)
+		for _i in range(total_cells):
+			wave.append(all_patterns.duplicate())
+	else:
+		wave = _clone_wave(initial_wave)
 
 	var stack: Array = []
+	if not initial_wave.is_empty():
+		for index in range(total_cells):
+			if wave[index].size() < patterns.size():
+				stack.append(index)
 	var allowed_mask := PackedByteArray()
 	allowed_mask.resize(patterns.size())
 	var init_seconds := _elapsed_seconds(init_start_ms)
