@@ -313,7 +313,7 @@ func _refresh_largest_walkable_cells(target_tilemap: TileMap) -> void:
 		while not queue.is_empty():
 			var current: Vector2i = queue.pop_front() as Vector2i
 			for direction in DIRECTIONS:
-				var neighbor := current + direction
+				var neighbor: Vector2i = current + direction
 				if not walkable_cells.has(neighbor):
 					continue
 				if visited.has(neighbor):
