@@ -159,7 +159,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 			return
 		output_tiles = chunk_result.output_tiles
 		timed_out = chunk_result.timed_out
-		contradiction_cells = chunk_result.get("contradiction_cells", [])
+		contradiction_cells = chunk_result.get("contradiction_cells", []) as Array[Vector2i]
 		solve_backtracks = chunk_result.get("backtracks", 0)
 		chunk_total = chunk_result.get("chunk_total", 0)
 		chunk_solved = chunk_result.get("chunk_solved", 0)
@@ -202,7 +202,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 			if result.success:
 				break
 			if attempt_status == "contradiction":
-				last_contradiction_cells = result.get("contradiction_cells", [])
+				last_contradiction_cells = result.get("contradiction_cells", []) as Array[Vector2i]
 
 		if not result.success and not timed_out:
 			contradiction_cells = _offset_cells(last_contradiction_cells, target_rect.position)
@@ -1025,7 +1025,7 @@ func _run_chunked_wfc(
 				initial_wave
 			)
 			if result.get("status", "") == "contradiction":
-				chunk_contradiction_cells = result.get("contradiction_cells", [])
+				chunk_contradiction_cells = result.get("contradiction_cells", []) as Array[Vector2i]
 			chunk_timed_out = result.get("timed_out", false)
 			backtracks_total += result.get("backtracks", 0)
 			if chunk_timed_out or result.success:
@@ -1138,7 +1138,7 @@ func _run_chunked_wfc(
 					max_backtracks
 				)
 				if result.get("status", "") == "contradiction":
-					chunk_contradiction_cells = result.get("contradiction_cells", [])
+					chunk_contradiction_cells = result.get("contradiction_cells", []) as Array[Vector2i]
 				chunk_timed_out = result.get("timed_out", false)
 				backtracks_total += result.get("backtracks", 0)
 				if chunk_timed_out or result.success:
