@@ -116,3 +116,48 @@ increases.
 | 1 | Rat | 15 |
 | 3 | Spider | 5 |
 | 5 | Ghost | 2 |
+
+## Level generator (WFC test level)
+
+The WFC test level uses `WFCLevelGenerator` (`scripts/level/wfc_level_generator.gd`) to build a
+procedural layout from a sample tilemap. The generator reads patterns from the sample tilemap,
+collapses them into a target grid, then writes the resulting tiles into the target tilemap. If the
+generator cannot solve within the time budget or attempt limit, it can partially fill the map and
+use a fallback tile to complete the remaining cells.
+
+### Scene wiring
+
+The generator is attached to the WFC test level scene and expects:
+
+* `target_tilemap_path`: tilemap that will be cleared and populated with generated tiles.
+* `sample_tilemap_path`: tilemap that provides the source patterns; it is hidden at runtime.
+* `debug_path_line_path`: optional `Line2D` used to visualize door path selection when
+  `debug_logs` is enabled.
+
+### Generation flow
+
+1. Extracts overlapping tile patterns of size `overlap_size` from the sample tilemap. Pattern
+   adjacency is computed by matching overlapping edges in four directions.
+2. Runs the WFC solver to collapse the target grid, optionally with backtracking and a time
+   budget (`time_budget_seconds`).
+3. Writes tiles into the target tilemap, then:
+   * forces the outer border to the first `wall` tile type found,
+   * positions the two doors in `LayerProps/DoorGroup` by picking a start cell near the bottom-left
+     corner and a far (90th percentile) walkable cell, and
+   * rebuilds the dirt border and moves players/enemies/props to the nearest floor cell.
+
+### Runtime controls
+
+* `generate_on_ready` triggers generation when the scene loads.
+* Pressing the `ui_accept` action (Enter/Space by default) regenerates with a new random seed.
+
+### Timeout fallback tiles
+
+When the solver times out, the generator fills the remaining empty cells using the
+`time_budget_timeout_tile` mode:
+
+* `dirt`: choose the first tile with `custom_data` type `dirt`.
+* `most_common` / `least_common`: pick the most/least common tile in the sample.
+* `random_tile`: choose a random tile from the sample for each missing cell.
+* `random_same`: choose one random tile and reuse it for all missing cells.
+* `random_top_three`: choose randomly from the three most common tiles.
