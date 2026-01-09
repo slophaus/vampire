@@ -2,6 +2,7 @@ extends Node
 class_name ArenaTimeManager
 
 signal arena_difficulty_increased(arena_difficulty: int)
+signal arena_time_completed
 
 const DIFFICULTY_INTERVAL := 15
 
@@ -65,6 +66,4 @@ func reset_state() -> void:
 
 
 func on_timer_timeout():
-	var end_screen_instance = end_screen_scene.instantiate()
-	add_child(end_screen_instance)
-	end_screen_instance.play_jingle()
+	arena_time_completed.emit()
