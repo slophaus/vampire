@@ -123,4 +123,6 @@ func on_quit_pressed():
 
 func on_options_closed(options_instance: OptionsMenu):
 	options_instance.queue_free()
+	if %OptionsButton is SoundButton:
+		%OptionsButton.reset_scale()
 	%OnePlayerButton.grab_focus()
