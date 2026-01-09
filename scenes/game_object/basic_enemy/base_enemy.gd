@@ -59,6 +59,8 @@ func _ready():
 	update_visual_scale()
 	navigation_rng.randomize()
 	_schedule_next_navigation_update()
+	GameEvents.debug_mode_toggled.connect(_on_debug_mode_toggled)
+	_on_debug_mode_toggled(GameEvents.debug_mode_enabled)
 
 
 func on_hit():
@@ -184,6 +186,11 @@ func apply_elite_stats() -> void:
 	health_component.current_health = health_component.max_health
 	contact_damage *= ELITE_DAMAGE_MULTIPLIER
 	update_visual_scale()
+
+
+func _on_debug_mode_toggled(enabled: bool) -> void:
+	if navigation_agent != null:
+		navigation_agent.debug_enabled = enabled
 
 
 func apply_dig_level() -> void:
