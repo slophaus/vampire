@@ -11,7 +11,7 @@ shader_parameter/lerp_percent = 0.0
 
 [node name="RatEnemy" instance=ExtResource("1_ypp2g")]
 script = ExtResource("2_cbo0g")
-max_health = 38.0
+max_health = 30.0
 max_speed = 105.0
 acceleration = 1.5
 contact_damage = 2.0

@@ -356,7 +356,7 @@ sources/0 = SubResource("TileSetAtlasSource_nvumn")
 script = ExtResource("1_iqu8w")
 level_id = &"main"
 spawn_rate_keyframes = Array[Vector2]([Vector2(1, 0.5), Vector2(3, 1), Vector2(16, 2)])
-enemy_spawn_keyframes = Array[Vector3]([Vector3(1, 0, 15), Vector3(2, 3, 1), Vector3(4, 4, 2), Vector3(8, 1, 5), Vector3(12, 2, 4), Vector3(14, 5, 1)])
+enemy_spawn_keyframes = Array[Vector3]([Vector3(1, 0, 15), Vector3(2, 3, 1), Vector3(4, 4, 1), Vector3(8, 1, 5), Vector3(12, 2, 4), Vector3(14, 5, 1)])
 
 [node name="LayerTilemaps" type="Node2D" parent="."]
 
@@ -375,6 +375,7 @@ z_index = 1
 
 [node name="DoorToBoss" parent="LayerProps/DoorGroup" instance=ExtResource("5_mwgft")]
 position = Vector2(390, -256)
+target_scene_path = "uid://d2t5e1r1c1gby"
 exit_door_name = &"DoorToMain"
 preserve_current_level = true
 

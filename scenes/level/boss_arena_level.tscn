@@ -1,9 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://d2t5e1r1c1gby"]
+[gd_scene load_steps=9 format=3 uid="uid://d2t5e1r1c1gby"]
 
 [ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_0tq7x"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="1_hxoa7"]
-[ext_resource type="PackedScene" uid="uid://ct3bt3o3o1yqf" path="res://scenes/level/main_level.tscn" id="5_main"]
-[ext_resource type="PackedScene" uid="uid://cwt0ajjcva1li" path="res://scenes/level/wfc_test_level.tscn" id="6_wfc"]
 [ext_resource type="PackedScene" uid="uid://b6f3xj5k6h6vl" path="res://scenes/game_object/well/well.tscn" id="7_rdh48"]
 [ext_resource type="Texture2D" uid="uid://dej1p0au5qgos" path="res://sprites/blob_dirt_border_6.png" id="8_qdgwu"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="10_t70je"]
