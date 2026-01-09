@@ -43,6 +43,10 @@ func _unhandled_input(event):
 	if event.is_action_pressed("pause"):
 		add_child(paused_menu_scene.instantiate())
 		get_tree().root.set_input_as_handled()
+		return
+	if event.is_action_pressed("toggle_navigation_debug"):
+		GameEvents.toggle_navigation_debug_disabled()
+		get_tree().root.set_input_as_handled()
 
 
 func transition_to_level(level_scene: PackedScene, exit_door_name: StringName = &"Door", preserve_current_level: bool = false) -> void:

@@ -55,6 +55,8 @@ func get_spawn_position(player_position: Vector2) -> Vector2:
 func is_spawn_cell_navigable_to_player(spawn_cell: Vector2i, player_position: Vector2) -> bool:
 	if arena_tilemap == null:
 		return false
+	if GameEvents.navigation_debug_disabled:
+		return true
 	var navigation_map := arena_tilemap.get_navigation_map(0)
 	if not navigation_map.is_valid():
 		return true

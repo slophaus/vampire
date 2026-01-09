@@ -231,7 +231,7 @@ func _find_possession_target() -> Node2D:
 
 func _get_possession_path_direction(target: Node2D) -> Vector2:
 	var offset = target.global_position - global_position
-	if navigation_agent == null:
+	if GameEvents.navigation_debug_disabled or navigation_agent == null:
 		return offset
 	navigation_agent.target_position = target.global_position
 	var next_path_position = navigation_agent.get_next_path_position()
