@@ -87,8 +87,6 @@ func _load_level(level_scene: PackedScene, exit_door_name: StringName, preserve_
 	else:
 		_restore_arena_time_state(level_scene)
 	_apply_level_settings(current_level)
-	if _defer_player_position_for_wfc(current_level, exit_door_name):
-		return
 	_position_players(current_level, exit_door_name)
 
 
@@ -123,26 +121,6 @@ func _get_level_tilemap(level: Node) -> TileMap:
 		if candidate.is_in_group("arena_tilemap"):
 			return candidate as TileMap
 	return null
-
-
-func _get_wfc_generator(level: Node) -> WFCLevelGenerator:
-	for candidate in level.find_children("", "WFCLevelGenerator", true, false):
-		return candidate as WFCLevelGenerator
-	return null
-
-
-func _defer_player_position_for_wfc(level: LevelRoot, exit_door_name: StringName) -> bool:
-	var wfc_generator := _get_wfc_generator(level)
-	if wfc_generator == null:
-		return false
-	if not wfc_generator.generate_on_ready:
-		return false
-	if wfc_generator.generation_completed:
-		return false
-	var handler := _on_wfc_generation_finished.bind(level, exit_door_name)
-	if not wfc_generator.generation_finished.is_connected(handler):
-		wfc_generator.generation_finished.connect(handler)
-	return true
 
 
 func _initialize_dirt_border(level: Node) -> void:
@@ -265,17 +243,6 @@ func _position_players(level: LevelRoot, exit_door_name: StringName) -> void:
 		if typeof(player_number) != TYPE_INT:
 			continue
 		player.global_position = spawn_position + PLAYER_FORMATION_OFFSETS.get(player_number, Vector2.ZERO)
-
-
-func _on_wfc_generation_finished(success: bool, level: LevelRoot, exit_door_name: StringName) -> void:
-	var wfc_generator := _get_wfc_generator(level)
-	if wfc_generator != null:
-		var handler := _on_wfc_generation_finished.bind(level, exit_door_name)
-		if wfc_generator.generation_finished.is_connected(handler):
-			wfc_generator.generation_finished.disconnect(handler)
-	if level != current_level:
-		return
-	_position_players(level, exit_door_name)
 
 
 func _get_spawn_position(level: LevelRoot, exit_door_name: StringName) -> Vector2:
