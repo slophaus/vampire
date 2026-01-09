@@ -12,6 +12,8 @@ const ELITE_DAMAGE_MULTIPLIER := 1.5
 const ELITE_TINT_VALUE := 0.6
 const STANDARD_TINT_VALUE := 1.0
 const GHOST_POSSESSION_TINT := Color(0.2, 1.0, 0.6, 1.0)
+const NAVIGATION_UPDATE_MIN := 0.4
+const NAVIGATION_UPDATE_MAX := 0.7
 
 @export var max_health := 10.0
 @export var max_speed := 30.0
@@ -45,6 +47,8 @@ var size_multiplier := 1.0
 var is_possessed := false
 var possessed_time_left := 0.0
 var possessed_original_stats: Dictionary = {}
+var next_navigation_update_time := 0.0
+var navigation_rng := RandomNumberGenerator.new()
 
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
@@ -53,6 +57,8 @@ func _ready():
 	apply_elite_stats()
 	apply_random_tint()
 	update_visual_scale()
+	navigation_rng.randomize()
+	_schedule_next_navigation_update()
 
 
 func on_hit():
@@ -104,7 +110,10 @@ func accelerate_to_player_with_pathfinding() -> void:
 		velocity_component.accelerate_in_direction(direct_direction.normalized())
 		return
 
-	navigation_agent.target_position = target_player.global_position
+	var now = Time.get_ticks_msec() / 1000.0
+	if now >= next_navigation_update_time:
+		navigation_agent.target_position = target_player.global_position
+		_schedule_next_navigation_update()
 	var next_path_position = navigation_agent.get_next_path_position()
 	var direction = next_path_position - global_position
 	if direction.length_squared() <= 0.001:
@@ -112,6 +121,11 @@ func accelerate_to_player_with_pathfinding() -> void:
 	if direction.length_squared() <= 0.001:
 		return
 	velocity_component.accelerate_in_direction(direction.normalized())
+
+
+func _schedule_next_navigation_update() -> void:
+	var interval = navigation_rng.randf_range(NAVIGATION_UPDATE_MIN, NAVIGATION_UPDATE_MAX)
+	next_navigation_update_time = (Time.get_ticks_msec() / 1000.0) + interval
 
 
 func apply_enemy_separation() -> void:
