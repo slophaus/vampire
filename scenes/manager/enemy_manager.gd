@@ -16,6 +16,7 @@ const GHOST_ENEMY_INDEX := 5
 
 var enemy_table = WeightedTable.new()
 var failed_spawn_count := 0
+var last_navigation_ms := 0.0
 var applied_enemy_keyframes: Dictionary = {}
 var level_spawn_rate_keyframes: Array[Vector2] = []
 var level_enemy_spawn_keyframes: Array[Vector3] = []
@@ -58,7 +59,9 @@ func is_spawn_cell_navigable_to_player(spawn_cell: Vector2i, player_position: Ve
 	if not navigation_map.is_valid():
 		return true
 	var spawn_position = arena_tilemap.to_global(arena_tilemap.map_to_local(spawn_cell))
+	var navigation_start_usec = Time.get_ticks_usec()
 	var path = NavigationServer2D.map_get_path(navigation_map, spawn_position, player_position, false)
+	last_navigation_ms = float(Time.get_ticks_usec() - navigation_start_usec) / 1000.0
 	if path.is_empty():
 		return false
 	var last_point = path[path.size() - 1]
@@ -145,6 +148,10 @@ func on_timer_timeout():
 
 func get_failed_spawn_count() -> int:
 	return failed_spawn_count
+
+
+func get_last_navigation_ms() -> float:
+	return last_navigation_ms
 
 
 func get_spawn_rate() -> float:
