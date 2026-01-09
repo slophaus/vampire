@@ -19,11 +19,14 @@ var failed_spawn_count := 0
 var applied_enemy_keyframes: Dictionary = {}
 var level_spawn_rate_keyframes: Array[Vector2] = []
 var level_enemy_spawn_keyframes: Array[Vector3] = []
+var spawning_enabled := true
 
 
 func _ready():
 	timer.timeout.connect(on_timer_timeout)
-	arena_time_manager.arena_difficulty_increased.connect(on_arena_difficulty_increased)
+	if arena_time_manager != null:
+		arena_time_manager.arena_difficulty_increased.connect(on_arena_difficulty_increased)
+		arena_time_manager.arena_time_completed.connect(on_arena_time_completed)
 	_reset_enemy_progression()
 	if arena_time_manager != null and arena_time_manager.get_arena_difficulty() > 0:
 		on_arena_difficulty_increased(arena_time_manager.get_arena_difficulty())
@@ -107,6 +110,8 @@ func get_worm_occupied_cells() -> Dictionary:
 
 
 func on_timer_timeout():
+	if not spawning_enabled:
+		return
 	timer.start()
 
 	if get_tree().get_nodes_in_group("enemy").size() >= MAX_ENEMIES:
@@ -212,9 +217,25 @@ func apply_level_settings(level: LevelRoot) -> void:
 	else:
 		level_spawn_rate_keyframes = []
 		level_enemy_spawn_keyframes = []
+	set_spawning_enabled(true)
 	_reset_enemy_progression()
 	if arena_time_manager != null:
 		on_arena_difficulty_increased(arena_time_manager.get_arena_difficulty())
+
+
+func set_spawning_enabled(enabled: bool) -> void:
+	spawning_enabled = enabled
+	if timer == null:
+		return
+	if spawning_enabled:
+		if timer.is_stopped():
+			timer.start()
+	else:
+		timer.stop()
+
+
+func on_arena_time_completed() -> void:
+	set_spawning_enabled(false)
 
 
 func _reset_enemy_progression() -> void:
