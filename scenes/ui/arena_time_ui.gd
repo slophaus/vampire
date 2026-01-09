@@ -19,9 +19,8 @@ func _process(delta):
 
 	var process_ms = Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
 	var physics_ms = Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
-	var navigation_ms = Performance.get_monitor(Performance.TIME_NAVIGATION) * 1000.0
 
-	stats_label.text = "FPS: %d\nEnemies: %d\nDifficulty: %d\nNext Diff: %s\nSpawn Rate: %.2f/s\nFailed Spawns: %d\nProcess: %.2f ms\nPhysics: %.2f ms\nNavigation: %.2f ms" % [
+	stats_label.text = "FPS: %d\nEnemies: %d\nDifficulty: %d\nNext Diff: %s\nSpawn Rate: %.2f/s\nFailed Spawns: %d\nProcess: %.2f ms\nPhysics: %.2f ms" % [
 		Engine.get_frames_per_second(),
 		get_tree().get_nodes_in_group("enemy").size(),
 		arena_time_manager.get_arena_difficulty(),
@@ -29,8 +28,7 @@ func _process(delta):
 		spawn_rate,
 		failed_spawns,
 		process_ms,
-		physics_ms,
-		navigation_ms
+		physics_ms
 	]
 
 
