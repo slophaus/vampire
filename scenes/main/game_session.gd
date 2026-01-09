@@ -44,7 +44,7 @@ func _unhandled_input(event):
 		add_child(paused_menu_scene.instantiate())
 		get_tree().root.set_input_as_handled()
 		return
-	if event.is_action_pressed("toggle_navigation_debug"):
+	if GameEvents.debug_mode_enabled and event.is_action_pressed("toggle_navigation_debug"):
 		GameEvents.toggle_navigation_debug_disabled()
 		get_tree().root.set_input_as_handled()
 
