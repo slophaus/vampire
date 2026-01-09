@@ -262,6 +262,10 @@ func can_attack() -> bool:
 	return not is_regenerating and not is_possessed
 
 
+func can_be_targeted() -> bool:
+	return not is_regenerating
+
+
 func _update_aim_laser() -> void:
 	var aim_direction = get_aim_direction()
 	if aim_direction == Vector2.ZERO:
