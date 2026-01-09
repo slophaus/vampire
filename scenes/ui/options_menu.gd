@@ -4,11 +4,13 @@ class_name OptionsMenu
 signal back_pressed
 
 @onready var window_button: Button = %WindowButton
+@onready var debug_button: Button = %DebugButton
 @onready var music_slider: Slider = %MusicSlider
 @onready var sfx_slider: Slider = %SfxSlider
 @onready var back_button: Button = %BackButton
 @onready var focus_controls: Array[Control] = [
 	window_button,
+	debug_button,
 	music_slider,
 	sfx_slider,
 	back_button,
@@ -22,6 +24,7 @@ const NAVIGATION_REPEAT_DELAY := 0.2
 func _ready():
 	back_button.pressed.connect(on_back_pressed)
 	window_button.pressed.connect(on_window_button_pressed)
+	debug_button.pressed.connect(on_debug_button_pressed)
 	music_slider.value_changed.connect(on_audio_slider_changed.bind("music"))
 	sfx_slider.value_changed.connect(on_audio_slider_changed.bind("sfx"))
 	update_display()
@@ -66,6 +69,7 @@ func update_display():
 			window_button.text = "Fullscreen"
 		_:
 			window_button.text = "Windowed"
+	debug_button.text = "Debug: On" if GameEvents.debug_mode_enabled else "Debug: Off"
 	music_slider.value = get_bus_volume_percent("music")
 	sfx_slider.value = get_bus_volume_percent("sfx")
 
@@ -101,6 +105,11 @@ func on_window_button_pressed():
 
 func on_audio_slider_changed(value: float, bus_name: String):
 	set_bus_volume_percent(bus_name, value)
+
+
+func on_debug_button_pressed():
+	GameEvents.set_debug_mode_enabled(not GameEvents.debug_mode_enabled)
+	update_display()
 
 
 

@@ -94,6 +94,20 @@ custom_minimum_size = Vector2(100, 2.08165e-12)
 layout_mode = 2
 size_flags_horizontal = 0
 
+[node name="DebugOptionContainer" type="VBoxContainer" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/DebugOptionContainer"]
+layout_mode = 2
+theme_type_variation = &"BlueOutlineLabel"
+text = "Debug Mode"
+
+[node name="DebugButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer/VBoxContainer/DebugOptionContainer" instance=ExtResource("3_n6dag")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 2.08165e-12)
+layout_mode = 2
+size_flags_horizontal = 0
+
 [node name="BackButton" parent="MarginContainer/PanelContainer/MarginContainer/VBoxContainer" instance=ExtResource("3_n6dag")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(50, 2.08165e-12)

@@ -4,6 +4,12 @@ extends CanvasLayer
 @export var enemy_manager: EnemyManager
 @onready var label = %Label
 @onready var stats_label = %StatsLabel
+@onready var stats_container = %StatsContainer
+
+
+func _ready() -> void:
+	GameEvents.debug_mode_toggled.connect(_on_debug_mode_toggled)
+	_on_debug_mode_toggled(GameEvents.debug_mode_enabled)
 
 func _process(delta):
 	if arena_time_manager == null:
@@ -33,6 +39,10 @@ func _process(delta):
 		process_ms,
 		physics_ms
 	]
+
+
+func _on_debug_mode_toggled(enabled: bool) -> void:
+	stats_container.visible = enabled
 
 
 func format_seconds_to_string(seconds: float) -> String:

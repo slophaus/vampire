@@ -78,6 +78,9 @@ func _elapsed_seconds(start_ms: int) -> float:
 
 func _ready() -> void:
 	set_process_unhandled_input(true)
+	if GameEvents != null:
+		GameEvents.debug_mode_toggled.connect(_on_debug_mode_toggled)
+		_on_debug_mode_toggled(GameEvents.debug_mode_enabled)
 	if generate_on_ready:
 		generate_level()
 
@@ -291,8 +294,17 @@ func generate_level(use_new_seed: bool = false) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept"):
+	if not GameEvents.debug_mode_enabled:
+		return
+	if event.is_action_pressed("debug_regen_wfc"):
 		generate_level(true)
+
+
+func _on_debug_mode_toggled(enabled: bool) -> void:
+	debug = enabled
+	if not debug:
+		_reset_debug_door_path()
+		_reset_debug_contradiction_dots()
 
 
 func _move_entities_to_nearest_floor(target_tilemap: TileMap) -> void:
