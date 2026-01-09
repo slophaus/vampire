@@ -123,3 +123,4 @@ func on_quit_pressed():
 
 func on_options_closed(options_instance: OptionsMenu):
 	options_instance.queue_free()
+	%OnePlayerButton.grab_focus()
