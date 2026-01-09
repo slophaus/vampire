@@ -3,6 +3,7 @@ extends Node
 signal experience_vial_collected(number: float)
 signal ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, player_number: int)
 signal player_damaged
+signal navigation_debug_toggled(enabled: bool)
 
 var player_count := 1
 var player_color_indices := [0, 1, 2, 3]
@@ -11,6 +12,7 @@ var persisted_upgrade_pools_by_player: Dictionary = {}
 var persisted_turn_player_number := 1
 var persisted_experience_state: Dictionary = {}
 var paused_main_scene: Node = null
+var navigation_debug_disabled := false
 
 const PLAYER_COLOR_OPTIONS := [
 	Color(1, 0, 0),
@@ -38,6 +40,11 @@ func emit_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dicti
 
 func emit_player_damaged():
 	player_damaged.emit()
+
+
+func toggle_navigation_debug_disabled() -> void:
+	navigation_debug_disabled = not navigation_debug_disabled
+	navigation_debug_toggled.emit(navigation_debug_disabled)
 
 
 func get_player_color(player_number: int) -> Color:

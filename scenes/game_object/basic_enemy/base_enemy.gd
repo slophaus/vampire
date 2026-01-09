@@ -97,6 +97,13 @@ func accelerate_to_player_with_pathfinding() -> void:
 	if target_player == null:
 		return
 
+	if GameEvents.navigation_debug_disabled or navigation_agent == null:
+		var direct_direction = target_player.global_position - global_position
+		if direct_direction.length_squared() <= 0.001:
+			return
+		velocity_component.accelerate_in_direction(direct_direction.normalized())
+		return
+
 	navigation_agent.target_position = target_player.global_position
 	var next_path_position = navigation_agent.get_next_path_position()
 	var direction = next_path_position - global_position
