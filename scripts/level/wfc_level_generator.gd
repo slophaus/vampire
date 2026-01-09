@@ -766,35 +766,6 @@ func _offset_cells(cells: Array[Vector2i], offset: Vector2i) -> Array[Vector2i]:
 	return offset_cells
 
 
-func _map_chunk_contradiction_cells(
-	chunk_rect: Rect2i,
-	grid_cells: Array[Vector2i],
-	known_tiles: Dictionary
-) -> Array[Vector2i]:
-	if grid_cells.is_empty():
-		return []
-	if known_tiles.is_empty():
-		return _offset_cells(grid_cells, chunk_rect.position)
-	var mapped: Array[Vector2i] = []
-	var seen: Dictionary = {}
-	for cell in grid_cells:
-		var found := false
-		for dy in range(overlap_size):
-			for dx in range(overlap_size):
-				var tile_pos := chunk_rect.position + Vector2i(cell.x + dx, cell.y + dy)
-				if known_tiles.has(tile_pos):
-					if not seen.has(tile_pos):
-						mapped.append(tile_pos)
-						seen[tile_pos] = true
-					found = true
-		if not found:
-			var fallback := chunk_rect.position + cell
-			if not seen.has(fallback):
-				mapped.append(fallback)
-				seen[fallback] = true
-	return mapped
-
-
 func _set_cell_to_tile(target_tilemap: TileMap, cell: Vector2i, tile_info: Dictionary) -> void:
 	if target_tilemap == null:
 		return
@@ -1033,12 +1004,11 @@ func _run_chunked_wfc(
 		var chunk_timed_out := false
 		var constraints_invalid := false
 		var chunk_contradiction_cells: Array[Vector2i] = []
-		var known_tiles: Dictionary = {}
 		while attempt < max_attempts_per_solve:
 			attempt += 1
 			var initial_wave: Array = []
 			if not ignore_chunk_borders:
-				known_tiles = _collect_known_tiles(output_tiles, chunk_rect)
+				var known_tiles := _collect_known_tiles(output_tiles, chunk_rect)
 				initial_wave = _build_constrained_wave(
 					patterns,
 					chunk_rect,
@@ -1062,11 +1032,7 @@ func _run_chunked_wfc(
 				initial_wave
 			)
 			if result.get("status", "") == "contradiction":
-				chunk_contradiction_cells = _map_chunk_contradiction_cells(
-					chunk_rect,
-					_as_vector2i_array(result.get("contradiction_cells", [])),
-					known_tiles
-				)
+				chunk_contradiction_cells = _as_vector2i_array(result.get("contradiction_cells", []))
 			chunk_timed_out = result.get("timed_out", false)
 			backtracks_total += result.get("backtracks", 0)
 			if chunk_timed_out or result.success:
@@ -1078,7 +1044,7 @@ func _run_chunked_wfc(
 			continue
 		if not result.success and not chunk_timed_out:
 			if not chunk_contradiction_cells.is_empty():
-				contradiction_cells.append_array(chunk_contradiction_cells)
+				contradiction_cells.append_array(_offset_cells(chunk_contradiction_cells, chunk_rect.position))
 			_debug_log("WFC: %s solve failed after %d attempts at %s; marking for border-ignored retry." % [
 				chunk_label,
 				max_attempts_per_solve,
@@ -1179,11 +1145,7 @@ func _run_chunked_wfc(
 					max_backtracks
 				)
 				if result.get("status", "") == "contradiction":
-					chunk_contradiction_cells = _map_chunk_contradiction_cells(
-						chunk_rect,
-						_as_vector2i_array(result.get("contradiction_cells", [])),
-						{}
-					)
+					chunk_contradiction_cells = _as_vector2i_array(result.get("contradiction_cells", []))
 				chunk_timed_out = result.get("timed_out", false)
 				backtracks_total += result.get("backtracks", 0)
 				if chunk_timed_out or result.success:
@@ -1191,7 +1153,7 @@ func _run_chunked_wfc(
 
 			if not result.success and not chunk_timed_out:
 				if not chunk_contradiction_cells.is_empty():
-					contradiction_cells.append_array(chunk_contradiction_cells)
+					contradiction_cells.append_array(_offset_cells(chunk_contradiction_cells, chunk_rect.position))
 				retry_failed += 1
 				_debug_log("WFC: %s solve still failed with ignored borders at %s." % [chunk_label, chunk_rect])
 				_debug_log("WFC: border-ignored retry halted: %d/%d solved, %d timed out, %d failed, %d tile conflicts across %d chunks." % [
