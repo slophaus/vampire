@@ -1,8 +1,6 @@
 extends Node
 class_name WFCLevelGenerator
 
-signal generation_finished(success: bool)
-
 @export_category("Tilemaps")
 @export var target_tilemap_path: NodePath
 @export var sample_tilemap_path: NodePath
@@ -41,7 +39,6 @@ const DEBUG_DOOR_PATH_COLOR := Color(1, 0, 0, 1)
 const DEBUG_CONTRADICTION_DOTS_NAME := "WFCContradictionDots"
 const DEBUG_CONTRADICTION_COLOR := Color(1, 0, 0, 1)
 var _largest_walkable_cells: Dictionary = {}
-var generation_completed := false
 
 
 class DebugContradictionDots:
@@ -73,14 +70,6 @@ func _debug_log(message: String) -> void:
 func _report_generation_failure(message: String) -> void:
 	_debug_log(message)
 	print("generation fail")
-	_emit_generation_finished(false)
-
-
-func _emit_generation_finished(success: bool) -> void:
-	if generation_completed:
-		return
-	generation_completed = true
-	generation_finished.emit(success)
 
 
 func _elapsed_seconds(start_ms: int) -> float:
@@ -97,7 +86,6 @@ func _ready() -> void:
 
 
 func generate_level(use_new_seed: bool = false) -> void:
-	generation_completed = false
 	var total_start_ms := Time.get_ticks_msec()
 	var phase_start_ms := total_start_ms
 	var patterns_seconds := 0.0
@@ -303,7 +291,6 @@ func generate_level(use_new_seed: bool = false) -> void:
 	_debug_log("WFC: summary %s." % ", ".join(summary_parts))
 	_debug_log("WFC: generation complete.")
 	print("generation time: %.3f sec" % total_seconds)
-	_emit_generation_finished(true)
 
 
 func _unhandled_input(event: InputEvent) -> void:
