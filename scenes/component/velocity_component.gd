@@ -58,8 +58,6 @@ func get_closest_player(from_position: Vector2) -> Node2D:
 			continue
 		if player_node.has_method("can_be_targeted") and not player_node.can_be_targeted():
 			continue
-		if player_node.has_method("can_attack") and not player_node.can_attack():
-			continue
 		var distance = from_position.distance_squared_to(player_node.global_position)
 		if distance < closest_distance:
 			closest_distance = distance
