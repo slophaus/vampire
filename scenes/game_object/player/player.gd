@@ -89,6 +89,8 @@ func _ready():
 	if poison_component != null:
 		poison_component.poison_started.connect(_on_poison_started)
 		poison_component.poison_ended.connect(_on_poison_ended)
+	GameEvents.debug_mode_toggled.connect(_on_debug_mode_toggled)
+	_on_debug_mode_toggled(GameEvents.debug_mode_enabled)
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
 	for ability in abilities.get_children():
 		if ability.has_method("set_player_number"):
@@ -239,6 +241,11 @@ func _get_possession_path_direction(target: Node2D) -> Vector2:
 	if direction.length_squared() <= 0.001:
 		return offset
 	return direction
+
+
+func _on_debug_mode_toggled(enabled: bool) -> void:
+	if navigation_agent != null:
+		navigation_agent.debug_enabled = enabled
 
 func get_aim_direction() -> Vector2:
 	var suffix = get_player_action_suffix()
