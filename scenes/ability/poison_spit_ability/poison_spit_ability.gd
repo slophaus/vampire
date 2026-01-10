@@ -15,11 +15,13 @@ var hit_count := 0
 var target_group := "enemy"
 var last_hit_target: Node2D
 var poison_duration := 2.5
+var poison_damage_per_tick := 5.0
 var owner_actor: Node2D
 
 
 func _ready():
 	animated_sprite.play()
+	animated_sprite.modulate = Color(0.3, 1, 0.3)
 	collision_shape.disabled = false
 	if hitbox_component.penetration <= 0:
 		hitbox_component.penetration = BASE_PENETRATION
@@ -75,4 +77,5 @@ func apply_poison(target: Node2D) -> void:
 	var poison_component = target.get_node_or_null("PoisonComponent") as PoisonComponent
 	if poison_component == null:
 		return
+	poison_component.damage_per_tick = poison_damage_per_tick
 	poison_component.apply_poison(poison_duration)
