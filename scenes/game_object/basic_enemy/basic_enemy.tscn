@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://bses7vk27cfvt"]
+[gd_scene load_steps=22 format=3 uid="uid://bses7vk27cfvt"]
 
 [ext_resource type="Script" uid="uid://ckddqvu6v5j4" path="res://scenes/game_object/basic_enemy/base_enemy.gd" id="1_gpcli"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_en8ir"]
