@@ -1,6 +1,6 @@
 extends Node
 
-const MAX_RANGE = 450
+const MAX_RANGE = 300
 const PLAYER_ATTACK_LAYER = 4
 const ENEMY_ATTACK_LAYER = 8
 const BASE_PENETRATION = 1
@@ -93,9 +93,9 @@ func spawn_spit(start_position: Vector2, target_position: Vector2) -> void:
 	var foreground_layer = get_tree().get_first_node_in_group("foreground_layer")
 	foreground_layer.add_child(spit_instance)
 	spit_instance.owner_actor = get_owner_actor()
-	var level_damage = base_damage + (damage_per_level * (poison_spit_level - 1))
-	spit_instance.hitbox_component.damage = level_damage * additional_damage_percent
-	spit_instance.hitbox_component.knockback = 150.0
+	spit_instance.hitbox_component.damage = 0
+	spit_instance.hitbox_component.deals_damage = false
+	spit_instance.hitbox_component.knockback = 0.0
 	spit_instance.hitbox_component.penetration = BASE_PENETRATION + (PENETRATION_PER_LEVEL * (poison_spit_level - 1))
 	spit_instance.target_group = target_group
 	spit_instance.poison_duration = base_poison_duration + (poison_duration_per_level * (poison_spit_level - 1))

@@ -1,7 +1,7 @@
 extends Node2D
 class_name PoisonSpitAbility
 
-const SPEED := 200.0
+const SPEED := 320.0
 const BASE_PENETRATION := 1
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
@@ -13,7 +13,6 @@ var max_distance := 0.0
 var distance_traveled := 0.0
 var hit_count := 0
 var target_group := "enemy"
-var last_hit_target: Node2D
 var poison_duration := 2.5
 var poison_damage_per_tick := 5.0
 var owner_actor: Node2D
@@ -52,8 +51,6 @@ func setup(start_position: Vector2, target_position: Vector2, range_limit: float
 
 func on_hit_landed(current_hits: int) -> void:
 	hit_count = current_hits
-	if last_hit_target != null:
-		apply_poison(last_hit_target)
 	if hit_count >= hitbox_component.penetration:
 		queue_free()
 
@@ -63,12 +60,12 @@ func on_area_entered(area: Area2D) -> void:
 		var hurtbox_component = area as HurtboxComponent
 		var parent_node = hurtbox_component.get_parent() as Node2D
 		if parent_node != null:
-			last_hit_target = parent_node
+			apply_poison(parent_node)
 
 
 func on_body_entered(body: Node) -> void:
 	if body is Node2D and body.is_in_group(target_group):
-		last_hit_target = body as Node2D
+		apply_poison(body as Node2D)
 
 
 func apply_poison(target: Node2D) -> void:
