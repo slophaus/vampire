@@ -37,6 +37,9 @@ func update_spider_facing() -> void:
 		visuals.scale = Vector2(size_multiplier, size_multiplier)
 	if spider_sprite == null:
 		return
+	if spider_jump_windup_left > 0.0 and spider_jump_direction != Vector2.ZERO:
+		spider_sprite.rotation = spider_jump_direction.angle() + (PI * 0.5)
+		return
 	var move_velocity := velocity_component.velocity
 	if move_velocity.length_squared() <= 0.001:
 		return
@@ -46,6 +49,12 @@ func update_spider_facing() -> void:
 func update_spider_movement(delta: float) -> void:
 	spider_jump_cooldown = max(spider_jump_cooldown - delta, 0.0)
 	if spider_jump_windup_left > 0.0:
+		var target_player := velocity_component.cached_player
+		if target_player == null:
+			velocity_component.refresh_target_player(global_position)
+			target_player = velocity_component.cached_player
+		if target_player != null:
+			spider_jump_direction = (target_player.global_position - global_position).normalized()
 		spider_jump_windup_left = max(spider_jump_windup_left - delta, 0.0)
 		spider_jump_blink_time += delta
 		update_spider_jump_blink()
