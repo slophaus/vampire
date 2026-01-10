@@ -3,6 +3,7 @@ extends BaseEnemy
 const SPIDER_BURST_DURATION := 0.3
 const SPIDER_REST_DURATION := 1.2
 const SPIDER_STOP_DECELERATION := 600.0
+const SPIDER_WALK_DECELERATION_SPEED := 40.0
 const SPIDER_JUMP_RANGE := 150.0
 const SPIDER_JUMP_COOLDOWN := 1.1
 const SPIDER_JUMP_FORCE := 500.0
@@ -67,7 +68,10 @@ func update_spider_movement(delta: float) -> void:
 			execute_spider_jump()
 		return
 	if spider_rest_time_left > 0.0:
-		set_spider_animation("stand")
+		if velocity_component.velocity.length() > SPIDER_WALK_DECELERATION_SPEED:
+			set_spider_animation("walk")
+		else:
+			set_spider_animation("stand")
 		spider_rest_time_left = max(spider_rest_time_left - delta, 0.0)
 		velocity_component.velocity = velocity_component.velocity.move_toward(
 			Vector2.ZERO,
