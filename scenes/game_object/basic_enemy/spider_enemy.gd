@@ -28,8 +28,19 @@ func _physics_process(delta):
 	update_spider_movement(delta)
 	apply_enemy_separation()
 	velocity_component.move(self)
-	update_visual_facing()
+	update_spider_facing()
 	update_possession_timer(delta)
+
+
+func update_spider_facing() -> void:
+	if visuals != null:
+		visuals.scale = Vector2(size_multiplier, size_multiplier)
+	if spider_sprite == null:
+		return
+	var move_velocity := velocity_component.velocity
+	if move_velocity.length_squared() <= 0.001:
+		return
+	spider_sprite.rotation = move_velocity.angle() + (PI * 0.5)
 
 
 func update_spider_movement(delta: float) -> void:
