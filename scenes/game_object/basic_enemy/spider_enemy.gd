@@ -17,6 +17,7 @@ var spider_jump_windup_left := 0.0
 var spider_jump_blink_time := 0.0
 var spider_jump_direction := Vector2.ZERO
 var spider_decelerating_from_burst := false
+var spider_decelerating_from_jump := false
 
 func _ready():
 	super._ready()
@@ -69,7 +70,10 @@ func update_spider_movement(delta: float) -> void:
 			execute_spider_jump()
 		return
 	if spider_rest_time_left > 0.0:
-		if spider_decelerating_from_burst \
+		if spider_decelerating_from_jump \
+			and velocity_component.velocity.length() > SPIDER_WALK_DECELERATION_SPEED:
+			set_spider_animation("jump")
+		elif spider_decelerating_from_burst \
 			and velocity_component.velocity.length() > SPIDER_WALK_DECELERATION_SPEED:
 			set_spider_animation("walk")
 		else:
@@ -81,6 +85,7 @@ func update_spider_movement(delta: float) -> void:
 		)
 		if spider_rest_time_left <= 0.0:
 			spider_decelerating_from_burst = false
+			spider_decelerating_from_jump = false
 		return
 
 	if spider_burst_time_left > 0.0:
@@ -124,13 +129,14 @@ func start_spider_jump_windup(target_player: Node2D) -> void:
 	spider_jump_windup_left = SPIDER_JUMP_WINDUP_DURATION
 	spider_jump_blink_time = 0.0
 	spider_decelerating_from_burst = false
+	spider_decelerating_from_jump = false
 	set_spider_animation("walk")
 	update_spider_jump_blink()
 
 
 func execute_spider_jump() -> void:
 	update_spider_jump_blink_strength(0.0)
-	set_spider_animation("stand")
+	set_spider_animation("jump")
 	if spider_jump_direction == Vector2.ZERO:
 		spider_rest_time_left = SPIDER_REST_DURATION
 		return
@@ -138,6 +144,7 @@ func execute_spider_jump() -> void:
 	spider_jump_cooldown = SPIDER_JUMP_COOLDOWN
 	spider_rest_time_left = SPIDER_REST_DURATION
 	spider_decelerating_from_burst = false
+	spider_decelerating_from_jump = true
 
 
 func update_spider_jump_blink() -> void:
