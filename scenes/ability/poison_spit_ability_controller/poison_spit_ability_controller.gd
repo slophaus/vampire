@@ -98,6 +98,7 @@ func spawn_spit(start_position: Vector2, target_position: Vector2) -> void:
 	spit_instance.hitbox_component.knockback = 0.0
 	spit_instance.hitbox_component.penetration = BASE_PENETRATION + (PENETRATION_PER_LEVEL * (poison_spit_level - 1))
 	spit_instance.target_group = target_group
+	spit_instance.update_collision_mask()
 	spit_instance.poison_duration = base_poison_duration + (poison_duration_per_level * (poison_spit_level - 1))
 	spit_instance.scale = Vector2.ONE * (BASE_SCALE + (SCALE_PER_LEVEL * (poison_spit_level - 1)))
 	if target_group == "player":

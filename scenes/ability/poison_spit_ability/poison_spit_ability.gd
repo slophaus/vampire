@@ -3,6 +3,8 @@ class_name PoisonSpitAbility
 
 const SPEED := 320.0
 const BASE_PENETRATION := 1
+const PLAYER_BODY_LAYER := 2
+const ENEMY_BODY_LAYER := 8
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -22,6 +24,7 @@ func _ready():
 	animated_sprite.play()
 	animated_sprite.modulate = Color(0.3, 1, 0.3)
 	collision_shape.disabled = false
+	update_collision_mask()
 	if hitbox_component.penetration <= 0:
 		hitbox_component.penetration = BASE_PENETRATION
 	hitbox_component.hit_landed.connect(on_hit_landed)
@@ -47,6 +50,12 @@ func setup(start_position: Vector2, target_position: Vector2, range_limit: float
 	rotation = direction.angle() - (PI / 2.0)
 	max_distance = range_limit
 	distance_traveled = 0.0
+
+
+func update_collision_mask() -> void:
+	if hitbox_component == null:
+		return
+	hitbox_component.collision_mask = PLAYER_BODY_LAYER if target_group == "player" else ENEMY_BODY_LAYER
 
 
 func on_hit_landed(current_hits: int) -> void:
