@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://owsousbyak2l"]
+[gd_scene load_steps=12 format=3 uid="uid://owsousbyak2l"]
 
 [ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_4u6wh"]
 [ext_resource type="Script" uid="uid://djn78hgdxoebn" path="res://scenes/game_object/basic_enemy/spider_enemy.gd" id="2_xg0uw"]
@@ -9,6 +9,10 @@
 resource_local_to_scene = true
 shader = ExtResource("4_y2o7k")
 shader_parameter/lerp_percent = 0.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y2o7k"]
+atlas = ExtResource("4_rjuvl")
+region = Rect2(150, 0, 50, 50)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_70rvh"]
 atlas = ExtResource("4_rjuvl")
@@ -24,6 +28,14 @@ region = Rect2(100, 0, 50, 50)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_clblt"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y2o7k")
+}],
+"loop": true,
+"name": &"jump",
+"speed": 5.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_70rvh")
@@ -64,9 +76,8 @@ clip_children = 2
 position = Vector2(-1, -2)
 scale = Vector2(0.7, 0.7)
 sprite_frames = SubResource("SpriteFrames_clblt")
-animation = &"stand"
+animation = &"jump"
 autoplay = "stand"
-frame_progress = 0.552019
 
 [node name="enemy_color" type="ColorRect" parent="Visuals/SpiderSprite" index="0"]
 material = SubResource("CanvasItemMaterial_nb0jk")
