@@ -12,8 +12,8 @@ const SCALE_PER_LEVEL = 0.1
 @export var owner_group := "player"
 @export var target_group := "enemy"
 
-var base_damage = 1.5
-var damage_per_level = 1.0
+var base_damage = 0.0
+var damage_per_level = 0.0
 var base_poison_duration := 2.5
 var poison_duration_per_level := 0.5
 var additional_damage_percent: float = 1.0
