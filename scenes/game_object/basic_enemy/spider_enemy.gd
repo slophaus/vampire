@@ -46,6 +46,7 @@ func update_spider_facing() -> void:
 func update_spider_movement(delta: float) -> void:
 	spider_jump_cooldown = max(spider_jump_cooldown - delta, 0.0)
 	if spider_jump_windup_left > 0.0:
+		set_spider_animation("stand")
 		spider_jump_windup_left = max(spider_jump_windup_left - delta, 0.0)
 		spider_jump_blink_time += delta
 		update_spider_jump_blink()
@@ -57,6 +58,7 @@ func update_spider_movement(delta: float) -> void:
 			execute_spider_jump()
 		return
 	if spider_rest_time_left > 0.0:
+		set_spider_animation("stand")
 		spider_rest_time_left = max(spider_rest_time_left - delta, 0.0)
 		velocity_component.velocity = velocity_component.velocity.move_toward(
 			Vector2.ZERO,
@@ -65,12 +67,14 @@ func update_spider_movement(delta: float) -> void:
 		return
 
 	if spider_burst_time_left > 0.0:
+		set_spider_animation("walk")
 		spider_burst_time_left = max(spider_burst_time_left - delta, 0.0)
 		accelerate_to_player_with_pathfinding()
 		if spider_burst_time_left <= 0.0:
 			spider_rest_time_left = SPIDER_REST_DURATION
 		return
 
+	set_spider_animation("stand")
 	start_spider_burst()
 
 
@@ -81,11 +85,13 @@ func start_spider_burst() -> void:
 		target_player = velocity_component.cached_player
 	if target_player == null:
 		spider_burst_time_left = SPIDER_BURST_DURATION
+		set_spider_animation("stand")
 		return
 	if can_spider_jump(target_player):
 		start_spider_jump_windup(target_player)
 		return
 	spider_burst_time_left = SPIDER_BURST_DURATION
+	set_spider_animation("walk")
 
 
 func can_spider_jump(target_player: Node2D) -> bool:
@@ -98,6 +104,7 @@ func start_spider_jump_windup(target_player: Node2D) -> void:
 	spider_jump_direction = (target_player.global_position - global_position).normalized()
 	spider_jump_windup_left = SPIDER_JUMP_WINDUP_DURATION
 	spider_jump_blink_time = 0.0
+	set_spider_animation("stand")
 	update_spider_jump_blink()
 
 
@@ -123,3 +130,13 @@ func update_spider_jump_blink_strength(strength: float) -> void:
 	if blink_material == null:
 		return
 	blink_material.set_shader_parameter("lerp_percent", strength)
+
+
+func set_spider_animation(animation_name: String) -> void:
+	if spider_sprite == null:
+		return
+	if spider_sprite.animation == animation_name:
+		if not spider_sprite.is_playing():
+			spider_sprite.play()
+		return
+	spider_sprite.play(animation_name)
