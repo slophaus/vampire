@@ -1,8 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://owsousbyak2l"]
+[gd_scene load_steps=11 format=3 uid="uid://owsousbyak2l"]
 
 [ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_4u6wh"]
 [ext_resource type="Script" uid="uid://djn78hgdxoebn" path="res://scenes/game_object/basic_enemy/spider_enemy.gd" id="2_xg0uw"]
-[ext_resource type="Texture2D" uid="uid://cyj45untksubk" path="res://sprites/spider2.png" id="4_rjuvl"]
+[ext_resource type="Texture2D" uid="uid://u4rgmh55wee2" path="res://sprites/spider3.png" id="4_rjuvl"]
 [ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="4_y2o7k"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ollop"]
@@ -14,6 +14,14 @@ shader_parameter/lerp_percent = 0.0
 atlas = ExtResource("4_rjuvl")
 region = Rect2(0, 0, 50, 50)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_clblt"]
+atlas = ExtResource("4_rjuvl")
+region = Rect2(50, 0, 50, 50)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5nps2"]
+atlas = ExtResource("4_rjuvl")
+region = Rect2(100, 0, 50, 50)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_clblt"]
 animations = [{
 "frames": [{
@@ -21,8 +29,19 @@ animations = [{
 "texture": SubResource("AtlasTexture_70rvh")
 }],
 "loop": true,
-"name": &"default",
+"name": &"stand",
 "speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_clblt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5nps2")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 10.0
 }]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_nb0jk"]
@@ -45,6 +64,9 @@ clip_children = 2
 position = Vector2(-1, -2)
 scale = Vector2(0.7, 0.7)
 sprite_frames = SubResource("SpriteFrames_clblt")
+animation = &"stand"
+autoplay = "stand"
+frame_progress = 0.552019
 
 [node name="enemy_color" type="ColorRect" parent="Visuals/SpiderSprite" index="0"]
 material = SubResource("CanvasItemMaterial_nb0jk")
