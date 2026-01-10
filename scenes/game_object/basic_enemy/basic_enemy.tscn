@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3 uid="uid://bses7vk27cfvt"]
+[gd_scene load_steps=21 format=3 uid="uid://bses7vk27cfvt"]
 
 [ext_resource type="Script" uid="uid://ckddqvu6v5j4" path="res://scenes/game_object/basic_enemy/base_enemy.gd" id="1_gpcli"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_en8ir"]
@@ -17,12 +17,7 @@
 [ext_resource type="AudioStream" uid="uid://dycvhorndvf1c" path="res://assets/audio/footstep_carpet_002.ogg" id="13_oy0ft"]
 [ext_resource type="AudioStream" uid="uid://dqqkhujcgssj6" path="res://assets/audio/footstep_carpet_003.ogg" id="14_6oeop"]
 [ext_resource type="AudioStream" uid="uid://bmnew52u2j6r5" path="res://assets/audio/footstep_carpet_004.ogg" id="15_yavv3"]
-[ext_resource type="Texture2D" uid="uid://b4k4vbwhs13on" path="res://sprites/mouse1.png" id="17_fcdwx"]
-[ext_resource type="Texture2D" uid="uid://grf1esxamv8l" path="res://sprites/dragon1_anim.png" id="18_ql8xh"]
-[ext_resource type="Texture2D" uid="uid://bhj2q30pr1e30" path="res://sprites/gollum.png" id="19_1uv4c"]
-[ext_resource type="Texture2D" uid="uid://nnylxra1cfyn" path="res://sprites/rat2.png" id="19_vrngj"]
 [ext_resource type="PackedScene" uid="uid://b4d5h026u4tmt" path="res://scenes/component/poison_component.tscn" id="19_w8xtr"]
-[ext_resource type="Texture2D" uid="uid://vtcvj8l05fru" path="res://sprites/ghost2.png" id="23_lw8qt"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ollop"]
 resource_local_to_scene = true
@@ -31,131 +26,6 @@ shader_parameter/lerp_percent = 0.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_5yb0v"]
 radius = 13.0384
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_lw8qt"]
-atlas = ExtResource("19_vrngj")
-region = Rect2(0, 0, 100, 40)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_2d6i2"]
-atlas = ExtResource("19_vrngj")
-region = Rect2(0, 40, 100, 40)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_hxpda"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_lw8qt")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_2d6i2")
-}],
-"loop": true,
-"name": &"default",
-"speed": 5.0
-}]
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_fcdwx"]
-blend_mode = 3
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_26myy"]
-atlas = ExtResource("17_fcdwx")
-region = Rect2(0, 0, 40, 40)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_nb0jk"]
-atlas = ExtResource("17_fcdwx")
-region = Rect2(40, 0, 40, 40)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_sdy2s"]
-atlas = ExtResource("17_fcdwx")
-region = Rect2(80, 0, 40, 40)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_vrngj"]
-atlas = ExtResource("17_fcdwx")
-region = Rect2(120, 0, 40, 40)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_sdy2s"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_26myy")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_nb0jk")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_sdy2s")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_vrngj")
-}],
-"loop": true,
-"name": &"default",
-"speed": 5.0
-}]
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_26myy"]
-blend_mode = 3
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_cb80a"]
-atlas = ExtResource("18_ql8xh")
-region = Rect2(0, 0, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1qyew"]
-atlas = ExtResource("18_ql8xh")
-region = Rect2(64, 0, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ygu0k"]
-atlas = ExtResource("18_ql8xh")
-region = Rect2(128, 0, 64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_htcmv"]
-atlas = ExtResource("18_ql8xh")
-region = Rect2(192, 0, 64, 64)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_iguem"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_cb80a")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1qyew")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ygu0k")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_htcmv")
-}],
-"loop": true,
-"name": &"default",
-"speed": 5.0
-}]
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_nb0jk"]
-blend_mode = 3
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_hxpda"]
-atlas = ExtResource("23_lw8qt")
-region = Rect2(0, 0, 50, 70)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_vx8tq"]
-atlas = ExtResource("23_lw8qt")
-region = Rect2(50, 0, 50, 70)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_yypiw"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_hxpda")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_vx8tq")
-}],
-"loop": true,
-"name": &"default",
-"speed": 2.0
-}]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_5o3ap"]
 radius = 7.0
@@ -183,9 +53,8 @@ health_component = NodePath("../HealthComponent")
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
 path_postprocessing = 1
 
-[node name="HitFlashComponent" parent="." node_paths=PackedStringArray("health_component", "sprite") instance=ExtResource("7_4kqgf")]
+[node name="HitFlashComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("7_4kqgf")]
 health_component = NodePath("../HealthComponent")
-sprite = NodePath("../Visuals/mouse_sprite")
 hit_flash_material = SubResource("ShaderMaterial_ollop")
 
 [node name="DeathComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("4_j8jii")]
@@ -212,83 +81,6 @@ target_group = "player"
 
 [node name="DigAbilityController" parent="Abilities" instance=ExtResource("6_82h32")]
 owner_group = "enemy"
-
-[node name="Visuals" type="Node2D" parent="."]
-
-[node name="RatSprite" type="AnimatedSprite2D" parent="Visuals"]
-visible = false
-clip_children = 2
-position = Vector2(3, -6)
-scale = Vector2(0.55, 0.55)
-sprite_frames = SubResource("SpriteFrames_hxpda")
-autoplay = "default"
-frame_progress = 0.711659
-
-[node name="enemy_color" type="ColorRect" parent="Visuals/RatSprite"]
-material = SubResource("CanvasItemMaterial_fcdwx")
-offset_left = -42.0
-offset_top = -21.0
-offset_right = 51.0
-offset_bottom = 27.0
-
-[node name="mouse_sprite" type="AnimatedSprite2D" parent="Visuals"]
-visible = false
-clip_children = 2
-position = Vector2(3, -7)
-sprite_frames = SubResource("SpriteFrames_sdy2s")
-autoplay = "default"
-frame_progress = 0.963654
-
-[node name="enemy_color" type="ColorRect" parent="Visuals/mouse_sprite"]
-material = SubResource("CanvasItemMaterial_26myy")
-offset_left = -17.0
-offset_top = -17.0
-offset_right = 20.0
-offset_bottom = 19.0
-
-[node name="dragon_sprite" type="AnimatedSprite2D" parent="Visuals"]
-visible = false
-clip_children = 2
-position = Vector2(1, -12)
-sprite_frames = SubResource("SpriteFrames_iguem")
-autoplay = "default"
-
-[node name="enemy_color" type="ColorRect" parent="Visuals/dragon_sprite"]
-material = SubResource("CanvasItemMaterial_nb0jk")
-offset_left = -26.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 30.0
-
-[node name="SpiderSprite" type="Sprite2D" parent="Visuals"]
-visible = false
-clip_children = 2
-position = Vector2(2, -2)
-scale = Vector2(0.4, 0.4)
-texture = ExtResource("19_1uv4c")
-
-[node name="enemy_color" type="ColorRect" parent="Visuals/SpiderSprite"]
-material = SubResource("CanvasItemMaterial_nb0jk")
-offset_left = -32.0
-offset_top = -27.0
-offset_right = 30.0
-offset_bottom = 33.0
-
-[node name="GhostSprite" type="AnimatedSprite2D" parent="Visuals"]
-visible = false
-clip_children = 2
-position = Vector2(-2, 1)
-scale = Vector2(0.705, 0.705)
-sprite_frames = SubResource("SpriteFrames_yypiw")
-autoplay = "default"
-frame_progress = 0.695401
-
-[node name="enemy_color" type="ColorRect" parent="Visuals/GhostSprite"]
-material = SubResource("CanvasItemMaterial_nb0jk")
-offset_left = -27.0
-offset_top = -34.0
-offset_right = 30.0
-offset_bottom = 30.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_5o3ap")

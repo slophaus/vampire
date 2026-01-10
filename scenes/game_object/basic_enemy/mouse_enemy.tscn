@@ -1,16 +1,73 @@
-[gd_scene load_steps=5 format=3 uid="uid://x0j8ytkng0vk"]
+[gd_scene load_steps=11 format=3 uid="uid://x0j8ytkng0vk"]
 
 [ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_b0v7n"]
 [ext_resource type="Script" uid="uid://d0kgxjlkn1nw7" path="res://scenes/game_object/basic_enemy/mouse_enemy.gd" id="2_8j86p"]
 [ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="3_rtidv"]
+[ext_resource type="Texture2D" uid="uid://b4k4vbwhs13on" path="res://sprites/mouse1.png" id="4_ss3o8"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ollop"]
 resource_local_to_scene = true
 shader = ExtResource("3_rtidv")
 shader_parameter/lerp_percent = 0.0
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_26myy"]
+blend_mode = 3
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_26myy"]
+atlas = ExtResource("4_ss3o8")
+region = Rect2(0, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nb0jk"]
+atlas = ExtResource("4_ss3o8")
+region = Rect2(40, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sdy2s"]
+atlas = ExtResource("4_ss3o8")
+region = Rect2(80, 0, 40, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vrngj"]
+atlas = ExtResource("4_ss3o8")
+region = Rect2(120, 0, 40, 40)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_sdy2s"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_26myy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nb0jk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sdy2s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vrngj")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
 [node name="MouseEnemy" instance=ExtResource("1_b0v7n")]
 script = ExtResource("2_8j86p")
 
 [node name="HitFlashComponent" parent="." index="6"]
 hit_flash_material = SubResource("ShaderMaterial_ollop")
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="mouse_sprite" type="AnimatedSprite2D" parent="Visuals"]
+visible = false
+clip_children = 2
+position = Vector2(3, -7)
+sprite_frames = SubResource("SpriteFrames_sdy2s")
+autoplay = "default"
+frame_progress = 0.963654
+
+[node name="enemy_color" type="ColorRect" parent="Visuals/mouse_sprite"]
+material = SubResource("CanvasItemMaterial_26myy")
+offset_left = -17.0
+offset_top = -17.0
+offset_right = 20.0
+offset_bottom = 19.0
