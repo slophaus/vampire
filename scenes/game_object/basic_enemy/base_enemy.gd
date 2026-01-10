@@ -22,7 +22,7 @@ const NAVIGATION_UPDATE_MAX := 0.7
 @export var contact_damage := 1.0
 @export var poison_contact_duration := 0.0
 
-@onready var visuals := $Visuals
+@onready var visuals: Node2D = get_node_or_null("Visuals")
 @onready var velocity_component: VelocityComponent = $VelocityComponent
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
 @onready var health_component: HealthComponent = $HealthComponent
@@ -30,16 +30,16 @@ const NAVIGATION_UPDATE_MAX := 0.7
 @onready var death_component = $DeathComponent
 @onready var fireball_ability_controller = $Abilities/FireballAbilityController
 @onready var dig_ability_controller = $Abilities/DigAbilityController
-@onready var mouse_sprite: AnimatedSprite2D = $Visuals/mouse_sprite
-@onready var dragon_sprite: AnimatedSprite2D = $Visuals/dragon_sprite
-@onready var rat_sprite: AnimatedSprite2D = $Visuals/RatSprite
-@onready var spider_sprite: Sprite2D = $Visuals/SpiderSprite
-@onready var ghost_sprite: AnimatedSprite2D = $Visuals/GhostSprite
-@onready var mouse_color: ColorRect = $Visuals/mouse_sprite/enemy_color
-@onready var dragon_color: ColorRect = $Visuals/dragon_sprite/enemy_color
-@onready var rat_color: ColorRect = $Visuals/RatSprite/enemy_color
-@onready var spider_color: ColorRect = $Visuals/SpiderSprite/enemy_color
-@onready var ghost_color: ColorRect = $Visuals/GhostSprite/enemy_color
+@onready var mouse_sprite: AnimatedSprite2D = get_node_or_null("Visuals/mouse_sprite")
+@onready var dragon_sprite: AnimatedSprite2D = get_node_or_null("Visuals/dragon_sprite")
+@onready var rat_sprite: AnimatedSprite2D = get_node_or_null("Visuals/RatSprite")
+@onready var spider_sprite: AnimatedSprite2D = get_node_or_null("Visuals/SpiderSprite")
+@onready var ghost_sprite: AnimatedSprite2D = get_node_or_null("Visuals/GhostSprite")
+@onready var mouse_color: ColorRect = get_node_or_null("Visuals/mouse_sprite/enemy_color")
+@onready var dragon_color: ColorRect = get_node_or_null("Visuals/dragon_sprite/enemy_color")
+@onready var rat_color: ColorRect = get_node_or_null("Visuals/RatSprite/enemy_color")
+@onready var spider_color: ColorRect = get_node_or_null("Visuals/SpiderSprite/enemy_color")
+@onready var ghost_color: ColorRect = get_node_or_null("Visuals/GhostSprite/enemy_color")
 
 var enemy_tint := Color.WHITE
 var is_elite := false
@@ -84,17 +84,17 @@ func set_active_sprite(active_sprite: CanvasItem) -> void:
 
 
 func set_sprite_visibility(visible_sprite: CanvasItem) -> void:
-	mouse_sprite.visible = mouse_sprite == visible_sprite
-	dragon_sprite.visible = dragon_sprite == visible_sprite
-	rat_sprite.visible = rat_sprite == visible_sprite
-	spider_sprite.visible = spider_sprite == visible_sprite
-	ghost_sprite.visible = ghost_sprite == visible_sprite
+	for sprite in [mouse_sprite, dragon_sprite, rat_sprite, spider_sprite, ghost_sprite]:
+		if sprite == null:
+			continue
+		sprite.visible = sprite == visible_sprite
 
 
 func update_visual_facing() -> void:
 	var move_sign = sign(velocity.x)
 	if move_sign != 0:
-		visuals.scale = Vector2(move_sign * facing_multiplier * size_multiplier, size_multiplier)
+		if visuals != null:
+			visuals.scale = Vector2(move_sign * facing_multiplier * size_multiplier, size_multiplier)
 
 
 func accelerate_to_player_with_pathfinding() -> void:
@@ -201,7 +201,8 @@ func apply_dig_level() -> void:
 
 
 func update_visual_scale() -> void:
-	visuals.scale = Vector2(facing_multiplier * size_multiplier, size_multiplier)
+	if visuals != null:
+		visuals.scale = Vector2(facing_multiplier * size_multiplier, size_multiplier)
 
 
 func can_be_possessed() -> bool:
