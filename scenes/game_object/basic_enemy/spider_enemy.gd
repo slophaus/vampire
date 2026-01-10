@@ -16,6 +16,7 @@ var spider_jump_cooldown := 0.0
 var spider_jump_windup_left := 0.0
 var spider_jump_blink_time := 0.0
 var spider_jump_direction := Vector2.ZERO
+var spider_decelerating_from_burst := false
 
 func _ready():
 	super._ready()
@@ -68,7 +69,8 @@ func update_spider_movement(delta: float) -> void:
 			execute_spider_jump()
 		return
 	if spider_rest_time_left > 0.0:
-		if velocity_component.velocity.length() > SPIDER_WALK_DECELERATION_SPEED:
+		if spider_decelerating_from_burst \
+			and velocity_component.velocity.length() > SPIDER_WALK_DECELERATION_SPEED:
 			set_spider_animation("walk")
 		else:
 			set_spider_animation("stand")
@@ -77,6 +79,8 @@ func update_spider_movement(delta: float) -> void:
 			Vector2.ZERO,
 			SPIDER_STOP_DECELERATION * delta
 		)
+		if spider_rest_time_left <= 0.0:
+			spider_decelerating_from_burst = false
 		return
 
 	if spider_burst_time_left > 0.0:
@@ -85,6 +89,7 @@ func update_spider_movement(delta: float) -> void:
 		accelerate_to_player_with_pathfinding()
 		if spider_burst_time_left <= 0.0:
 			spider_rest_time_left = SPIDER_REST_DURATION
+			spider_decelerating_from_burst = true
 		return
 
 	set_spider_animation("stand")
@@ -104,6 +109,7 @@ func start_spider_burst() -> void:
 		start_spider_jump_windup(target_player)
 		return
 	spider_burst_time_left = SPIDER_BURST_DURATION
+	spider_decelerating_from_burst = false
 	set_spider_animation("walk")
 
 
@@ -117,6 +123,7 @@ func start_spider_jump_windup(target_player: Node2D) -> void:
 	spider_jump_direction = (target_player.global_position - global_position).normalized()
 	spider_jump_windup_left = SPIDER_JUMP_WINDUP_DURATION
 	spider_jump_blink_time = 0.0
+	spider_decelerating_from_burst = false
 	set_spider_animation("stand")
 	update_spider_jump_blink()
 
@@ -129,6 +136,7 @@ func execute_spider_jump() -> void:
 	velocity_component.apply_knockback(spider_jump_direction, SPIDER_JUMP_FORCE)
 	spider_jump_cooldown = SPIDER_JUMP_COOLDOWN
 	spider_rest_time_left = SPIDER_REST_DURATION
+	spider_decelerating_from_burst = false
 
 
 func update_spider_jump_blink() -> void:
