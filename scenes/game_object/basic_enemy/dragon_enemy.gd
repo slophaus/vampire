@@ -6,6 +6,7 @@ func _ready():
 	set_active_sprite(dragon_sprite)
 	fireball_ability_controller.set_active(true)
 	dig_ability_controller.set_active(false)
+	poison_spit_ability_controller.set_active(false)
 
 
 func _physics_process(delta):

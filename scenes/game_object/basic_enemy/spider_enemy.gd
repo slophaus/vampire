@@ -32,6 +32,7 @@ func _ready():
 	set_active_sprite(spider_sprite)
 	fireball_ability_controller.set_active(false)
 	dig_ability_controller.set_active(false)
+	poison_spit_ability_controller.set_active(false)
 	change_state(SpiderState.IDLE)
 
 

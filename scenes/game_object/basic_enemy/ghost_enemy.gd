@@ -32,6 +32,7 @@ func _ready():
 	set_active_sprite(ghost_sprite)
 	fireball_ability_controller.set_active(false)
 	dig_ability_controller.set_active(false)
+	poison_spit_ability_controller.set_active(false)
 	add_to_group("ghost")
 	collision_layer = 0
 	collision_mask = 0

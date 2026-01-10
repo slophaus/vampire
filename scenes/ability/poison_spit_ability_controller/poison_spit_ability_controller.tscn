@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://c0ogj7a3g3irf"]
+
+[ext_resource type="Script" path="res://scenes/ability/poison_spit_ability_controller/poison_spit_ability_controller.gd" id="1_3k5gw"]
+[ext_resource type="PackedScene" uid="uid://boq3kpgqkqf7v" path="res://scenes/ability/poison_spit_ability/poison_spit_ability.tscn" id="2_eor4m"]
+
+[node name="PoisonSpitAbilityController" type="Node"]
+script = ExtResource("1_3k5gw")
+poison_spit_ability = ExtResource("2_eor4m")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 5.0
+autostart = true

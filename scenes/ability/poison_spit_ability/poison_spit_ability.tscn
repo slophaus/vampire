@@ -1,0 +1,58 @@
+[gd_scene load_steps=10 format=3 uid="uid://boq3kpgqkqf7v"]
+
+[ext_resource type="Texture2D" uid="uid://qdsoubk4rxdn" path="res://sprites/fireball.png" id="1_7y7qo"]
+[ext_resource type="Script" uid="uid://dy3und0tae1v7" path="res://scenes/ability/poison_spit_ability/poison_spit_ability.gd" id="2_n4n6q"]
+[ext_resource type="PackedScene" uid="uid://b07jrrt845lfp" path="res://scenes/component/hitbox_component.tscn" id="3_jm40a"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jt8kd"]
+atlas = ExtResource("1_7y7qo")
+region = Rect2(0, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_54sar"]
+atlas = ExtResource("1_7y7qo")
+region = Rect2(20, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qw6a6"]
+atlas = ExtResource("1_7y7qo")
+region = Rect2(40, 0, 20, 20)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l6s7q"]
+atlas = ExtResource("1_7y7qo")
+region = Rect2(60, 0, 20, 20)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2tadk"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jt8kd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_54sar")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qw6a6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l6s7q")
+}],
+"loop": true,
+"name": &"default",
+"speed": 8.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5h1e1"]
+radius = 7.0
+
+[node name="PoisonSpitAbility" type="Node2D"]
+script = ExtResource("2_n4n6q")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -5)
+scale = Vector2(1.2, 1.2)
+sprite_frames = SubResource("SpriteFrames_2tadk")
+autoplay = "default"
+
+[node name="HitboxComponent" parent="." instance=ExtResource("3_jm40a")]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxComponent"]
+shape = SubResource("CircleShape2D_5h1e1")

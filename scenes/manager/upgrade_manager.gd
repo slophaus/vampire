@@ -15,10 +15,12 @@ var upgrade_axe := preload("res://resources/upgrades/axe.tres")
 var upgrade_axe_damage := preload("res://resources/upgrades/axe_damage.tres")
 var upgrade_axe_level := preload("res://resources/upgrades/axe_level.tres")
 var upgrade_fireball := preload("res://resources/upgrades/fireball.tres")
+var upgrade_poison_spit := preload("res://resources/upgrades/poison_spit.tres")
 var upgrade_sword_rate := preload("res://resources/upgrades/sword_rate.tres")
 var upgrade_sword_damage := preload("res://resources/upgrades/sword_damage.tres")
 var upgrade_sword_level := preload("res://resources/upgrades/sword_level.tres")
 var upgrade_fireball_level := preload("res://resources/upgrades/fireball_level.tres")
+var upgrade_poison_spit_level := preload("res://resources/upgrades/poison_spit_level.tres")
 var upgrade_player_speed := preload("res://resources/upgrades/player_speed.tres")
 var upgrade_player_health := preload("res://resources/upgrades/health.tres")
 var upgrade_dig := preload("res://resources/upgrades/dig.tres")
@@ -61,6 +63,7 @@ func create_upgrade_pool() -> WeightedTable:
 	upgrade_pool.add_item(upgrade_axe, 10)
 	upgrade_pool.add_item(upgrade_boomerang, 10)
 	upgrade_pool.add_item(upgrade_fireball, 10)
+	upgrade_pool.add_item(upgrade_poison_spit, 10)
 	upgrade_pool.add_item(upgrade_sword_rate, 10)
 	upgrade_pool.add_item(upgrade_sword_damage, 10)
 	upgrade_pool.add_item(upgrade_sword_level, 10)
@@ -102,6 +105,8 @@ func update_upgrade_pool(chosen_upgrade: AbilityUpgrade, upgrade_pool: WeightedT
 		upgrade_pool.add_item(upgrade_axe_level, 10)
 	if chosen_upgrade.id == upgrade_fireball.id:
 		upgrade_pool.add_item(upgrade_fireball_level, 10)
+	if chosen_upgrade.id == upgrade_poison_spit.id:
+		upgrade_pool.add_item(upgrade_poison_spit_level, 10)
 	if chosen_upgrade.id == upgrade_dig.id:
 		upgrade_pool.add_item(upgrade_dig_level, 10)
 	if chosen_upgrade.id == upgrade_whip.id:
