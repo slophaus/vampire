@@ -39,6 +39,7 @@ const DEBUG_DOOR_PATH_COLOR := Color(1, 0, 0, 1)
 const DEBUG_CONTRADICTION_DOTS_NAME := "WFCContradictionDots"
 const DEBUG_CONTRADICTION_COLOR := Color(1, 0, 0, 1)
 var _largest_walkable_cells: Dictionary = {}
+var _has_generated := false
 
 
 class DebugContradictionDots:
@@ -81,7 +82,7 @@ func _ready() -> void:
 	if GameEvents != null:
 		GameEvents.debug_mode_toggled.connect(_on_debug_mode_toggled)
 		_on_debug_mode_toggled(GameEvents.debug_mode_enabled)
-	if generate_on_ready:
+	if generate_on_ready and not _has_generated:
 		generate_level()
 
 
@@ -289,6 +290,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 	if enable_backtracking:
 		summary_parts.append("backtracks %d" % solve_backtracks)
 	_debug_log("WFC: summary %s." % ", ".join(summary_parts))
+	_has_generated = true
 	_debug_log("WFC: generation complete.")
 	print("generation time: %.3f sec" % total_seconds)
 
