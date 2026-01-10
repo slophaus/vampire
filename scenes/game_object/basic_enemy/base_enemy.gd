@@ -30,16 +30,19 @@ const NAVIGATION_UPDATE_MAX := 0.7
 @onready var death_component = $DeathComponent
 @onready var fireball_ability_controller = $Abilities/FireballAbilityController
 @onready var dig_ability_controller = $Abilities/DigAbilityController
+@onready var poison_spit_ability_controller = $Abilities/PoisonSpitAbilityController
 @onready var mouse_sprite: AnimatedSprite2D = get_node_or_null("Visuals/mouse_sprite")
 @onready var dragon_sprite: AnimatedSprite2D = get_node_or_null("Visuals/dragon_sprite")
 @onready var rat_sprite: AnimatedSprite2D = get_node_or_null("Visuals/RatSprite")
 @onready var spider_sprite: AnimatedSprite2D = get_node_or_null("Visuals/SpiderSprite")
 @onready var ghost_sprite: AnimatedSprite2D = get_node_or_null("Visuals/GhostSprite")
+@onready var scorpion_sprite: AnimatedSprite2D = get_node_or_null("Visuals/ScorpionSprite")
 @onready var mouse_color: ColorRect = get_node_or_null("Visuals/mouse_sprite/enemy_color")
 @onready var dragon_color: ColorRect = get_node_or_null("Visuals/dragon_sprite/enemy_color")
 @onready var rat_color: ColorRect = get_node_or_null("Visuals/RatSprite/enemy_color")
 @onready var spider_color: ColorRect = get_node_or_null("Visuals/SpiderSprite/enemy_color")
 @onready var ghost_color: ColorRect = get_node_or_null("Visuals/GhostSprite/enemy_color")
+@onready var scorpion_color: ColorRect = get_node_or_null("Visuals/ScorpionSprite/enemy_color")
 
 var enemy_tint := Color.WHITE
 var is_elite := false
@@ -84,7 +87,7 @@ func set_active_sprite(active_sprite: CanvasItem) -> void:
 
 
 func set_sprite_visibility(visible_sprite: CanvasItem) -> void:
-	for sprite in [mouse_sprite, dragon_sprite, rat_sprite, spider_sprite, ghost_sprite]:
+	for sprite in [mouse_sprite, dragon_sprite, rat_sprite, spider_sprite, ghost_sprite, scorpion_sprite]:
 		if sprite == null:
 			continue
 		sprite.visible = sprite == visible_sprite
@@ -162,7 +165,7 @@ func apply_random_tint() -> void:
 
 
 func apply_enemy_tint() -> void:
-	for tint_rect in [mouse_color, dragon_color, rat_color, spider_color, ghost_color]:
+	for tint_rect in [mouse_color, dragon_color, rat_color, spider_color, ghost_color, scorpion_color]:
 		if tint_rect == null:
 			continue
 		tint_rect.color = enemy_tint

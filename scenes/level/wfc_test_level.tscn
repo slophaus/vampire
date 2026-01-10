@@ -352,7 +352,7 @@ sources/0 = SubResource("TileSetAtlasSource_nvumn")
 script = ExtResource("1_level_root")
 level_id = &"wfc_test"
 spawn_rate_keyframes = Array[Vector2]([Vector2(1, 0.1), Vector2(8, 0.3), Vector2(16, 1)])
-enemy_spawn_keyframes = Array[Vector3]([Vector3(1, 2, 15), Vector3(3, 4, 5), Vector3(5, 5, 2)])
+enemy_spawn_keyframes = Array[Vector3]([Vector3(1, 2, 15), Vector3(3, 4, 5), Vector3(4, 6, 2), Vector3(5, 5, 2)])
 
 [node name="LayerTilemaps" type="Node2D" parent="."]
 

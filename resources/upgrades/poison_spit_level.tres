@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="AbilityUpgrade" load_steps=2 format=3 uid="uid://c7n1i74yeh7me"]
+
+[ext_resource type="Script" uid="uid://bo62cjqkynv4i" path="res://resources/upgrades/ability_upgrade.gd" id="1_q0dkc"]
+
+[resource]
+script = ExtResource("1_q0dkc")
+id = "poison_spit_level"
+max_quantity = 0
+name = "Poison Spit Level"
+description = "Increases poison spit damage and poison duration."

@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://bses7vk27cfvt"]
+[gd_scene load_steps=23 format=3 uid="uid://bses7vk27cfvt"]
 
 [ext_resource type="Script" uid="uid://ckddqvu6v5j4" path="res://scenes/game_object/basic_enemy/base_enemy.gd" id="1_gpcli"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_en8ir"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://cjxiijis5jocn" path="res://scenes/component/death_component.tscn" id="4_j8jii"]
 [ext_resource type="PackedScene" uid="uid://b1rgnu4v5t5yp" path="res://scenes/ability/fireball_ability_controller/fireball_ability_controller.tscn" id="5_m1ysn"]
 [ext_resource type="PackedScene" uid="uid://bnvjt5ntscb8x" path="res://scenes/ability/dig_ability_controller/dig_ability_controller.tscn" id="6_82h32"]
+[ext_resource type="PackedScene" uid="uid://c0ogj7a3g3irf" path="res://scenes/ability/poison_spit_ability_controller/poison_spit_ability_controller.tscn" id="7_7dkni"]
 [ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="6_jhg8v"]
 [ext_resource type="PackedScene" uid="uid://bkkq5ohgbnkxw" path="res://scenes/component/hit_flash_component.tscn" id="7_4kqgf"]
 [ext_resource type="PackedScene" uid="uid://bh478361trp2r" path="res://scenes/component/random_audio_stream_player_2d_component.tscn" id="10_74ju1"]
@@ -81,6 +82,10 @@ target_group = "player"
 
 [node name="DigAbilityController" parent="Abilities" instance=ExtResource("6_82h32")]
 owner_group = "enemy"
+
+[node name="PoisonSpitAbilityController" parent="Abilities" instance=ExtResource("7_7dkni")]
+owner_group = "enemy"
+target_group = "player"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_5o3ap")

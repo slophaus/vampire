@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3 uid="uid://b0t32i2sfsnld"]
+
+[ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_t6h0c"]
+[ext_resource type="Script" uid="uid://c5xjxe8jvl3e0" path="res://scenes/game_object/basic_enemy/scorpion_enemy.gd" id="2_u6i0n"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2n4sd"]
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"default",
+"speed": 6.0
+}]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_p8k2a"]
+blend_mode = 3
+
+[node name="ScorpionEnemy" instance=ExtResource("1_t6h0c")]
+script = ExtResource("2_u6i0n")
+max_health = 12.0
+max_speed = 260.0
+acceleration = 140.0
+contact_damage = 2.0
+
+[node name="Visuals" type="Node2D" parent="." index="12"]
+
+[node name="ScorpionSprite" type="AnimatedSprite2D" parent="Visuals" index="0"]
+clip_children = 2
+position = Vector2(0, -4)
+scale = Vector2(0.9, 0.9)
+sprite_frames = SubResource("SpriteFrames_2n4sd")
+autoplay = "default"
+
+[node name="enemy_color" type="ColorRect" parent="Visuals/ScorpionSprite" index="0"]
+material = SubResource("CanvasItemMaterial_p8k2a")
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
