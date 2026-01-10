@@ -793,25 +793,16 @@ func _set_cell_to_tile(target_tilemap: TileMap, cell: Vector2i, tile_info: Dicti
 
 
 func _cell_to_world(target_tilemap: TileMap, cell: Vector2i) -> Vector2:
-	var local_position = target_tilemap.map_to_local(cell) + _get_tilemap_cell_center_offset(target_tilemap)
+	var local_position = target_tilemap.map_to_local(cell)
 	return target_tilemap.to_global(local_position)
 
 
 func _get_floor_positions_from_cells(target_tilemap: TileMap, walkable_cells: Dictionary) -> Array[Vector2]:
 	var floor_positions: Array[Vector2] = []
-	var center_offset := _get_tilemap_cell_center_offset(target_tilemap)
 	for cell in walkable_cells.keys():
-		var local_position = target_tilemap.map_to_local(cell) + center_offset
+		var local_position = target_tilemap.map_to_local(cell)
 		floor_positions.append(target_tilemap.to_global(local_position))
 	return floor_positions
-
-
-func _get_tilemap_cell_center_offset(target_tilemap: TileMap) -> Vector2:
-	if target_tilemap == null:
-		return Vector2.ZERO
-	if target_tilemap.tile_set == null:
-		return Vector2.ZERO
-	return target_tilemap.tile_set.tile_size * 0.5
 
 
 func _move_nodes_in_group_to_nearest_floor(group_name: String, floor_positions: Array[Vector2]) -> void:
