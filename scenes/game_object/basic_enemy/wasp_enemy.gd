@@ -9,7 +9,6 @@ const WASP_STING_WINDUP_DURATION := 1.0
 const WASP_STING_RECOVER_DURATION := 1.8
 const WASP_STOP_DECELERATION := 440.0
 const WASP_STING_BLINK_SPEED := 8.0
-const WASP_STING_CONTACT_DAMAGE := 2.0
 
 enum WaspState {
 	NORMAL,
@@ -154,14 +153,12 @@ func change_state(new_state: WaspState) -> void:
 	match current_state:
 		WaspState.NORMAL:
 			update_wasp_sting_blink_strength(0.0)
-			contact_damage = 0.0
+			pass
 		WaspState.STING_WINDUP:
-			contact_damage = WASP_STING_CONTACT_DAMAGE
 			wasp_sting_windup_left = WASP_STING_WINDUP_DURATION
 			wasp_sting_blink_time = 0.0
 			update_wasp_sting_blink()
 		WaspState.STING_RECOVER:
-			contact_damage = WASP_STING_CONTACT_DAMAGE
 			wasp_sting_recover_left = WASP_STING_RECOVER_DURATION
 			update_wasp_sting_blink_strength(0.0)
 
