@@ -3,8 +3,11 @@ class_name ArenaTimeManager
 
 signal arena_difficulty_increased(arena_difficulty: int)
 signal arena_time_completed
+signal arena_rest_started
+signal arena_rest_ended
 
 const DIFFICULTY_INTERVAL := 15
+const REST_DURATION := 30.0
 
 @export var end_screen_scene: PackedScene
 
@@ -13,6 +16,7 @@ const DIFFICULTY_INTERVAL := 15
 var arena_difficulty = 1
 var base_duration := 0.0
 var total_duration := 0.0
+var is_resting := false
 
 
 func _ready():
@@ -22,6 +26,8 @@ func _ready():
 
 
 func _process(delta):
+	if is_resting:
+		return
 	var next_time_target = total_duration - ((arena_difficulty + 1) * DIFFICULTY_INTERVAL)
 	if timer.time_left <= next_time_target:
 		arena_difficulty += 1
@@ -66,4 +72,16 @@ func reset_state() -> void:
 
 
 func on_timer_timeout():
-	arena_time_completed.emit()
+	start_rest()
+
+
+func start_rest() -> void:
+	if is_resting:
+		return
+	is_resting = true
+	timer.stop()
+	arena_rest_started.emit()
+	await get_tree().create_timer(REST_DURATION).timeout
+	reset_state()
+	is_resting = false
+	arena_rest_ended.emit()
