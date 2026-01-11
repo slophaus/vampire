@@ -28,7 +28,8 @@ func _ready():
 	timer.timeout.connect(on_timer_timeout)
 	if arena_time_manager != null:
 		arena_time_manager.arena_difficulty_increased.connect(on_arena_difficulty_increased)
-		arena_time_manager.arena_time_completed.connect(on_arena_time_completed)
+		arena_time_manager.arena_rest_started.connect(on_arena_rest_started)
+		arena_time_manager.arena_rest_ended.connect(on_arena_rest_ended)
 	_reset_enemy_progression()
 	if arena_time_manager != null and arena_time_manager.get_arena_difficulty() > 0:
 		on_arena_difficulty_increased(arena_time_manager.get_arena_difficulty())
@@ -254,8 +255,15 @@ func set_spawning_enabled(enabled: bool) -> void:
 		timer.stop()
 
 
-func on_arena_time_completed() -> void:
+func on_arena_rest_started() -> void:
 	set_spawning_enabled(false)
+
+
+func on_arena_rest_ended() -> void:
+	_reset_enemy_progression()
+	set_spawning_enabled(true)
+	if arena_time_manager != null:
+		on_arena_difficulty_increased(arena_time_manager.get_arena_difficulty())
 
 
 func _reset_enemy_progression() -> void:
