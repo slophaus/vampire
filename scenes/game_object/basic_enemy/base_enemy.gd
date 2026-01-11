@@ -111,7 +111,7 @@ func accelerate_to_player_with_pathfinding() -> void:
 	if target_player == null:
 		return
 
-	if GameEvents.navigation_debug_disabled or navigation_agent == null:
+	if is_in_group(AIR_ENEMY_GROUP) or GameEvents.navigation_debug_disabled or navigation_agent == null:
 		var direct_direction = target_player.global_position - global_position
 		if direct_direction.length_squared() <= 0.001:
 			return

@@ -401,6 +401,9 @@ y_sort_enabled = true
 position = Vector2(492, 188)
 experience_vial_drop_radius = 60.0
 
+[node name="LayerAirEntities" type="Node2D" parent="." groups=["air_entities_layer"]]
+z_index = 6
+
 [node name="LayerEffects" type="Node2D" parent="." groups=["effects_layer", "foreground_layer"]]
 z_index = 6
 

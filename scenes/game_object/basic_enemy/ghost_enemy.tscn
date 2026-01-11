@@ -35,7 +35,7 @@ animations = [{
 "speed": 2.0
 }]
 
-[node name="GhostEnemy" instance=ExtResource("1_vx81f")]
+[node name="GhostEnemy" groups=["enemy", "air_enemy"] instance=ExtResource("1_vx81f")]
 script = ExtResource("2_j5b60")
 max_health = 25.0
 max_speed = 28.0
