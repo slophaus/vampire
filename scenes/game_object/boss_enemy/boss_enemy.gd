@@ -117,15 +117,21 @@ func spawn_explosion() -> void:
 	explosion_instance.global_position = global_position
 	explosion_instance.emitting = true
 	explosion_instance.finished.connect(explosion_instance.queue_free)
-	var effects_layer = get_tree().get_first_node_in_group("effects_layer")
-	var spawn_parent = effects_layer if effects_layer != null else get_tree().current_scene
+	var tree := get_tree()
+	if tree == null:
+		return
+	var effects_layer = tree.get_first_node_in_group("effects_layer")
+	var spawn_parent = effects_layer if effects_layer != null else tree.current_scene
 	if spawn_parent == null:
 		return
 	spawn_parent.add_child(explosion_instance)
 
 
 func spawn_boss_drops() -> void:
-	var vials_layer = get_tree().get_first_node_in_group("vials_layer")
+	var tree := get_tree()
+	if tree == null:
+		return
+	var vials_layer = tree.get_first_node_in_group("vials_layer")
 	var spawn_parent: Node = vials_layer if vials_layer != null else get_parent()
 	if spawn_parent == null:
 		return
@@ -165,7 +171,10 @@ func schedule_next_minion_spawn() -> void:
 func spawn_minions() -> void:
 	if minion_scene == null:
 		return
-	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
+	var tree := get_tree()
+	if tree == null:
+		return
+	var entities_layer = tree.get_first_node_in_group("entities_layer")
 	var spawn_parent: Node = entities_layer if entities_layer != null else get_parent()
 	if spawn_parent == null:
 		return

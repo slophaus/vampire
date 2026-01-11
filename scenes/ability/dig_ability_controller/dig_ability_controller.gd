@@ -43,8 +43,11 @@ func _on_tile_converted(world_position: Vector2) -> void:
 	var poof_instance = dig_poof_scene.instantiate() as GPUParticles2D
 	if poof_instance == null:
 		return
-	var effects_layer = get_tree().get_first_node_in_group("effects_layer")
-	var spawn_parent = effects_layer if effects_layer != null else get_tree().current_scene
+	var tree := get_tree()
+	if tree == null:
+		return
+	var effects_layer = tree.get_first_node_in_group("effects_layer")
+	var spawn_parent = effects_layer if effects_layer != null else tree.current_scene
 	if spawn_parent == null:
 		return
 	spawn_parent.add_child(poof_instance)
@@ -61,7 +64,10 @@ func get_owner_actor() -> Node2D:
 			return node as Node2D
 		node = node.get_parent()
 
-	return get_tree().get_first_node_in_group(owner_group) as Node2D
+	var tree := get_tree()
+	if tree == null:
+		return null
+	return tree.get_first_node_in_group(owner_group) as Node2D
 
 
 func resolve_player_number() -> int:
