@@ -407,7 +407,7 @@ z_index = 5
 y_sort_enabled = true
 
 [node name="WormEnemy" parent="LayerEntities" instance=ExtResource("8_uk2yf")]
-position = Vector2(535, 474)
+position = Vector2(594, 665)
 
 [node name="WormEnemy2" parent="LayerEntities" instance=ExtResource("8_uk2yf")]
 position = Vector2(321, -396)
