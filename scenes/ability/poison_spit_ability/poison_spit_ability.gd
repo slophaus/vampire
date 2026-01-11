@@ -7,6 +7,7 @@ const BASE_PENETRATION := 1
 @onready var hitbox_component: HitboxComponent = $HitboxComponent
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape: CollisionShape2D = $HitboxComponent/CollisionShape2D
+@export var dust_poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
 
 var direction := Vector2.ZERO
 var max_distance := 0.0
@@ -34,6 +35,7 @@ func _physics_process(delta: float) -> void:
 	distance_traveled += movement.length()
 
 	if distance_traveled >= max_distance:
+		spawn_dust()
 		queue_free()
 
 
@@ -49,3 +51,19 @@ func on_hit_landed(current_hits: int) -> void:
 	hit_count = current_hits
 	if hit_count >= hitbox_component.penetration:
 		queue_free()
+
+
+func spawn_dust() -> void:
+	if dust_poof_scene == null:
+		return
+	var dust_instance = dust_poof_scene.instantiate() as GPUParticles2D
+	if dust_instance == null:
+		return
+	dust_instance.global_position = global_position
+	dust_instance.emitting = true
+	dust_instance.finished.connect(dust_instance.queue_free)
+	var effects_layer = get_tree().get_first_node_in_group("effects_layer")
+	var spawn_parent = effects_layer if effects_layer != null else get_tree().current_scene
+	if spawn_parent == null:
+		return
+	spawn_parent.add_child(dust_instance)
