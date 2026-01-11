@@ -49,6 +49,9 @@ func collect():
 		queue_free()
 		return
 	GameEvents.emit_experience_vial_collected(0.25)
+	var poison_component = player.get_node_or_null("PoisonComponent") as PoisonComponent
+	if poison_component != null:
+		poison_component.clear_poison()
 	if player.has_method("flash_experience_gain"):
 		player.flash_experience_gain()
 	queue_free()
