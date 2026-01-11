@@ -34,8 +34,7 @@ func _ready():
 	dig_ability_controller.set_active(false)
 	poison_spit_ability_controller.set_active(false)
 	add_to_group("ghost")
-	collision_layer = 0
-	collision_mask = 0
+	configure_air_enemy()
 	ghost_dormant = true
 	ghost_respawn_fade = 0.0
 	visuals.modulate.a = 0.0

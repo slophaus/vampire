@@ -8,6 +8,7 @@ const WASP_STING_FORCE := 450.0
 const WASP_STING_WINDUP_DURATION := 0.8
 const WASP_STING_RECOVER_DURATION := 1.5
 const WASP_STOP_DECELERATION := 450.0
+const WASP_STING_BLINK_SPEED := 8.0
 
 enum WaspState {
 	NORMAL,
@@ -22,6 +23,7 @@ var wasp_sting_cooldown := 0.0
 var wasp_sting_windup_left := 0.0
 var wasp_sting_recover_left := 0.0
 var wasp_sting_direction := Vector2.ZERO
+var wasp_sting_blink_time := 0.0
 
 
 func _ready():
@@ -31,6 +33,7 @@ func _ready():
 	fireball_ability_controller.set_active(false)
 	dig_ability_controller.set_active(false)
 	poison_spit_ability_controller.set_active(false)
+	configure_air_enemy()
 	change_state(WaspState.NORMAL)
 
 
@@ -95,6 +98,8 @@ func update_wasp_sting_windup(delta: float) -> void:
 	if target_player != null:
 		wasp_sting_direction = (target_player.global_position - global_position).normalized()
 	wasp_sting_windup_left = max(wasp_sting_windup_left - delta, 0.0)
+	wasp_sting_blink_time += delta
+	update_wasp_sting_blink()
 	velocity_component.velocity = velocity_component.velocity.move_toward(
 		Vector2.ZERO,
 		WASP_STOP_DECELERATION * delta
@@ -104,6 +109,7 @@ func update_wasp_sting_windup(delta: float) -> void:
 
 
 func execute_wasp_sting() -> void:
+	update_wasp_sting_blink_strength(0.0)
 	if wasp_sting_direction != Vector2.ZERO:
 		velocity_component.apply_knockback(wasp_sting_direction, WASP_STING_FORCE)
 	wasp_sting_cooldown = WASP_STING_COOLDOWN
@@ -124,8 +130,26 @@ func change_state(new_state: WaspState) -> void:
 	current_state = new_state
 	match current_state:
 		WaspState.NORMAL:
+			update_wasp_sting_blink_strength(0.0)
 			pass
 		WaspState.STING_WINDUP:
 			wasp_sting_windup_left = WASP_STING_WINDUP_DURATION
+			wasp_sting_blink_time = 0.0
+			update_wasp_sting_blink()
 		WaspState.STING_RECOVER:
 			wasp_sting_recover_left = WASP_STING_RECOVER_DURATION
+			update_wasp_sting_blink_strength(0.0)
+
+
+func update_wasp_sting_blink() -> void:
+	var blink_value := 0.5 + 0.5 * sin(wasp_sting_blink_time * TAU * WASP_STING_BLINK_SPEED)
+	update_wasp_sting_blink_strength(blink_value)
+
+
+func update_wasp_sting_blink_strength(strength: float) -> void:
+	if wasp_sprite == null:
+		return
+	var blink_material := wasp_sprite.material as ShaderMaterial
+	if blink_material == null:
+		return
+	blink_material.set_shader_parameter("lerp_percent", strength)
