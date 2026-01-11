@@ -66,6 +66,7 @@ runaway counts. Arena difficulty starts at 1 and increases every 15 seconds.
 | Rat | Added at arena difficulty 12 | 38 HP, 105 max speed, 1.5 acceleration, 2 contact damage | Fast bruiser with higher contact damage. |
 | Spider | Added via level keyframes | 5 HP, 200 max speed, 100 acceleration, 1 contact damage | Fast jumper that can apply poison on contact. |
 | Ghost | Added via level keyframes | 25 HP, 28 max speed, 3.0 acceleration, 0 contact damage | Only one ghost can exist at a time. |
+| Scorpion | Added via level keyframes | 12 HP, 70 max speed, 50 acceleration, 2 contact damage | Poison spitter that fires ranged shots. |
 
 ### Worm enemy
 
@@ -85,6 +86,7 @@ Enemy spawn keyframes reference these IDs:
 | 3 | Worm |
 | 4 | Spider |
 | 5 | Ghost |
+| 6 | Scorpion |
 
 ### Level spawn rates
 
@@ -105,6 +107,7 @@ increases.
 | 1 | Mouse | 15 |
 | 2 | Worm | 1 |
 | 4 | Spider | 2 |
+| 6 | Scorpion | 3 |
 | 8 | Dragon | 5 |
 | 12 | Rat | 4 |
 | 14 | Ghost | 1 |
@@ -115,6 +118,7 @@ increases.
 | --- | --- | --- |
 | 1 | Rat | 15 |
 | 3 | Spider | 5 |
+| 4 | Scorpion | 2 |
 | 5 | Ghost | 2 |
 
 ## Level generator (WFC test level)
