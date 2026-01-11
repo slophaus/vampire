@@ -6,12 +6,11 @@ signal poison_ended
 
 @export var health_component: HealthComponent
 @export var tick_rate := 1.0
-@export var damage_per_tick := 1.0
-@export var default_duration := 3.0
+@export var poison_damage_rate := 1.0
 
 @onready var tick_timer: Timer = $TickTimer
 
-var poison_time_left := 0.0
+var poison_level := 0.0
 var is_poisoned := false
 
 
@@ -21,19 +20,10 @@ func _ready() -> void:
 		tick_timer.timeout.connect(_on_tick_timer_timeout)
 
 
-func _process(delta: float) -> void:
-	if not is_poisoned:
+func apply_poison(poison_damage: float = 0.0) -> void:
+	if poison_damage <= 0.0:
 		return
-	poison_time_left = max(poison_time_left - delta, 0.0)
-	if poison_time_left <= 0.0:
-		_stop_poison()
-
-
-func apply_poison(duration: float = 0.0) -> void:
-	var resolved_duration = duration if duration > 0.0 else default_duration
-	if resolved_duration <= 0.0:
-		return
-	poison_time_left = max(poison_time_left, resolved_duration)
+	poison_level = max(poison_level, poison_damage)
 	if not is_poisoned:
 		is_poisoned = true
 		poison_started.emit()
@@ -48,8 +38,17 @@ func clear_poison() -> void:
 func _on_tick_timer_timeout() -> void:
 	if health_component == null or not is_poisoned:
 		return
-	health_component.damage(damage_per_tick, Color(0.3, 1, 0.3))
-	if tick_timer != null:
+	var damage_per_tick := poison_damage_rate * tick_rate
+	if damage_per_tick <= 0.0:
+		_stop_poison()
+		return
+	var damage = min(poison_level, damage_per_tick)
+	if damage > 0.0:
+		health_component.damage(damage, Color(0.3, 1, 0.3))
+	poison_level = max(poison_level - damage, 0.0)
+	if poison_level <= 0.0:
+		_stop_poison()
+	elif tick_timer != null:
 		tick_timer.start()
 
 
@@ -57,6 +56,7 @@ func _stop_poison() -> void:
 	if not is_poisoned:
 		return
 	is_poisoned = false
+	poison_level = 0.0
 	poison_ended.emit()
 	if tick_timer != null:
 		tick_timer.stop()
