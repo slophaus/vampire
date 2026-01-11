@@ -223,7 +223,7 @@ func is_invulnerable() -> bool:
 
 func configure_air_enemy() -> void:
 	add_to_group(AIR_ENEMY_GROUP)
-	collision_layer = 0
+	collision_layer = 8
 	collision_mask = 0
 
 
