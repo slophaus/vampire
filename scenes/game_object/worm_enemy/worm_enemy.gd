@@ -456,7 +456,10 @@ func _start_segment_explosions() -> void:
 
 	for index in range(segment_count):
 		_explode_segment(index)
-		await get_tree().create_timer(SEGMENT_EXPLOSION_DELAY).timeout
+		var tree := get_tree()
+		if tree == null:
+			return
+		await tree.create_timer(SEGMENT_EXPLOSION_DELAY).timeout
 
 	queue_free()
 
