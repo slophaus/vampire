@@ -6,6 +6,7 @@ const MAX_SPAWN_RADIUS_MULTIPLIER = 0.75
 const MAX_ENEMIES = 500
 const MAX_SPAWN_ATTEMPTS = 1
 const GHOST_ENEMY_INDEX := 5
+const AIR_ENEMY_GROUP := "air_enemy"
 
 @export var enemy_scene: PackedScene
 @export var enemy_scenes: Array[PackedScene] = []
@@ -33,7 +34,7 @@ func _ready():
 		on_arena_difficulty_increased(arena_time_manager.get_arena_difficulty())
 
 
-func get_spawn_position(player_position: Vector2) -> Vector2:
+func get_spawn_position(player_position: Vector2, require_navigation: bool = true) -> Vector2:
 	var view_rect = get_camera_view_rect()
 	if view_rect == Rect2():
 		return Vector2.ZERO
@@ -45,7 +46,7 @@ func get_spawn_position(player_position: Vector2) -> Vector2:
 	if offscreen_cells.is_empty():
 		return Vector2.ZERO
 	var spawn_cell = offscreen_cells.pick_random()
-	if not is_spawn_cell_navigable_to_player(spawn_cell, player_position):
+	if require_navigation and not is_spawn_cell_navigable_to_player(spawn_cell, player_position):
 		return Vector2.ZERO
 	var local_position = arena_tilemap.map_to_local(spawn_cell)
 	return arena_tilemap.to_global(local_position)
@@ -126,15 +127,6 @@ func on_timer_timeout():
 	if player == null:
 		return
 
-	var spawn_position := Vector2.ZERO
-	for attempt in range(MAX_SPAWN_ATTEMPTS):
-		spawn_position = get_spawn_position(player.global_position)
-		if spawn_position != Vector2.ZERO:
-			break
-	if spawn_position == Vector2.ZERO:
-		failed_spawn_count += 1
-		return
-
 	if enemy_table.items.is_empty():
 		return
 
@@ -142,9 +134,28 @@ func on_timer_timeout():
 	if enemy_index == GHOST_ENEMY_INDEX and not can_spawn_ghost():
 		enemy_index = pick_non_ghost_enemy()
 	var enemy = get_enemy_scene(enemy_index).instantiate() as Node2D
+	var is_air_enemy := enemy.is_in_group(AIR_ENEMY_GROUP)
 
-	var entities_layer = get_tree().get_first_node_in_group("entities_layer")
-	entities_layer.add_child(enemy)
+	var spawn_position := Vector2.ZERO
+	for attempt in range(MAX_SPAWN_ATTEMPTS):
+		spawn_position = get_spawn_position(player.global_position, not is_air_enemy)
+		if spawn_position != Vector2.ZERO:
+			break
+	if spawn_position == Vector2.ZERO:
+		failed_spawn_count += 1
+		enemy.queue_free()
+		return
+
+	var target_layer = get_tree().get_first_node_in_group("entities_layer")
+	if is_air_enemy:
+		var air_layer = get_tree().get_first_node_in_group("air_entities_layer")
+		if air_layer != null:
+			target_layer = air_layer
+	if target_layer == null:
+		enemy.queue_free()
+		return
+
+	target_layer.add_child(enemy)
 	enemy.global_position = spawn_position
 
 

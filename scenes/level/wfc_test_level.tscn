@@ -413,5 +413,8 @@ z_index = 3
 z_index = 5
 y_sort_enabled = true
 
+[node name="LayerAirEntities" type="Node2D" parent="." groups=["air_entities_layer"]]
+z_index = 6
+
 [node name="LayerEffects" type="Node2D" parent="." groups=["effects_layer", "foreground_layer"]]
 z_index = 6
