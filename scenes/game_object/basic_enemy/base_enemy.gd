@@ -22,6 +22,9 @@ const AIR_ENEMY_GROUP := "air_enemy"
 @export var facing_multiplier := -1.0
 @export var contact_damage := 1.0
 @export var poison_contact_damage := 0.0
+@export var dormant_enabled := true
+@export var dormant_wake_radius := 150.0
+@export var dormant_wake_timer_seconds := 0.0
 
 @onready var visuals: Node2D = get_node_or_null("Visuals")
 @onready var velocity_component: VelocityComponent = $VelocityComponent
@@ -55,6 +58,8 @@ var possessed_time_left := 0.0
 var possessed_original_stats: Dictionary = {}
 var next_navigation_update_time := 0.0
 var navigation_rng := RandomNumberGenerator.new()
+var is_dormant := false
+var dormant_timer_left := 0.0
 
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
@@ -65,12 +70,17 @@ func _ready():
 	update_visual_scale()
 	navigation_rng.randomize()
 	_schedule_next_navigation_update()
+	if dormant_enabled:
+		is_dormant = true
+		dormant_timer_left = dormant_wake_timer_seconds
 	GameEvents.debug_mode_toggled.connect(_on_debug_mode_toggled)
 	_on_debug_mode_toggled(GameEvents.debug_mode_enabled)
 
 
 func on_hit():
 	$HitRandomAudioPlayerComponent.play_random()
+	if is_dormant:
+		wake_from_dormant()
 
 
 func apply_enemy_stats() -> void:
@@ -225,6 +235,27 @@ func configure_air_enemy() -> void:
 	add_to_group(AIR_ENEMY_GROUP)
 	collision_layer = 8
 	collision_mask = 0
+
+
+func update_dormant_state(delta: float) -> bool:
+	if not dormant_enabled:
+		return false
+	if not is_dormant:
+		return false
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player != null and global_position.distance_to(player.global_position) <= dormant_wake_radius:
+		wake_from_dormant()
+		return false
+	if dormant_wake_timer_seconds > 0.0:
+		dormant_timer_left = max(dormant_timer_left - delta, 0.0)
+		if dormant_timer_left <= 0.0:
+			wake_from_dormant()
+			return false
+	return true
+
+
+func wake_from_dormant() -> void:
+	is_dormant = false
 
 
 func start_enemy_possession(duration: float) -> void:

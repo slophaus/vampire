@@ -37,6 +37,8 @@ func _ready():
 
 
 func _physics_process(delta):
+	if update_dormant_state(delta):
+		return
 	update_spider_movement(delta)
 	apply_enemy_separation()
 	velocity_component.move(self)
