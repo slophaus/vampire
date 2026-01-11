@@ -25,25 +25,23 @@ func on_area_entered(other_area: Area2D):
 	var owner_node = get_parent()
 	if not hitbox_component.can_hit(owner_node):
 		return
-	if hitbox_component.deals_damage:
-		health_component.damage(hitbox_component.damage)
+	health_component.damage(hitbox_component.damage)
 	hitbox_component.register_hit(owner_node)
 	apply_knockback(hitbox_component)
 
-	if hitbox_component.deals_damage:
-		var floating_text = floating_text_scene.instantiate() as FloatingText
-		get_tree().get_first_node_in_group("foreground_layer").add_child(floating_text)
+	var floating_text = floating_text_scene.instantiate() as FloatingText
+	get_tree().get_first_node_in_group("foreground_layer").add_child(floating_text)
 
-		floating_text.global_position = global_position + (Vector2.UP * 16)
+	floating_text.global_position = global_position + (Vector2.UP * 16)
 	
-		# cut out for brevity
-		var fmt_string := "%0.1f"
-		if is_equal_approx(hitbox_component.damage, int(hitbox_component.damage)):
-			fmt_string = "%0.0f"
-		var damage_color := Color.WHITE
-		if owner_node != null and owner_node.is_in_group("player"):
-			damage_color = Color(1, 0.3, 0.3)
-		floating_text.start(fmt_string % hitbox_component.damage, damage_color)
+	# cut out for brevity
+	var fmt_string := "%0.1f"
+	if is_equal_approx(hitbox_component.damage, int(hitbox_component.damage)):
+		fmt_string = "%0.0f"
+	var damage_color := Color.WHITE
+	if owner_node != null and owner_node.is_in_group("player"):
+		damage_color = Color(1, 0.3, 0.3)
+	floating_text.start(fmt_string % hitbox_component.damage, damage_color)
 	
 	hit.emit()
 
