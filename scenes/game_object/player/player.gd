@@ -324,9 +324,9 @@ func on_body_entered(other_body: Node2D):
 	if typeof(contact_damage) in [TYPE_INT, TYPE_FLOAT]:
 		resolved_damage = float(contact_damage)
 	colliding_enemies[other_body] = resolved_damage
-	var poison_duration = other_body.get("poison_contact_duration")
-	if poison_component != null and typeof(poison_duration) in [TYPE_INT, TYPE_FLOAT] and poison_duration > 0.0:
-		poison_component.apply_poison(float(poison_duration))
+	var poison_damage = other_body.get("poison_contact_damage")
+	if poison_component != null and typeof(poison_damage) in [TYPE_INT, TYPE_FLOAT] and poison_damage > 0.0:
+		poison_component.apply_poison(float(poison_damage))
 	check_deal_damage()
 
 

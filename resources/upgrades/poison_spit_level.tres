@@ -7,4 +7,4 @@ script = ExtResource("1_q0dkc")
 id = "poison_spit_level"
 max_quantity = 0
 name = "Poison Spit Level"
-description = "Increases poison spit damage and poison duration."
+description = "Increases poison spit damage and poison potency."

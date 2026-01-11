@@ -20,7 +20,7 @@ const NAVIGATION_UPDATE_MAX := 0.7
 @export var acceleration := 5.0
 @export var facing_multiplier := -1.0
 @export var contact_damage := 1.0
-@export var poison_contact_duration := 0.0
+@export var poison_contact_damage := 0.0
 
 @onready var visuals: Node2D = get_node_or_null("Visuals")
 @onready var velocity_component: VelocityComponent = $VelocityComponent

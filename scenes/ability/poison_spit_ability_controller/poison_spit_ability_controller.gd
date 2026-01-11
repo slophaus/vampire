@@ -14,8 +14,8 @@ const SCALE_PER_LEVEL = 0.1
 
 var base_damage = 0.0
 var damage_per_level = 0.0
-var base_poison_duration := 2.5
-var poison_duration_per_level := 0.5
+var base_poison_damage := 12.5
+var poison_damage_per_level := 2.5
 var additional_damage_percent: float = 1.0
 var base_wait_time := 0.0
 var rate_reduction_percent := 0.0
@@ -98,7 +98,7 @@ func spawn_spit(start_position: Vector2, target_position: Vector2) -> void:
 	spit_instance.hitbox_component.knockback = 150.0
 	spit_instance.hitbox_component.penetration = BASE_PENETRATION + (PENETRATION_PER_LEVEL * (poison_spit_level - 1))
 	spit_instance.target_group = target_group
-	spit_instance.poison_duration = base_poison_duration + (poison_duration_per_level * (poison_spit_level - 1))
+	spit_instance.poison_damage = base_poison_damage + (poison_damage_per_level * (poison_spit_level - 1))
 	spit_instance.scale = Vector2.ONE * (BASE_SCALE + (SCALE_PER_LEVEL * (poison_spit_level - 1)))
 	if target_group == "player":
 		spit_instance.hitbox_component.collision_layer = ENEMY_ATTACK_LAYER
