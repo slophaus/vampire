@@ -26,6 +26,7 @@ func on_area_entered(other_area: Area2D):
 	if not hitbox_component.can_hit(owner_node):
 		return
 	health_component.damage(hitbox_component.damage)
+	apply_poison_from_hitbox(hitbox_component)
 	hitbox_component.register_hit(owner_node)
 	apply_knockback(hitbox_component)
 
@@ -44,6 +45,18 @@ func on_area_entered(other_area: Area2D):
 	floating_text.start(fmt_string % hitbox_component.damage, damage_color)
 	
 	hit.emit()
+
+
+func apply_poison_from_hitbox(hitbox_component: HitboxComponent) -> void:
+	if hitbox_component == null or hitbox_component.poison_damage <= 0.0:
+		return
+	var owner_node = get_parent()
+	if owner_node == null:
+		return
+	var poison_component = owner_node.get_node_or_null("PoisonComponent") as PoisonComponent
+	if poison_component == null:
+		return
+	poison_component.apply_poison(hitbox_component.poison_damage)
 
 
 func should_ignore_hit(hitbox_component: HitboxComponent) -> bool:
