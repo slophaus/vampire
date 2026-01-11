@@ -408,6 +408,11 @@ y_sort_enabled = true
 
 [node name="WormEnemy" parent="LayerEntities" instance=ExtResource("8_uk2yf")]
 position = Vector2(594, 665)
+dormant_wake_timer_seconds = 10.0
+
+[node name="WormEnemy3" parent="LayerEntities" instance=ExtResource("8_uk2yf")]
+position = Vector2(410, 35)
+dormant_wake_timer_seconds = 10.0
 
 [node name="WormEnemy2" parent="LayerEntities" instance=ExtResource("8_uk2yf")]
 position = Vector2(321, -396)
