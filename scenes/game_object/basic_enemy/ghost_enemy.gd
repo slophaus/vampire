@@ -25,9 +25,13 @@ var ghost_possession_target: Node2D
 var ghost_possession_time_left := 0.0
 var ghost_possession_cooldown := 0.0
 var ghost_dormant := true
+var ghost_original_collision_layer := 0
+var ghost_original_collision_mask := 0
 
 func _ready():
 	super._ready()
+	ghost_original_collision_layer = collision_layer
+	ghost_original_collision_mask = collision_mask
 	set_sprite_visibility(ghost_sprite)
 	set_active_sprite(ghost_sprite)
 	fireball_ability_controller.set_active(false)
@@ -262,11 +266,15 @@ func start_ghost_possession(target: Node2D, duration: float) -> void:
 	ghost_possession_time_left = duration
 	visuals.modulate.a = 0.0
 	ghost_offscreen_time = 0.0
+	collision_layer = 0
+	collision_mask = 0
 
 
 func end_ghost_possession(force_peak_visibility: bool = false, start_cooldown: bool = false, respawn_on_exit: bool = true) -> void:
 	ghost_possession_target = null
 	ghost_possession_time_left = 0.0
+	collision_layer = ghost_original_collision_layer
+	collision_mask = ghost_original_collision_mask
 	if start_cooldown:
 		ghost_possession_cooldown = GHOST_POSSESSION_COOLDOWN
 	if respawn_on_exit:
