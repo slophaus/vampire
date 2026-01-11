@@ -14,6 +14,7 @@ const STANDARD_TINT_VALUE := 1.0
 const GHOST_POSSESSION_TINT := Color(0.2, 1.0, 0.6, 1.0)
 const NAVIGATION_UPDATE_MIN := 0.4
 const NAVIGATION_UPDATE_MAX := 0.7
+const AIR_ENEMY_GROUP := "air_enemy"
 
 @export var max_health := 10.0
 @export var max_speed := 30.0
@@ -138,14 +139,16 @@ func _schedule_next_navigation_update() -> void:
 func apply_enemy_separation() -> void:
 	var separation_distance := SEPARATION_RADIUS * 2.0
 	var separation_force := Vector2.ZERO
+	var is_air_enemy := is_in_group(AIR_ENEMY_GROUP)
 
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if enemy == self:
 			continue
-		if enemy.is_in_group("ghost"):
-			continue
 		var enemy_node = enemy as Node2D
 		if enemy_node == null:
+			continue
+		var enemy_is_air := enemy_node.is_in_group(AIR_ENEMY_GROUP)
+		if is_air_enemy != enemy_is_air:
 			continue
 		var offset = global_position - enemy_node.global_position
 		var distance = offset.length()
@@ -216,6 +219,12 @@ func can_be_possessed() -> bool:
 
 func is_invulnerable() -> bool:
 	return false
+
+
+func configure_air_enemy() -> void:
+	add_to_group(AIR_ENEMY_GROUP)
+	collision_layer = 0
+	collision_mask = 0
 
 
 func start_enemy_possession(duration: float) -> void:
