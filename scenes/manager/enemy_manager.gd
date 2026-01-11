@@ -147,6 +147,10 @@ func on_timer_timeout():
 		enemy.queue_free()
 		return
 
+	if enemy is BaseEnemy:
+		enemy.dormant_enabled = false
+		enemy.is_dormant = false
+
 	var target_layer = get_tree().get_first_node_in_group("entities_layer")
 	if is_air_enemy:
 		var air_layer = get_tree().get_first_node_in_group("air_entities_layer")
