@@ -1,7 +1,7 @@
 extends Node2D
 class_name PoisonSpitAbility
 
-const SPEED := 200.0
+const SPEED := 350.0
 const BASE_PENETRATION := 1
 
 @onready var hitbox_component: HitboxComponent = $HitboxComponent

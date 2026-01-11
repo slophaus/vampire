@@ -1,6 +1,6 @@
 extends Node
 
-const MAX_RANGE = 450
+const MAX_RANGE = 150
 const PLAYER_ATTACK_LAYER = 4
 const ENEMY_ATTACK_LAYER = 8
 const BASE_PENETRATION = 1
@@ -14,8 +14,8 @@ const SCALE_PER_LEVEL = 0.1
 
 var base_damage = 0.0
 var damage_per_level = 0.0
-var base_poison_damage := 12.5
-var poison_damage_per_level := 2.5
+var base_poison_damage := 5.0
+var poison_damage_per_level := 3.0
 var additional_damage_percent: float = 1.0
 var base_wait_time := 0.0
 var rate_reduction_percent := 0.0
