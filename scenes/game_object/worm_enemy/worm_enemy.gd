@@ -192,8 +192,10 @@ func build_segments() -> void:
 
 
 func initialize_direction() -> void:
-	var scene_center = get_scene_center()
-	var to_center = scene_center - global_position
+	var spawn_position = get_spawn_marker_position()
+	if spawn_position == Vector2.ZERO:
+		spawn_position = get_scene_center()
+	var to_center = spawn_position - global_position
 
 	if to_center == Vector2.ZERO:
 		direction = Vector2.RIGHT
@@ -384,6 +386,20 @@ func get_scene_center() -> Vector2:
 	var camera = get_viewport().get_camera_2d()
 	if camera != null:
 		return camera.get_screen_center_position()
+	return Vector2.ZERO
+
+
+func get_spawn_marker_position() -> Vector2:
+	var scene_root = get_tree().current_scene
+	var level_root := scene_root as LevelRoot
+	var marker_name := &"PlayerSpawn"
+	if level_root != null:
+		marker_name = level_root.spawn_marker_name
+	if scene_root == null:
+		return Vector2.ZERO
+	var marker = scene_root.find_child(marker_name, true, false)
+	if marker is Node2D:
+		return marker.global_position
 	return Vector2.ZERO
 
 
