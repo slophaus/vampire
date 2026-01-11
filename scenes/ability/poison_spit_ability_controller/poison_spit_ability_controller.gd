@@ -95,10 +95,10 @@ func spawn_spit(start_position: Vector2, target_position: Vector2) -> void:
 	spit_instance.owner_actor = get_owner_actor()
 	var level_damage = base_damage + (damage_per_level * (poison_spit_level - 1))
 	spit_instance.hitbox_component.damage = level_damage * additional_damage_percent
+	spit_instance.hitbox_component.poison_damage = base_poison_damage + (poison_damage_per_level * (poison_spit_level - 1))
 	spit_instance.hitbox_component.knockback = 150.0
 	spit_instance.hitbox_component.penetration = BASE_PENETRATION + (PENETRATION_PER_LEVEL * (poison_spit_level - 1))
 	spit_instance.target_group = target_group
-	spit_instance.poison_damage = base_poison_damage + (poison_damage_per_level * (poison_spit_level - 1))
 	spit_instance.scale = Vector2.ONE * (BASE_SCALE + (SCALE_PER_LEVEL * (poison_spit_level - 1)))
 	if target_group == "player":
 		spit_instance.hitbox_component.collision_layer = ENEMY_ATTACK_LAYER
