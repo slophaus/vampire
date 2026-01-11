@@ -319,11 +319,7 @@ func update_health_bar_size() -> void:
 func on_body_entered(other_body: Node2D):
 	if other_body == null or not other_body.is_in_group("enemy"):
 		return
-	var contact_damage = other_body.get("contact_damage")
-	var resolved_damage := 1.0
-	if typeof(contact_damage) in [TYPE_INT, TYPE_FLOAT]:
-		resolved_damage = float(contact_damage)
-	colliding_enemies[other_body] = resolved_damage
+	colliding_enemies[other_body] = true
 	var poison_damage = other_body.get("poison_contact_damage")
 	if poison_component != null and typeof(poison_damage) in [TYPE_INT, TYPE_FLOAT] and poison_damage > 0.0:
 		poison_component.apply_poison(float(poison_damage))
@@ -341,8 +337,15 @@ func on_damage_interval_timer_timeout():
 
 func get_contact_damage() -> float:
 	var max_damage := 0.0
-	for damage_value in colliding_enemies.values():
-		max_damage = max(max_damage, float(damage_value))
+	for enemy in colliding_enemies.keys():
+		if not is_instance_valid(enemy):
+			colliding_enemies.erase(enemy)
+			continue
+		var contact_damage = enemy.get("contact_damage")
+		var resolved_damage := 1.0
+		if typeof(contact_damage) in [TYPE_INT, TYPE_FLOAT]:
+			resolved_damage = float(contact_damage)
+		max_damage = max(max_damage, resolved_damage)
 	return max_damage
 
 
