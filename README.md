@@ -15,7 +15,7 @@
 | Fireball Level 1 (`fireball`) | Unlock | Always in pool | Grants the Fireball ability controller (launches a fireball at a random enemy). |
 | Fireball Level (`fireball_level`) | Level | Added after unlocking Fireball | +3 damage per level, +3 splash radius per level, and +0.15 scale per level. |
 | Poison Spit Level 1 (`poison_spit`) | Unlock | Always in pool | Grants the Poison Spit ability controller (spits poison at a random enemy). |
-| Poison Spit Level (`poison_spit_level`) | Level | Added after unlocking Poison Spit | Increases poison spit damage and poison potency. |
+| Poison Spit Level (`poison_spit_level`) | Level | Added after unlocking Poison Spit | +3 poison damage per level and +0.1 scale per level. |
 | Sword Level (`sword_level`) | Level | Always in pool | Adds +1 sword per attack per level. |
 | Whip (`whip`) | Unlock | Always in pool | Grants the Whip ability controller (aimed whip strike). |
 | Whip Level (`whip_level`) | Level | Added after unlocking Whip | Longer whip per level. |
@@ -24,7 +24,7 @@
 
 | Upgrade | Availability | Effect |
 | --- | --- | --- |
-| Axe Damage (`axe_damage`) | Added after unlocking Axe | +50% axe damage per level. |
+| Axe Damage (`axe_damage`) | Added after unlocking Axe | +5 axe damage per level. |
 | Sword Damage (`sword_damage`) | Always in pool | +5 sword damage per level. |
 | Sword Rate (`sword_rate`) | Always in pool | +20% sword attack rate per level. |
 | Move Speed (`player_speed`) | Always in pool | +20% player movement speed per level. |
@@ -65,8 +65,8 @@ runaway counts. Arena difficulty starts at 1 and increases every 15 seconds.
 | --- | --- | --- | --- |
 | Mouse | Always in pool | 10 HP, 30 max speed, 5.0 acceleration, 1 contact damage | Small melee chaser. |
 | Dragon | Added at arena difficulty 8 | 10 HP, 45 max speed, 2.0 acceleration, 1 contact damage | Ranged caster that fires fireballs. |
-| Rat | Added at arena difficulty 12 | 38 HP, 105 max speed, 1.5 acceleration, 2 contact damage | Fast bruiser with higher contact damage. |
-| Spider | Added via level keyframes | 5 HP, 200 max speed, 100 acceleration, 1 contact damage | Fast jumper that can apply poison on contact. |
+| Rat | Added at arena difficulty 12 | 30 HP, 105 max speed, 1.5 acceleration, 2 contact damage | Fast bruiser with higher contact damage. |
+| Spider | Added via level keyframes | 5 HP, 200 max speed, 100 acceleration, 0 contact damage + 5 poison damage | Fast jumper that can apply poison on contact. |
 | Ghost | Added via level keyframes | 25 HP, 28 max speed, 3.0 acceleration, 0 contact damage | Only one ghost can exist at a time. |
 | Scorpion | Added via level keyframes | 12 HP, 70 max speed, 50 acceleration, 2 contact damage | Poison spitter that fires ranged shots. |
 | Wasp | Added via level keyframes | 6 HP, 160 max speed, 90 acceleration, 3 contact damage | Air enemy that wanders and lunges with a sting attack. |
