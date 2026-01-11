@@ -150,6 +150,8 @@ func on_timer_timeout():
 	if enemy is BaseEnemy:
 		enemy.dormant_enabled = false
 		enemy.is_dormant = false
+	elif enemy.has_method("set_spawned_awake"):
+		enemy.set_spawned_awake()
 
 	var target_layer = get_tree().get_first_node_in_group("entities_layer")
 	if is_air_enemy:
