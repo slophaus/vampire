@@ -28,7 +28,7 @@ animations = [{
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_tk4ad"]
 blend_mode = 3
 
-[node name="WaspEnemy" groups=["enemy", "air_enemy"] instance=ExtResource("1_f7nex")]
+[node name="WaspEnemy" groups=["air_enemy"] instance=ExtResource("1_f7nex")]
 script = ExtResource("2_1b7xk")
 max_health = 6.0
 max_speed = 160.0
@@ -43,6 +43,7 @@ hit_flash_material = SubResource("ShaderMaterial_ollop")
 [node name="WaspSprite" type="AnimatedSprite2D" parent="Visuals" index="0"]
 clip_children = 2
 position = Vector2(3, 2)
+scale = Vector2(-1, 1)
 sprite_frames = SubResource("SpriteFrames_6pttv")
 
 [node name="enemy_color" type="ColorRect" parent="Visuals/WaspSprite" index="0"]
