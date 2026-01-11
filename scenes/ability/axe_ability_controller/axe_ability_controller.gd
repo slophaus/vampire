@@ -3,7 +3,7 @@ extends Node
 @export var axe_ability_scene: PackedScene
 
 var base_damage = 10
-var additional_damage_percent: float = 1.0
+var additional_damage_bonus: float = 0.0
 var base_penetration := 3
 var axe_level := 1
 var multi_shot_delay := 0.3
@@ -35,7 +35,7 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 		return
 	match upgrade.id:
 		"axe_damage":
-			additional_damage_percent = 1 + (current_upgrades["axe_damage"]["quantity"] * 0.5)
+			additional_damage_bonus = current_upgrades["axe_damage"]["quantity"] * 5.0
 		"axe_level":
 			axe_level = 1 + current_upgrades["axe_level"]["quantity"]
 
@@ -67,7 +67,7 @@ func spawn_axes(player: Node2D, foreground: Node2D) -> void:
 		foreground.add_child(axe_instance)
 		axe_instance.source_player = player
 		axe_instance.global_position = player.global_position
-		axe_instance.hitbox_component.damage = base_damage * additional_damage_percent
+		axe_instance.hitbox_component.damage = base_damage + additional_damage_bonus
 		axe_instance.hitbox_component.knockback = 0.0
 		axe_instance.hitbox_component.penetration = base_penetration
 		if shot_index < axe_level - 1:

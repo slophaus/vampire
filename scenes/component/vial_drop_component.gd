@@ -15,9 +15,18 @@ func _ready():
 func on_died():
 	if randf() > drop_rate:
 		return
-	
+
 	var selected_vial_scene = vial_scene
-	if health_vial_scene != null and randf() < health_drop_chance:
+	var drop_chance = health_drop_chance
+	var player = get_tree().get_first_node_in_group("player")
+	if player != null:
+		var player_health = player.get_node_or_null("HealthComponent") as HealthComponent
+		if player_health != null:
+			var near_death_threshold = player.get("near_death_hit_points")
+			if typeof(near_death_threshold) in [TYPE_FLOAT, TYPE_INT]:
+				if player_health.current_health <= float(near_death_threshold):
+					drop_chance = min(drop_chance * 3.0, 1.0)
+	if health_vial_scene != null and randf() < drop_chance:
 		selected_vial_scene = health_vial_scene
 
 	if selected_vial_scene == null:
