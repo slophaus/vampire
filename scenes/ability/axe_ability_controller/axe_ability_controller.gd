@@ -63,6 +63,8 @@ func set_player_number(new_player_number: int) -> void:
 
 func spawn_axes(player: Node2D, foreground: Node2D) -> void:
 	for shot_index in range(axe_level):
+		if not is_instance_valid(foreground) or not foreground.is_inside_tree():
+			return
 		var axe_instance = axe_ability_scene.instantiate() as AxeAbility
 		foreground.add_child(axe_instance)
 		axe_instance.source_player = player
