@@ -24,7 +24,6 @@ var ghost_respawn_fade := 1.0
 var ghost_possession_target: Node2D
 var ghost_possession_time_left := 0.0
 var ghost_possession_cooldown := 0.0
-var ghost_dormant := true
 var ghost_original_collision_layer := 0
 var ghost_original_collision_mask := 0
 
@@ -39,7 +38,7 @@ func _ready():
 	poison_spit_ability_controller.set_active(false)
 	add_to_group("ghost")
 	configure_air_enemy()
-	ghost_dormant = true
+	dormant_wake_radius = GHOST_WAKE_RADIUS
 	ghost_respawn_fade = 0.0
 	visuals.modulate.a = 0.0
 
@@ -51,11 +50,6 @@ func _physics_process(delta):
 
 func on_hit():
 	super.on_hit()
-	if ghost_dormant:
-		ghost_dormant = false
-		ghost_fade_time = 0.0
-		ghost_respawn_fade = 0.0
-		visuals.modulate.a = 0.0
 
 
 func can_be_possessed() -> bool:
@@ -67,8 +61,7 @@ func is_invulnerable() -> bool:
 
 
 func update_ghost_state(delta: float) -> void:
-	if ghost_dormant:
-		update_ghost_dormant_state()
+	if update_dormant_state(delta):
 		return
 	update_ghost_fade(delta)
 	ghost_possession_cooldown = max(ghost_possession_cooldown - delta, 0.0)
@@ -142,13 +135,8 @@ func get_camera_view_rect() -> Rect2:
 	return Rect2(min_position, half_size * 2.0)
 
 
-func update_ghost_dormant_state() -> void:
-	var player := get_tree().get_first_node_in_group("player") as Node2D
-	if player == null:
-		return
-	if global_position.distance_to(player.global_position) > GHOST_WAKE_RADIUS:
-		return
-	ghost_dormant = false
+func wake_from_dormant() -> void:
+	super.wake_from_dormant()
 	ghost_fade_time = 0.0
 	ghost_respawn_fade = 0.0
 	visuals.modulate.a = 0.0

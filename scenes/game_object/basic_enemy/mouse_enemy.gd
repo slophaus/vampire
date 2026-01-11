@@ -11,6 +11,8 @@ func _ready():
 
 
 func _physics_process(delta):
+	if update_dormant_state(delta):
+		return
 	velocity_component.accelerate_to_player()
 	apply_enemy_separation()
 	velocity_component.move(self)
