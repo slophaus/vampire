@@ -14,6 +14,8 @@
 | Dig Level (`dig_level`) | Level | Added after unlocking Dig | Shortens dig cooldowns and allows digging walls at level 2. |
 | Fireball Level 1 (`fireball`) | Unlock | Always in pool | Grants the Fireball ability controller (launches a fireball at a random enemy). |
 | Fireball Level (`fireball_level`) | Level | Added after unlocking Fireball | +3 damage per level, +3 splash radius per level, and +0.15 scale per level. |
+| Poison Spit Level 1 (`poison_spit`) | Unlock | Always in pool | Grants the Poison Spit ability controller (spits poison at a random enemy). |
+| Poison Spit Level (`poison_spit_level`) | Level | Added after unlocking Poison Spit | Increases poison spit damage and poison potency. |
 | Sword Level (`sword_level`) | Level | Always in pool | Adds +1 sword per attack per level. |
 | Whip (`whip`) | Unlock | Always in pool | Grants the Whip ability controller (aimed whip strike). |
 | Whip Level (`whip_level`) | Level | Added after unlocking Whip | Longer whip per level. |
@@ -67,6 +69,7 @@ runaway counts. Arena difficulty starts at 1 and increases every 15 seconds.
 | Spider | Added via level keyframes | 5 HP, 200 max speed, 100 acceleration, 1 contact damage | Fast jumper that can apply poison on contact. |
 | Ghost | Added via level keyframes | 25 HP, 28 max speed, 3.0 acceleration, 0 contact damage | Only one ghost can exist at a time. |
 | Scorpion | Added via level keyframes | 12 HP, 70 max speed, 50 acceleration, 2 contact damage | Poison spitter that fires ranged shots. |
+| Wasp | Added via level keyframes | 6 HP, 160 max speed, 90 acceleration, 3 contact damage | Air enemy that wanders and lunges with a sting attack. |
 
 ### Worm enemy
 
@@ -87,6 +90,7 @@ Enemy spawn keyframes reference these IDs:
 | 4 | Spider |
 | 5 | Ghost |
 | 6 | Scorpion |
+| 7 | Wasp |
 
 ### Level spawn rates
 
@@ -109,6 +113,7 @@ increases.
 | 4 | Spider | 2 |
 | 6 | Scorpion | 3 |
 | 8 | Dragon | 5 |
+| 10 | Wasp | 2 |
 | 12 | Rat | 4 |
 | 14 | Ghost | 1 |
 
@@ -120,6 +125,7 @@ increases.
 | 3 | Spider | 5 |
 | 4 | Scorpion | 2 |
 | 5 | Ghost | 2 |
+| 6 | Wasp | 2 |
 
 ## Level generator (WFC test level)
 
