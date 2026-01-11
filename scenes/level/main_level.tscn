@@ -419,9 +419,10 @@ z_index = 6
 position = Vector2(72, 573)
 
 [node name="WaspEnemy" parent="LayerAirEntities" instance=ExtResource("9_krg47")]
-position = Vector2(298, 441)
+position = Vector2(756, 34)
 max_speed = 50.0
 acceleration = 5.0
+dormant_wake_radius = 300.0
 
 [node name="LayerEffects" type="Node2D" parent="." groups=["effects_layer", "foreground_layer"]]
 z_index = 6
