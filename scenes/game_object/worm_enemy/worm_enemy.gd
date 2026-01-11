@@ -20,6 +20,9 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 @export var head_tint := Color(0.85, 0.35, 0.55, 1.0)
 @export var body_tint := Color(1.0, 0.65, 0.8, 1.0)
 @export var poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
+@export var dormant_enabled := true
+@export var dormant_wake_radius := 150.0
+@export var dormant_wake_timer_seconds := 0.0
 
 @onready var segment_container := $Visuals/Segments
 @onready var collision_container := self
@@ -47,6 +50,8 @@ var segment_tints: Array = []
 var time_alive := 0.0
 var is_dying := false
 var growth_timer := 0.0
+var is_dormant := false
+var dormant_timer_left := 0.0
 
 func _ready() -> void:
 	randomize()
@@ -54,6 +59,9 @@ func _ready() -> void:
 	if health_component != null:
 		health_component.free_owner_on_death = false
 		health_component.died.connect(_on_died)
+	if dormant_enabled:
+		is_dormant = true
+		dormant_timer_left = dormant_wake_timer_seconds
 	call_deferred("_finish_spawn")
 
 
@@ -73,6 +81,8 @@ func _finish_spawn() -> void:
 
 func _physics_process(delta: float) -> void:
 	if is_dying:
+		return
+	if update_dormant_state(delta):
 		return
 	time_alive += delta
 	_update_growth(delta)
@@ -271,6 +281,32 @@ func update_segments() -> void:
 		if index == 0 and not hurtbox_shapes.is_empty():
 			hurtbox_shapes[0].position = local_position
 	_update_occupied_tiles()
+
+
+func update_dormant_state(delta: float) -> bool:
+	if not dormant_enabled:
+		return false
+	if not is_dormant:
+		return false
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player != null and global_position.distance_to(player.global_position) <= dormant_wake_radius:
+		wake_from_dormant()
+		return false
+	if dormant_wake_timer_seconds > 0.0:
+		dormant_timer_left = max(dormant_timer_left - delta, 0.0)
+		if dormant_timer_left <= 0.0:
+			wake_from_dormant()
+			return false
+	return true
+
+
+func wake_from_dormant() -> void:
+	is_dormant = false
+
+
+func set_spawned_awake() -> void:
+	dormant_enabled = false
+	is_dormant = false
 
 
 func _update_occupied_tiles() -> void:
