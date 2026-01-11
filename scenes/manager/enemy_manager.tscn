@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://eadorq7tpodo"]
+[gd_scene load_steps=10 format=3 uid="uid://eadorq7tpodo"]
 
 [ext_resource type="Script" uid="uid://fbx5f3e7sxto" path="res://scenes/manager/enemy_manager.gd" id="1_46876"]
 [ext_resource type="PackedScene" uid="uid://x0j8ytkng0vk" path="res://scenes/game_object/basic_enemy/mouse_enemy.tscn" id="2_ytlsn"]
@@ -8,11 +8,12 @@
 [ext_resource type="PackedScene" uid="uid://owsousbyak2l" path="res://scenes/game_object/basic_enemy/spider_enemy.tscn" id="6_6scq5"]
 [ext_resource type="PackedScene" uid="uid://bq0yg3a252iky" path="res://scenes/game_object/basic_enemy/ghost_enemy.tscn" id="7_44g0d"]
 [ext_resource type="PackedScene" uid="uid://b0t32i2sfsnld" path="res://scenes/game_object/basic_enemy/scorpion_enemy.tscn" id="8_6d2ey"]
+[ext_resource type="PackedScene" uid="uid://cf3s2qn8df93j" path="res://scenes/game_object/basic_enemy/wasp_enemy.tscn" id="9_w0l7m"]
 
 [node name="EnemyManager" type="Node"]
 script = ExtResource("1_46876")
 enemy_scene = ExtResource("2_ytlsn")
-enemy_scenes = Array[PackedScene]([ExtResource("2_ytlsn"), ExtResource("3_0ybpt"), ExtResource("4_ntx8s"), ExtResource("5_w8j1m"), ExtResource("6_6scq5"), ExtResource("7_44g0d"), ExtResource("8_6d2ey")])
+enemy_scenes = Array[PackedScene]([ExtResource("2_ytlsn"), ExtResource("3_0ybpt"), ExtResource("4_ntx8s"), ExtResource("5_w8j1m"), ExtResource("6_6scq5"), ExtResource("7_44g0d"), ExtResource("8_6d2ey"), ExtResource("9_w0l7m")])
 
 [node name="Timer" type="Timer" parent="."]
 wait_time = 0.75
