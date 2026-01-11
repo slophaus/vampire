@@ -417,6 +417,14 @@ dormant_wake_timer_seconds = 10.0
 [node name="WormEnemy2" parent="LayerEntities" instance=ExtResource("8_uk2yf")]
 position = Vector2(321, -396)
 
+[node name="WormEnemy4" parent="LayerEntities" instance=ExtResource("8_uk2yf")]
+position = Vector2(-560, 336)
+dormant_wake_timer_seconds = 30.0
+
+[node name="WormEnemy5" parent="LayerEntities" instance=ExtResource("8_uk2yf")]
+position = Vector2(-563, 433)
+dormant_wake_timer_seconds = 30.0
+
 [node name="LayerAirEntities" type="Node2D" parent="." groups=["air_entities_layer"]]
 z_index = 6
 
