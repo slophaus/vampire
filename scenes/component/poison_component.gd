@@ -37,8 +37,6 @@ func apply_poison(duration: float = 0.0) -> void:
 	if not is_poisoned:
 		is_poisoned = true
 		poison_started.emit()
-		if resolved_duration < tick_rate:
-			_apply_tick_damage()
 		if tick_timer != null:
 			tick_timer.start()
 
@@ -48,17 +46,11 @@ func clear_poison() -> void:
 
 
 func _on_tick_timer_timeout() -> void:
-	if not is_poisoned:
-		return
-	_apply_tick_damage()
-	if tick_timer != null:
-		tick_timer.start()
-
-
-func _apply_tick_damage() -> void:
-	if health_component == null:
+	if health_component == null or not is_poisoned:
 		return
 	health_component.damage(damage_per_tick, Color(0.3, 1, 0.3))
+	if tick_timer != null:
+		tick_timer.start()
 
 
 func _stop_poison() -> void:
