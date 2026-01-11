@@ -41,7 +41,7 @@ func _physics_process(delta):
 	update_wasp_state(delta)
 	apply_enemy_separation()
 	velocity_component.move(self)
-	update_visual_facing()
+	update_wasp_facing()
 	update_possession_timer(delta)
 
 
@@ -72,6 +72,33 @@ func update_wasp_wander(delta: float) -> void:
 		wasp_wander_direction = Vector2(cos(angle), sin(angle))
 		wasp_wander_time_left = rng.randf_range(WASP_WANDER_MIN_DURATION, WASP_WANDER_MAX_DURATION)
 	velocity_component.accelerate_in_direction(wasp_wander_direction)
+
+
+func update_wasp_facing() -> void:
+	if visuals != null:
+		if current_state == WaspState.STING_WINDUP or current_state == WaspState.STING_RECOVER:
+			visuals.scale = Vector2(size_multiplier, size_multiplier)
+		else:
+			var target_player := velocity_component.cached_player
+			if target_player == null:
+				velocity_component.refresh_target_player(global_position)
+				target_player = velocity_component.cached_player
+			var facing_sign := 0.0
+			if target_player != null:
+				facing_sign = sign(target_player.global_position.x - global_position.x)
+			else:
+				facing_sign = sign(velocity_component.velocity.x)
+			if facing_sign == 0:
+				facing_sign = 1.0
+			visuals.scale = Vector2(facing_sign * facing_multiplier * size_multiplier, size_multiplier)
+	if wasp_sprite == null:
+		return
+	match current_state:
+		WaspState.STING_WINDUP, WaspState.STING_RECOVER:
+			if wasp_sting_direction != Vector2.ZERO:
+				wasp_sprite.rotation = wasp_sting_direction.angle()
+		WaspState.NORMAL:
+			wasp_sprite.rotation = 0.0
 
 
 func can_start_wasp_sting() -> bool:
