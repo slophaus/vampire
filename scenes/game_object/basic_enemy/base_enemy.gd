@@ -14,7 +14,6 @@ const STANDARD_TINT_VALUE := 1.0
 const GHOST_POSSESSION_TINT := Color(0.2, 1.0, 0.6, 1.0)
 const NAVIGATION_UPDATE_MIN := 0.4
 const NAVIGATION_UPDATE_MAX := 0.7
-const FACING_DEADZONE := 1.0
 
 @export var max_health := 10.0
 @export var max_speed := 30.0
@@ -53,7 +52,6 @@ var possessed_time_left := 0.0
 var possessed_original_stats: Dictionary = {}
 var next_navigation_update_time := 0.0
 var navigation_rng := RandomNumberGenerator.new()
-var last_facing_sign := 1.0
 
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
@@ -96,16 +94,10 @@ func set_sprite_visibility(visible_sprite: CanvasItem) -> void:
 
 
 func update_visual_facing() -> void:
-	if visuals == null or velocity_component == null:
-		return
-	var x_velocity = velocity_component.velocity.x
-	if abs(x_velocity) <= FACING_DEADZONE:
-		return
-	var move_sign = sign(x_velocity)
-	if move_sign == 0:
-		return
-	last_facing_sign = move_sign
-	visuals.scale = Vector2(move_sign * facing_multiplier * size_multiplier, size_multiplier)
+	var move_sign = sign(velocity.x)
+	if move_sign != 0:
+		if visuals != null:
+			visuals.scale = Vector2(move_sign * facing_multiplier * size_multiplier, size_multiplier)
 
 
 func accelerate_to_player_with_pathfinding() -> void:
@@ -213,7 +205,7 @@ func apply_dig_level() -> void:
 
 func update_visual_scale() -> void:
 	if visuals != null:
-		visuals.scale = Vector2(last_facing_sign * facing_multiplier * size_multiplier, size_multiplier)
+		visuals.scale = Vector2(facing_multiplier * size_multiplier, size_multiplier)
 
 
 func can_be_possessed() -> bool:
