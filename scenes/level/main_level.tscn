@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://ct3bt3o3o1yqf"]
+[gd_scene load_steps=12 format=3 uid="uid://ct3bt3o3o1yqf"]
 
 [ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_iqu8w"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="2_5fr2l"]
@@ -7,9 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://b6f3xj5k6h6vl" path="res://scenes/game_object/well/well.tscn" id="6_adxub"]
 [ext_resource type="PackedScene" uid="uid://c8j2qneyiwkhy" path="res://scenes/game_object/experience_vial/experience_vial.tscn" id="7_ff0s2"]
 [ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="8_uk2yf"]
-[ext_resource type="PackedScene" uid="uid://owsousbyak2l" path="res://scenes/game_object/basic_enemy/spider_enemy.tscn" id="9_ondrs"]
+[ext_resource type="PackedScene" uid="uid://cf3s2qn8dga3j" path="res://scenes/game_object/basic_enemy/wasp_enemy.tscn" id="9_krg47"]
 [ext_resource type="PackedScene" uid="uid://bq0yg3a252iky" path="res://scenes/game_object/basic_enemy/ghost_enemy.tscn" id="10_5fr2l"]
-[ext_resource type="PackedScene" uid="uid://b4gvllnygcjko" path="res://scenes/game_object/basic_enemy/scorpion_enemy.tscn" id="10_6i4h1"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_nvumn"]
 texture = ExtResource("3_2sb77")
@@ -419,8 +418,7 @@ position = Vector2(321, -396)
 [node name="LayerEffects" type="Node2D" parent="." groups=["effects_layer", "foreground_layer"]]
 z_index = 6
 
-[node name="ScorpionEnemy" parent="." instance=ExtResource("10_6i4h1")]
-position = Vector2(588, 389)
-
-[node name="SpiderEnemy" parent="." instance=ExtResource("9_ondrs")]
-position = Vector2(99, 327)
+[node name="WaspEnemy" parent="." instance=ExtResource("9_krg47")]
+position = Vector2(298, 441)
+max_speed = 50.0
+acceleration = 5.0

@@ -1,13 +1,29 @@
-[gd_scene load_steps=5 format=3 uid="uid://cf3s2qn8df93j"]
+[gd_scene load_steps=9 format=3 uid="uid://cf3s2qn8dga3j"]
 
 [ext_resource type="PackedScene" uid="uid://bses7vk27cfvt" path="res://scenes/game_object/basic_enemy/basic_enemy.tscn" id="1_f7nex"]
-[ext_resource type="Script" path="res://scenes/game_object/basic_enemy/wasp_enemy.gd" id="2_1b7xk"]
+[ext_resource type="Script" uid="uid://bycmurpk8sp7w" path="res://scenes/game_object/basic_enemy/wasp_enemy.gd" id="2_1b7xk"]
 [ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="3_mgse7"]
+[ext_resource type="Texture2D" uid="uid://cdsmju5hytm66" path="res://sprites/wasp1.png" id="4_piqfp"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ollop"]
 resource_local_to_scene = true
 shader = ExtResource("3_mgse7")
 shader_parameter/lerp_percent = 0.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1m0us"]
+atlas = ExtResource("4_piqfp")
+region = Rect2(0, 0, 50, 50)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_6pttv"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1m0us")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_tk4ad"]
 blend_mode = 3
@@ -18,7 +34,6 @@ max_health = 6.0
 max_speed = 160.0
 acceleration = 90.0
 contact_damage = 3.0
-poison_contact_damage = 0.0
 
 [node name="HitFlashComponent" parent="." index="6"]
 hit_flash_material = SubResource("ShaderMaterial_ollop")
@@ -27,7 +42,8 @@ hit_flash_material = SubResource("ShaderMaterial_ollop")
 
 [node name="WaspSprite" type="AnimatedSprite2D" parent="Visuals" index="0"]
 clip_children = 2
-position = Vector2(0, -6)
+position = Vector2(3, 2)
+sprite_frames = SubResource("SpriteFrames_6pttv")
 
 [node name="enemy_color" type="ColorRect" parent="Visuals/WaspSprite" index="0"]
 material = SubResource("CanvasItemMaterial_tk4ad")
