@@ -63,7 +63,7 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 		return
 	if upgrade.id == "poison_spit_level":
 		poison_spit_level = 1 + current_upgrades["poison_spit_level"]["quantity"]
-		rate_reduction_percent = 0.2 * (poison_spit_level - 1)
+		rate_reduction_percent = 0.25 * (poison_spit_level - 1)
 		update_timer_wait_time()
 
 
