@@ -23,7 +23,7 @@ blend_mode = 3
 
 [node name="BaseWorm" type="CharacterBody2D" groups=["enemy", "worm"]]
 collision_layer = 8
-collision_mask = 14
+collision_mask = 10
 motion_mode = 1
 max_health = 20.0
 script = ExtResource("1_0r4sg")
@@ -45,10 +45,10 @@ hit_flash_material = SubResource("ShaderMaterial_p7l3g")
 visible = false
 health_component = NodePath("../HealthComponent")
 
-[node name="HurtboxSegmentCollisionPrototype" type="CollisionShape2D" parent="HurtboxComponent"]
+[node name="Segment0" type="CollisionShape2D" parent="HurtboxComponent"]
 shape = SubResource("RectangleShape2D_v5n7q")
 
-[node name="SegmentCollisionPrototype" type="CollisionShape2D" parent="."]
+[node name="Segment0" type="CollisionShape2D" parent="."]
 visible = false
 shape = SubResource("RectangleShape2D_v5n7q")
 
