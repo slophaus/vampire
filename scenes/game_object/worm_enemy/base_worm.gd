@@ -29,8 +29,6 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 @export var poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
 @export var can_dig := true
 @export var occupies_tiles := true
-@export var collision_enabled := true
-@export var collision_mask_on := 10
 @export var baby_worm_scene: PackedScene
 @export_range(0.0, 30.0, 0.1) var baby_spawn_interval := 0.0
 @export_range(1, 10, 1) var baby_spawn_count := 1
@@ -73,10 +71,6 @@ var baby_spawn_timer := 0.0
 func _ready() -> void:
 	randomize()
 	visible = false
-	if collision_enabled:
-		collision_mask = collision_mask_on
-	else:
-		collision_mask = 0
 	if health_component != null:
 		health_component.max_health = max_health
 		health_component.current_health = max_health
