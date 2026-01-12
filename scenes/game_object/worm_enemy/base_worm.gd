@@ -28,13 +28,7 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 @export var body_tint := Color(1.0, 0.65, 0.8, 1.0)
 @export var poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
 @export var can_dig := true
-@export var occupies_tiles := true:
-	set(value):
-		if field == value:
-			return
-		field = value
-		_update_collision_state()
-		_update_occupied_tiles()
+@export var occupies_tiles := true
 @export var baby_worm_scene: PackedScene
 @export_range(0.0, 30.0, 0.1) var baby_spawn_interval := 0.0
 @export_range(1, 10, 1) var baby_spawn_count := 1
@@ -193,7 +187,6 @@ func cache_segments() -> void:
 		if child is CollisionShape2D and not child.is_queued_for_deletion():
 			hurtbox_shapes.append(child)
 	segment_count = min(segment_sprites.size(), segment_shapes.size(), segment_count)
-	_update_collision_state()
 
 
 func build_segments() -> void:
@@ -406,18 +399,10 @@ func set_spawned_awake() -> void:
 func _update_occupied_tiles() -> void:
 	if tile_eater == null:
 		return
-	_update_collision_state()
 	if not occupies_tiles:
 		tile_eater.clear_occupied_tiles()
 		return
 	tile_eater.update_occupied_tiles(get_occupied_positions())
-
-
-func _update_collision_state() -> void:
-	var collisions_enabled := occupies_tiles
-	for shape in segment_shapes:
-		if shape != null:
-			shape.disabled = not collisions_enabled
 
 
 func apply_hit_flash() -> void:
