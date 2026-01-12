@@ -17,12 +17,20 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 @export_range(0.0, 1.0, 0.05) var targeted_move_chance := 0.6
 @export var target_group: StringName = &"player"
 @export var target_node_path: NodePath
+@export var contact_damage := 1.0
 @export_range(1, 64, 1) var segment_count := 15
 @export_range(1, 128, 1) var max_segment_count := 25
 @export_range(0.5, 30.0, 0.5) var growth_interval := 6.0
+@export_range(0.25, 8.0, 0.25) var step_tile_multiplier := 1.0
+@export_range(1.0, 8.0, 0.25) var footprint_tiles := 1.0
 @export var head_tint := Color(0.85, 0.35, 0.55, 1.0)
 @export var body_tint := Color(1.0, 0.65, 0.8, 1.0)
 @export var poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
+@export var can_dig := true
+@export var occupies_tiles := true
+@export var baby_worm_scene: PackedScene
+@export_range(0.0, 30.0, 0.1) var baby_spawn_interval := 0.0
+@export_range(1, 10, 1) var baby_spawn_count := 1
 @export var dormant_enabled := true
 @export var dormant_wake_radius := 150.0
 @export var dormant_wake_timer_seconds := 0.0
@@ -57,6 +65,7 @@ var is_dormant := false
 var dormant_timer_left := 0.0
 var spawn_target_segment_count := 0
 var spawn_growth_remaining := 0
+var baby_spawn_timer := 0.0
 
 func _ready() -> void:
 	randomize()
@@ -92,6 +101,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if update_dormant_state(delta):
 		return
+	_update_baby_spawns(delta)
 	time_alive += delta
 	_update_growth(delta)
 	move_timer += delta
@@ -100,7 +110,7 @@ func _physics_process(delta: float) -> void:
 	move_timer -= move_interval
 
 	direction = choose_direction()
-	var next_head = snap_to_grid(segment_positions[0] + (direction * TILE_SIZE))
+	var next_head = snap_to_grid(segment_positions[0] + (direction * get_step_size()))
 	if did_collide_with_worm_at(next_head):
 		_handle_collision_death()
 		return
@@ -221,7 +231,7 @@ func initialize_segments() -> void:
 	segment_positions.clear()
 
 	for index in range(segment_count):
-		segment_positions.append(global_position - (direction * TILE_SIZE * index))
+		segment_positions.append(global_position - (direction * get_step_size() * index))
 
 	update_segments()
 
@@ -293,14 +303,14 @@ func choose_targeted_direction(
 
 func choose_ordered_direction(ordered: Array[Vector2]) -> Vector2:
 	for candidate in ordered:
-		var candidate_position = segment_positions[0] + (candidate * TILE_SIZE)
+		var candidate_position = segment_positions[0] + (candidate * get_step_size())
 		if is_position_blocked(candidate_position):
 			continue
 		if not is_position_adjacent_to_body(candidate_position):
 			return candidate
 
 	for candidate in ordered:
-		var candidate_position = segment_positions[0] + (candidate * TILE_SIZE)
+		var candidate_position = segment_positions[0] + (candidate * get_step_size())
 		if not is_position_blocked(candidate_position):
 			return candidate
 
@@ -323,12 +333,12 @@ func get_target_position() -> Variant:
 func advance_segments() -> void:
 	if segment_positions.is_empty():
 		return
-	var new_head = snap_to_grid(segment_positions[0] + (direction * TILE_SIZE))
+	var new_head = snap_to_grid(segment_positions[0] + (direction * get_step_size()))
 	segment_positions.insert(0, new_head)
 	segment_positions.pop_back()
 	global_position = new_head
-	if tile_eater != null:
-		tile_eater.try_convert_tile(new_head, WORM_EATABLE_TILE_TYPES)
+	if tile_eater != null and can_dig:
+		_convert_tiles_for_footprint(new_head)
 	if spawn_growth_remaining > 0:
 		_grow_segment()
 		spawn_growth_remaining = max(spawn_growth_remaining - 1, 0)
@@ -386,7 +396,10 @@ func set_spawned_awake() -> void:
 func _update_occupied_tiles() -> void:
 	if tile_eater == null:
 		return
-	tile_eater.update_occupied_tiles(segment_positions)
+	if not occupies_tiles:
+		tile_eater.clear_occupied_tiles()
+		return
+	tile_eater.update_occupied_tiles(get_occupied_positions())
 
 
 func apply_hit_flash() -> void:
@@ -476,12 +489,22 @@ func get_spawn_marker_position() -> Vector2:
 
 
 func snap_to_grid(world_position: Vector2) -> Vector2:
+	var step_size = get_step_size()
+	var offset := Vector2(step_size / 2.0, step_size / 2.0)
+	return (world_position - offset).snapped(Vector2(step_size, step_size)) + offset
+
+
+func snap_to_tile_grid(world_position: Vector2) -> Vector2:
 	var offset := Vector2(TILE_SIZE / 2.0, TILE_SIZE / 2.0)
 	return (world_position - offset).snapped(Vector2(TILE_SIZE, TILE_SIZE)) + offset
 
 
+func get_step_size() -> float:
+	return TILE_SIZE * step_tile_multiplier
+
+
 func is_position_blocked(candidate_position: Vector2) -> bool:
-	if tile_eater != null and not tile_eater.is_world_position_occupiable(candidate_position):
+	if tile_eater != null and not _is_position_occupiable_for_footprint(candidate_position):
 		return true
 
 	for occupied in segment_positions:
@@ -526,7 +549,7 @@ func is_position_adjacent_to_body(candidate_position: Vector2) -> bool:
 
 func is_adjacent(a: Vector2, b: Vector2) -> bool:
 	var delta = a - b
-	return abs(delta.x) + abs(delta.y) == TILE_SIZE
+	return abs(delta.x) + abs(delta.y) == get_step_size()
 
 
 func did_collide_with_worm() -> bool:
@@ -563,7 +586,91 @@ func _handle_collision_death() -> void:
 
 
 func get_occupied_positions() -> Array[Vector2]:
-	return segment_positions.duplicate()
+	if not occupies_tiles:
+		return []
+	var occupied: Dictionary = {}
+	var footprint_tile_count = int(max(1.0, ceil(footprint_tiles)))
+	for position in segment_positions:
+		if footprint_tile_count <= 1:
+			occupied[snap_to_tile_grid(position)] = true
+		else:
+			for footprint_position in _get_footprint_positions(position, footprint_tile_count):
+				occupied[footprint_position] = true
+	var positions: Array[Vector2] = []
+	for position in occupied.keys():
+		positions.append(position)
+	return positions
+
+
+func _get_footprint_positions(center_position: Vector2, footprint_tile_count: int) -> Array[Vector2]:
+	var positions: Array[Vector2] = []
+	if footprint_tile_count <= 1:
+		positions.append(snap_to_tile_grid(center_position))
+		return positions
+	var tile_span = footprint_tile_count * TILE_SIZE
+	var start = center_position - Vector2(tile_span * 0.5 - (TILE_SIZE * 0.5), tile_span * 0.5 - (TILE_SIZE * 0.5))
+	for y in range(footprint_tile_count):
+		for x in range(footprint_tile_count):
+			positions.append(start + Vector2(x * TILE_SIZE, y * TILE_SIZE))
+	return positions
+
+
+func _is_position_occupiable_for_footprint(candidate_position: Vector2) -> bool:
+	if tile_eater == null:
+		return true
+	var footprint_tile_count = int(max(1.0, ceil(footprint_tiles)))
+	if footprint_tile_count <= 1:
+		return tile_eater.is_world_position_occupiable(candidate_position)
+	for position in _get_footprint_positions(candidate_position, footprint_tile_count):
+		if not tile_eater.is_world_position_occupiable(position):
+			return false
+	return true
+
+
+func _convert_tiles_for_footprint(center_position: Vector2) -> void:
+	if tile_eater == null:
+		return
+	var footprint_tile_count = int(max(1.0, ceil(footprint_tiles)))
+	if footprint_tile_count <= 1:
+		tile_eater.try_convert_tile(center_position, WORM_EATABLE_TILE_TYPES)
+		return
+	for position in _get_footprint_positions(center_position, footprint_tile_count):
+		tile_eater.try_convert_tile(position, WORM_EATABLE_TILE_TYPES)
+
+
+func _update_baby_spawns(delta: float) -> void:
+	if baby_worm_scene == null or baby_spawn_interval <= 0.0:
+		return
+	baby_spawn_timer += delta
+	if baby_spawn_timer < baby_spawn_interval:
+		return
+	baby_spawn_timer -= baby_spawn_interval
+	for index in range(baby_spawn_count):
+		_spawn_baby_worm()
+
+
+func _spawn_baby_worm() -> void:
+	if baby_worm_scene == null:
+		return
+	var baby = baby_worm_scene.instantiate() as Node2D
+	if baby == null:
+		return
+	var tree := get_tree()
+	if tree == null:
+		return
+	var target_layer = tree.get_first_node_in_group("entities_layer")
+	if target_layer != null:
+		target_layer.add_child(baby)
+	else:
+		add_child(baby)
+	var spawn_position = global_position
+	if not segment_positions.is_empty():
+		spawn_position = segment_positions[segment_positions.size() - 1]
+	if baby.has_method("snap_to_grid"):
+		spawn_position = baby.call("snap_to_grid", spawn_position)
+	baby.global_position = spawn_position
+	if baby.has_method("set_spawned_awake"):
+		baby.call("set_spawned_awake")
 
 
 func _on_died() -> void:
