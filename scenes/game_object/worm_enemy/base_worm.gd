@@ -67,10 +67,14 @@ var dormant_timer_left := 0.0
 var spawn_target_segment_count := 0
 var spawn_growth_remaining := 0
 var baby_spawn_timer := 0.0
+var default_collision_layer := 0
+var default_collision_mask := 0
 
 func _ready() -> void:
 	randomize()
 	visible = false
+	default_collision_layer = collision_layer
+	default_collision_mask = collision_mask
 	if health_component != null:
 		health_component.max_health = max_health
 		health_component.current_health = max_health
@@ -88,6 +92,7 @@ func _finish_spawn() -> void:
 	spawn_growth_remaining = max(spawn_target_segment_count - segment_count, 0)
 	build_segments()
 	cache_segments()
+	_update_collision_state()
 	global_position = snap_to_grid(global_position)
 	initialize_direction()
 	initialize_segments()
@@ -157,6 +162,7 @@ func _grow_segment() -> void:
 	var shape = collision_template.duplicate()
 	shape.name = "Segment%s" % segment_count
 	collision_container.add_child(shape)
+	shape.disabled = not occupies_tiles
 	segment_shapes.append(shape)
 	segment_count += 1
 	_apply_segment_tint(segment_tints.size() - 1)
@@ -403,6 +409,18 @@ func _update_occupied_tiles() -> void:
 		tile_eater.clear_occupied_tiles()
 		return
 	tile_eater.update_occupied_tiles(get_occupied_positions())
+
+
+func _update_collision_state() -> void:
+	var collider_enabled := occupies_tiles
+	if collider_enabled:
+		collision_layer = default_collision_layer
+		collision_mask = default_collision_mask
+	else:
+		collision_layer = 0
+		collision_mask = 0
+	for shape in segment_shapes:
+		shape.disabled = not collider_enabled
 
 
 func apply_hit_flash() -> void:
