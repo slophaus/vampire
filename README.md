@@ -96,7 +96,7 @@ Enemy spawn keyframes reference these IDs:
 
 | Level | Spawn rate keyframes (difficulty → spawns/sec) |
 | --- | --- |
-| Main level (`level_id = main`) | 1 → 0.5, 3 → 1, 16 → 2 |
+| Main level (`level_id = main`) | 1 → 0.5, 3 → 1, 16 → 1.8 |
 | WFC test level (`level_id = wfc_test`) | 1 → 0.1, 8 → 0.3, 16 → 1 |
 
 ### Level enemy progressions
@@ -109,13 +109,10 @@ increases.
 | Arena difficulty | Enemy added | Weight added |
 | --- | --- | --- |
 | 1 | Mouse | 15 |
-| 2 | Worm | 1 |
-| 4 | Spider | 2 |
-| 6 | Scorpion | 3 |
-| 8 | Dragon | 5 |
-| 10 | Wasp | 2 |
-| 12 | Rat | 4 |
-| 14 | Ghost | 1 |
+| 2 | Worm | 1.5 |
+| 4 | Spider | 1 |
+| 8 | Dragon | 4 |
+| 14 | Rat | 4 |
 
 **WFC test level (`level_id = wfc_test`)**
 
