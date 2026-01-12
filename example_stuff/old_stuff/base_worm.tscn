@@ -1,0 +1,92 @@
+[gd_scene load_steps=13 format=3 uid="uid://nb5rle4erw63"]
+
+[ext_resource type="Script" uid="uid://boh6m45f5snal" path="res://scenes/game_object/worm_enemy/base_worm.gd" id="1_0r4sg"]
+[ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_8h4ly"]
+[ext_resource type="PackedScene" uid="uid://nipysc8tqhsn" path="res://scenes/component/blood_drop_component.tscn" id="3_3j4l4"]
+[ext_resource type="PackedScene" uid="uid://gsyk0iqo1m50" path="res://scenes/component/hurtbox_component.tscn" id="3_yy0i2"]
+[ext_resource type="PackedScene" uid="uid://b4d5h026u4tmt" path="res://scenes/component/poison_component.tscn" id="4_ko1rr"]
+[ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="5_owowv"]
+[ext_resource type="Texture2D" uid="uid://crrxkfeyeohmh" path="res://sprites/metroid_can.png" id="6_dcn7l"]
+[ext_resource type="PackedScene" uid="uid://bkkq5ohgbnkxw" path="res://scenes/component/hit_flash_component.tscn" id="6_h7r1w"]
+[ext_resource type="Texture2D" uid="uid://k8kyda065ipn" path="res://sprites/metroid_elbow.png" id="7_5yf6x"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p7l3g"]
+resource_local_to_scene = true
+shader = ExtResource("5_owowv")
+shader_parameter/lerp_percent = 0.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v5n7q"]
+size = Vector2(16, 16)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_e1o1h"]
+blend_mode = 3
+
+[node name="BaseWorm" type="CharacterBody2D" groups=["enemy", "worm"]]
+collision_mask = 10
+motion_mode = 1
+script = ExtResource("1_0r4sg")
+
+[node name="HealthComponent" parent="." instance=ExtResource("2_8h4ly")]
+max_health = 20.0
+
+[node name="PoisonComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("4_ko1rr")]
+health_component = NodePath("../HealthComponent")
+
+[node name="BloodDropComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_3j4l4")]
+health_component = NodePath("../HealthComponent")
+
+[node name="HitFlashComponent" parent="." node_paths=PackedStringArray("health_component", "sprite") instance=ExtResource("6_h7r1w")]
+health_component = NodePath("../HealthComponent")
+sprite = NodePath("../Visuals/Segments/HeadPrototype")
+hit_flash_material = SubResource("ShaderMaterial_p7l3g")
+
+[node name="HurtboxComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_yy0i2")]
+visible = false
+health_component = NodePath("../HealthComponent")
+
+[node name="Segment0" type="CollisionShape2D" parent="HurtboxComponent"]
+shape = SubResource("RectangleShape2D_v5n7q")
+
+[node name="Segment0" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("RectangleShape2D_v5n7q")
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="Segments" type="Node2D" parent="Visuals"]
+
+[node name="HeadPrototype" type="Sprite2D" parent="Visuals/Segments"]
+clip_children = 2
+texture = ExtResource("6_dcn7l")
+region_rect = Rect2(112, 16, 16, 16)
+
+[node name="segment_color" type="ColorRect" parent="Visuals/Segments/HeadPrototype"]
+material = SubResource("CanvasItemMaterial_e1o1h")
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="BodyPrototype" type="Sprite2D" parent="Visuals/Segments"]
+clip_children = 2
+texture = ExtResource("6_dcn7l")
+region_rect = Rect2(112, 16, 16, 16)
+
+[node name="segment_color" type="ColorRect" parent="Visuals/Segments/BodyPrototype"]
+material = SubResource("CanvasItemMaterial_e1o1h")
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="TurnPrototype" type="Sprite2D" parent="Visuals/Segments"]
+visible = false
+clip_children = 2
+texture = ExtResource("7_5yf6x")
+
+[node name="segment_color" type="ColorRect" parent="Visuals/Segments/TurnPrototype"]
+material = SubResource("CanvasItemMaterial_e1o1h")
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0
