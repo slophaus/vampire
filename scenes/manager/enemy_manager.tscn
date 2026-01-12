@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="5_w8j1m"]
 [ext_resource type="PackedScene" uid="uid://owsousbyak2l" path="res://scenes/game_object/basic_enemy/spider_enemy.tscn" id="6_6scq5"]
 [ext_resource type="PackedScene" uid="uid://bq0yg3a252iky" path="res://scenes/game_object/basic_enemy/ghost_enemy.tscn" id="7_44g0d"]
-[ext_resource type="PackedScene" uid="uid://b0t32i2sfsnld" path="res://scenes/game_object/basic_enemy/scorpion_enemy.tscn" id="8_6d2ey"]
+[ext_resource type="PackedScene" uid="uid://b4gvllnygcjko" path="res://scenes/game_object/basic_enemy/scorpion_enemy.tscn" id="8_6d2ey"]
 [ext_resource type="PackedScene" uid="uid://cf3s2qn8df93j" path="res://scenes/game_object/basic_enemy/wasp_enemy.tscn" id="9_w0l7m"]
 
 [node name="EnemyManager" type="Node"]
