@@ -18,9 +18,9 @@ const DOOR_EXIT_OFFSET := Vector2(0, 64)
 const SPAWN_CLAMP_SKIP_FRAMES := 2
 const PLAYER_FORMATION_OFFSETS := {
 	1: Vector2.ZERO,
-	2: Vector2(32, 0),
-	3: Vector2(-32, 0),
-	4: Vector2(0, 32),
+	2: Vector2(20, -10),
+	3: Vector2(-20, -10),
+	4: Vector2(0, -20),
 }
 
 @onready var level_container: Node = $LevelContainer

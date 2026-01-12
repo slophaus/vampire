@@ -651,7 +651,7 @@ func _apply_door_clearance(
 	var min_x := door_cell.x - 2
 	var max_x := door_cell.x + 2
 	var min_y := door_cell.y - 1
-	var max_y := door_cell.y + 4
+	var max_y := door_cell.y + 5
 	for x in range(min_x, max_x + 1):
 		for y in range(min_y, max_y + 1):
 			_set_cell_to_tile(target_tilemap, Vector2i(x, y), floor_tile)
