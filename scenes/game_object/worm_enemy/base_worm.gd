@@ -685,7 +685,8 @@ func _spawn_baby_worm() -> void:
 		add_child(baby)
 	var spawn_position = global_position
 	if not segment_positions.is_empty():
-		spawn_position = segment_positions[segment_positions.size() - 1]
+		var random_index = randi_range(0, segment_positions.size() - 1)
+		spawn_position = segment_positions[random_index]
 	if baby.has_method("snap_to_grid"):
 		spawn_position = baby.call("snap_to_grid", spawn_position)
 	baby.global_position = spawn_position
