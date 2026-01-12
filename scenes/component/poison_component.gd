@@ -41,7 +41,7 @@ func clear_poison() -> void:
 func _on_tick_timer_timeout() -> void:
 	if health_component == null or not is_poisoned:
 		return
-	var damage_per_tick := poison_damage_rate * max(poison_potency, 1.0)
+	var damage_per_tick: float = poison_damage_rate * max(poison_potency, 1.0)
 	if damage_per_tick <= 0.0:
 		_stop_poison()
 		return
