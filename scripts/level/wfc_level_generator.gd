@@ -648,8 +648,8 @@ func _apply_door_clearance(
 ) -> void:
 	if floor_tile.is_empty():
 		return
-	var min_x := door_cell.x - 1
-	var max_x := door_cell.x + 1
+	var min_x := door_cell.x - 2
+	var max_x := door_cell.x + 2
 	var min_y := door_cell.y - 1
 	var max_y := door_cell.y + 4
 	for x in range(min_x, max_x + 1):
