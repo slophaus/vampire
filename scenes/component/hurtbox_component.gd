@@ -57,7 +57,7 @@ func apply_poison_from_hitbox(hitbox_component: HitboxComponent) -> void:
 	var poison_component = owner_node.get_node_or_null("PoisonComponent") as PoisonComponent
 	if poison_component == null:
 		return
-	poison_component.apply_poison(hitbox_component.poison_damage)
+	poison_component.apply_poison(hitbox_component.poison_damage, hitbox_component.poison_potency)
 
 
 func should_ignore_hit(hitbox_component: HitboxComponent) -> bool:
