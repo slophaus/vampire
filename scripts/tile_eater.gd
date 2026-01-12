@@ -121,6 +121,8 @@ func _try_convert_tile_cell(cell: Vector2i, allowed_types: Array[String]) -> voi
 	if tile_data == null:
 		return
 	var tile_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
+	if tile_type == "metal":
+		return
 	if tile_type == null or not allowed_types.has(tile_type):
 		return
 	arena_tilemap.set_cell(0, cell, walkable_tile_source_id, walkable_tile_atlas, walkable_tile_alternative)
