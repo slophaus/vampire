@@ -10,6 +10,7 @@ const ENEMY_HITBOX_LAYER = 8
 
 var base_damage = 5
 var additional_damage_bonus: float = 0.0
+var sword_scale_bonus: float = 0.0
 var base_penetration := 3
 var base_wait_time
 var sword_level := 1
@@ -74,6 +75,7 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 			$Timer.start()
 		"sword_damage":
 			additional_damage_bonus = current_upgrades["sword_damage"]["quantity"] * 5.0
+			sword_scale_bonus = current_upgrades["sword_damage"]["quantity"] * 0.3
 		"sword_level":
 			sword_level = 1 + current_upgrades["sword_level"]["quantity"]
 
@@ -133,6 +135,7 @@ func spawn_sword(start_position: Vector2, target_position: Vector2) -> void:
 	sword_instance.hitbox_component.damage = base_damage + additional_damage_bonus
 	sword_instance.hitbox_component.knockback = 250.0
 	sword_instance.hitbox_component.penetration = base_penetration
+	sword_instance.scale = Vector2.ONE * (1.0 + sword_scale_bonus)
 	if owner_group == "player":
 		sword_instance.hitbox_component.collision_layer = PLAYER_HITBOX_LAYER
 	else:
