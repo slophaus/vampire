@@ -15,6 +15,7 @@ var last_spawn_position := Vector2.ZERO
 
 const DEFEAT_MENU_DELAY := 0.6
 const DOOR_EXIT_OFFSET := Vector2(0, 64)
+const SPAWN_CLAMP_SKIP_FRAMES := 2
 const PLAYER_FORMATION_OFFSETS := {
 	1: Vector2.ZERO,
 	2: Vector2(32, 0),
@@ -246,6 +247,8 @@ func _position_players(level: LevelRoot, exit_door_name: StringName) -> void:
 	var spawn_position = _get_spawn_position(level, exit_door_name)
 	last_spawn_position = spawn_position
 	for player in get_tree().get_nodes_in_group("player"):
+		if player.has_method("set_clamp_skip_frames"):
+			player.set_clamp_skip_frames(SPAWN_CLAMP_SKIP_FRAMES)
 		var player_number = player.get("player_number")
 		if typeof(player_number) != TYPE_INT:
 			continue

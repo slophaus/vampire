@@ -45,6 +45,7 @@ var base_speed := 0
 var base_max_health := 0.0
 var base_health_bar_width := 0.0
 var base_health_bar_left := 0.0
+var clamp_skip_frames := 0
 var is_regenerating := false
 var normal_visuals_modulate := Color.WHITE
 var last_health := 0.0
@@ -118,7 +119,10 @@ func _process(delta):
 	var direction = movement_vector.normalized()
 	velocity_component.accelerate_in_direction(direction)
 	velocity_component.move(self)
-	_clamp_to_camera_bounds()
+	if clamp_skip_frames > 0:
+		clamp_skip_frames -= 1
+	else:
+		_clamp_to_camera_bounds()
 	
 	if movement_vector.x != 0 || movement_vector.y != 0:
 		animation_player.play("walk")
@@ -158,6 +162,10 @@ func _get_collision_padding() -> float:
 	if shape is RectangleShape2D:
 		return max(shape.size.x, shape.size.y) * 0.5
 	return 0.0
+
+
+func set_clamp_skip_frames(frames: int) -> void:
+	clamp_skip_frames = max(frames, 0)
 
 
 func get_movement_vector():	
