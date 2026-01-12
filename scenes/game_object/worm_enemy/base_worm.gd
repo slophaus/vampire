@@ -43,8 +43,8 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 @onready var head_template: Sprite2D = $Visuals/Segments/HeadPrototype
 @onready var body_template: Sprite2D = $Visuals/Segments/BodyPrototype
 @onready var turn_template: Sprite2D = $Visuals/Segments/TurnPrototype
-@onready var collision_template: CollisionShape2D = $Segment0
-@onready var hurtbox_template: CollisionShape2D = $HurtboxComponent/Segment0
+@onready var collision_template: CollisionShape2D = $SegmentCollisionPrototype
+@onready var hurtbox_template: CollisionShape2D = $HurtboxComponent/HurtboxSegmentCollisionPrototype
 @onready var health_component: HealthComponent = $HealthComponent
 var tile_eater: TileEater
 
