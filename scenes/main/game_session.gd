@@ -11,6 +11,7 @@ var game_over := false
 var is_transitioning := false
 var cached_levels: Dictionary = {}
 var cached_time_states: Dictionary = {}
+var last_spawn_position := Vector2.ZERO
 
 const DEFEAT_MENU_DELAY := 0.6
 const DOOR_EXIT_OFFSET := Vector2(0, 64)
@@ -47,6 +48,11 @@ func _unhandled_input(event):
 	if GameEvents.debug_mode_enabled and event.is_action_pressed("toggle_navigation_debug"):
 		GameEvents.toggle_navigation_debug_disabled()
 		get_tree().root.set_input_as_handled()
+		return
+	if GameEvents.debug_mode_enabled and event.is_action_pressed("debug_place_player"):
+		_place_players_at_last_spawn()
+		get_tree().root.set_input_as_handled()
+		return
 
 
 func transition_to_level(level_scene: PackedScene, exit_door_name: StringName = &"Door", preserve_current_level: bool = false) -> void:
@@ -238,11 +244,20 @@ func _restore_arena_time_state(level_scene: PackedScene) -> void:
 
 func _position_players(level: LevelRoot, exit_door_name: StringName) -> void:
 	var spawn_position = _get_spawn_position(level, exit_door_name)
+	last_spawn_position = spawn_position
 	for player in get_tree().get_nodes_in_group("player"):
 		var player_number = player.get("player_number")
 		if typeof(player_number) != TYPE_INT:
 			continue
 		player.global_position = spawn_position + PLAYER_FORMATION_OFFSETS.get(player_number, Vector2.ZERO)
+
+
+func _place_players_at_last_spawn() -> void:
+	for player in get_tree().get_nodes_in_group("player"):
+		var player_number = player.get("player_number")
+		if typeof(player_number) != TYPE_INT:
+			continue
+		player.global_position = last_spawn_position + PLAYER_FORMATION_OFFSETS.get(player_number, Vector2.ZERO)
 
 
 func _get_spawn_position(level: LevelRoot, exit_door_name: StringName) -> Vector2:
