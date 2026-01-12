@@ -1,11 +1,12 @@
-[gd_scene load_steps=11 format=3 uid="uid://ct3bt3o3o1yqf"]
+[gd_scene load_steps=12 format=3 uid="uid://ct3bt3o3o1yqf"]
 
 [ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_iqu8w"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="2_5fr2l"]
 [ext_resource type="Texture2D" uid="uid://dej1p0au5qgos" path="res://sprites/blob_dirt_border_6.png" id="3_2sb77"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="5_mwgft"]
 [ext_resource type="PackedScene" uid="uid://b6f3xj5k6h6vl" path="res://scenes/game_object/well/well.tscn" id="6_adxub"]
-[ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="8_uk2yf"]
+[ext_resource type="PackedScene" uid="uid://39y41oqxzjzyo" path="res://scenes/game_object/worm_enemy/worm_enemy_pink.tscn" id="8_uk2yf"]
+[ext_resource type="PackedScene" uid="uid://nnxot00inv5q6" path="res://scenes/game_object/worm_enemy/fast_worm_enemy.tscn" id="8_fastworm"]
 [ext_resource type="PackedScene" uid="uid://cf3s2qn8dga3j" path="res://scenes/game_object/basic_enemy/wasp_enemy.tscn" id="9_krg47"]
 [ext_resource type="PackedScene" uid="uid://bq0yg3a252iky" path="res://scenes/game_object/basic_enemy/ghost_enemy.tscn" id="10_5fr2l"]
 
@@ -367,15 +368,8 @@ layer_0/tile_data = PackedInt32Array(1638448, 65536, 4, 1572912, 0, 4, 1507376, 
 [node name="dirt_border" type="TileMapLayer" parent="LayerTilemaps/TileMap"]
 tile_set = SubResource("TileSet_ou6is")
 
-[node name="WormEnemy" parent="LayerTilemaps" instance=ExtResource("8_uk2yf")]
+[node name="fast_worm_enemy" parent="LayerTilemaps" instance=ExtResource("8_fastworm")]
 position = Vector2(537, 397)
-move_interval = 0.2
-targeted_move_chance = 0.9
-segment_count = 6
-max_segment_count = 6
-head_tint = Color(0, 0.393333, 0.59, 1)
-body_tint = Color(0, 0.72298, 0.870049, 1)
-dormant_wake_radius = 300.0
 
 [node name="LayerProps" type="Node2D" parent="."]
 z_index = 1

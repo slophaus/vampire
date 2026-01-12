@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://nnxot00inv5q6"]
+
+[ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="1_base"]
+
+[node name="FastWormEnemy" instance=ExtResource("1_base")]
+move_interval = 0.2
+targeted_move_chance = 0.9
+segment_count = 6
+max_segment_count = 6
+head_tint = Color(0, 0.393333, 0.59, 1)
+body_tint = Color(0, 0.72298, 0.870049, 1)
+dormant_wake_radius = 300.0

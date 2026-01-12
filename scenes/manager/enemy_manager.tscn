@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://x0j8ytkng0vk" path="res://scenes/game_object/basic_enemy/mouse_enemy.tscn" id="2_ytlsn"]
 [ext_resource type="PackedScene" uid="uid://cyjtpnmjqjlkd" path="res://scenes/game_object/basic_enemy/dragon_enemy.tscn" id="3_0ybpt"]
 [ext_resource type="PackedScene" uid="uid://ccfd7m5mjef0g" path="res://scenes/game_object/basic_enemy/rat_enemy.tscn" id="4_ntx8s"]
-[ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="5_w8j1m"]
+[ext_resource type="PackedScene" uid="uid://39y41oqxzjzyo" path="res://scenes/game_object/worm_enemy/worm_enemy_pink.tscn" id="5_w8j1m"]
 [ext_resource type="PackedScene" uid="uid://owsousbyak2l" path="res://scenes/game_object/basic_enemy/spider_enemy.tscn" id="6_6scq5"]
 [ext_resource type="PackedScene" uid="uid://bq0yg3a252iky" path="res://scenes/game_object/basic_enemy/ghost_enemy.tscn" id="7_44g0d"]
 [ext_resource type="PackedScene" uid="uid://b4gvllnygcjko" path="res://scenes/game_object/basic_enemy/scorpion_enemy.tscn" id="8_6d2ey"]
