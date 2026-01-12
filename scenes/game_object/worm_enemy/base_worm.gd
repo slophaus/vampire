@@ -28,13 +28,16 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 @export var body_tint := Color(1.0, 0.65, 0.8, 1.0)
 @export var poof_scene: PackedScene = preload("res://scenes/vfx/poof.tscn")
 @export var can_dig := true
+var _occupies_tiles := true
 @export var occupies_tiles := true:
 	set(value):
-		if field == value:
+		if _occupies_tiles == value:
 			return
-		field = value
+		_occupies_tiles = value
 		_update_collision_state()
 		_update_occupied_tiles()
+	get:
+		return _occupies_tiles
 @export var baby_worm_scene: PackedScene
 @export_range(0.0, 30.0, 0.1) var baby_spawn_interval := 0.0
 @export_range(1, 10, 1) var baby_spawn_count := 1
