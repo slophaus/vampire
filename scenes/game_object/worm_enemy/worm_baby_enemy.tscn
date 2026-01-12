@@ -1,6 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://b5p8w7v7d7q4j"]
+[gd_scene load_steps=4 format=3 uid="uid://b5p8w7v7d7q4j"]
 
 [ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/base_worm.tscn" id="1_base"]
+[ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="2_1xecw"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p7l3g"]
+resource_local_to_scene = true
+shader = ExtResource("2_1xecw")
+shader_parameter/lerp_percent = 0.0
 
 [node name="WormBabyEnemy" instance=ExtResource("1_base")]
 collision_layer = 8
@@ -12,23 +18,25 @@ segment_count = 4
 max_segment_count = 4
 step_tile_multiplier = 0.25
 head_tint = Color(0.9, 0.1, 0.1, 1)
-body_tint = Color(0.75, 0.0, 0.0, 1)
+body_tint = Color(0.75, 0, 0, 1)
 can_dig = false
 occupies_tiles = false
-
 dormant_enabled = false
 
-[node name="HeadPrototype" parent="Visuals/Segments"]
+[node name="HitFlashComponent" parent="." index="3"]
+hit_flash_material = SubResource("ShaderMaterial_p7l3g")
+
+[node name="Segment0" parent="HurtboxComponent" index="0"]
 scale = Vector2(0.25, 0.25)
 
-[node name="BodyPrototype" parent="Visuals/Segments"]
+[node name="Segment0" parent="." index="5"]
 scale = Vector2(0.25, 0.25)
 
-[node name="TurnPrototype" parent="Visuals/Segments"]
+[node name="HeadPrototype" parent="Visuals/Segments" index="0"]
 scale = Vector2(0.25, 0.25)
 
-[node name="Segment0" parent="HurtboxComponent"]
+[node name="BodyPrototype" parent="Visuals/Segments" index="1"]
 scale = Vector2(0.25, 0.25)
 
-[node name="Segment0" parent="."]
+[node name="TurnPrototype" parent="Visuals/Segments" index="2"]
 scale = Vector2(0.25, 0.25)

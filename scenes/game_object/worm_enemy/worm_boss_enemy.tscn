@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://daff8rvbw6ue"]
 
 [ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/base_worm.tscn" id="1_base"]
-[ext_resource type="PackedScene" path="res://scenes/game_object/worm_enemy/worm_baby_enemy.tscn" id="2_baby"]
+[ext_resource type="PackedScene" uid="uid://b5p8w7v7d7q4j" path="res://scenes/game_object/worm_enemy/worm_baby_enemy.tscn" id="2_baby"]
 [ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="3_jnwlg"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_p7l3g"]
@@ -12,15 +12,15 @@ shader_parameter/lerp_percent = 0.0
 [node name="WormBossEnemy" instance=ExtResource("1_base")]
 move_interval = 1.0
 targeted_move_chance = 0.8
-max_health = 50.0
+max_health = 75.0
 segment_count = 6
-max_segment_count = 6
+max_segment_count = 12
 step_tile_multiplier = 4.0
 footprint_tiles = 4.0
 head_tint = Color(0.2, 0.2, 0.2, 1)
 body_tint = Color(0.35, 0.35, 0.35, 1)
 baby_worm_scene = ExtResource("2_baby")
-baby_spawn_interval = 1.5
+baby_spawn_interval = 1.0
 dormant_wake_radius = 400.0
 
 [node name="HitFlashComponent" parent="." index="3"]
