@@ -3,7 +3,7 @@ extends Node
 const MAX_RANGE = 150
 const PLAYER_ATTACK_LAYER = 4
 const ENEMY_ATTACK_LAYER = 8
-const BASE_PENETRATION = 1
+const BASE_PENETRATION = 3
 const PENETRATION_PER_LEVEL = 0
 const BASE_SCALE = 1.0
 const SCALE_PER_LEVEL = 0.1
@@ -15,7 +15,7 @@ const SCALE_PER_LEVEL = 0.1
 var base_damage = 0.0
 var damage_per_level = 0.0
 var base_poison_damage := 5.0
-var poison_damage_per_level := 3.0
+var poison_damage_per_level := 5.0
 var additional_damage_percent: float = 1.0
 var base_wait_time := 0.0
 var rate_reduction_percent := 0.0
@@ -63,6 +63,8 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 		return
 	if upgrade.id == "poison_spit_level":
 		poison_spit_level = 1 + current_upgrades["poison_spit_level"]["quantity"]
+		rate_reduction_percent = 0.2 * (poison_spit_level - 1)
+		update_timer_wait_time()
 
 
 func get_owner_actor() -> Node2D:

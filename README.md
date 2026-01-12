@@ -15,7 +15,7 @@
 | Fireball Level 1 (`fireball`) | Unlock | Always in pool | Grants the Fireball ability controller (launches a fireball at a random enemy). |
 | Fireball Level (`fireball_level`) | Level | Added after unlocking Fireball | +3 damage per level, +3 splash radius per level, and +0.15 scale per level. |
 | Poison Spit Level 1 (`poison_spit`) | Unlock | Always in pool | Grants the Poison Spit ability controller (spits poison at a random enemy). |
-| Poison Spit Level (`poison_spit_level`) | Level | Added after unlocking Poison Spit | +3 poison damage per level and +0.1 scale per level. |
+| Poison Spit Level (`poison_spit_level`) | Level | Added after unlocking Poison Spit | +5 poison damage per level, +20% attack rate per level, and +0.1 scale per level. |
 | Sword Level (`sword_level`) | Level | Always in pool | Adds +1 sword per attack per level. |
 | Whip (`whip`) | Unlock | Always in pool | Grants the Whip ability controller (aimed whip strike). |
 | Whip Level (`whip_level`) | Level | Added after unlocking Whip | Longer whip per level. |
