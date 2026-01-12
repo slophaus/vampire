@@ -1,7 +1,6 @@
 extends CharacterBody2D
 
 const TILE_SIZE := 16.0
-const MOVE_INTERVAL := 0.8
 const TURN_CHANCE := 0.3
 const SEGMENT_EXPLOSION_DELAY := 0.08
 const WORM_EATABLE_TILE_TYPES: Array[String] = ["dirt", "wall"]
@@ -14,6 +13,10 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 ]
 
 @export var turn_delay := 4.0
+@export_range(0.05, 5.0, 0.05) var move_interval := 0.8
+@export_range(0.0, 1.0, 0.05) var targeted_move_chance := 0.6
+@export var target_group: StringName = &"player"
+@export var target_node_path: NodePath
 @export_range(1, 64, 1) var segment_count := 15
 @export_range(1, 128, 1) var max_segment_count := 25
 @export_range(0.5, 30.0, 0.5) var growth_interval := 6.0
@@ -92,9 +95,9 @@ func _physics_process(delta: float) -> void:
 	time_alive += delta
 	_update_growth(delta)
 	move_timer += delta
-	if move_timer < MOVE_INTERVAL:
+	if move_timer < move_interval:
 		return
-	move_timer -= MOVE_INTERVAL
+	move_timer -= move_interval
 
 	direction = choose_direction()
 	var next_head = snap_to_grid(segment_positions[0] + (direction * TILE_SIZE))
@@ -232,6 +235,10 @@ func choose_direction() -> Vector2:
 	var right = Vector2(direction.y, -direction.x)
 	var backward = -direction
 
+	var target_position = get_target_position()
+	if target_position != null and randf() <= targeted_move_chance:
+		return choose_targeted_direction(target_position, forward, left, right, backward)
+
 	var should_turn = time_alive >= turn_delay and randf() <= TURN_CHANCE
 	var ordered: Array[Vector2] = []
 	if should_turn:
@@ -243,6 +250,48 @@ func choose_direction() -> Vector2:
 		ordered = [forward, left, right]
 	ordered.append(backward)
 
+	return choose_ordered_direction(ordered)
+
+
+func choose_targeted_direction(
+	target_position: Vector2,
+	forward: Vector2,
+	left: Vector2,
+	right: Vector2,
+	backward: Vector2
+) -> Vector2:
+	var head_position = segment_positions[0]
+	var delta = snap_to_grid(target_position) - head_position
+	if delta == Vector2.ZERO:
+		return direction
+
+	var primary = Vector2.ZERO
+	var secondary = Vector2.ZERO
+	if abs(delta.x) >= abs(delta.y):
+		if delta.x != 0.0:
+			primary = Vector2(sign(delta.x), 0)
+		if delta.y != 0.0:
+			secondary = Vector2(0, sign(delta.y))
+	else:
+		if delta.y != 0.0:
+			primary = Vector2(0, sign(delta.y))
+		if delta.x != 0.0:
+			secondary = Vector2(sign(delta.x), 0)
+
+	var ordered: Array[Vector2] = []
+	if primary != Vector2.ZERO:
+		ordered.append(primary)
+	if secondary != Vector2.ZERO and secondary != primary:
+		ordered.append(secondary)
+
+	for candidate in [forward, left, right, backward]:
+		if candidate != Vector2.ZERO and not ordered.has(candidate):
+			ordered.append(candidate)
+
+	return choose_ordered_direction(ordered)
+
+
+func choose_ordered_direction(ordered: Array[Vector2]) -> Vector2:
 	for candidate in ordered:
 		var candidate_position = segment_positions[0] + (candidate * TILE_SIZE)
 		if is_position_blocked(candidate_position):
@@ -256,6 +305,19 @@ func choose_direction() -> Vector2:
 			return candidate
 
 	return ordered[0]
+
+
+func get_target_position() -> Variant:
+	if target_node_path != NodePath():
+		var target_node = get_node_or_null(target_node_path)
+		if target_node is Node2D:
+			return target_node.global_position
+	if target_group.is_empty():
+		return null
+	var group_target := get_tree().get_first_node_in_group(target_group) as Node2D
+	if group_target != null:
+		return group_target.global_position
+	return null
 
 
 func advance_segments() -> void:
