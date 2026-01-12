@@ -1,6 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://b741wbb614voc"]
+[gd_scene load_steps=4 format=3 uid="uid://b741wbb614voc"]
 
 [ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/base_worm.tscn" id="1_base"]
+[ext_resource type="Shader" uid="uid://6p77t16b127a" path="res://scenes/component/hit_flash_component.gdshader" id="2_6urrc"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p7l3g"]
+resource_local_to_scene = true
+shader = ExtResource("2_6urrc")
+shader_parameter/lerp_percent = 0.0
 
 [node name="PinkWormEnemy" instance=ExtResource("1_base")]
 targeted_move_chance = 0.0
+
+[node name="HitFlashComponent" parent="." index="3"]
+hit_flash_material = SubResource("ShaderMaterial_p7l3g")

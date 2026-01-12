@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://c76g74tmtmrjx"]
+[gd_scene load_steps=4 format=3 uid="uid://c76g74tmtmrjx"]
 
 [ext_resource type="Script" uid="uid://ctyl0ls3bg663" path="res://scenes/game_object/door/door.gd" id="1_2f1k1"]
-[ext_resource type="Texture2D" uid="uid://crrxkfeyeohmh" path="res://sprites/metroid_can.png" id="2_3a4ag"]
+[ext_resource type="Texture2D" uid="uid://dtm6youtk7ca1" path="res://sprites/door1.png" id="2_vc7f2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lg3gl"]
 size = Vector2(16, 16)
@@ -11,8 +11,10 @@ collision_layer = 0
 collision_mask = 2
 script = ExtResource("1_2f1k1")
 
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0, -2)
+scale = Vector2(1.6, 1.6)
+texture = ExtResource("2_vc7f2")
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_lg3gl")
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_3a4ag")
