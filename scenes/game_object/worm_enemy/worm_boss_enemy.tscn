@@ -12,6 +12,7 @@ shader_parameter/lerp_percent = 0.0
 [node name="WormBossEnemy" instance=ExtResource("1_base")]
 move_interval = 1.0
 targeted_move_chance = 0.8
+max_health = 50.0
 segment_count = 6
 max_segment_count = 6
 step_tile_multiplier = 4.0
