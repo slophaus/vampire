@@ -273,6 +273,7 @@ func generate_level(use_new_seed: bool = false) -> void:
 	if target_tilemap.has_meta(TileEater.DIRT_BORDER_META_KEY):
 		target_tilemap.remove_meta(TileEater.DIRT_BORDER_META_KEY)
 	TileEater.initialize_dirt_border_for_tilemap(target_tilemap)
+	_move_entities_to_nearest_floor(target_tilemap)
 
 	finalize_seconds = _elapsed_seconds(phase_start_ms)
 	total_seconds = _elapsed_seconds(total_start_ms)
@@ -304,6 +305,17 @@ func _on_debug_mode_toggled(enabled: bool) -> void:
 	if not debug:
 		_reset_debug_door_path()
 		_reset_debug_contradiction_dots()
+
+
+func _move_entities_to_nearest_floor(target_tilemap: TileMap) -> void:
+	if target_tilemap == null:
+		return
+	var floor_positions := _get_floor_positions_from_cells(target_tilemap, _largest_walkable_cells)
+	if floor_positions.is_empty():
+		return
+	_move_nodes_in_group_to_nearest_floor("player", floor_positions)
+	_move_nodes_in_group_to_nearest_floor("enemy", floor_positions)
+	_move_props_to_nearest_floor(floor_positions)
 
 
 func _set_border_tiles_to_wall(target_tilemap: TileMap, target_rect: Rect2i) -> void:
@@ -783,6 +795,50 @@ func _set_cell_to_tile(target_tilemap: TileMap, cell: Vector2i, tile_info: Dicti
 func _cell_to_world(target_tilemap: TileMap, cell: Vector2i) -> Vector2:
 	var local_position = target_tilemap.map_to_local(cell)
 	return target_tilemap.to_global(local_position)
+
+
+func _get_floor_positions_from_cells(target_tilemap: TileMap, walkable_cells: Dictionary) -> Array[Vector2]:
+	var floor_positions: Array[Vector2] = []
+	for cell in walkable_cells.keys():
+		var local_position = target_tilemap.map_to_local(cell)
+		floor_positions.append(target_tilemap.to_global(local_position))
+	return floor_positions
+
+
+func _move_nodes_in_group_to_nearest_floor(group_name: String, floor_positions: Array[Vector2]) -> void:
+	for node in get_tree().get_nodes_in_group(group_name):
+		var node_2d := node as Node2D
+		if node_2d == null:
+			continue
+		node_2d.global_position = _find_closest_floor_position(node_2d.global_position, floor_positions)
+
+
+func _move_props_to_nearest_floor(floor_positions: Array[Vector2]) -> void:
+	var props_layer := get_parent().get_node_or_null("LayerProps")
+	if props_layer == null:
+		return
+	var door_group := props_layer.get_node_or_null("DoorGroup")
+	for child in props_layer.get_children():
+		var node_2d := child as Node2D
+		if node_2d == null:
+			continue
+		if door_group != null and node_2d == door_group:
+			continue
+		node_2d.global_position = _find_closest_floor_position(node_2d.global_position, floor_positions)
+
+
+func _find_closest_floor_position(
+	start_position: Vector2,
+	floor_positions: Array[Vector2]
+) -> Vector2:
+	var closest_position := floor_positions[0]
+	var closest_distance := INF
+	for floor_position in floor_positions:
+		var distance := start_position.distance_squared_to(floor_position)
+		if distance < closest_distance:
+			closest_distance = distance
+			closest_position = floor_position
+	return closest_position
 
 
 func _build_patterns(
