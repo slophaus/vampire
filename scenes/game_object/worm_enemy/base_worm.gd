@@ -417,10 +417,9 @@ func _update_occupied_tiles() -> void:
 
 
 func _update_collision_state() -> void:
-	var collisions_enabled := occupies_tiles
 	for shape in segment_shapes:
 		if shape != null:
-			shape.disabled = not collisions_enabled
+			shape.disabled = false
 
 
 func apply_hit_flash() -> void:
