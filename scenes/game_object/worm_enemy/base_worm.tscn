@@ -1,6 +1,6 @@
 [gd_scene load_steps=13 format=3 uid="uid://cwl7f4qnc4l8g"]
 
-[ext_resource type="Script" uid="uid://baaesj1y55fv4" path="res://scenes/game_object/worm_enemy/worm_enemy.gd" id="1_0r4sg"]
+[ext_resource type="Script" uid="uid://baaesj1y55fv4" path="res://scenes/game_object/worm_enemy/base_worm.gd" id="1_0r4sg"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_8h4ly"]
 [ext_resource type="PackedScene" uid="uid://nipysc8tqhsn" path="res://scenes/component/blood_drop_component.tscn" id="3_3j4l4"]
 [ext_resource type="PackedScene" uid="uid://gsyk0iqo1m50" path="res://scenes/component/hurtbox_component.tscn" id="3_yy0i2"]
@@ -21,7 +21,7 @@ size = Vector2(16, 16)
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_e1o1h"]
 blend_mode = 3
 
-[node name="WormEnemy" type="CharacterBody2D" groups=["enemy", "worm"]]
+[node name="BaseWorm" type="CharacterBody2D" groups=["enemy", "worm"]]
 collision_mask = 10
 motion_mode = 1
 script = ExtResource("1_0r4sg")
