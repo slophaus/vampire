@@ -80,13 +80,13 @@ func _load_level(level_scene: PackedScene, exit_door_name: StringName, preserve_
 	level_container.add_child(current_level)
 	current_level.process_mode = Node.PROCESS_MODE_INHERIT
 	_reset_level_doors(current_level)
-	_attach_players_to_level(current_level)
 	if not restored_from_cache:
 		_initialize_dirt_border(current_level)
 		arena_time_manager.reset_state()
 	else:
 		_restore_arena_time_state(level_scene)
 	_apply_level_settings(current_level)
+	_attach_players_to_level(current_level)
 	_position_players(current_level, exit_door_name)
 
 
