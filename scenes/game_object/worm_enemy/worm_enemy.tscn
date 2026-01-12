@@ -25,6 +25,7 @@ blend_mode = 3
 collision_mask = 10
 motion_mode = 1
 script = ExtResource("1_0r4sg")
+targeted_move_chance = 0.0
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_8h4ly")]
 max_health = 20.0
