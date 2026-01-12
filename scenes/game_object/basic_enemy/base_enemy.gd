@@ -12,6 +12,7 @@ const ELITE_DAMAGE_MULTIPLIER := 1.5
 const ELITE_TINT_VALUE := 0.6
 const STANDARD_TINT_VALUE := 1.0
 const GHOST_POSSESSION_TINT := Color(0.2, 1.0, 0.6, 1.0)
+const POISON_TINT := Color(0.3, 1.0, 0.3, 1.0)
 const NAVIGATION_UPDATE_MIN := 0.4
 const NAVIGATION_UPDATE_MAX := 0.7
 const AIR_ENEMY_GROUP := "air_enemy"
@@ -30,6 +31,7 @@ const AIR_ENEMY_GROUP := "air_enemy"
 @onready var velocity_component: VelocityComponent = $VelocityComponent
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
 @onready var health_component: HealthComponent = $HealthComponent
+@onready var poison_component: PoisonComponent = get_node_or_null("PoisonComponent")
 @onready var hit_flash_component = $HitFlashComponent
 @onready var death_component = $DeathComponent
 @onready var fireball_ability_controller = $Abilities/FireballAbilityController
@@ -60,6 +62,8 @@ var next_navigation_update_time := 0.0
 var navigation_rng := RandomNumberGenerator.new()
 var is_dormant := false
 var dormant_timer_left := 0.0
+var last_health := 0.0
+var floating_text_scene = preload("res://scenes/ui/floating_text.tscn")
 
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
@@ -70,11 +74,17 @@ func _ready():
 	update_visual_scale()
 	navigation_rng.randomize()
 	_schedule_next_navigation_update()
+	if poison_component != null:
+		poison_component.poison_started.connect(_on_poison_started)
+		poison_component.poison_ended.connect(_on_poison_ended)
 	if dormant_enabled:
 		is_dormant = true
 		dormant_timer_left = dormant_wake_timer_seconds
 	GameEvents.debug_mode_toggled.connect(_on_debug_mode_toggled)
 	_on_debug_mode_toggled(GameEvents.debug_mode_enabled)
+	if health_component != null:
+		last_health = health_component.current_health
+		health_component.health_changed.connect(_on_health_changed)
 
 
 func on_hit():
@@ -180,10 +190,11 @@ func apply_random_tint() -> void:
 
 
 func apply_enemy_tint() -> void:
+	var target_tint = _get_status_tint()
 	for tint_rect in [mouse_color, dragon_color, rat_color, spider_color, ghost_color, scorpion_color, wasp_color]:
 		if tint_rect == null:
 			continue
-		tint_rect.color = enemy_tint
+		tint_rect.color = target_tint
 		tint_rect.visible = true
 
 
@@ -311,3 +322,47 @@ func end_enemy_possession() -> void:
 		enemy_tint = possessed_original_stats.get("enemy_tint", enemy_tint)
 	apply_enemy_tint()
 	update_visual_scale()
+
+
+func _get_status_tint() -> Color:
+	if is_possessed:
+		return GHOST_POSSESSION_TINT
+	if poison_component != null and poison_component.is_poisoned:
+		return POISON_TINT
+	return enemy_tint
+
+
+func _on_poison_started() -> void:
+	apply_enemy_tint()
+
+
+func _on_poison_ended() -> void:
+	apply_enemy_tint()
+
+
+func _on_health_changed() -> void:
+	if health_component == null:
+		return
+	if health_component.current_health < last_health:
+		var damage_amount = last_health - health_component.current_health
+		if damage_amount > 0.0 and health_component.last_damage_color.is_equal_approx(POISON_TINT):
+			_spawn_damage_text(damage_amount, health_component.last_damage_color)
+	last_health = health_component.current_health
+
+
+func _spawn_damage_text(damage_amount: float, damage_color: Color) -> void:
+	if damage_amount <= 0:
+		return
+	var floating_text = floating_text_scene.instantiate() as FloatingText
+	var tree := get_tree()
+	if tree == null:
+		return
+	var foreground_layer = tree.get_first_node_in_group("foreground_layer")
+	if foreground_layer == null:
+		return
+	foreground_layer.add_child(floating_text)
+	floating_text.global_position = global_position + (Vector2.UP * 16)
+	var fmt_string := "%0.1f"
+	if is_equal_approx(damage_amount, int(damage_amount)):
+		fmt_string = "%0.0f"
+	floating_text.start(fmt_string % damage_amount, damage_color)
