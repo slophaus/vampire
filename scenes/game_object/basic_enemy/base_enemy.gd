@@ -124,10 +124,7 @@ func update_visual_facing() -> void:
 
 
 func accelerate_to_player_with_pathfinding() -> void:
-	var target_player := velocity_component.cached_player
-	if target_player == null:
-		velocity_component.refresh_target_player(global_position)
-		target_player = velocity_component.cached_player
+	var target_player := get_target_player_in_sight()
 	if target_player == null:
 		return
 
@@ -154,6 +151,19 @@ func accelerate_to_player_with_pathfinding() -> void:
 func _schedule_next_navigation_update() -> void:
 	var interval = navigation_rng.randf_range(NAVIGATION_UPDATE_MIN, NAVIGATION_UPDATE_MAX)
 	next_navigation_update_time = (Time.get_ticks_msec() / 1000.0) + interval
+
+
+func get_target_player_in_sight() -> Node2D:
+	var target_player := velocity_component.cached_player
+	if target_player == null:
+		velocity_component.refresh_target_player(global_position)
+		target_player = velocity_component.cached_player
+	if target_player == null:
+		return null
+	if not velocity_component.is_target_in_sight(target_player, global_position):
+		velocity_component.clear_target_player()
+		return null
+	return target_player
 
 
 func apply_enemy_separation() -> void:

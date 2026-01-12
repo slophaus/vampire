@@ -77,10 +77,7 @@ func update_spider_movement(delta: float) -> void:
 
 
 func start_spider_burst() -> void:
-	var target_player := velocity_component.cached_player
-	if target_player == null:
-		velocity_component.refresh_target_player(global_position)
-		target_player = velocity_component.cached_player
+	var target_player := get_target_player_in_sight()
 	if target_player == null:
 		set_spider_animation("stand")
 		return
@@ -134,10 +131,7 @@ func change_state(new_state: SpiderState) -> void:
 
 
 func update_spider_jump_windup(delta: float) -> void:
-	var target_player := velocity_component.cached_player
-	if target_player == null:
-		velocity_component.refresh_target_player(global_position)
-		target_player = velocity_component.cached_player
+	var target_player := get_target_player_in_sight()
 	if target_player != null:
 		spider_jump_direction = (target_player.global_position - global_position).normalized()
 	set_spider_animation("walk")
