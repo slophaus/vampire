@@ -77,10 +77,7 @@ func update_wasp_wander(delta: float) -> void:
 
 
 func update_wasp_facing() -> void:
-	var target_player := velocity_component.cached_player
-	if target_player == null:
-		velocity_component.refresh_target_player(global_position)
-		target_player = velocity_component.cached_player
+	var target_player := get_target_player_in_sight()
 	if current_state == WaspState.STING_WINDUP or current_state == WaspState.STING_RECOVER:
 		if visuals != null:
 			visuals.scale = Vector2(size_multiplier, size_multiplier)
@@ -101,24 +98,21 @@ func update_wasp_facing() -> void:
 func can_start_wasp_sting() -> bool:
 	if wasp_sting_cooldown > 0.0:
 		return false
-	var target_player := velocity_component.cached_player
-	if target_player == null:
-		velocity_component.refresh_target_player(global_position)
-		target_player = velocity_component.cached_player
+	var target_player := get_target_player_in_sight()
 	if target_player == null:
 		return false
 	return global_position.distance_to(target_player.global_position) <= WASP_STING_RANGE
 
 
 func start_wasp_sting_windup() -> void:
-	var target_player := velocity_component.cached_player
+	var target_player := get_target_player_in_sight()
 	if target_player != null:
 		wasp_sting_direction = (target_player.global_position - global_position).normalized()
 	change_state(WaspState.STING_WINDUP)
 
 
 func update_wasp_sting_windup(delta: float) -> void:
-	var target_player := velocity_component.cached_player
+	var target_player := get_target_player_in_sight()
 	if target_player != null:
 		wasp_sting_direction = (target_player.global_position - global_position).normalized()
 	wasp_sting_windup_left = max(wasp_sting_windup_left - delta, 0.0)

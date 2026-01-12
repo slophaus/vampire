@@ -4,6 +4,7 @@ class_name VelocityComponent
 @export var max_speed: int = 30
 @export var acceleration: float = 5
 @export var target_refresh_interval: float = 2.0
+@export var sight_range: float = 500.0
  
 var velocity := Vector2.ZERO
 var cached_player: Node2D = null
@@ -19,6 +20,9 @@ func accelerate_to_player():
 		refresh_target_player(owner_node2d.global_position)
 
 	if cached_player == null:
+		return
+	if not is_target_in_sight(cached_player, owner_node2d.global_position):
+		clear_target_player()
 		return
 	
 	var direction = (cached_player.global_position - owner_node2d.global_position).normalized()
@@ -45,6 +49,16 @@ func _process(delta: float) -> void:
 func refresh_target_player(from_position: Vector2) -> void:
 	cached_player = get_closest_player(from_position)
 
+func clear_target_player() -> void:
+	cached_player = null
+
+func is_target_in_sight(target_player: Node2D, from_position: Vector2) -> bool:
+	if target_player == null:
+		return false
+	if sight_range <= 0.0:
+		return true
+	return from_position.distance_squared_to(target_player.global_position) <= sight_range * sight_range
+
 func get_closest_player(from_position: Vector2) -> Node2D:
 	var players = get_tree().get_nodes_in_group("player")
 	if players.is_empty():
@@ -59,6 +73,8 @@ func get_closest_player(from_position: Vector2) -> Node2D:
 		if player_node.has_method("can_be_targeted") and not player_node.can_be_targeted():
 			continue
 		var distance = from_position.distance_squared_to(player_node.global_position)
+		if sight_range > 0.0 and distance > sight_range * sight_range:
+			continue
 		if distance < closest_distance:
 			closest_distance = distance
 			closest_player = player_node
