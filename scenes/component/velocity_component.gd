@@ -3,6 +3,7 @@ class_name VelocityComponent
 
 @export var max_speed: int = 30
 @export var acceleration: float = 5
+@export var damping: float = 60.0
 @export var target_refresh_interval: float = 2.0
 @export var sight_range: float = 500.0
  
@@ -87,6 +88,8 @@ func accelerate_in_direction(direction: Vector2):
 
 
 func move(character_body: CharacterBody2D):
+	if damping > 0.0:
+		velocity = velocity.move_toward(Vector2.ZERO, damping * get_physics_process_delta_time())
 	character_body.velocity = velocity
 	character_body.move_and_slide()
 
