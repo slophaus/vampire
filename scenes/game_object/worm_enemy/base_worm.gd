@@ -13,7 +13,7 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 ]
 
 @export var turn_delay := 4.0
-@export_range(0.05, 5.0, 0.05) var move_interval := 0.8
+@export var move_interval := 0.8
 @export_range(0.0, 1.0, 0.05) var targeted_move_chance := 0.6
 @export var target_group: StringName = &"player"
 @export var target_node_path: NodePath
