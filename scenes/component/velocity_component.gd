@@ -3,9 +3,9 @@ class_name VelocityComponent
 
 @export var max_speed: int = 30
 @export var acceleration: float = 5
-@export var damping: float = 60.0
+@export var damping: float = 2.0
 @export var target_refresh_interval: float = 2.0
-@export var sight_range: float = 500.0
+@export var sight_range: float = 400.0
  
 var velocity := Vector2.ZERO
 var cached_player: Node2D = null
