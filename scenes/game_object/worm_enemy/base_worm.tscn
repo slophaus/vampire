@@ -25,10 +25,10 @@ blend_mode = 3
 collision_layer = 8
 collision_mask = 10
 motion_mode = 1
+max_health = 20.0
 script = ExtResource("1_0r4sg")
 
 [node name="HealthComponent" parent="." instance=ExtResource("2_8h4ly")]
-max_health = 20.0
 
 [node name="PoisonComponent" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("4_ko1rr")]
 health_component = NodePath("../HealthComponent")

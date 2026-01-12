@@ -18,6 +18,7 @@ const EXPLOSION_STREAMS: Array[AudioStream] = [
 @export var target_group: StringName = &"player"
 @export var target_node_path: NodePath
 @export var contact_damage := 1.0
+@export var max_health := 20.0
 @export_range(1, 64, 1) var segment_count := 15
 @export_range(1, 128, 1) var max_segment_count := 25
 @export_range(0.5, 30.0, 0.5) var growth_interval := 6.0
@@ -71,6 +72,8 @@ func _ready() -> void:
 	randomize()
 	visible = false
 	if health_component != null:
+		health_component.max_health = max_health
+		health_component.current_health = max_health
 		health_component.free_owner_on_death = false
 		health_component.died.connect(_on_died)
 	if dormant_enabled:
