@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://dej1p0au5qgos" path="res://sprites/blob_dirt_border_6.png" id="3_2sb77"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="5_mwgft"]
 [ext_resource type="PackedScene" uid="uid://b6f3xj5k6h6vl" path="res://scenes/game_object/well/well.tscn" id="6_adxub"]
-[ext_resource type="PackedScene" uid="uid://39y41oqxzjzyo" path="res://scenes/game_object/worm_enemy/worm_enemy_pink.tscn" id="8_uk2yf"]
+[ext_resource type="PackedScene" uid="uid://39y41oqxzjzyo" path="res://scenes/game_object/worm_enemy/pink_worm_enemy.tscn" id="8_uk2yf"]
 [ext_resource type="PackedScene" uid="uid://nnxot00inv5q6" path="res://scenes/game_object/worm_enemy/fast_worm_enemy.tscn" id="8_fastworm"]
 [ext_resource type="PackedScene" uid="uid://cf3s2qn8dga3j" path="res://scenes/game_object/basic_enemy/wasp_enemy.tscn" id="9_krg47"]
 [ext_resource type="PackedScene" uid="uid://bq0yg3a252iky" path="res://scenes/game_object/basic_enemy/ghost_enemy.tscn" id="10_5fr2l"]

@@ -71,11 +71,13 @@ runaway counts. Arena difficulty starts at 1 and increases every 15 seconds.
 | Scorpion | Added via level keyframes | 12 HP, 70 max speed, 50 acceleration, 2 contact damage | Poison spitter that fires ranged shots. |
 | Wasp | Added via level keyframes | 6 HP, 160 max speed, 90 acceleration, 3 contact damage | Air enemy that wanders and lunges with a sting attack. |
 
-### Worm enemy
+### Worm enemies
 
 | Enemy | Spawn behavior | Stats | Notes |
 | --- | --- | --- | --- |
-| Worm | Added at arena difficulty 2 | 20 HP, 15 segments, moves every 0.8s | Grid-based mover that avoids overlapping bodies, digs through blocked tiles, and explodes segments on death. |
+| Base worm | Not spawned directly (template) | 20 HP, 15 segments, moves every 0.8s | Baseline grid-based mover that avoids overlapping bodies, digs through blocked tiles, and explodes segments on death. |
+| Pink worm | Added via level keyframes | 20 HP, 15 segments, moves every 0.8s | Uses the base worm stats but does not target the player directly. |
+| Fast worm | Added via level keyframes | 20 HP, 6 segments, moves every 0.2s | Faster, shorter worm with high player-targeting chance and a longer wake radius. |
 
 ### Enemy IDs
 
@@ -86,11 +88,12 @@ Enemy spawn keyframes reference these IDs:
 | 0 | Mouse |
 | 1 | Dragon |
 | 2 | Rat |
-| 3 | Worm |
+| 3 | Pink Worm |
 | 4 | Spider |
 | 5 | Ghost |
 | 6 | Scorpion |
 | 7 | Wasp |
+| 8 | Fast Worm |
 
 ### Level spawn rates
 

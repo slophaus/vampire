@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://39y41oqxzjzyo"]
-
-[ext_resource type="PackedScene" uid="uid://cwl7f4qnc4l8g" path="res://scenes/game_object/worm_enemy/worm_enemy.tscn" id="1_base"]
-
-[node name="WormEnemyPink" instance=ExtResource("1_base")]
-targeted_move_chance = 0.0
