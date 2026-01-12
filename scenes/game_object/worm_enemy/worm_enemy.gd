@@ -52,6 +52,8 @@ var is_dying := false
 var growth_timer := 0.0
 var is_dormant := false
 var dormant_timer_left := 0.0
+var spawn_target_segment_count := 0
+var spawn_growth_remaining := 0
 
 func _ready() -> void:
 	randomize()
@@ -66,6 +68,9 @@ func _ready() -> void:
 
 
 func _finish_spawn() -> void:
+	spawn_target_segment_count = max(segment_count, 1)
+	segment_count = 1
+	spawn_growth_remaining = max(spawn_target_segment_count - segment_count, 0)
 	build_segments()
 	cache_segments()
 	global_position = snap_to_grid(global_position)
@@ -101,6 +106,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _update_growth(delta: float) -> void:
+	if spawn_growth_remaining > 0:
+		return
 	if growth_interval <= 0.0:
 		return
 	if segment_count >= max_segment_count:
@@ -260,6 +267,9 @@ func advance_segments() -> void:
 	global_position = new_head
 	if tile_eater != null:
 		tile_eater.try_convert_tile(new_head, WORM_EATABLE_TILE_TYPES)
+	if spawn_growth_remaining > 0:
+		_grow_segment()
+		spawn_growth_remaining = max(spawn_growth_remaining - 1, 0)
 
 
 func update_segments() -> void:
