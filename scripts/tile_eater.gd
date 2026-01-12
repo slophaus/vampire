@@ -95,7 +95,8 @@ func update_occupied_tiles(world_positions: Array[Vector2]) -> void:
 	var next_cells: Dictionary = {}
 	for position in world_positions:
 		var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(position))
-		next_cells[cell] = true
+		if _is_cell_occupiable(cell):
+			next_cells[cell] = true
 	for cell in occupied_cells.keys():
 		if not next_cells.has(cell):
 			_set_walkable_cell(cell)
@@ -107,6 +108,14 @@ func update_occupied_tiles(world_positions: Array[Vector2]) -> void:
 
 func clear_occupied_tiles() -> void:
 	update_occupied_tiles([])
+
+
+func is_world_position_occupiable(position: Vector2) -> bool:
+	_ensure_arena_tilemap()
+	if arena_tilemap == null:
+		return false
+	var cell = arena_tilemap.local_to_map(arena_tilemap.to_local(position))
+	return _is_cell_occupiable(cell)
 
 
 func _try_convert_tile_cell(cell: Vector2i, allowed_types: Array[String]) -> void:
@@ -200,6 +209,16 @@ func _update_dirt_border(center_cell: Vector2i) -> void:
 
 func _is_walkable_cell(cell: Vector2i) -> bool:
 	return _is_walkable_cell_in_tilemap(arena_tilemap, cell)
+
+
+func _is_cell_occupiable(cell: Vector2i) -> bool:
+	if arena_tilemap == null:
+		return false
+	var tile_data := arena_tilemap.get_cell_tile_data(0, cell)
+	if tile_data == null:
+		return false
+	var tile_type = tile_data.get_custom_data(CUSTOM_DATA_KEY)
+	return tile_type != "metal"
 
 
 static func initialize_dirt_border_for_tilemap(arena_tilemap: TileMap) -> void:

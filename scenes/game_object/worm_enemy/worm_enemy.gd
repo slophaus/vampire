@@ -409,6 +409,9 @@ func snap_to_grid(world_position: Vector2) -> Vector2:
 
 
 func is_position_blocked(candidate_position: Vector2) -> bool:
+	if tile_eater != null and not tile_eater.is_world_position_occupiable(candidate_position):
+		return true
+
 	for occupied in segment_positions:
 		if occupied == candidate_position:
 			return true
