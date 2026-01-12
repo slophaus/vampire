@@ -10,9 +10,8 @@ shader_parameter/lerp_percent = 0.0
 
 [node name="WormBabyEnemy" instance=ExtResource("1_base")]
 collision_layer = 8
-collision_mask = 10
 move_interval = 0.1
-targeted_move_chance = 0.9
+targeted_move_chance = 0.5
 max_health = 5.0
 segment_count = 4
 max_segment_count = 4
