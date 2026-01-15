@@ -8,5 +8,5 @@ script = ExtResource("1_3k5gw")
 poison_spit_ability = ExtResource("2_eor4m")
 
 [node name="Timer" type="Timer" parent="."]
-wait_time = 5.0
+wait_time = 4.0
 autostart = true
