@@ -4,6 +4,7 @@ const TILE_SIZE := 16.0
 const TURN_CHANCE := 0.3
 const SEGMENT_EXPLOSION_DELAY := 0.08
 const WORM_EATABLE_TILE_TYPES: Array[String] = ["dirt", "wall"]
+const POISON_TINT := Color(0.3, 1.0, 0.3, 1.0)
 const EXPLOSION_STREAMS: Array[AudioStream] = [
 	preload("res://assets/audio/impactMining_000.ogg"),
 	preload("res://assets/audio/impactMining_001.ogg"),
@@ -55,12 +56,14 @@ var _occupies_tiles := true
 @onready var collision_template: CollisionShape2D = $Segment0
 @onready var hurtbox_template: CollisionShape2D = $HurtboxComponent/Segment0
 @onready var health_component: HealthComponent = $HealthComponent
+@onready var poison_component: PoisonComponent = get_node_or_null("PoisonComponent")
 var tile_eater: TileEater
 
 @onready var body_texture: Texture2D = body_template.texture
 @onready var body_region_rect: Rect2 = body_template.region_rect
 @onready var turn_texture: Texture2D = turn_template.texture
 
+var floating_text_scene = preload("res://scenes/ui/floating_text.tscn")
 var move_timer := 0.0
 var segment_positions: Array[Vector2] = []
 var direction := Vector2.RIGHT
@@ -76,6 +79,7 @@ var dormant_timer_left := 0.0
 var spawn_target_segment_count := 0
 var spawn_growth_remaining := 0
 var baby_spawn_timer := 0.0
+var last_health := 0.0
 
 func _ready() -> void:
 	randomize()
@@ -85,6 +89,11 @@ func _ready() -> void:
 		health_component.current_health = max_health
 		health_component.free_owner_on_death = false
 		health_component.died.connect(_on_died)
+		last_health = health_component.current_health
+		health_component.health_changed.connect(_on_health_changed)
+	if poison_component != null:
+		poison_component.poison_started.connect(_on_poison_started)
+		poison_component.poison_ended.connect(_on_poison_ended)
 	if dormant_enabled:
 		is_dormant = true
 		dormant_timer_left = dormant_wake_timer_seconds
@@ -441,11 +450,16 @@ func _apply_segment_tint(index: int) -> void:
 	var tint_rect: ColorRect = segment_tints[index]
 	if tint_rect == null:
 		return
-	if index == 0:
-		tint_rect.color = head_tint
-	else:
-		tint_rect.color = body_tint
+	tint_rect.color = _get_segment_tint(index)
 	tint_rect.visible = true
+
+
+func _get_segment_tint(index: int) -> Color:
+	if poison_component != null and poison_component.is_poisoned:
+		return POISON_TINT
+	if index == 0:
+		return head_tint
+	return body_tint
 
 
 func get_segment_rotation(index: int) -> float:
@@ -771,3 +785,39 @@ func _play_explosion_sound(spawn_position: Vector2) -> void:
 
 func can_be_possessed() -> bool:
 	return false
+
+
+func _on_poison_started() -> void:
+	apply_segment_tints()
+
+
+func _on_poison_ended() -> void:
+	apply_segment_tints()
+
+
+func _on_health_changed() -> void:
+	if health_component == null:
+		return
+	if health_component.current_health < last_health:
+		var damage_amount = last_health - health_component.current_health
+		if damage_amount > 0.0 and health_component.last_damage_color.is_equal_approx(POISON_TINT):
+			_spawn_damage_text(damage_amount, health_component.last_damage_color)
+	last_health = health_component.current_health
+
+
+func _spawn_damage_text(damage_amount: float, damage_color: Color) -> void:
+	if damage_amount <= 0:
+		return
+	var floating_text = floating_text_scene.instantiate() as FloatingText
+	var tree := get_tree()
+	if tree == null:
+		return
+	var foreground_layer = tree.get_first_node_in_group("foreground_layer")
+	if foreground_layer == null:
+		return
+	foreground_layer.add_child(floating_text)
+	floating_text.global_position = global_position + (Vector2.UP * 16)
+	var fmt_string := "%0.1f"
+	if is_equal_approx(damage_amount, int(damage_amount)):
+		fmt_string = "%0.0f"
+	floating_text.start(fmt_string % damage_amount, damage_color)
