@@ -9,7 +9,7 @@ const SIZE_PER_LEVEL = 0.2
 @export var boomerang_ability_scene: PackedScene
 
 var base_damage = 4
-var damage_per_level = 2
+var damage_per_level = 3
 var additional_damage_percent: float = 1.0
 var base_wait_time
 var boomerang_level := 1

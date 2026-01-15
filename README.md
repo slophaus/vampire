@@ -9,7 +9,7 @@
 | Axe (`axe`) | Unlock | Always in pool | Grants the Axe ability controller (periodic spinning axe). |
 | Axe Level (`axe_level`) | Level | Added after unlocking Axe | Adds +1 axe per attack per level. |
 | Boomerang (`boomerang`) | Unlock | Always in pool | Grants the Boomerang ability controller (throws a returning boomerang). |
-| Boomerang Level (`boomerang_level`) | Level | Added after unlocking Boomerang | +2 damage per level, +25 range per level, +3 penetration per level, +0.2 size scale per level. |
+| Boomerang Level (`boomerang_level`) | Level | Added after unlocking Boomerang | +3 damage per level, +25 range per level, +3 penetration per level, +0.2 size scale per level. |
 | Dig (`dig`) | Unlock | Always in pool | Grants the Dig ability controller (burrow through dirt). |
 | Dig Level (`dig_level`) | Level | Added after unlocking Dig | Shortens dig cooldowns and allows digging walls at level 2. |
 | Fireball Level 1 (`fireball`) | Unlock | Always in pool | Grants the Fireball ability controller (launches a fireball at a random enemy). |
