@@ -385,7 +385,7 @@ exit_door_name = &"DoorToMain"
 preserve_current_level = true
 
 [node name="DoorToDirt" parent="LayerProps/DoorGroup" instance=ExtResource("5_mwgft")]
-position = Vector2(-928, 364)
+position = Vector2(-917, 369)
 target_scene_path = "uid://itjijo4otoeh"
 exit_door_name = &"DoorToMain"
 preserve_current_level = true
