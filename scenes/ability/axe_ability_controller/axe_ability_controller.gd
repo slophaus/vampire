@@ -4,6 +4,7 @@ extends Node
 
 var base_damage = 10
 var additional_damage_bonus: float = 0.0
+var axe_scale_bonus: float = 0.0
 var base_penetration := 3
 var axe_level := 1
 var multi_shot_delay := 0.3
@@ -36,6 +37,7 @@ func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Diction
 	match upgrade.id:
 		"axe_damage":
 			additional_damage_bonus = current_upgrades["axe_damage"]["quantity"] * 5.0
+			axe_scale_bonus = current_upgrades["axe_damage"]["quantity"] * 0.3
 		"axe_level":
 			axe_level = 1 + current_upgrades["axe_level"]["quantity"]
 
@@ -73,5 +75,6 @@ func spawn_axes(player: Node2D, foreground: Node2D) -> void:
 		axe_instance.hitbox_component.damage = base_damage + additional_damage_bonus
 		axe_instance.hitbox_component.knockback = 0.0
 		axe_instance.hitbox_component.penetration = base_penetration
+		axe_instance.scale *= 1.0 + axe_scale_bonus
 		if shot_index < axe_level - 1:
 			await get_tree().create_timer(multi_shot_delay).timeout
