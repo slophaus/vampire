@@ -11,6 +11,11 @@ const POSSESSION_TINT = Color(0.55, 0.9, 0.85, 1.0)
 const POISON_TINT = Color(0.3, 1.0, 0.3, 1.0)
 const POSSESSION_TARGET_DEADZONE := 4.0
 const POSSESSION_BREAK_HITS := 3
+const DEBUG_TARGET_RADIUS_COLOR := Color(1.0, 0.0, 0.0, 0.75)
+const DEBUG_POISON_SPIT_RADIUS_COLOR := Color(0.1, 0.9, 0.1, 0.75)
+const DEBUG_RADIUS_STROKE_WIDTH := 2.0
+const DEBUG_RADIUS_ARC_POINTS := 72
+const POISON_SPIT_CONTROLLER_SCENE := "res://scenes/ability/poison_spit_ability_controller/poison_spit_ability_controller.tscn"
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
@@ -34,6 +39,7 @@ const POSSESSION_BREAK_HITS := 3
 @export var near_death_hit_points := 2.0
 @export var near_death_flash_speed := 6.0
 @export var explosion_scene: PackedScene = preload("res://scenes/vfx/explosion.tscn")
+@export var targeting_radius := 350.0
 
 signal regenerate_started
 signal regenerate_finished
@@ -99,6 +105,7 @@ func _ready():
 	update_health_bar_size()
 	update_health_display()
 	set_upgrade_dot_count(0)
+	queue_redraw()
 
 
 func _process(delta):
@@ -254,6 +261,16 @@ func _get_possession_path_direction(target: Node2D) -> Vector2:
 func _on_debug_mode_toggled(enabled: bool) -> void:
 	if navigation_agent != null:
 		navigation_agent.debug_enabled = enabled
+	queue_redraw()
+
+
+func _draw() -> void:
+	if not GameEvents.debug_mode_enabled:
+		return
+	draw_arc(Vector2.ZERO, targeting_radius, 0.0, TAU, DEBUG_RADIUS_ARC_POINTS, DEBUG_TARGET_RADIUS_COLOR, DEBUG_RADIUS_STROKE_WIDTH)
+	var poison_spit_range := _get_poison_spit_range()
+	if poison_spit_range > 0.0:
+		draw_arc(Vector2.ZERO, poison_spit_range, 0.0, TAU, DEBUG_RADIUS_ARC_POINTS, DEBUG_POISON_SPIT_RADIUS_COLOR, DEBUG_RADIUS_STROKE_WIDTH)
 
 func get_aim_direction() -> Vector2:
 	var suffix = get_player_action_suffix()
@@ -271,6 +288,10 @@ func get_player_action_suffix() -> String:
 
 func get_player_tint() -> Color:
 	return GameEvents.get_player_color(player_number)
+
+
+func get_targeting_radius() -> float:
+	return targeting_radius
 
 
 func can_attack() -> bool:
@@ -489,6 +510,8 @@ func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades:
 			if ability_controller.has_method("set_player_number"):
 				ability_controller.set_player_number(player_number)
 			abilities.add_child(ability_controller)
+			if ability_controller.scene_file_path == POISON_SPIT_CONTROLLER_SCENE:
+				queue_redraw()
 	elif ability_upgrade.id == "player_speed":
 		var speed_bonus_steps := [0.2, 0.15, 0.1, 0.05]
 		var bonus_multiplier := 0.0
@@ -501,6 +524,17 @@ func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades:
 		health_component.heal(8.0)
 		update_health_bar_size()
 	update_upgrade_dots(current_upgrades)
+
+
+func _get_poison_spit_range() -> float:
+	if abilities == null:
+		return 0.0
+	for ability_controller in abilities.get_children():
+		if ability_controller.scene_file_path != POISON_SPIT_CONTROLLER_SCENE:
+			continue
+		if ability_controller.has_method("get_max_range"):
+			return float(ability_controller.call("get_max_range"))
+	return 0.0
 
 
 func _has_ability_controller(ability_scene: PackedScene) -> bool:

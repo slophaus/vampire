@@ -32,11 +32,12 @@ func on_timer_timeout() -> void:
 		return
 	if owner_actor.has_method("can_attack") and not owner_actor.can_attack():
 		return
+	var targeting_range = get_effective_targeting_range(owner_actor, MAX_RANGE)
 
 	if owner_group == "player":
 		var aim_direction = get_aim_direction(owner_actor)
 		if aim_direction != Vector2.ZERO:
-			await fire_swords(owner_actor.global_position, owner_actor.global_position + (aim_direction * MAX_RANGE))
+			await fire_swords(owner_actor.global_position, owner_actor.global_position + (aim_direction * targeting_range), targeting_range)
 			return
 
 	var targets = get_tree().get_nodes_in_group(target_group)
@@ -47,7 +48,7 @@ func on_timer_timeout() -> void:
 			return false
 		if target.get("is_regenerating") == true:
 			return false
-		return target.global_position.distance_squared_to(owner_actor.global_position) < pow(MAX_RANGE, 2)
+		return target.global_position.distance_squared_to(owner_actor.global_position) < pow(targeting_range, 2)
 	)
 	
 	if targets.is_empty():
@@ -60,7 +61,7 @@ func on_timer_timeout() -> void:
 		return a_distance < b_distance
 	)
 	
-	await fire_swords(owner_actor.global_position, targets[0].global_position)
+	await fire_swords(owner_actor.global_position, targets[0].global_position, targeting_range)
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
@@ -127,7 +128,7 @@ func get_aim_direction(player: Node2D) -> Vector2:
 	return aim_vector.normalized()
 
 
-func spawn_sword(start_position: Vector2, target_position: Vector2) -> void:
+func spawn_sword(start_position: Vector2, target_position: Vector2, range_limit: float) -> void:
 	var sword_instance = sword_ability.instantiate() as SwordAbility
 	var foreground_layer = get_tree().get_first_node_in_group("foreground_layer")
 	foreground_layer.add_child(sword_instance)
@@ -141,12 +142,12 @@ func spawn_sword(start_position: Vector2, target_position: Vector2) -> void:
 	else:
 		sword_instance.hitbox_component.collision_layer = ENEMY_HITBOX_LAYER
 
-	sword_instance.setup(start_position, target_position, MAX_RANGE)
+	sword_instance.setup(start_position, target_position, range_limit)
 
 
-func fire_swords(start_position: Vector2, target_position: Vector2) -> void:
+func fire_swords(start_position: Vector2, target_position: Vector2, range_limit: float) -> void:
 	for shot_index in range(sword_level):
-		spawn_sword(start_position, target_position)
+		spawn_sword(start_position, target_position, range_limit)
 		if shot_index < sword_level - 1:
 			await get_tree().create_timer(multi_shot_delay).timeout
 
@@ -159,3 +160,9 @@ func set_active(active: bool) -> void:
 		$Timer.start()
 	else:
 		$Timer.stop()
+
+
+func get_effective_targeting_range(owner_actor: Node2D, ability_range: float) -> float:
+	if owner_actor != null and owner_actor.is_in_group("player") and owner_actor.has_method("get_targeting_radius"):
+		return min(ability_range, float(owner_actor.call("get_targeting_radius")))
+	return ability_range

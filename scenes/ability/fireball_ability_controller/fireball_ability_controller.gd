@@ -37,6 +37,7 @@ func on_timer_timeout() -> void:
 		return
 	if owner_actor.has_method("can_attack") and not owner_actor.can_attack():
 		return
+	var targeting_range = get_effective_targeting_range(owner_actor, MAX_RANGE)
 
 	var targets = get_tree().get_nodes_in_group(target_group)
 	targets = targets.filter(func(target: Node2D):
@@ -46,14 +47,14 @@ func on_timer_timeout() -> void:
 			return false
 		if target.get("is_regenerating") == true:
 			return false
-		return target.global_position.distance_squared_to(owner_actor.global_position) < pow(MAX_RANGE, 2)
+		return target.global_position.distance_squared_to(owner_actor.global_position) < pow(targeting_range, 2)
 	)
 	
 	if targets.is_empty():
 		return
 
 	var selected_target = targets.pick_random()
-	fire_fireballs(owner_actor.global_position, selected_target.global_position)
+	fire_fireballs(owner_actor.global_position, selected_target.global_position, targeting_range)
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
@@ -88,7 +89,7 @@ func resolve_player_number() -> int:
 func set_player_number(new_player_number: int) -> void:
 	player_number = new_player_number
 
-func spawn_fireball(start_position: Vector2, target_position: Vector2) -> void:
+func spawn_fireball(start_position: Vector2, target_position: Vector2, range_limit: float) -> void:
 	var fireball_instance = fireball_ability.instantiate() as FireballAbility
 	var foreground_layer = get_tree().get_first_node_in_group("foreground_layer")
 	foreground_layer.add_child(fireball_instance)
@@ -105,11 +106,11 @@ func spawn_fireball(start_position: Vector2, target_position: Vector2) -> void:
 	else:
 		fireball_instance.hitbox_component.collision_layer = PLAYER_ATTACK_LAYER
 
-	fireball_instance.setup(start_position, target_position, MAX_RANGE)
+	fireball_instance.setup(start_position, target_position, range_limit)
 
 
-func fire_fireballs(start_position: Vector2, target_position: Vector2) -> void:
-	spawn_fireball(start_position, target_position)
+func fire_fireballs(start_position: Vector2, target_position: Vector2, range_limit: float) -> void:
+	spawn_fireball(start_position, target_position, range_limit)
 
 
 func set_active(active: bool) -> void:
@@ -124,3 +125,9 @@ func set_active(active: bool) -> void:
 
 func update_timer_wait_time() -> void:
 	$Timer.wait_time = base_wait_time * (1 - rate_reduction_percent)
+
+
+func get_effective_targeting_range(owner_actor: Node2D, ability_range: float) -> float:
+	if owner_actor != null and owner_actor.is_in_group("player") and owner_actor.has_method("get_targeting_radius"):
+		return min(ability_range, float(owner_actor.call("get_targeting_radius")))
+	return ability_range
