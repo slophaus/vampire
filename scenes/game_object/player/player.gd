@@ -490,7 +490,12 @@ func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades:
 				ability_controller.set_player_number(player_number)
 			abilities.add_child(ability_controller)
 	elif ability_upgrade.id == "player_speed":
-		velocity_component.max_speed = base_speed + (base_speed * current_upgrades["player_speed"]["quantity"] * 0.2)
+		var speed_bonus_steps := [0.2, 0.15, 0.1, 0.05]
+		var bonus_multiplier := 0.0
+		var speed_quantity := int(current_upgrades["player_speed"]["quantity"])
+		for index in range(min(speed_quantity, speed_bonus_steps.size())):
+			bonus_multiplier += speed_bonus_steps[index]
+		velocity_component.max_speed = base_speed + (base_speed * bonus_multiplier)
 	elif ability_upgrade.id == "player_health":
 		health_component.max_health = base_max_health + (current_upgrades["player_health"]["quantity"] * 8.0)
 		health_component.heal(8.0)
