@@ -3,6 +3,8 @@ extends Node
 const MAX_RANGE = 130
 const PLAYER_ATTACK_LAYER = 4
 const ENEMY_ATTACK_LAYER = 8
+const PLAYER_BODY_LAYER = 2
+const ENEMY_BODY_LAYER = 8
 const BASE_PENETRATION = 3
 const PENETRATION_PER_LEVEL = 1
 const BASE_SCALE = 1.0
@@ -21,6 +23,10 @@ var base_wait_time := 0.0
 var rate_reduction_percent := 0.0
 var poison_spit_level := 1
 var player_number := 1
+var is_charged := false
+
+@onready var detection_area: Area2D = $TargetDetectionArea
+@onready var detection_shape: CollisionShape2D = $TargetDetectionArea/CollisionShape2D
 
 
 func _ready():
@@ -28,6 +34,8 @@ func _ready():
 	base_wait_time = $Timer.wait_time
 	update_timer_wait_time()
 	$Timer.timeout.connect(on_timer_timeout)
+	detection_area.body_entered.connect(on_target_body_entered)
+	update_detection_settings()
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
 
 
@@ -39,22 +47,14 @@ func on_timer_timeout() -> void:
 		return
 	var targeting_range = get_effective_targeting_range(owner_actor, MAX_RANGE)
 
-	var targets = get_tree().get_nodes_in_group(target_group)
-	targets = targets.filter(func(target: Node2D):
-		if target == null or not is_instance_valid(target):
-			return false
-		if target.is_in_group("ghost"):
-			return false
-		if target.get("is_regenerating") == true:
-			return false
-		return target.global_position.distance_squared_to(owner_actor.global_position) < pow(targeting_range, 2)
-	)
-
+	var targets = get_valid_targets(owner_actor, targeting_range)
 	if targets.is_empty():
+		is_charged = true
 		return
 
 	var selected_target = targets.pick_random()
 	fire_spit(owner_actor.global_position, selected_target.global_position, targeting_range)
+	is_charged = false
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
@@ -120,6 +120,7 @@ func set_active(active: bool) -> void:
 	set_process(active)
 	set_physics_process(active)
 	set_process_input(active)
+	detection_area.monitoring = active
 	if active:
 		$Timer.start()
 	else:
@@ -138,3 +139,51 @@ func get_effective_targeting_range(owner_actor: Node2D, ability_range: float) ->
 
 func get_max_range() -> float:
 	return MAX_RANGE
+
+
+func on_target_body_entered(body: Node) -> void:
+	if not is_charged:
+		return
+	var owner_actor = get_owner_actor()
+	if owner_actor == null:
+		return
+	var target = body as Node2D
+	if target == null:
+		return
+	var targeting_range = get_effective_targeting_range(owner_actor, MAX_RANGE)
+	if not is_valid_target(target, owner_actor, targeting_range):
+		return
+	fire_spit(owner_actor.global_position, target.global_position, targeting_range)
+	is_charged = false
+	$Timer.start()
+
+
+func update_detection_settings() -> void:
+	if detection_shape.shape == null:
+		detection_shape.shape = CircleShape2D.new()
+	if detection_shape.shape is CircleShape2D:
+		(detection_shape.shape as CircleShape2D).radius = MAX_RANGE
+	if target_group == "player":
+		detection_area.collision_mask = PLAYER_BODY_LAYER
+	else:
+		detection_area.collision_mask = ENEMY_BODY_LAYER
+
+
+func get_valid_targets(owner_actor: Node2D, targeting_range: float) -> Array[Node2D]:
+	var targets = get_tree().get_nodes_in_group(target_group)
+	targets = targets.filter(func(target: Node2D):
+		return is_valid_target(target, owner_actor, targeting_range)
+	)
+	return targets
+
+
+func is_valid_target(target: Node2D, owner_actor: Node2D, targeting_range: float) -> bool:
+	if target == null or not is_instance_valid(target):
+		return false
+	if target.is_in_group("ghost"):
+		return false
+	if target.get("is_regenerating") == true:
+		return false
+	if owner_actor == null:
+		return false
+	return target.global_position.distance_squared_to(owner_actor.global_position) < pow(targeting_range, 2)
