@@ -25,6 +25,8 @@ var poison_spit_level := 1
 var player_number := 1
 var is_charged := false
 
+signal charge_state_changed(charged: bool)
+
 @onready var detection_area: Area2D = $TargetDetectionArea
 @onready var detection_shape: CollisionShape2D = $TargetDetectionArea/CollisionShape2D
 
@@ -49,12 +51,12 @@ func on_timer_timeout() -> void:
 
 	var targets = get_valid_targets(owner_actor, targeting_range)
 	if targets.is_empty():
-		is_charged = true
+		set_charged(true)
 		return
 
 	var selected_target = targets.pick_random()
 	fire_spit(owner_actor.global_position, selected_target.global_position, targeting_range)
-	is_charged = false
+	set_charged(false)
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
@@ -125,6 +127,7 @@ func set_active(active: bool) -> void:
 		$Timer.start()
 	else:
 		$Timer.stop()
+		set_charged(false)
 
 
 func update_timer_wait_time() -> void:
@@ -154,7 +157,7 @@ func on_target_body_entered(body: Node) -> void:
 	if not is_valid_target(target, owner_actor, targeting_range):
 		return
 	fire_spit(owner_actor.global_position, target.global_position, targeting_range)
-	is_charged = false
+	set_charged(false)
 	$Timer.start()
 
 
@@ -167,6 +170,13 @@ func update_detection_settings() -> void:
 		detection_area.collision_mask = PLAYER_BODY_LAYER
 	else:
 		detection_area.collision_mask = ENEMY_BODY_LAYER
+
+
+func set_charged(charged: bool) -> void:
+	if is_charged == charged:
+		return
+	is_charged = charged
+	charge_state_changed.emit(is_charged)
 
 
 func get_valid_targets(owner_actor: Node2D, targeting_range: float) -> Array[Node2D]:
