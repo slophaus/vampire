@@ -9,6 +9,7 @@ const AIM_LASER_LENGTH = 240.0
 const NEAR_DEATH_RED = Color(1.0, 0.1, 0.1)
 const POSSESSION_TINT = Color(0.55, 0.9, 0.85, 1.0)
 const POISON_TINT = Color(0.3, 1.0, 0.3, 1.0)
+const POISON_CHARGE_FLASH_COLOR = Color(0.3, 1.0, 0.3)
 const POSSESSION_TARGET_DEADZONE := 4.0
 const POSSESSION_BREAK_HITS := 3
 const DEBUG_TARGET_RADIUS_COLOR := Color(1.0, 0.0, 0.0, 0.75)
@@ -29,7 +30,7 @@ const POISON_SPIT_FLASH_SPEED := 3.0
 @onready var player_color = $Visuals/player_sprite/player_color
 @onready var near_death_flash = $Visuals/player_sprite/NearDeathFlash
 @onready var flash_overlay = $Visuals/player_sprite/FlashOverlay
-@onready var poison_spit_indicator: Polygon2D = $Visuals/PoisonSpitChargedIndicator
+@onready var poison_spit_flash = $Visuals/player_sprite/PoisonSpitFlash
 @onready var velocity_component = $VelocityComponent
 @onready var aim_laser: Line2D = $AimLaser
 @onready var player_collision_shape: CollisionShape2D = $CollisionShape2D
@@ -81,6 +82,8 @@ func _ready():
 	player_color.visible = true
 	if near_death_flash != null:
 		near_death_flash.visible = false
+	if poison_spit_flash != null:
+		poison_spit_flash.visible = false
 	if flash_overlay != null:
 		flash_overlay.visible = false
 	aim_laser.visible = false
@@ -111,7 +114,7 @@ func _ready():
 	update_health_bar_size()
 	update_health_display()
 	set_upgrade_dot_count(0)
-	_update_poison_spit_indicator(0.0)
+	_update_poison_spit_flash(0.0)
 	queue_redraw()
 
 
@@ -151,7 +154,7 @@ func _process(delta):
 	else:
 		_update_aim_laser()
 	_update_status_tint()
-	_update_poison_spit_indicator(delta)
+	_update_poison_spit_flash(delta)
 	_update_near_death_flash(delta)
 	_update_flash_overlay()
 
@@ -572,22 +575,25 @@ func _connect_poison_spit_controller(ability_controller: Node) -> void:
 func _on_poison_spit_charge_changed(charged: bool) -> void:
 	is_poison_spit_charged = charged
 	poison_spit_flash_time = 0.0
-	if poison_spit_indicator != null:
-		poison_spit_indicator.visible = charged
-		poison_spit_indicator.modulate = Color(1, 1, 1, 1)
+	if not charged:
+		stop_poison_spit_flash()
 
 
-func _update_poison_spit_indicator(delta: float) -> void:
-	if poison_spit_indicator == null:
+func _update_poison_spit_flash(delta: float) -> void:
+	if poison_spit_flash == null:
 		return
 	if not is_poison_spit_charged:
-		poison_spit_indicator.visible = false
-		poison_spit_indicator.modulate = Color(1, 1, 1, 1)
+		stop_poison_spit_flash()
 		return
-	poison_spit_indicator.visible = true
+	poison_spit_flash.visible = true
+	_sync_flash_sprite(poison_spit_flash)
 	poison_spit_flash_time += delta * POISON_SPIT_FLASH_SPEED
 	var pulse = (sin(poison_spit_flash_time * TAU) + 1.0) * 0.5
-	poison_spit_indicator.modulate = Color(1, 1, 1, 0.3 + (0.7 * pulse))
+	var flash_color = POISON_CHARGE_FLASH_COLOR.lerp(Color.WHITE, pulse)
+	flash_color.a = 0.5
+	var flash_material := poison_spit_flash.material as ShaderMaterial
+	if flash_material != null:
+		flash_material.set_shader_parameter("flash_color", flash_color)
 
 
 func update_upgrade_dots(current_upgrades: Dictionary) -> void:
@@ -690,6 +696,17 @@ func stop_near_death_flash() -> void:
 	near_death_flash.visible = false
 	near_death_flash.stop()
 	near_death_time = 0.0
+
+
+func stop_poison_spit_flash() -> void:
+	if poison_spit_flash == null:
+		return
+	poison_spit_flash.visible = false
+	poison_spit_flash.stop()
+	poison_spit_flash_time = 0.0
+	var flash_material := poison_spit_flash.material as ShaderMaterial
+	if flash_material != null:
+		flash_material.set_shader_parameter("flash_color", Color(1, 1, 1, 0))
 
 
 func _update_status_tint() -> void:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://bpgwbwa1p3m6i"]
+[gd_scene load_steps=30 format=3 uid="uid://bpgwbwa1p3m6i"]
 
 [ext_resource type="Script" uid="uid://cfd7lntaw45s6" path="res://scenes/game_object/player/player.gd" id="1_dj72w"]
 [ext_resource type="PackedScene" uid="uid://d32bhk07dm6w8" path="res://scenes/component/health_component.tscn" id="2_3j6hq"]
@@ -76,6 +76,10 @@ shader = ExtResource("13_2bnhf")
 shader_parameter/flash_color = Color(1, 1, 1, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5jk2f"]
+shader = ExtResource("13_2bnhf")
+shader_parameter/flash_color = Color(1, 1, 1, 0)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_q1s9w"]
 shader = ExtResource("13_2bnhf")
 shader_parameter/flash_color = Color(1, 1, 1, 0)
 
@@ -181,11 +185,10 @@ visible = false
 material = SubResource("ShaderMaterial_5jk2f")
 sprite_frames = SubResource("SpriteFrames_gme53")
 
-[node name="PoisonSpitChargedIndicator" type="Polygon2D" parent="Visuals"]
+[node name="PoisonSpitFlash" type="AnimatedSprite2D" parent="Visuals/player_sprite"]
 visible = false
-position = Vector2(0, -40)
-color = Color(0.2, 1, 0.2, 1)
-polygon = PackedVector2Array(0, -6, 4, -4, 6, 0, 4, 4, 0, 6, -4, 4, -6, 0, -4, -4)
+material = SubResource("ShaderMaterial_q1s9w")
+sprite_frames = SubResource("SpriteFrames_gme53")
 
 [node name="hurtbox" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_8chf6")]
 collision_mask = 8
