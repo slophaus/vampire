@@ -31,8 +31,5 @@ func _on_focus_entered() -> void:
 
 
 func _on_focus_exited() -> void:
-	if bounce_tween != null and bounce_tween.is_running():
-		bounce_tween.kill()
-	scale = base_scale
 	if focus_outline != null:
 		focus_outline.visible = false
