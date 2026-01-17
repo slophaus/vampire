@@ -624,15 +624,15 @@ func get_occupied_positions() -> Array[Vector2]:
 		return []
 	var occupied: Dictionary = {}
 	var footprint_tile_count = int(max(1.0, ceil(footprint_tiles)))
-	for position in segment_positions:
+	for segment_position in segment_positions:
 		if footprint_tile_count <= 1:
-			occupied[snap_to_tile_grid(position)] = true
+			occupied[snap_to_tile_grid(segment_position)] = true
 		else:
-			for footprint_position in _get_footprint_positions(position, footprint_tile_count):
+			for footprint_position in _get_footprint_positions(segment_position, footprint_tile_count):
 				occupied[footprint_position] = true
 	var positions: Array[Vector2] = []
-	for position in occupied.keys():
-		positions.append(position)
+	for occupied_position in occupied.keys():
+		positions.append(occupied_position)
 	return positions
 
 
@@ -655,8 +655,8 @@ func _is_position_occupiable_for_footprint(candidate_position: Vector2) -> bool:
 	var footprint_tile_count = int(max(1.0, ceil(footprint_tiles)))
 	if footprint_tile_count <= 1:
 		return tile_eater.is_world_position_occupiable(candidate_position)
-	for position in _get_footprint_positions(candidate_position, footprint_tile_count):
-		if not tile_eater.is_world_position_occupiable(position):
+	for footprint_position in _get_footprint_positions(candidate_position, footprint_tile_count):
+		if not tile_eater.is_world_position_occupiable(footprint_position):
 			return false
 	return true
 
@@ -668,8 +668,8 @@ func _convert_tiles_for_footprint(center_position: Vector2) -> void:
 	if footprint_tile_count <= 1:
 		tile_eater.try_convert_tile(center_position, WORM_EATABLE_TILE_TYPES)
 		return
-	for position in _get_footprint_positions(center_position, footprint_tile_count):
-		tile_eater.try_convert_tile(position, WORM_EATABLE_TILE_TYPES)
+	for footprint_position in _get_footprint_positions(center_position, footprint_tile_count):
+		tile_eater.try_convert_tile(footprint_position, WORM_EATABLE_TILE_TYPES)
 
 
 func _update_baby_spawns(delta: float) -> void:

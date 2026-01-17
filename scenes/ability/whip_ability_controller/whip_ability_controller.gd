@@ -182,9 +182,9 @@ func _initialize_points() -> void:
 		anchor_position = owner_actor.global_position
 	var direction = last_direction
 	for index in range(segment_count):
-		var position = anchor_position - (direction * segment_length * index)
-		points.append(position)
-		previous_points.append(position)
+		var segment_position = anchor_position - (direction * segment_length * index)
+		points.append(segment_position)
+		previous_points.append(segment_position)
 		point_angles.append(direction.angle())
 
 
