@@ -97,7 +97,7 @@ func explode(excluded_target: Node2D = null) -> void:
 	spawn_explosion()
 	show_splash_indicator = true
 	direction = Vector2.ZERO
-	collision_shape.disabled = true
+	collision_shape.set_deferred("disabled", true)
 	refresh_splash_visual()
 
 	var splash_radius = (BASE_SPLASH_RADIUS * scale.x) + splash_radius_bonus
