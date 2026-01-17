@@ -181,6 +181,12 @@ visible = false
 material = SubResource("ShaderMaterial_5jk2f")
 sprite_frames = SubResource("SpriteFrames_gme53")
 
+[node name="PoisonSpitChargedIndicator" type="Polygon2D" parent="Visuals"]
+visible = false
+position = Vector2(0, -40)
+color = Color(0.2, 1, 0.2, 1)
+polygon = PackedVector2Array(0, -6, 4, -4, 6, 0, 4, 4, 0, 6, -4, 4, -6, 0, -4, -4)
+
 [node name="hurtbox" parent="." node_paths=PackedStringArray("health_component") instance=ExtResource("3_8chf6")]
 collision_mask = 8
 health_component = NodePath("../HealthComponent")

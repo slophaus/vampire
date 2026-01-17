@@ -16,6 +16,7 @@ const DEBUG_POISON_SPIT_RADIUS_COLOR := Color(0.1, 0.9, 0.1, 0.75)
 const DEBUG_RADIUS_STROKE_WIDTH := 2.0
 const DEBUG_RADIUS_ARC_POINTS := 72
 const POISON_SPIT_CONTROLLER_SCENE := "res://scenes/ability/poison_spit_ability_controller/poison_spit_ability_controller.tscn"
+const POISON_SPIT_FLASH_SPEED := 3.0
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
@@ -28,6 +29,7 @@ const POISON_SPIT_CONTROLLER_SCENE := "res://scenes/ability/poison_spit_ability_
 @onready var player_color = $Visuals/player_sprite/player_color
 @onready var near_death_flash = $Visuals/player_sprite/NearDeathFlash
 @onready var flash_overlay = $Visuals/player_sprite/FlashOverlay
+@onready var poison_spit_indicator: Polygon2D = $Visuals/PoisonSpitChargedIndicator
 @onready var velocity_component = $VelocityComponent
 @onready var aim_laser: Line2D = $AimLaser
 @onready var player_collision_shape: CollisionShape2D = $CollisionShape2D
@@ -63,6 +65,8 @@ var possession_time_left := 0.0
 var possession_target: Node2D
 var possession_damage_hits := 0
 var possessed_original_speed := 0.0
+var is_poison_spit_charged := false
+var poison_spit_flash_time := 0.0
 
 const UPGRADE_DOT_SIZE := 4.0
 const UPGRADE_DOT_RADIUS := 2
@@ -102,9 +106,12 @@ func _ready():
 	for ability in abilities.get_children():
 		if ability.has_method("set_player_number"):
 			ability.set_player_number(player_number)
+		if ability.scene_file_path == POISON_SPIT_CONTROLLER_SCENE:
+			_connect_poison_spit_controller(ability)
 	update_health_bar_size()
 	update_health_display()
 	set_upgrade_dot_count(0)
+	_update_poison_spit_indicator(0.0)
 	queue_redraw()
 
 
@@ -144,6 +151,7 @@ func _process(delta):
 	else:
 		_update_aim_laser()
 	_update_status_tint()
+	_update_poison_spit_indicator(delta)
 	_update_near_death_flash(delta)
 	_update_flash_overlay()
 
@@ -511,6 +519,7 @@ func on_ability_upgrade_added(ability_upgrade: AbilityUpgrade, current_upgrades:
 				ability_controller.set_player_number(player_number)
 			abilities.add_child(ability_controller)
 			if ability_controller.scene_file_path == POISON_SPIT_CONTROLLER_SCENE:
+				_connect_poison_spit_controller(ability_controller)
 				queue_redraw()
 	elif ability_upgrade.id == "player_speed":
 		var speed_bonus_steps := [0.2, 0.15, 0.1, 0.05]
@@ -547,6 +556,38 @@ func _has_ability_controller(ability_scene: PackedScene) -> bool:
 		if child.scene_file_path == scene_path:
 			return true
 	return false
+
+
+func _connect_poison_spit_controller(ability_controller: Node) -> void:
+	if ability_controller == null:
+		return
+	if not ability_controller.has_signal("charge_state_changed"):
+		return
+	var charge_callable = Callable(self, "_on_poison_spit_charge_changed")
+	if ability_controller.is_connected("charge_state_changed", charge_callable):
+		return
+	ability_controller.connect("charge_state_changed", charge_callable)
+
+
+func _on_poison_spit_charge_changed(charged: bool) -> void:
+	is_poison_spit_charged = charged
+	poison_spit_flash_time = 0.0
+	if poison_spit_indicator != null:
+		poison_spit_indicator.visible = charged
+		poison_spit_indicator.modulate = Color(1, 1, 1, 1)
+
+
+func _update_poison_spit_indicator(delta: float) -> void:
+	if poison_spit_indicator == null:
+		return
+	if not is_poison_spit_charged:
+		poison_spit_indicator.visible = false
+		poison_spit_indicator.modulate = Color(1, 1, 1, 1)
+		return
+	poison_spit_indicator.visible = true
+	poison_spit_flash_time += delta * POISON_SPIT_FLASH_SPEED
+	var pulse = (sin(poison_spit_flash_time * TAU) + 1.0) * 0.5
+	poison_spit_indicator.modulate = Color(1, 1, 1, 0.3 + (0.7 * pulse))
 
 
 func update_upgrade_dots(current_upgrades: Dictionary) -> void:
