@@ -7,10 +7,7 @@ uniform vec2 rect_size = vec2(1.0, 1.0);
 void fragment() {
 	vec2 uv = UV;
 	vec2 pixel_size = outline_size / max(rect_size, vec2(1.0));
-	float left_edge = step(uv.x, pixel_size.x);
-	float right_edge = step(1.0 - uv.x, pixel_size.x);
-	float top_edge = step(uv.y, pixel_size.y);
-	float bottom_edge = step(1.0 - uv.y, pixel_size.y);
-	float outline_mask = max(max(left_edge, right_edge), max(top_edge, bottom_edge));
+	float edge_distance = min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y));
+	float outline_mask = step(edge_distance, max(pixel_size.x, pixel_size.y));
 	COLOR = vec4(outline_color.rgb, outline_color.a * outline_mask);
 }
