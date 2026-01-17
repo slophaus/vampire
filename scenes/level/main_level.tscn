@@ -397,8 +397,8 @@ capacity = 25
 
 [node name="Well2" parent="LayerProps" instance=ExtResource("6_adxub")]
 position = Vector2(290, 284)
-emission_interval = 0.25
-capacity = 200
+emission_interval = 0.1
+capacity = 300
 
 [node name="PlayerSpawn" type="Node2D" parent="."]
 position = Vector2(381, 374)

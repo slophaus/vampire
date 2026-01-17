@@ -7,7 +7,7 @@ var additional_damage_bonus: float = 0.0
 var axe_scale_bonus: float = 0.0
 var base_penetration := 3
 var axe_level := 1
-var multi_shot_delay := 0.3
+var multi_shot_delay := 0.2
 var multi_shot_delay_by_axes := {
 	2: 0.45,
 	3: 0.32,
