@@ -589,8 +589,8 @@ func _update_poison_spit_flash(delta: float) -> void:
 	_sync_flash_sprite(poison_spit_flash)
 	poison_spit_flash_time += delta * POISON_SPIT_FLASH_SPEED
 	var pulse = (sin(poison_spit_flash_time * TAU) + 1.0) * 0.5
-	var flash_color = POISON_CHARGE_FLASH_COLOR.lerp(Color.WHITE, pulse)
-	flash_color.a = 0.5
+	var flash_color = POISON_CHARGE_FLASH_COLOR
+	flash_color.a = lerp(0.0, 0.5, pulse)
 	var flash_material := poison_spit_flash.material as ShaderMaterial
 	if flash_material != null:
 		flash_material.set_shader_parameter("flash_color", flash_color)
