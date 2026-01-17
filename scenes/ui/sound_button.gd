@@ -7,12 +7,16 @@ var bounce_tween: Tween
 
 
 func _ready():
-	base_scale = scale
 	pressed.connect(on_pressed)
 	focus_entered.connect(_on_focus_entered)
 	focus_exited.connect(_on_focus_exited)
 	if focus_outline != null:
 		focus_outline.visible = has_focus()
+	call_deferred("_cache_base_scale")
+
+
+func _cache_base_scale() -> void:
+	base_scale = scale
 
 
 func on_pressed():
