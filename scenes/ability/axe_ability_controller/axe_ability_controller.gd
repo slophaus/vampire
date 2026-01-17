@@ -7,7 +7,7 @@ var additional_damage_bonus: float = 0.0
 var axe_scale_bonus: float = 0.0
 var base_penetration := 3
 var axe_level := 1
-var multi_shot_delay := 0.3
+var multi_shot_span := 0.45
 var player_number := 1
 
 
@@ -64,6 +64,9 @@ func set_player_number(new_player_number: int) -> void:
 
 
 func spawn_axes(player: Node2D, foreground: Node2D) -> void:
+	var multi_shot_delay = multi_shot_span
+	if axe_level > 1:
+		multi_shot_delay = multi_shot_span / float(axe_level - 1)
 	for shot_index in range(axe_level):
 		if not is_instance_valid(foreground) or not foreground.is_inside_tree():
 			return
