@@ -17,7 +17,7 @@ const DEBUG_POISON_SPIT_RADIUS_COLOR := Color(0.1, 0.9, 0.1, 0.75)
 const DEBUG_RADIUS_STROKE_WIDTH := 2.0
 const DEBUG_RADIUS_ARC_POINTS := 72
 const POISON_SPIT_CONTROLLER_SCENE := "res://scenes/ability/poison_spit_ability_controller/poison_spit_ability_controller.tscn"
-const POISON_SPIT_FLASH_SPEED := 3.0
+const POISON_SPIT_FLASH_SPEED := 4.5
 
 @onready var damage_interval_timer = $DamageIntervalTimer
 @onready var health_component = $HealthComponent
