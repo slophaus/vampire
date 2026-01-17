@@ -231,6 +231,7 @@ libraries = {
 unique_name_in_owner = true
 visible = false
 material = SubResource("ShaderMaterial_0y2ej")
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
