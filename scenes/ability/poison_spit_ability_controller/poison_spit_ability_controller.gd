@@ -153,9 +153,9 @@ func on_target_body_entered(body: Node) -> void:
 	var target = body as Node2D
 	if target == null:
 		return
+	if not is_valid_target(target, owner_actor):
+		return
 	var targeting_range = get_effective_targeting_range(owner_actor, MAX_RANGE)
-	#if not is_valid_target(target, owner_actor, targeting_range):
-	#	return
 	fire_spit(owner_actor.global_position, target.global_position, targeting_range)
 	set_charged(false)
 	$Timer.start()
@@ -182,13 +182,14 @@ func set_charged(charged: bool) -> void:
 func get_valid_targets(owner_actor: Node2D, targeting_range: float) -> Array[Node2D]:
 	var raw_targets = get_tree().get_nodes_in_group(target_group)
 	var targets: Array[Node2D] = []
+	var targeting_range_squared = pow(targeting_range, 2)
 	for target in raw_targets:
-		if target is Node2D and is_valid_target(target, owner_actor, targeting_range):
+		if target is Node2D and is_valid_target(target, owner_actor) and is_target_in_range(target, owner_actor, targeting_range_squared):
 			targets.append(target)
 	return targets
 
 
-func is_valid_target(target: Node2D, owner_actor: Node2D, targeting_range: float) -> bool:
+func is_valid_target(target: Node2D, owner_actor: Node2D) -> bool:
 	if target == null or not is_instance_valid(target):
 		return false
 	if target.is_in_group("ghost"):
@@ -197,4 +198,8 @@ func is_valid_target(target: Node2D, owner_actor: Node2D, targeting_range: float
 		return false
 	if owner_actor == null:
 		return false
-	return target.global_position.distance_squared_to(owner_actor.global_position) < pow(targeting_range, 2)
+	return true
+
+
+func is_target_in_range(target: Node2D, owner_actor: Node2D, targeting_range_squared: float) -> bool:
+	return target.global_position.distance_squared_to(owner_actor.global_position) < targeting_range_squared
