@@ -67,6 +67,7 @@ func spawn_axes(player: Node2D, foreground: Node2D) -> void:
 			return
 		var axe_instance = axe_ability_scene.instantiate() as AxeAbility
 		foreground.add_child(axe_instance)
+		axe_instance.start_angle = 0.0
 		axe_instance.source_player = player
 		axe_instance.global_position = player.global_position
 		axe_instance.hitbox_component.damage = base_damage + additional_damage_bonus
