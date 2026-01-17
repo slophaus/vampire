@@ -33,7 +33,7 @@ func set_ability_upgrades(upgrades: Array[AbilityUpgrade], current_upgrades: Dic
 		card_instance.set_controlling_player(controlling_player_number)
 		card_instance.set_focus_color(highlight_color)
 		var display_name = get_display_name(upgrade, current_upgrades)
-		var display_description = get_display_description(upgrade)
+		var display_description = get_display_description(upgrade, current_upgrades)
 		card_instance.set_ability_upgrade(upgrade, display_name, display_description)
 		card_instance.play_in(delay)
 		card_instance.selected.connect(on_upgrade_selected.bind(upgrade))
@@ -59,7 +59,14 @@ func get_display_name(upgrade: AbilityUpgrade, current_upgrades: Dictionary) -> 
 	return upgrade.name
 
 
-func get_display_description(upgrade: AbilityUpgrade) -> String:
+func get_display_description(upgrade: AbilityUpgrade, current_upgrades: Dictionary) -> String:
+	if upgrade.id == "player_speed":
+		var speed_bonuses = [20, 15, 10, 5]
+		var current_quantity = 0
+		if current_upgrades.has(upgrade.id):
+			current_quantity = current_upgrades[upgrade.id]["quantity"]
+		var next_index = clampi(current_quantity, 0, speed_bonuses.size() - 1)
+		return "Move %d%% faster." % speed_bonuses[next_index]
 	return upgrade.description
 
 
