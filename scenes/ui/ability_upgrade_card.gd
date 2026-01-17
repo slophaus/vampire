@@ -1,4 +1,4 @@
-extends PanelContainer
+extends Panel
 class_name AbilityUpgradeCard
 
 signal selected
