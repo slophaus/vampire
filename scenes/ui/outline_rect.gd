@@ -8,6 +8,10 @@ class_name OutlineRect
 
 
 func _ready() -> void:
+	if shader_material != null:
+		shader_material = shader_material.duplicate()
+		shader_material.resource_local_to_scene = true
+		material = shader_material
 	_update_shader()
 	resized.connect(_update_shader)
 
