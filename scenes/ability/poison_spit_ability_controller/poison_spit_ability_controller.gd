@@ -49,11 +49,14 @@ func on_timer_timeout() -> void:
 		return
 	var targeting_range = get_effective_targeting_range(owner_actor, MAX_RANGE)
 
-	set_charged(true)
-	$Timer.stop()
-	if fire_at_overlapping_target(owner_actor, targeting_range):
-		set_charged(false)
-		$Timer.start()
+	var targets = get_valid_targets(owner_actor, targeting_range)
+	if targets.is_empty():
+		set_charged(true)
+		return
+
+	var selected_target = targets.pick_random()
+	fire_spit(owner_actor.global_position, selected_target.global_position, targeting_range)
+	set_charged(false)
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
@@ -183,16 +186,6 @@ func get_valid_targets(owner_actor: Node2D, targeting_range: float) -> Array[Nod
 		if target is Node2D and is_valid_target(target, owner_actor, targeting_range):
 			targets.append(target)
 	return targets
-
-
-func fire_at_overlapping_target(owner_actor: Node2D, targeting_range: float) -> bool:
-	var overlapping_bodies = detection_area.get_overlapping_bodies()
-	for body in overlapping_bodies:
-		var target = body as Node2D
-		if target != null and is_valid_target(target, owner_actor, targeting_range):
-			fire_spit(owner_actor.global_position, target.global_position, targeting_range)
-			return true
-	return false
 
 
 func is_valid_target(target: Node2D, owner_actor: Node2D, targeting_range: float) -> bool:
