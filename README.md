@@ -127,6 +127,25 @@ increases.
 | 5 | Ghost | 2 |
 | 6 | Wasp | 2 |
 
+## Dirt and boss levels
+
+### Dirt level (`dirt_level.tscn`)
+
+* WFC-generated dirt arena with its own spawn pacing: 1 → 0.4, 8 → 0.7, 20 → 1.2.
+* Enemy progression:
+  * Difficulty 1: Pink Worm (10), Wasp (8), Rat (2).
+  * Difficulty 3: Fast Worm (5).
+  * Difficulty 4: Pink Worm (16), Wasp (12), Rat (3).
+  * Difficulty 6: Fast Worm (7).
+  * Difficulty 8: Pink Worm (20), Wasp (16), Rat (4).
+
+### Boss levels
+
+* **Boss arena** (`boss_arena_level.tscn`): timeless arena with a Dragon Boss and doors back to
+  the main level or WFC test level.
+* **Dirt boss** (`dirt_boss.tscn`): boss arena variant that spawns Pink Worms and Fast Worms and
+  includes a Worm Boss enemy, with a return door to the dirt level.
+
 ## Level generator (WFC test level)
 
 The WFC test level uses `WFCLevelGenerator` (`scripts/level/wfc_level_generator.gd`) to build a
