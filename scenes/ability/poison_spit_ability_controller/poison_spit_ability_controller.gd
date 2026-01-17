@@ -4,7 +4,7 @@ const MAX_RANGE = 130
 const PLAYER_ATTACK_LAYER = 4
 const ENEMY_ATTACK_LAYER = 8
 const PLAYER_BODY_LAYER = 2
-const ENEMY_BODY_LAYER = 4
+const ENEMY_BODY_LAYER = 8
 const BASE_PENETRATION = 3
 const PENETRATION_PER_LEVEL = 1
 const BASE_SCALE = 1.0
@@ -154,8 +154,8 @@ func on_target_body_entered(body: Node) -> void:
 	if target == null:
 		return
 	var targeting_range = get_effective_targeting_range(owner_actor, MAX_RANGE)
-	if not is_valid_target(target, owner_actor, targeting_range):
-		return
+	#if not is_valid_target(target, owner_actor, targeting_range):
+	#	return
 	fire_spit(owner_actor.global_position, target.global_position, targeting_range)
 	set_charged(false)
 	$Timer.start()
