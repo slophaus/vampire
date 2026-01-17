@@ -29,17 +29,18 @@ func on_timer_timeout():
 		return
 	if player.has_method("can_attack") and not player.can_attack():
 		return
+	var targeting_range = get_effective_targeting_range(player, get_boomerang_range())
 
 	var aim_direction = get_aim_direction(player)
 	if aim_direction != Vector2.ZERO:
-		spawn_boomerang(player.global_position, player.global_position + (aim_direction * get_boomerang_range()), player)
+		spawn_boomerang(player.global_position, player.global_position + (aim_direction * targeting_range), player, targeting_range)
 		return
 
 	var enemies = get_tree().get_nodes_in_group("enemy")
 	enemies = enemies.filter(func(enemy: Node2D):
 		if enemy.is_in_group("ghost"):
 			return false
-		return enemy.global_position.distance_squared_to(player.global_position) < pow(get_boomerang_range(), 2)
+		return enemy.global_position.distance_squared_to(player.global_position) < pow(targeting_range, 2)
 	)
 
 	if enemies.is_empty():
@@ -52,7 +53,7 @@ func on_timer_timeout():
 		return a_distance < b_distance
 	)
 
-	spawn_boomerang(player.global_position, enemies[0].global_position, player)
+	spawn_boomerang(player.global_position, enemies[0].global_position, player, targeting_range)
 
 
 func on_ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictionary, upgrade_player_number: int):
@@ -114,7 +115,7 @@ func get_aim_direction(player: Node2D) -> Vector2:
 	return aim_vector.normalized()
 
 
-func spawn_boomerang(start_position: Vector2, target_position: Vector2, player: Node2D) -> void:
+func spawn_boomerang(start_position: Vector2, target_position: Vector2, player: Node2D, range_limit: float) -> void:
 	var boomerang_instance = boomerang_ability_scene.instantiate() as BoomerangAbility
 	var foreground_layer = get_tree().get_first_node_in_group("foreground_layer")
 	foreground_layer.add_child(boomerang_instance)
@@ -124,8 +125,14 @@ func spawn_boomerang(start_position: Vector2, target_position: Vector2, player: 
 	boomerang_instance.hitbox_component.penetration = BASE_PENETRATION + (PENETRATION_PER_LEVEL * (boomerang_level - 1))
 	boomerang_instance.scale = Vector2.ONE * (1.0 + (SIZE_PER_LEVEL * (boomerang_level - 1)))
 
-	boomerang_instance.setup(start_position, target_position, get_boomerang_range(), player)
+	boomerang_instance.setup(start_position, target_position, range_limit, player)
 
 
 func get_boomerang_range() -> float:
 	return BASE_RANGE + (RANGE_PER_LEVEL * (boomerang_level - 1))
+
+
+func get_effective_targeting_range(player: Node2D, ability_range: float) -> float:
+	if player != null and player.is_in_group("player") and player.has_method("get_targeting_radius"):
+		return min(ability_range, float(player.call("get_targeting_radius")))
+	return ability_range
