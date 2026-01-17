@@ -1,9 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://n7p1t353jjgd"]
+[gd_scene load_steps=15 format=3 uid="uid://n7p1t353jjgd"]
 
 [ext_resource type="Script" uid="uid://sv4kbwfj1poy" path="res://scenes/ui/ability_upgrade_card.gd" id="1_vrw8k"]
 [ext_resource type="PackedScene" uid="uid://be5obdyonetw6" path="res://scenes/component/random_audio_stream_player_component.tscn" id="2_hegi4"]
 [ext_resource type="AudioStream" uid="uid://dwltkatemmftx" path="res://assets/audio/maximize_001.ogg" id="3_7qk1e"]
 [ext_resource type="AudioStream" uid="uid://wmeuv2uvn5yp" path="res://assets/audio/toggle_002.ogg" id="3_x5vad"]
+[ext_resource type="Shader" uid="uid://b5kj7dx6e3c2f" path="res://resources/shaders/ui_outline.gdshader" id="5_lu4te"]
+[ext_resource type="Script" uid="uid://big0bsnixs067" path="res://scenes/ui/outline_rect.gd" id="6_m85mw"]
 
 [sub_resource type="Animation" id="Animation_rm8hb"]
 length = 0.001
@@ -193,6 +195,11 @@ _data = {
 &"hover": SubResource("Animation_1i4jy")
 }
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0y2ej"]
+shader = ExtResource("5_lu4te")
+shader_parameter/outline_color = Color(1, 0.87, 0.2, 1)
+shader_parameter/outline_size = 4.0
+
 [node name="AbilityUpgradeCard" type="PanelContainer" groups=["upgrade_card"]]
 custom_minimum_size = Vector2(112.5, 112.5)
 offset_right = 90.0
@@ -219,6 +226,20 @@ libraries = {
 libraries = {
 &"": SubResource("AnimationLibrary_wakmk")
 }
+
+[node name="FocusOutline" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+material = SubResource("ShaderMaterial_0y2ej")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_m85mw")
+outline_size = 4.0
+outline_color = Color(1, 0.87, 0.2, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2

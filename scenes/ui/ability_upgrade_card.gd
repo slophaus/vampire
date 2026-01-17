@@ -5,9 +5,9 @@ signal selected
 
 @onready var name_label: Label = %NameLabel
 @onready var description_label: Label = %DescriptionLabel
+@onready var focus_outline: OutlineRect = %FocusOutline
 
 var disabled := false
-var focus_stylebox: StyleBoxFlat
 var controlling_player_number := 1
 
 
@@ -17,7 +17,8 @@ func _ready():
 	focus_entered.connect(on_focus_entered)
 	focus_exited.connect(on_focus_exited)
 	focus_mode = Control.FOCUS_ALL
-	ensure_focus_stylebox()
+	if focus_outline != null:
+		focus_outline.visible = false
 
 
 func play_in(delay: float = 0):
@@ -73,7 +74,8 @@ func on_focus_entered():
 	if disabled:
 		return
 
-	add_theme_stylebox_override("panel", focus_stylebox)
+	if focus_outline != null:
+		focus_outline.visible = true
 	$HoverAnimationPlayer.play("hover")
 
 
@@ -81,7 +83,8 @@ func on_focus_exited():
 	if disabled:
 		return
 
-	remove_theme_stylebox_override("panel")
+	if focus_outline != null:
+		focus_outline.visible = false
 
 
 func set_controlling_player(player_number: int) -> void:
@@ -89,10 +92,8 @@ func set_controlling_player(player_number: int) -> void:
 
 
 func set_focus_color(color: Color) -> void:
-	ensure_focus_stylebox()
-	focus_stylebox.border_color = color
-	if has_focus():
-		add_theme_stylebox_override("panel", focus_stylebox)
+	if focus_outline != null:
+		focus_outline.set_outline_color(color)
 
 
 func is_event_for_player(event: InputEvent) -> bool:
@@ -104,17 +105,3 @@ func is_event_for_player(event: InputEvent) -> bool:
 
 func get_player_device_id(player_number: int) -> int:
 	return max(player_number - 1, 0)
-
-
-func ensure_focus_stylebox() -> void:
-	if focus_stylebox != null:
-		return
-	var base_stylebox = get_theme_stylebox("panel")
-	if base_stylebox is StyleBoxFlat:
-		focus_stylebox = (base_stylebox as StyleBoxFlat).duplicate()
-	else:
-		focus_stylebox = StyleBoxFlat.new()
-	if focus_stylebox is StyleBoxFlat:
-		var flat_stylebox = focus_stylebox as StyleBoxFlat
-		flat_stylebox.border_color = Color(1, 0.87, 0.2)
-		flat_stylebox.set_border_width_all(4)
