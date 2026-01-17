@@ -84,6 +84,7 @@ target_group = "player"
 owner_group = "enemy"
 
 [node name="PoisonSpitAbilityController" parent="Abilities" instance=ExtResource("7_7dkni")]
+visible = false
 owner_group = "enemy"
 target_group = "player"
 
