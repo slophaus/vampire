@@ -39,6 +39,7 @@ func set_ability_upgrades(upgrades: Array[AbilityUpgrade], current_upgrades: Dic
 		card_instance.selected.connect(on_upgrade_selected.bind(upgrade))
 		cards.append(card_instance)
 		delay += 0.1
+	_configure_card_navigation()
 	if not cards.is_empty():
 		call_deferred("_focus_card", 0)
 
@@ -62,24 +63,24 @@ func get_display_description(upgrade: AbilityUpgrade) -> String:
 	return upgrade.description
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if cards.is_empty():
-		return
-	if not is_event_for_player(event):
-		return
-
-	if event.is_action_pressed("ui_left"):
-		_focus_card(selected_index - 1)
-	elif event.is_action_pressed("ui_right"):
-		_focus_card(selected_index + 1)
-
-
 func _focus_card(index: int) -> void:
 	if cards.is_empty():
 		return
 
 	selected_index = clampi(index, 0, cards.size() - 1)
 	cards[selected_index].grab_focus()
+
+
+func _configure_card_navigation() -> void:
+	if cards.is_empty():
+		return
+
+	for index in range(cards.size()):
+		var card = cards[index]
+		if index > 0:
+			card.focus_neighbor_left = cards[index - 1].get_path()
+		if index < cards.size() - 1:
+			card.focus_neighbor_right = cards[index + 1].get_path()
 
 
 func on_upgrade_selected(upgrade: AbilityUpgrade):
