@@ -47,14 +47,11 @@ func on_timer_timeout() -> void:
 		return
 	if owner_actor.has_method("can_attack") and not owner_actor.can_attack():
 		return
-	if is_charged:
-		return
 	var targeting_range = get_effective_targeting_range(owner_actor, MAX_RANGE)
 
 	var targets = get_valid_targets(owner_actor, targeting_range)
 	if targets.is_empty():
 		set_charged(true)
-		$Timer.stop()
 		return
 
 	var selected_target = targets.pick_random()
