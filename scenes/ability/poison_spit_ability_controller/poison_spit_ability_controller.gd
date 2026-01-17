@@ -1,6 +1,6 @@
 extends Node
 
-const MAX_RANGE = 130
+const MAX_RANGE = 100
 const PLAYER_ATTACK_LAYER = 4
 const ENEMY_ATTACK_LAYER = 8
 const PLAYER_BODY_LAYER = 2
