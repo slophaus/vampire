@@ -38,14 +38,7 @@ func _ready():
 	$Timer.timeout.connect(on_timer_timeout)
 	detection_area.body_entered.connect(on_target_body_entered)
 	update_detection_settings()
-	update_detection_range()
 	GameEvents.ability_upgrade_added.connect(on_ability_upgrade_added)
-
-
-func _physics_process(_delta: float) -> void:
-	if not is_charged:
-		return
-	update_detection_range()
 
 
 func on_timer_timeout() -> void:
@@ -171,27 +164,18 @@ func on_target_body_entered(body: Node) -> void:
 func update_detection_settings() -> void:
 	if detection_shape.shape == null:
 		detection_shape.shape = CircleShape2D.new()
+	if detection_shape.shape is CircleShape2D:
+		(detection_shape.shape as CircleShape2D).radius = MAX_RANGE
 	if target_group == "player":
 		detection_area.collision_mask = PLAYER_BODY_LAYER
 	else:
 		detection_area.collision_mask = ENEMY_BODY_LAYER
 
 
-func update_detection_range() -> void:
-	var owner_actor = get_owner_actor()
-	var targeting_range = MAX_RANGE
-	if owner_actor != null:
-		targeting_range = get_effective_targeting_range(owner_actor, MAX_RANGE)
-	if detection_shape.shape is CircleShape2D:
-		(detection_shape.shape as CircleShape2D).radius = targeting_range
-
-
 func set_charged(charged: bool) -> void:
 	if is_charged == charged:
 		return
 	is_charged = charged
-	if is_charged:
-		update_detection_range()
 	charge_state_changed.emit(is_charged)
 
 
