@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://d2o4jvqt6flcf" path="res://scenes/ability/poison_spit_ability_controller/poison_spit_ability_controller.gd" id="1_3k5gw"]
 [ext_resource type="PackedScene" uid="uid://boq3kpgqkqf7v" path="res://scenes/ability/poison_spit_ability/poison_spit_ability.tscn" id="2_eor4m"]
 
-[node name="PoisonSpitAbilityController" type="Node"]
+[node name="PoisonSpitAbilityController" type="Node2D"]
 script = ExtResource("1_3k5gw")
 poison_spit_ability = ExtResource("2_eor4m")
 
