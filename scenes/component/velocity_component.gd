@@ -1,7 +1,7 @@
 extends Node
 class_name VelocityComponent
 
-@export var max_speed: int = 30
+@export var max_speed: float = 30.0
 @export var acceleration: float = 5
 @export var damping: float = 2.0
 @export var target_refresh_interval: float = 2.0
