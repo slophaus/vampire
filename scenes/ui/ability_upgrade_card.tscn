@@ -1,11 +1,14 @@
-[gd_scene load_steps=15 format=3 uid="uid://n7p1t353jjgd"]
+[gd_scene load_steps=17 format=3 uid="uid://n7p1t353jjgd"]
 
 [ext_resource type="Script" uid="uid://sv4kbwfj1poy" path="res://scenes/ui/ability_upgrade_card.gd" id="1_vrw8k"]
 [ext_resource type="PackedScene" uid="uid://be5obdyonetw6" path="res://scenes/component/random_audio_stream_player_component.tscn" id="2_hegi4"]
 [ext_resource type="AudioStream" uid="uid://dwltkatemmftx" path="res://assets/audio/maximize_001.ogg" id="3_7qk1e"]
 [ext_resource type="AudioStream" uid="uid://wmeuv2uvn5yp" path="res://assets/audio/toggle_002.ogg" id="3_x5vad"]
-[ext_resource type="Shader" uid="uid://b5kj7dx6e3c2f" path="res://resources/shaders/ui_outline.gdshader" id="5_lu4te"]
-[ext_resource type="Script" uid="uid://big0bsnixs067" path="res://scenes/ui/outline_rect.gd" id="6_m85mw"]
+[ext_resource type="Shader" uid="uid://duei0g66g8uhr" path="res://resources/shaders/ui_outline.gdshader" id="5_lu4te"]
+[ext_resource type="Script" uid="uid://cn41fxc2vxgqu" path="res://scenes/ui/outline_rect.gd" id="6_m85mw"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jntrk"]
+draw_center = false
 
 [sub_resource type="Animation" id="Animation_rm8hb"]
 length = 0.001
@@ -199,12 +202,14 @@ _data = {
 shader = ExtResource("5_lu4te")
 shader_parameter/outline_color = Color(1, 0.87, 0.2, 1)
 shader_parameter/outline_size = 4.0
+shader_parameter/rect_size = Vector2(1, 1)
 
 [node name="AbilityUpgradeCard" type="PanelContainer" groups=["upgrade_card"]]
 custom_minimum_size = Vector2(112.5, 112.5)
 offset_right = 90.0
 offset_bottom = 112.5
 pivot_offset = Vector2(56.25, 56.25)
+theme_override_styles/panel = SubResource("StyleBoxFlat_jntrk")
 script = ExtResource("1_vrw8k")
 
 [node name="HoverPlayerComponent" parent="." instance=ExtResource("2_hegi4")]
@@ -227,38 +232,27 @@ libraries = {
 &"": SubResource("AnimationLibrary_wakmk")
 }
 
-[node name="FocusOutline" type="ColorRect" parent="."]
-unique_name_in_owner = true
-visible = false
-material = SubResource("ShaderMaterial_0y2ej")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("6_m85mw")
-outline_size = 4.0
-outline_color = Color(1, 0.87, 0.2, 1)
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 12
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"AlternatePanelContainer"
 
-[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer"]
+[node name="NameLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/PanelContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"BlueOutlineLabel"
@@ -268,9 +262,18 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="DescriptionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="DescriptionLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"BlueOutlineLabel"
 text = "Write Some description here as you write a long description"
 autowrap_mode = 2
+
+[node name="FocusOutline" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+material = SubResource("ShaderMaterial_0y2ej")
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("6_m85mw")
+outline_color = Color(1, 0.87, 0.2, 1)
