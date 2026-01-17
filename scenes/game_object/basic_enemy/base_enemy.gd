@@ -16,7 +16,6 @@ const POISON_TINT := Color(0.3, 1.0, 0.3, 1.0)
 const NAVIGATION_UPDATE_MIN := 0.4
 const NAVIGATION_UPDATE_MAX := 0.7
 const AIR_ENEMY_GROUP := "air_enemy"
-const POISON_SPIT_FLASH_SPEED := 3.0
 
 @export var max_health := 10.0
 @export var max_speed := 30.0
@@ -65,9 +64,6 @@ var is_dormant := false
 var dormant_timer_left := 0.0
 var last_health := 0.0
 var floating_text_scene = preload("res://scenes/ui/floating_text.tscn")
-var is_poison_spit_charged := false
-var poison_spit_flash_time := 0.0
-var normal_visuals_modulate := Color.WHITE
 
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
@@ -78,8 +74,6 @@ func _ready():
 	update_visual_scale()
 	navigation_rng.randomize()
 	_schedule_next_navigation_update()
-	if visuals != null:
-		normal_visuals_modulate = visuals.modulate
 	if poison_component != null:
 		poison_component.poison_started.connect(_on_poison_started)
 		poison_component.poison_ended.connect(_on_poison_ended)
@@ -91,14 +85,6 @@ func _ready():
 	if health_component != null:
 		last_health = health_component.current_health
 		health_component.health_changed.connect(_on_health_changed)
-	if poison_spit_ability_controller != null and poison_spit_ability_controller.has_signal("charge_state_changed"):
-		var charge_callable = Callable(self, "_on_poison_spit_charge_changed")
-		if not poison_spit_ability_controller.is_connected("charge_state_changed", charge_callable):
-			poison_spit_ability_controller.connect("charge_state_changed", charge_callable)
-
-
-func _process(delta: float) -> void:
-	_update_poison_spit_flash(delta)
 
 
 func on_hit():
@@ -362,24 +348,6 @@ func _on_poison_started() -> void:
 
 func _on_poison_ended() -> void:
 	apply_enemy_tint()
-
-
-func _on_poison_spit_charge_changed(charged: bool) -> void:
-	is_poison_spit_charged = charged
-	poison_spit_flash_time = 0.0
-	if not is_poison_spit_charged and visuals != null:
-		visuals.modulate = normal_visuals_modulate
-
-
-func _update_poison_spit_flash(delta: float) -> void:
-	if visuals == null:
-		return
-	if not is_poison_spit_charged:
-		visuals.modulate = normal_visuals_modulate
-		return
-	poison_spit_flash_time += delta * POISON_SPIT_FLASH_SPEED
-	var pulse = (sin(poison_spit_flash_time * TAU) + 1.0) * 0.5
-	visuals.modulate = normal_visuals_modulate.lerp(POISON_TINT, 0.3 + (0.7 * pulse))
 
 
 func _on_health_changed() -> void:

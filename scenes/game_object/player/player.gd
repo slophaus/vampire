@@ -29,6 +29,7 @@ const POISON_SPIT_FLASH_SPEED := 3.0
 @onready var player_color = $Visuals/player_sprite/player_color
 @onready var near_death_flash = $Visuals/player_sprite/NearDeathFlash
 @onready var flash_overlay = $Visuals/player_sprite/FlashOverlay
+@onready var poison_spit_indicator: Polygon2D = $Visuals/PoisonSpitChargedIndicator
 @onready var velocity_component = $VelocityComponent
 @onready var aim_laser: Line2D = $AimLaser
 @onready var player_collision_shape: CollisionShape2D = $CollisionShape2D
@@ -110,6 +111,7 @@ func _ready():
 	update_health_bar_size()
 	update_health_display()
 	set_upgrade_dot_count(0)
+	_update_poison_spit_indicator(0.0)
 	queue_redraw()
 
 
@@ -149,7 +151,7 @@ func _process(delta):
 	else:
 		_update_aim_laser()
 	_update_status_tint()
-	_update_poison_spit_flash(delta)
+	_update_poison_spit_indicator(delta)
 	_update_near_death_flash(delta)
 	_update_flash_overlay()
 
@@ -570,19 +572,22 @@ func _connect_poison_spit_controller(ability_controller: Node) -> void:
 func _on_poison_spit_charge_changed(charged: bool) -> void:
 	is_poison_spit_charged = charged
 	poison_spit_flash_time = 0.0
-	if not is_poison_spit_charged and visuals != null:
-		visuals.modulate = normal_visuals_modulate
+	if poison_spit_indicator != null:
+		poison_spit_indicator.visible = charged
+		poison_spit_indicator.modulate = Color(1, 1, 1, 1)
 
 
-func _update_poison_spit_flash(delta: float) -> void:
-	if visuals == null:
+func _update_poison_spit_indicator(delta: float) -> void:
+	if poison_spit_indicator == null:
 		return
 	if not is_poison_spit_charged:
-		visuals.modulate = normal_visuals_modulate
+		poison_spit_indicator.visible = false
+		poison_spit_indicator.modulate = Color(1, 1, 1, 1)
 		return
+	poison_spit_indicator.visible = true
 	poison_spit_flash_time += delta * POISON_SPIT_FLASH_SPEED
 	var pulse = (sin(poison_spit_flash_time * TAU) + 1.0) * 0.5
-	visuals.modulate = normal_visuals_modulate.lerp(POISON_TINT, 0.3 + (0.7 * pulse))
+	poison_spit_indicator.modulate = Color(1, 1, 1, 0.3 + (0.7 * pulse))
 
 
 func update_upgrade_dots(current_upgrades: Dictionary) -> void:
