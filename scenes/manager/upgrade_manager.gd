@@ -130,10 +130,6 @@ func pick_upgrades(player_number: int) -> Array[AbilityUpgrade]:
 
 
 func get_forced_upgrade_for_first_slot(upgrade_pool: WeightedTable) -> AbilityUpgrade:
-	for forced_upgrade in [upgrade_player_speed]:
-		for entry in upgrade_pool.items:
-			if entry["item"] == forced_upgrade:
-				return forced_upgrade
 	return null
 
 
