@@ -12,10 +12,11 @@ var base_rotation: Vector2
 var source_player: Node2D
 var hit_count := 0
 @export var spiral_duration := 2.0
+@export var start_angle := 0.0
 
 
 func _ready():
-	base_rotation = Vector2.RIGHT.rotated(randf_range(0, TAU))
+	base_rotation = Vector2.RIGHT.rotated(start_angle)
 	if hitbox_component.penetration <= 0:
 		hitbox_component.penetration = BASE_PENETRATION
 	hitbox_component.hit_landed.connect(on_hit_landed)
