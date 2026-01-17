@@ -12,7 +12,8 @@ var multi_shot_delay_by_axes := {
 	2: 0.45,
 	3: 0.32,
 	4: 0.27,
-	5: 0.23
+	5: 0.23,
+	6: 0.2,
 }
 var player_number := 1
 

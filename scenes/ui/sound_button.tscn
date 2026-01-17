@@ -1,11 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://dumjej53vmw4d"]
+[gd_scene load_steps=10 format=3 uid="uid://dumjej53vmw4d"]
 
 [ext_resource type="Script" uid="uid://ds3yhh3fxx57c" path="res://scenes/ui/sound_button.gd" id="1_7ydko"]
 [ext_resource type="PackedScene" uid="uid://be5obdyonetw6" path="res://scenes/component/random_audio_stream_player_component.tscn" id="2_mgyaf"]
 [ext_resource type="AudioStream" uid="uid://b416vj3mhrw02" path="res://assets/audio/click4.ogg" id="3_4651b"]
 [ext_resource type="AudioStream" uid="uid://73yn6bokdrhi" path="res://assets/audio/click5.ogg" id="4_86ide"]
-[ext_resource type="Shader" uid="uid://b5kj7dx6e3c2f" path="res://resources/shaders/ui_outline.gdshader" id="5_4x3be"]
-[ext_resource type="Script" uid="uid://big0bsnixs067" path="res://scenes/ui/outline_rect.gd" id="6_st8mf"]
+[ext_resource type="Shader" uid="uid://duei0g66g8uhr" path="res://resources/shaders/ui_outline.gdshader" id="5_4x3be"]
+[ext_resource type="Script" uid="uid://cn41fxc2vxgqu" path="res://scenes/ui/outline_rect.gd" id="6_st8mf"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dy0q0"]
 
@@ -13,49 +13,49 @@
 shader = ExtResource("5_4x3be")
 shader_parameter/outline_color = Color(1, 0.87, 0.2, 1)
 shader_parameter/outline_size = 4.0
+shader_parameter/rect_size = Vector2(1, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ehqc6"]
 shader = ExtResource("5_4x3be")
 shader_parameter/outline_color = Color(0, 0, 0, 1)
 shader_parameter/outline_size = 3.0
+shader_parameter/rect_size = Vector2(1, 1)
 
 [node name="SoundButton" type="Button"]
 offset_right = 6.0
 offset_bottom = 6.0
 scale = Vector2(1.02739, 1.02005)
-text = "Sound Button"
 theme_override_styles/focus = SubResource("StyleBoxEmpty_dy0q0")
+text = "Sound Button"
 script = ExtResource("1_7ydko")
 
 [node name="FocusOutline" type="ColorRect" parent="."]
 visible = false
 material = SubResource("ShaderMaterial_j25n1")
-anchors_preset = 15
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("6_st8mf")
-outline_size = 4.0
 outline_color = Color(1, 0.87, 0.2, 1)
 
 [node name="SelectionBorder" type="ColorRect" parent="."]
 visible = false
 material = SubResource("ShaderMaterial_ehqc6")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
 offset_left = -3.0
 offset_top = -3.0
 offset_right = 3.0
 offset_bottom = 3.0
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("6_st8mf")
 outline_size = 3.0
-outline_color = Color(0, 0, 0, 1)
 
 [node name="RandomAudioStreamPlayerComponent" parent="." instance=ExtResource("2_mgyaf")]
 streams = Array[AudioStream]([ExtResource("3_4651b"), ExtResource("4_86ide")])
