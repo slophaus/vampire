@@ -9,14 +9,13 @@ const BASE_PENETRATION := 3
 
 
 var base_rotation: Vector2
-var base_rotation_angle := 0.0
 var source_player: Node2D
 var hit_count := 0
 @export var spiral_duration := 2.0
 
 
 func _ready():
-	base_rotation = Vector2.RIGHT.rotated(base_rotation_angle)
+	base_rotation = Vector2.RIGHT.rotated(randf_range(0, TAU))
 	if hitbox_component.penetration <= 0:
 		hitbox_component.penetration = BASE_PENETRATION
 	hitbox_component.hit_landed.connect(on_hit_landed)
@@ -24,10 +23,6 @@ func _ready():
 	var tween = create_tween()
 	tween.tween_method(tween_method, 0.0, float(MAX_ROTATION), spiral_duration)
 	tween.tween_callback(queue_free)
-
-
-func set_base_rotation_angle(angle: float) -> void:
-	base_rotation_angle = angle
 
 
 func tween_method(rotations: float):
