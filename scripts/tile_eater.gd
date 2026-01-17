@@ -221,18 +221,18 @@ func _is_cell_occupiable(cell: Vector2i) -> bool:
 	return tile_type != "metal"
 
 
-static func initialize_dirt_border_for_tilemap(arena_tilemap: TileMap) -> void:
-	if arena_tilemap == null:
+static func initialize_dirt_border_for_tilemap(tilemap: TileMap) -> void:
+	if tilemap == null:
 		return
-	if arena_tilemap.has_meta(DIRT_BORDER_META_KEY):
+	if tilemap.has_meta(DIRT_BORDER_META_KEY):
 		return
-	var dirt_border_layer = arena_tilemap.get_node_or_null(DIRT_BORDER_LAYER_NAME) as TileMapLayer
+	var dirt_border_layer = tilemap.get_node_or_null(DIRT_BORDER_LAYER_NAME) as TileMapLayer
 	if dirt_border_layer == null:
 		return
 	dirt_border_layer.clear()
 	var floor_cells: Array[Vector2i] = []
-	for cell in arena_tilemap.get_used_cells(0):
-		if _is_walkable_cell_in_tilemap(arena_tilemap, cell):
+	for cell in tilemap.get_used_cells(0):
+		if _is_walkable_cell_in_tilemap(tilemap, cell):
 			floor_cells.append(cell)
 	if not floor_cells.is_empty():
 		dirt_border_layer.set_cells_terrain_connect(
@@ -241,7 +241,7 @@ static func initialize_dirt_border_for_tilemap(arena_tilemap: TileMap) -> void:
 			DIRT_BORDER_TERRAIN,
 			false
 		)
-	arena_tilemap.set_meta(DIRT_BORDER_META_KEY, true)
+	tilemap.set_meta(DIRT_BORDER_META_KEY, true)
 
 
 static func _is_walkable_cell_in_tilemap(arena_tilemap: TileMap, cell: Vector2i) -> bool:

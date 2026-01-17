@@ -2,7 +2,6 @@ extends Node
 class_name ArenaTimeManager
 
 signal arena_difficulty_increased(arena_difficulty: int)
-signal arena_time_completed
 signal arena_rest_started
 signal arena_rest_ended
 

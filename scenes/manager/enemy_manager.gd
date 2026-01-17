@@ -51,7 +51,6 @@ func get_spawn_position(player_position: Vector2, require_navigation: bool = tru
 		return Vector2.ZERO
 	var local_position = arena_tilemap.map_to_local(spawn_cell)
 	return arena_tilemap.to_global(local_position)
-	return Vector2.ZERO
 
 
 func is_spawn_cell_navigable_to_player(spawn_cell: Vector2i, player_position: Vector2) -> bool:

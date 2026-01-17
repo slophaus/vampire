@@ -16,8 +16,8 @@ func _ready() -> void:
 	resized.connect(_update_shader)
 
 
-func set_outline_color(color: Color) -> void:
-	outline_color = color
+func set_outline_color(new_color: Color) -> void:
+	outline_color = new_color
 	_update_shader()
 
 
