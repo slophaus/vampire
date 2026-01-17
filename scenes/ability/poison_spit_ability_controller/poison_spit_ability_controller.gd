@@ -170,10 +170,11 @@ func update_detection_settings() -> void:
 
 
 func get_valid_targets(owner_actor: Node2D, targeting_range: float) -> Array[Node2D]:
-	var targets = get_tree().get_nodes_in_group(target_group)
-	targets = targets.filter(func(target: Node2D):
-		return is_valid_target(target, owner_actor, targeting_range)
-	)
+	var raw_targets = get_tree().get_nodes_in_group(target_group)
+	var targets: Array[Node2D] = []
+	for target in raw_targets:
+		if target is Node2D and is_valid_target(target, owner_actor, targeting_range):
+			targets.append(target)
 	return targets
 
 
