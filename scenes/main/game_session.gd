@@ -264,9 +264,10 @@ func _place_players_at_last_spawn() -> void:
 
 
 func _get_spawn_position(level: LevelRoot, exit_door_name: StringName) -> Vector2:
-	var exit_door = level.find_child(exit_door_name, true, false)
-	if exit_door != null:
-		return exit_door.global_position + DOOR_EXIT_OFFSET
+	if not exit_door_name.is_empty():
+		var exit_door = level.find_child(exit_door_name, true, false)
+		if exit_door != null:
+			return exit_door.global_position + DOOR_EXIT_OFFSET
 	var spawn_marker = level.find_child(level.spawn_marker_name, true, false)
 	if spawn_marker != null:
 		return spawn_marker.global_position
