@@ -74,7 +74,7 @@ position = Vector2(0, -5)
 shape = SubResource("CircleShape2D_5yb0v")
 debug_color = Color(0.991942, 0, 0.258832, 0.42)
 
-[node name="Abilities" type="Node" parent="."]
+[node name="Abilities" type="Node2D" parent="."]
 
 [node name="FireballAbilityController" parent="Abilities" instance=ExtResource("5_m1ysn")]
 owner_group = "enemy"
