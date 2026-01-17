@@ -116,7 +116,10 @@ func update_upgrade_pool(chosen_upgrade: AbilityUpgrade, upgrade_pool: WeightedT
 func pick_upgrades(player_number: int) -> Array[AbilityUpgrade]:
 	var upgrade_pool = upgrade_pools_by_player[player_number]
 	var chosen_upgrades: Array[AbilityUpgrade] = []
-	for i in upgrade_option_count:
+	var forced_upgrade = get_forced_upgrade_for_first_slot(upgrade_pool)
+	if forced_upgrade != null:
+		chosen_upgrades.append(forced_upgrade)
+	for i in range(chosen_upgrades.size(), upgrade_option_count):
 		if upgrade_pool.items.size() == chosen_upgrades.size():  # no more viable upgrade
 			break
 
@@ -124,6 +127,14 @@ func pick_upgrades(player_number: int) -> Array[AbilityUpgrade]:
 		chosen_upgrades.append(upgr)
 
 	return chosen_upgrades
+
+
+func get_forced_upgrade_for_first_slot(upgrade_pool: WeightedTable) -> AbilityUpgrade:
+	for forced_upgrade in [upgrade_axe_level, upgrade_axe]:
+		for entry in upgrade_pool.items:
+			if entry["item"] == forced_upgrade:
+				return forced_upgrade
+	return null
 
 
 ## Get random upgrades from pool (up to 2), without duplicates

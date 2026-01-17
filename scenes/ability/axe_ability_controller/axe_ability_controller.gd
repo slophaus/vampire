@@ -8,6 +8,12 @@ var axe_scale_bonus: float = 0.0
 var base_penetration := 3
 var axe_level := 1
 var multi_shot_delay := 0.3
+var multi_shot_delay_by_axes := {
+	2: 0.45,
+	3: 0.32,
+	4: 0.27,
+	5: 0.23
+}
 var player_number := 1
 
 
@@ -64,6 +70,7 @@ func set_player_number(new_player_number: int) -> void:
 
 
 func spawn_axes(player: Node2D, foreground: Node2D) -> void:
+	var shot_delay = multi_shot_delay_by_axes.get(axe_level, multi_shot_delay)
 	for shot_index in range(axe_level):
 		if not is_instance_valid(foreground) or not foreground.is_inside_tree():
 			return
@@ -77,4 +84,4 @@ func spawn_axes(player: Node2D, foreground: Node2D) -> void:
 		axe_instance.hitbox_component.penetration = base_penetration
 		axe_instance.scale *= 1.0 + axe_scale_bonus
 		if shot_index < axe_level - 1:
-			await get_tree().create_timer(multi_shot_delay).timeout
+			await get_tree().create_timer(shot_delay).timeout
