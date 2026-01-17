@@ -200,7 +200,7 @@ shader = ExtResource("5_lu4te")
 shader_parameter/outline_color = Color(1, 0.87, 0.2, 1)
 shader_parameter/outline_size = 4.0
 
-[node name="AbilityUpgradeCard" type="Panel" groups=["upgrade_card"]]
+[node name="AbilityUpgradeCard" type="PanelContainer" groups=["upgrade_card"]]
 custom_minimum_size = Vector2(112.5, 112.5)
 offset_right = 90.0
 offset_bottom = 112.5
