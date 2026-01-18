@@ -363,6 +363,8 @@ func _spawn_respawn_marker() -> void:
 	marker.global_position = global_position
 	if marker.has_method("configure_from_enemy"):
 		marker.call("configure_from_enemy", self)
+	var base_name = NodeNameUtils.get_base_name_from_scene(get_scene_file_path(), "enemy")
+	NodeNameUtils.assign_unique_name(marker, parent_node, "%s_respawn" % base_name)
 
 
 func wake_from_dormant() -> void:

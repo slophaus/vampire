@@ -34,5 +34,7 @@ func on_died() -> void:
 		if droplet == null:
 			continue
 		spawn_parent.add_child(droplet)
+		var base_name = NodeNameUtils.get_base_name_from_scene(blood_droplet_scene.resource_path, "blood_droplet")
+		NodeNameUtils.assign_unique_name(droplet, spawn_parent, base_name)
 		var offset = Vector2.RIGHT.rotated(randf() * TAU) * randf() * spawn_radius
 		droplet.global_position = base_position + offset

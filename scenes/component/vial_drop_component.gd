@@ -41,4 +41,6 @@ func on_died():
 	if vials_layer == null:
 		return
 	vials_layer.add_child(vial_instance)
+	var base_name = NodeNameUtils.get_base_name_from_scene(selected_vial_scene.resource_path, "vial")
+	NodeNameUtils.assign_unique_name(vial_instance, vials_layer, base_name)
 	vial_instance.global_position = spawn_position

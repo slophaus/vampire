@@ -57,6 +57,8 @@ func _emit_vial() -> void:
 	if vials_layer == null:
 		return
 	vials_layer.add_child(vial_instance)
+	var base_name = NodeNameUtils.get_base_name_from_scene(experience_vial_scene.resource_path, "experience_vial")
+	NodeNameUtils.assign_unique_name(vial_instance, vials_layer, base_name)
 	var angle = randf() * TAU
 	var offset = Vector2(cos(angle), sin(angle)) * sqrt(randf()) * experience_vial_drop_radius
 	vial_instance.global_position = global_position + offset
