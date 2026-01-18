@@ -345,6 +345,7 @@ func update_despawn_state() -> bool:
 			continue
 		if global_position.distance_to(player_node.global_position) <= despawn_radius:
 			return false
+	GameEvents.enemy_despawned.emit()
 	_spawn_respawn_marker()
 	queue_free()
 	return true

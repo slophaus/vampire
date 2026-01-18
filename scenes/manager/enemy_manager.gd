@@ -22,6 +22,7 @@ var navigation_calls_per_second := 0.0
 var navigation_call_count := 0
 var navigation_window_start_ms := 0
 var last_spawn_ms := 0.0
+var despawned_enemy_count := 0
 var applied_enemy_keyframes: Dictionary = {}
 var level_spawn_rate_keyframes: Array[Vector2] = []
 var level_enemy_spawn_keyframes: Array[Vector3] = []
@@ -31,6 +32,7 @@ var spawning_enabled := true
 func _ready():
 	timer.timeout.connect(on_timer_timeout)
 	navigation_window_start_ms = Time.get_ticks_msec()
+	GameEvents.enemy_despawned.connect(_on_enemy_despawned)
 	if arena_time_manager != null:
 		arena_time_manager.arena_difficulty_increased.connect(on_arena_difficulty_increased)
 		arena_time_manager.arena_rest_started.connect(on_arena_rest_started)
@@ -196,6 +198,10 @@ func get_last_spawn_ms() -> float:
 	return last_spawn_ms
 
 
+func get_despawned_enemy_count() -> int:
+	return despawned_enemy_count
+
+
 func get_spawn_rate() -> float:
 	if timer.wait_time <= 0.0:
 		return 0.0
@@ -257,6 +263,10 @@ func _record_spawn_duration(start_usec: int) -> void:
 	last_spawn_ms = float(Time.get_ticks_usec() - start_usec) / 1000.0
 
 
+func _on_enemy_despawned() -> void:
+	despawned_enemy_count += 1
+
+
 func pick_non_ghost_enemy() -> int:
 	for attempt in range(10):
 		var enemy_index = enemy_table.pick_item()
@@ -280,6 +290,7 @@ func apply_level_settings(level: LevelRoot) -> void:
 	else:
 		level_spawn_rate_keyframes = []
 		level_enemy_spawn_keyframes = []
+	despawned_enemy_count = 0
 	set_spawning_enabled(true)
 	_reset_enemy_progression()
 	if arena_time_manager != null:

@@ -5,6 +5,7 @@ signal ability_upgrade_added(upgrade: AbilityUpgrade, current_upgrades: Dictiona
 signal player_damaged
 signal navigation_debug_toggled(enabled: bool)
 signal debug_mode_toggled(enabled: bool)
+signal enemy_despawned
 
 var player_count := 1
 var player_color_indices := [0, 1, 2, 3]
