@@ -26,6 +26,7 @@ const AIR_ENEMY_GROUP := "air_enemy"
 @export var dormant_enabled := true
 @export var dormant_wake_radius := 150.0
 @export var dormant_wake_timer_seconds := 0.0
+@export var is_elite := false
 
 @onready var visuals: Node2D = get_node_or_null("Visuals")
 @onready var velocity_component: VelocityComponent = $VelocityComponent
@@ -53,7 +54,6 @@ const AIR_ENEMY_GROUP := "air_enemy"
 @onready var wasp_color: ColorRect = get_node_or_null("Visuals/WaspSprite/enemy_color")
 
 var enemy_tint := Color.WHITE
-var is_elite := false
 var size_multiplier := 1.0
 var is_possessed := false
 var possessed_time_left := 0.0
@@ -209,9 +209,10 @@ func apply_enemy_tint() -> void:
 
 
 func assign_elite_status() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
-	is_elite = rng.randf() < ELITE_CHANCE
+	if not is_elite:
+		var rng := RandomNumberGenerator.new()
+		rng.randomize()
+		is_elite = rng.randf() < ELITE_CHANCE
 	size_multiplier = ELITE_SCALE if is_elite else 1.0
 
 
