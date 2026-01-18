@@ -7,6 +7,9 @@ var enemy_index := -1
 var enemy_scene_path := ""
 var respawn_data: Dictionary = {}
 
+func _ready() -> void:
+	add_to_group("enemy_respawn_marker")
+
 func configure_from_enemy(enemy: BaseEnemy) -> void:
 	enemy_index = enemy.enemy_index
 	enemy_scene_path = enemy.get_scene_file_path()

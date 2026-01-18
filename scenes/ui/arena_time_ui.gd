@@ -31,10 +31,13 @@ func _process(delta):
 
 	var process_ms = Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
 	var physics_ms = Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
+	var active_enemies = get_tree().get_nodes_in_group("enemy").size()
+	var despawned_enemies = get_tree().get_nodes_in_group("enemy_respawn_marker").size()
 
-	stats_label.text = "FPS: %d\nEnemies: %d\nDifficulty: %d\nNext Diff: %s\nSpawn Rate: %.2f/s\nFailed Spawns: %d\nNavigation: %.2f ms\nNav Calls: %.2f/s\nLast Spawn: %.2f ms\nProcess: %.2f ms\nPhysics: %.2f ms" % [
+	stats_label.text = "FPS: %d\nEnemies (Active/Despawned): %d/%d\nDifficulty: %d\nNext Diff: %s\nSpawn Rate: %.2f/s\nFailed Spawns: %d\nNavigation: %.2f ms\nNav Calls: %.2f/s\nLast Spawn: %.2f ms\nProcess: %.2f ms\nPhysics: %.2f ms" % [
 		Engine.get_frames_per_second(),
-		get_tree().get_nodes_in_group("enemy").size(),
+		active_enemies,
+		despawned_enemies,
 		arena_time_manager.get_arena_difficulty(),
 		format_seconds_to_string(arena_time_manager.get_time_until_next_difficulty()),
 		spawn_rate,
