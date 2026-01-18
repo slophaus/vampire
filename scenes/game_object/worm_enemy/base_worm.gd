@@ -693,10 +693,12 @@ func _spawn_baby_worm() -> void:
 	if tree == null:
 		return
 	var target_layer = tree.get_first_node_in_group("entities_layer")
+	var parent_node: Node = self
 	if target_layer != null:
-		target_layer.add_child(baby)
-	else:
-		add_child(baby)
+		parent_node = target_layer
+	parent_node.add_child(baby)
+	var base_name = NodeNameUtils.get_base_name_from_scene(baby.get_scene_file_path(), "worm")
+	NodeNameUtils.assign_unique_name(baby, parent_node, base_name)
 	var spawn_position = global_position
 	if not segment_positions.is_empty():
 		var random_index = randi_range(0, segment_positions.size() - 1)
