@@ -54,6 +54,8 @@ func _respawn_enemy() -> void:
 		enemy.enemy_index = enemy_index
 		enemy.set_respawn_data(respawn_data)
 	parent_node.add_child(enemy)
+	if enemy is BaseEnemy:
+		enemy.wake_from_dormant()
 	enemy.global_position = global_position
 	queue_free()
 
