@@ -139,6 +139,8 @@ func spawn_boss_drops() -> void:
 		var health_pickup = health_pickup_scene.instantiate() as Node2D
 		if health_pickup != null:
 			spawn_parent.add_child(health_pickup)
+			var base_name = NodeNameUtils.get_base_name_from_scene(health_pickup_scene.resource_path, "health_pickup")
+			NodeNameUtils.assign_unique_name(health_pickup, spawn_parent, base_name)
 			health_pickup.global_position = global_position
 	if experience_vial_scene == null or experience_vial_count <= 0:
 		return
@@ -147,6 +149,8 @@ func spawn_boss_drops() -> void:
 		if vial == null:
 			continue
 		spawn_parent.add_child(vial)
+		var vial_base_name = NodeNameUtils.get_base_name_from_scene(experience_vial_scene.resource_path, "experience_vial")
+		NodeNameUtils.assign_unique_name(vial, spawn_parent, vial_base_name)
 		var angle = TAU * float(i) / float(experience_vial_count)
 		var offset = Vector2(cos(angle), sin(angle)) * experience_vial_drop_radius
 		vial.global_position = global_position + offset
@@ -183,6 +187,8 @@ func spawn_minions() -> void:
 	for i in range(MINION_SPAWN_COUNT):
 		var minion = minion_scene.instantiate() as Node2D
 		spawn_parent.add_child(minion)
+		var base_name = NodeNameUtils.get_base_name_from_scene(minion_scene.resource_path, "enemy")
+		NodeNameUtils.assign_unique_name(minion, spawn_parent, base_name)
 		var angle = rng.randf_range(0.0, TAU)
 		var offset = Vector2(cos(angle), sin(angle)) * MINION_SPAWN_RADIUS
 		minion.global_position = global_position + offset

@@ -55,6 +55,8 @@ func _respawn_enemy() -> void:
 		enemy.set_respawn_data(respawn_data)
 	parent_node.add_child(enemy)
 	if enemy is BaseEnemy:
+		var base_name = _get_enemy_base_name()
+		NodeNameUtils.assign_unique_name(enemy, parent_node, base_name)
 		enemy.wake_from_dormant()
 	enemy.global_position = global_position
 	queue_free()
@@ -65,3 +67,9 @@ func _find_enemy_manager() -> EnemyManager:
 	if root == null:
 		return null
 	return root.find_child("EnemyManager", true, false) as EnemyManager
+
+
+func _get_enemy_base_name() -> String:
+	if enemy_scene_path != "":
+		return NodeNameUtils.get_base_name_from_scene(enemy_scene_path, "enemy")
+	return "enemy"

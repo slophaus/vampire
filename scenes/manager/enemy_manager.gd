@@ -173,6 +173,9 @@ func on_timer_timeout():
 		return
 
 	target_layer.add_child(enemy)
+	if enemy is BaseEnemy:
+		var base_name = NodeNameUtils.get_base_name_from_scene(enemy.get_scene_file_path(), "enemy")
+		NodeNameUtils.assign_unique_name(enemy, target_layer, base_name)
 	enemy.global_position = spawn_position
 	_record_spawn_duration(spawn_start_usec)
 
