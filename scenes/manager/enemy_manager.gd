@@ -18,6 +18,10 @@ const AIR_ENEMY_GROUP := "air_enemy"
 var enemy_table = WeightedTable.new()
 var failed_spawn_count := 0
 var last_navigation_ms := 0.0
+var navigation_calls_per_second := 0.0
+var navigation_call_count := 0
+var navigation_window_start_ms := 0
+var last_spawn_ms := 0.0
 var applied_enemy_keyframes: Dictionary = {}
 var level_spawn_rate_keyframes: Array[Vector2] = []
 var level_enemy_spawn_keyframes: Array[Vector3] = []
@@ -26,6 +30,7 @@ var spawning_enabled := true
 
 func _ready():
 	timer.timeout.connect(on_timer_timeout)
+	navigation_window_start_ms = Time.get_ticks_msec()
 	if arena_time_manager != null:
 		arena_time_manager.arena_difficulty_increased.connect(on_arena_difficulty_increased)
 		arena_time_manager.arena_rest_started.connect(on_arena_rest_started)
@@ -62,6 +67,7 @@ func is_spawn_cell_navigable_to_player(spawn_cell: Vector2i, player_position: Ve
 	if not navigation_map.is_valid():
 		return true
 	var spawn_position = arena_tilemap.to_global(arena_tilemap.map_to_local(spawn_cell))
+	_record_navigation_call()
 	var navigation_start_usec = Time.get_ticks_usec()
 	var path = NavigationServer2D.map_get_path(navigation_map, spawn_position, player_position, false)
 	last_navigation_ms = float(Time.get_ticks_usec() - navigation_start_usec) / 1000.0
@@ -130,6 +136,7 @@ func on_timer_timeout():
 	if enemy_table.items.is_empty():
 		return
 
+	var spawn_start_usec = Time.get_ticks_usec()
 	var enemy_index = enemy_table.pick_item()
 	if enemy_index == GHOST_ENEMY_INDEX and not can_spawn_ghost():
 		enemy_index = pick_non_ghost_enemy()
@@ -144,6 +151,7 @@ func on_timer_timeout():
 	if spawn_position == Vector2.ZERO:
 		failed_spawn_count += 1
 		enemy.queue_free()
+		_record_spawn_duration(spawn_start_usec)
 		return
 
 	if enemy is BaseEnemy:
@@ -159,10 +167,12 @@ func on_timer_timeout():
 			target_layer = air_layer
 	if target_layer == null:
 		enemy.queue_free()
+		_record_spawn_duration(spawn_start_usec)
 		return
 
 	target_layer.add_child(enemy)
 	enemy.global_position = spawn_position
+	_record_spawn_duration(spawn_start_usec)
 
 
 func get_failed_spawn_count() -> int:
@@ -171,6 +181,14 @@ func get_failed_spawn_count() -> int:
 
 func get_last_navigation_ms() -> float:
 	return last_navigation_ms
+
+
+func get_navigation_calls_per_second() -> float:
+	return navigation_calls_per_second
+
+
+func get_last_spawn_ms() -> float:
+	return last_spawn_ms
 
 
 func get_spawn_rate() -> float:
@@ -218,6 +236,20 @@ func get_enemy_scene(enemy_index: int) -> PackedScene:
 
 func can_spawn_ghost() -> bool:
 	return get_tree().get_nodes_in_group("ghost").is_empty()
+
+
+func _record_navigation_call() -> void:
+	navigation_call_count += 1
+	var now_ms = Time.get_ticks_msec()
+	var elapsed_ms = now_ms - navigation_window_start_ms
+	if elapsed_ms >= 1000:
+		navigation_calls_per_second = (float(navigation_call_count) * 1000.0) / max(1, elapsed_ms)
+		navigation_call_count = 0
+		navigation_window_start_ms = now_ms
+
+
+func _record_spawn_duration(start_usec: int) -> void:
+	last_spawn_ms = float(Time.get_ticks_usec() - start_usec) / 1000.0
 
 
 func pick_non_ghost_enemy() -> int:
