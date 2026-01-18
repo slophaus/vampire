@@ -439,27 +439,32 @@ z_index = 6
 
 [node name="GhostEnemy" parent="LayerAirEntities" instance=ExtResource("10_5fr2l")]
 position = Vector2(-112, 1546)
+despawn_radius = 0.0
 
 [node name="WaspEnemy" parent="LayerAirEntities" instance=ExtResource("9_krg47")]
 position = Vector2(347, -315)
 max_speed = 50.0
 acceleration = 5.0
+despawn_radius = 0.0
 dormant_wake_radius = 300.0
 
 [node name="WaspEnemy2" parent="LayerAirEntities" instance=ExtResource("9_krg47")]
 position = Vector2(386, -316)
 max_speed = 50.0
 acceleration = 5.0
+despawn_radius = 0.0
 dormant_wake_radius = 300.0
 
 [node name="WaspEnemy3" parent="LayerAirEntities" instance=ExtResource("9_krg47")]
 position = Vector2(423, -317)
 max_speed = 50.0
 acceleration = 5.0
+despawn_radius = 0.0
 dormant_wake_radius = 300.0
 
 [node name="MouseEnemy" parent="LayerAirEntities" instance=ExtResource("10_6i4h1")]
 position = Vector2(358, 930)
+despawn_radius = 0.0
 dormant_wake_timer_seconds = 30.0
 is_elite = true
 
