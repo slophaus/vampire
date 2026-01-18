@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://drk1dg1u7j77n"]
+[gd_scene load_steps=10 format=3 uid="uid://drk1dg1u7j77n"]
 
 [ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_w6ev1"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="2_55qmw"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="4_2vl15"]
 [ext_resource type="PackedScene" uid="uid://b6f3xj5k6h6vl" path="res://scenes/game_object/well/well.tscn" id="5_wklrg"]
 [ext_resource type="PackedScene" uid="uid://daff8rvbw6ue" path="res://scenes/game_object/worm_enemy/worm_boss_enemy.tscn" id="6_55qmw"]
+[ext_resource type="PackedScene" uid="uid://b2p22t8qybjhv" path="res://scenes/game_object/worm_enemy/fast_worm_enemy.tscn" id="6_h55lh"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3j8g6"]
 texture = ExtResource("3_h55lh")
@@ -395,6 +396,10 @@ y_sort_enabled = true
 
 [node name="LayerAirEntities" type="Node2D" parent="." groups=["air_entities_layer"]]
 z_index = 6
+
+[node name="FastWormEnemy" parent="LayerAirEntities" instance=ExtResource("6_h55lh")]
+position = Vector2(950, 206)
+dormant_wake_timer_seconds = 45.0
 
 [node name="LayerEffects" type="Node2D" parent="." groups=["effects_layer", "foreground_layer"]]
 z_index = 6

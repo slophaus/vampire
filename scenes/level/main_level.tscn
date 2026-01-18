@@ -387,7 +387,7 @@ exit_door_name = &"DoorToMain"
 preserve_current_level = true
 
 [node name="DoorToDirt" parent="LayerProps/DoorGroup" instance=ExtResource("5_mwgft")]
-position = Vector2(-936, 353)
+position = Vector2(-936, 369)
 target_scene_path = "uid://itjijo4otoeh"
 exit_door_name = &"DoorToMain"
 preserve_current_level = true
@@ -423,11 +423,11 @@ position = Vector2(-659, 326)
 dormant_wake_timer_seconds = 30.0
 
 [node name="WormEnemy5" parent="LayerEntities" instance=ExtResource("8_uk2yf")]
-position = Vector2(-657, 415)
+position = Vector2(-659, 414)
 dormant_wake_timer_seconds = 30.0
 
 [node name="FastWormEnemy" parent="LayerEntities" instance=ExtResource("7_krg47")]
-position = Vector2(-657, 367)
+position = Vector2(-659, 367)
 dormant_wake_timer_seconds = 90.0
 
 [node name="FastWormEnemy2" parent="LayerEntities" instance=ExtResource("7_krg47")]
