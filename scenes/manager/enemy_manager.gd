@@ -142,6 +142,8 @@ func on_timer_timeout():
 		enemy_index = pick_non_ghost_enemy()
 	var enemy = get_enemy_scene(enemy_index).instantiate() as Node2D
 	var is_air_enemy := enemy.is_in_group(AIR_ENEMY_GROUP)
+	if enemy is BaseEnemy:
+		enemy.enemy_index = enemy_index
 
 	var spawn_position := Vector2.ZERO
 	for attempt in range(MAX_SPAWN_ATTEMPTS):

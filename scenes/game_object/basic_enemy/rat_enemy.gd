@@ -10,6 +10,8 @@ func _ready():
 
 
 func _physics_process(delta):
+	if update_despawn_state():
+		return
 	if update_dormant_state(delta):
 		return
 	accelerate_to_player_with_pathfinding()

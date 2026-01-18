@@ -37,6 +37,8 @@ func _ready():
 
 
 func _physics_process(delta):
+	if update_despawn_state():
+		return
 	if update_dormant_state(delta):
 		return
 	update_spider_movement(delta)

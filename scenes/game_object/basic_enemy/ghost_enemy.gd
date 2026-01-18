@@ -44,6 +44,8 @@ func _ready():
 
 
 func _physics_process(delta):
+	if update_despawn_state():
+		return
 	update_ghost_state(delta)
 	update_possession_timer(delta)
 

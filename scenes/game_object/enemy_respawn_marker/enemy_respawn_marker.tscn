@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dpsxklj51l2xl"]
+
+[ext_resource type="Script" uid="uid://b1dv1fbbxso0s" path="res://scenes/game_object/enemy_respawn_marker/enemy_respawn_marker.gd" id="1_2gvf6"]
+
+[node name="EnemyRespawnMarker" type="Node2D"]
+script = ExtResource("1_2gvf6")
