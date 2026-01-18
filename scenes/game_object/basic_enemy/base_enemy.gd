@@ -16,6 +16,7 @@ const POISON_TINT := Color(0.3, 1.0, 0.3, 1.0)
 const NAVIGATION_UPDATE_MIN := 0.4
 const NAVIGATION_UPDATE_MAX := 0.7
 const AIR_ENEMY_GROUP := "air_enemy"
+const RESPAWN_MARKER_SCENE := preload("res://scenes/game_object/enemy_respawn_marker/enemy_respawn_marker.tscn")
 
 @export var max_health := 10.0
 @export var max_speed := 30.0
@@ -23,10 +24,12 @@ const AIR_ENEMY_GROUP := "air_enemy"
 @export var facing_multiplier := -1.0
 @export var contact_damage := 1.0
 @export var poison_contact_damage := 0.0
+@export var despawn_radius := 0.0
 @export var dormant_enabled := true
 @export var dormant_wake_radius := 150.0
 @export var dormant_wake_timer_seconds := 0.0
 @export var is_elite := false
+@export var enemy_index := -1
 
 @onready var visuals: Node2D = get_node_or_null("Visuals")
 @onready var velocity_component: VelocityComponent = $VelocityComponent
@@ -64,6 +67,7 @@ var is_dormant := false
 var dormant_timer_left := 0.0
 var last_health := 0.0
 var floating_text_scene = preload("res://scenes/ui/floating_text.tscn")
+var respawn_data: Dictionary = {}
 
 func _ready():
 	$HurtboxComponent.hit.connect(on_hit)
@@ -85,6 +89,8 @@ func _ready():
 	if health_component != null:
 		last_health = health_component.current_health
 		health_component.health_changed.connect(_on_health_changed)
+	if not respawn_data.is_empty():
+		apply_respawn_data(respawn_data)
 
 
 func on_hit():
@@ -100,6 +106,54 @@ func apply_enemy_stats() -> void:
 
 	health_component.max_health = max_health
 	health_component.current_health = max_health
+
+
+func get_respawn_data() -> Dictionary:
+	var current_health := max_health
+	if health_component != null:
+		current_health = health_component.current_health
+	return {
+		"max_health": max_health,
+		"current_health": current_health,
+		"max_speed": max_speed,
+		"acceleration": acceleration,
+		"facing_multiplier": facing_multiplier,
+		"contact_damage": contact_damage,
+		"poison_contact_damage": poison_contact_damage,
+		"is_elite": is_elite,
+		"size_multiplier": size_multiplier,
+		"enemy_tint": enemy_tint
+	}
+
+
+func set_respawn_data(data: Dictionary) -> void:
+	respawn_data = data.duplicate(true)
+
+
+func apply_respawn_data(data: Dictionary) -> void:
+	if data.is_empty():
+		return
+	max_health = float(data.get("max_health", max_health))
+	max_speed = float(data.get("max_speed", max_speed))
+	acceleration = float(data.get("acceleration", acceleration))
+	facing_multiplier = float(data.get("facing_multiplier", facing_multiplier))
+	contact_damage = float(data.get("contact_damage", contact_damage))
+	poison_contact_damage = float(data.get("poison_contact_damage", poison_contact_damage))
+	is_elite = bool(data.get("is_elite", is_elite))
+	size_multiplier = float(data.get("size_multiplier", size_multiplier))
+	enemy_tint = data.get("enemy_tint", enemy_tint)
+
+	velocity_component.max_speed = max_speed
+	velocity_component.acceleration = acceleration
+	navigation_agent.max_speed = velocity_component.max_speed
+
+	if health_component != null:
+		health_component.max_health = max_health
+		var stored_current_health := float(data.get("current_health", health_component.current_health))
+		health_component.current_health = clamp(stored_current_health, 0.0, health_component.max_health)
+		last_health = health_component.current_health
+	apply_enemy_tint()
+	update_visual_scale()
 
 
 func set_active_sprite(active_sprite: CanvasItem) -> void:
@@ -274,6 +328,41 @@ func update_dormant_state(delta: float) -> bool:
 			wake_from_dormant()
 			return false
 	return true
+
+
+func update_despawn_state() -> bool:
+	if despawn_radius <= 0.0:
+		return false
+	var tree := get_tree()
+	if tree == null:
+		return false
+	var players = tree.get_nodes_in_group("player")
+	if players.is_empty():
+		return false
+	for player in players:
+		var player_node = player as Node2D
+		if player_node == null:
+			continue
+		if global_position.distance_to(player_node.global_position) <= despawn_radius:
+			return false
+	_spawn_respawn_marker()
+	queue_free()
+	return true
+
+
+func _spawn_respawn_marker() -> void:
+	if RESPAWN_MARKER_SCENE == null:
+		return
+	var marker = RESPAWN_MARKER_SCENE.instantiate() as Node2D
+	if marker == null:
+		return
+	var parent_node = get_parent()
+	if parent_node == null:
+		return
+	parent_node.add_child(marker)
+	marker.global_position = global_position
+	if marker.has_method("configure_from_enemy"):
+		marker.call("configure_from_enemy", self)
 
 
 func wake_from_dormant() -> void:
