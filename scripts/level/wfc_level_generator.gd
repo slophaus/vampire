@@ -507,7 +507,7 @@ func _pick_spawn_cell(
 ) -> Vector2i:
 	if candidates.is_empty():
 		return Vector2i.ZERO
-	var attempts := min(candidates.size(), 8)
+	var attempts: int = min(candidates.size(), 8)
 	for i in range(attempts):
 		var candidate := candidates[rng.randi_range(0, candidates.size() - 1)]
 		if not used_cells.has(candidate):
