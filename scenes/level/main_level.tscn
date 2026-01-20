@@ -381,13 +381,13 @@ exit_door_name = &"DoorToMain"
 preserve_current_level = true
 
 [node name="DoorToWFC" parent="LayerProps/DoorGroup" instance=ExtResource("5_mwgft")]
-position = Vector2(-111, 1500)
+position = Vector2(422, 610)
 target_scene_path = "uid://cwt0ajjcva1li"
 exit_door_name = &"DoorToMain"
 preserve_current_level = true
 
 [node name="DoorToDirt" parent="LayerProps/DoorGroup" instance=ExtResource("5_mwgft")]
-position = Vector2(-936, 369)
+position = Vector2(189, 330)
 target_scene_path = "uid://itjijo4otoeh"
 exit_door_name = &"DoorToMain"
 preserve_current_level = true
@@ -435,6 +435,7 @@ z_index = 6
 [node name="GhostEnemy" parent="LayerAirEntities" instance=ExtResource("10_5fr2l")]
 position = Vector2(-112, 1546)
 despawn_radius = 0.0
+dormant_wake_radius = 150.0
 
 [node name="WaspEnemy" parent="LayerAirEntities" instance=ExtResource("9_krg47")]
 position = Vector2(347, -315)
@@ -460,6 +461,7 @@ dormant_wake_radius = 300.0
 [node name="MouseEnemy" parent="LayerAirEntities" instance=ExtResource("10_6i4h1")]
 position = Vector2(358, 930)
 despawn_radius = 0.0
+dormant_wake_radius = 150.0
 dormant_wake_timer_seconds = 30.0
 is_elite = true
 

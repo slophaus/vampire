@@ -1,10 +1,12 @@
-[gd_scene load_steps=8 format=3 uid="uid://cwt0ajjcva1li"]
+[gd_scene load_steps=11 format=3 uid="uid://cwt0ajjcva1li"]
 
 [ext_resource type="Script" uid="uid://d3y1ruiv0t6ks" path="res://scenes/level/level_root.gd" id="1_level_root"]
 [ext_resource type="TileSet" uid="uid://b6us1ivpw5jq2" path="res://resources/tileset.tres" id="2_tileset"]
 [ext_resource type="Texture2D" uid="uid://dej1p0au5qgos" path="res://sprites/blob_dirt_border_6.png" id="3_dirt_texture"]
 [ext_resource type="Script" uid="uid://5520l23xtact" path="res://scripts/level/wfc_level_generator.gd" id="4_wfc"]
+[ext_resource type="Script" uid="uid://ckhtrhi3sc1ln" path="res://scripts/level/path_enemy_spawn_group.gd" id="5_58rqn"]
 [ext_resource type="PackedScene" uid="uid://c76g74tmtmrjx" path="res://scenes/game_object/door/door.tscn" id="5_door"]
+[ext_resource type="PackedScene" uid="uid://owsousbyak2l" path="res://scenes/game_object/basic_enemy/spider_enemy.tscn" id="6_i8o4r"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_nvumn"]
 texture = ExtResource("3_dirt_texture")
@@ -348,6 +350,15 @@ terrain_set_0/terrain_0/name = "Terrain 0"
 terrain_set_0/terrain_0/color = Color(0.5, 0.34375, 0.25, 1)
 sources/0 = SubResource("TileSetAtlasSource_nvumn")
 
+[sub_resource type="Resource" id="Resource_3neex"]
+script = ExtResource("5_58rqn")
+path_percent = 0.66
+enemy_scene = ExtResource("6_i8o4r")
+count = 6
+spread_tiles = 10.0
+constrain_to_reachable_ground = true
+metadata/_custom_type_script = "uid://ckhtrhi3sc1ln"
+
 [node name="WFCTestLevel" type="Node"]
 script = ExtResource("1_level_root")
 level_id = &"wfc_test"
@@ -376,6 +387,7 @@ target_tilemap_path = NodePath("../LayerTilemaps/map_target")
 sample_tilemap_path = NodePath("../LayerTilemaps/map_sample")
 use_fixed_seed = false
 debug = false
+path_enemy_groups = Array[ExtResource("5_58rqn")]([SubResource("Resource_3neex")])
 
 [node name="LayerProps" type="Node2D" parent="."]
 z_index = 1
