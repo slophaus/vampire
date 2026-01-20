@@ -26,6 +26,10 @@ class_name WFCLevelGenerator
 
 @export_category("Debug")
 @export var debug := true
+
+@export_category("Path Enemy Spawns")
+@export var path_enemy_groups: Array[PathEnemySpawnGroup] = []
+
 const DIRECTIONS := [
 	Vector2i(0, -1),
 	Vector2i(1, 0),
@@ -38,6 +42,7 @@ const DEBUG_DOOR_PATH_Z_INDEX := 10
 const DEBUG_DOOR_PATH_COLOR := Color(1, 0, 0, 1)
 const DEBUG_CONTRADICTION_DOTS_NAME := "WFCContradictionDots"
 const DEBUG_CONTRADICTION_COLOR := Color(1, 0, 0, 1)
+const PATH_SPAWNED_ENEMY_GROUP := "path_spawned_enemy"
 var _largest_walkable_cells: Dictionary = {}
 
 
@@ -396,6 +401,121 @@ func _position_level_doors(target_tilemap: TileMap, rng: RandomNumberGenerator) 
 	var path_lookup := _cells_to_lookup(path_cells)
 	_apply_door_clearance(target_tilemap, start_cell, floor_tile, wall_tile, path_lookup)
 	_apply_door_clearance(target_tilemap, farthest_cell, floor_tile, wall_tile, path_lookup)
+	_spawn_path_enemy_groups(target_tilemap, path_cells, rng)
+
+
+func _spawn_path_enemy_groups(
+	target_tilemap: TileMap,
+	path_cells: Array[Vector2i],
+	rng: RandomNumberGenerator
+) -> void:
+	if path_enemy_groups.is_empty():
+		return
+	if target_tilemap == null or path_cells.is_empty():
+		return
+	var walkable_cells := _get_walkable_cells(target_tilemap)
+	if walkable_cells.is_empty():
+		return
+	var reachable_cells := walkable_cells if _largest_walkable_cells.is_empty() else _largest_walkable_cells
+	_clear_path_spawned_enemies()
+	for group in path_enemy_groups:
+		if group == null:
+			continue
+		if group.enemy_scene == null or group.count <= 0:
+			continue
+		var clamped_percent := clamp(group.path_percent, 0.0, 1.0)
+		var path_index := int(round(clamped_percent * float(path_cells.size() - 1)))
+		var center_cell := path_cells[path_index]
+		var candidate_cells := _build_spawn_candidates(
+			center_cell,
+			group.spread_tiles,
+			reachable_cells if group.constrain_to_reachable_ground else walkable_cells
+		)
+		if candidate_cells.is_empty():
+			candidate_cells.append(center_cell)
+		var used_cells: Dictionary = {}
+		for i in range(group.count):
+			var spawn_cell := _pick_spawn_cell(candidate_cells, used_cells, rng)
+			_spawn_enemy_at_cell(group.enemy_scene, target_tilemap, spawn_cell)
+
+
+func _spawn_enemy_at_cell(enemy_scene: PackedScene, target_tilemap: TileMap, cell: Vector2i) -> void:
+	if enemy_scene == null or target_tilemap == null:
+		return
+	var enemy_instance := enemy_scene.instantiate() as Node2D
+	if enemy_instance == null:
+		return
+	var parent_layer := _get_enemy_spawn_layer(enemy_instance)
+	parent_layer.add_child(enemy_instance)
+	if enemy_instance is BaseEnemy:
+		var base_name = NodeNameUtils.get_base_name_from_scene(enemy_instance.get_scene_file_path(), "enemy")
+		NodeNameUtils.assign_unique_name(enemy_instance, parent_layer, base_name)
+	enemy_instance.add_to_group(PATH_SPAWNED_ENEMY_GROUP)
+	enemy_instance.global_position = _cell_to_world(target_tilemap, cell)
+
+
+func _get_enemy_spawn_layer(enemy_instance: Node2D) -> Node:
+	var parent_node := get_parent()
+	if parent_node == null:
+		return self
+	if enemy_instance.is_in_group("air_enemy"):
+		var air_layer := parent_node.get_node_or_null("LayerAirEntities")
+		if air_layer != null:
+			return air_layer
+	var entity_layer := parent_node.get_node_or_null("LayerEntities")
+	if entity_layer != null:
+		return entity_layer
+	return parent_node
+
+
+func _clear_path_spawned_enemies() -> void:
+	var nodes := get_tree().get_nodes_in_group(PATH_SPAWNED_ENEMY_GROUP)
+	for node in nodes:
+		var node_2d := node as Node2D
+		if node_2d != null:
+			node_2d.queue_free()
+
+
+func _build_spawn_candidates(
+	center_cell: Vector2i,
+	spread_tiles: float,
+	walkable_cells: Dictionary
+) -> Array[Vector2i]:
+	var candidates: Array[Vector2i] = []
+	if walkable_cells.is_empty():
+		return candidates
+	if spread_tiles <= 0.0:
+		if walkable_cells.has(center_cell):
+			candidates.append(center_cell)
+		return candidates
+	var radius := int(ceil(spread_tiles))
+	for y in range(center_cell.y - radius, center_cell.y + radius + 1):
+		for x in range(center_cell.x - radius, center_cell.x + radius + 1):
+			var cell := Vector2i(x, y)
+			if not walkable_cells.has(cell):
+				continue
+			if Vector2(cell).distance_to(Vector2(center_cell)) > spread_tiles:
+				continue
+			candidates.append(cell)
+	return candidates
+
+
+func _pick_spawn_cell(
+	candidates: Array[Vector2i],
+	used_cells: Dictionary,
+	rng: RandomNumberGenerator
+) -> Vector2i:
+	if candidates.is_empty():
+		return Vector2i.ZERO
+	var attempts := min(candidates.size(), 8)
+	for i in range(attempts):
+		var candidate := candidates[rng.randi_range(0, candidates.size() - 1)]
+		if not used_cells.has(candidate):
+			used_cells[candidate] = true
+			return candidate
+	var fallback := candidates[rng.randi_range(0, candidates.size() - 1)]
+	used_cells[fallback] = true
+	return fallback
 
 
 func _get_walkable_cells(target_tilemap: TileMap) -> Dictionary:
@@ -809,6 +929,8 @@ func _move_nodes_in_group_to_nearest_floor(group_name: String, floor_positions: 
 	for node in get_tree().get_nodes_in_group(group_name):
 		var node_2d := node as Node2D
 		if node_2d == null:
+			continue
+		if group_name == "enemy" and node_2d.is_in_group("air_enemy"):
 			continue
 		node_2d.global_position = _find_closest_floor_position(node_2d.global_position, floor_positions)
 
