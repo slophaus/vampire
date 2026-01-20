@@ -423,7 +423,7 @@ func _spawn_path_enemy_groups(
 			continue
 		if group.enemy_scene == null or group.count <= 0:
 			continue
-		var clamped_percent := clamp(group.path_percent, 0.0, 1.0)
+		var clamped_percent: float = clamp(float(group.path_percent), 0.0, 1.0)
 		var path_index := int(round(clamped_percent * float(path_cells.size() - 1)))
 		var center_cell := path_cells[path_index]
 		var candidate_cells := _build_spawn_candidates(
